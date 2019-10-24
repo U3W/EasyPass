@@ -1,0 +1,9 @@
+.redbackgroundButton {
+    background: #C9132C;
+    border-color: #E33D54;
+}
+.redbackgroundButton:hover {
+    background: #9E051A;
+    border-color: #B10D24;
+}
+
