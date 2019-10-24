@@ -1,0 +1,80 @@
+/* line 5, ../sass/offline-language-german-indicator.sass */
+.offline-ui-side.offline-ui-side-up .offline-ui-side-content:before {
+    content: "Online";
+}
+/* line 10, ../sass/offline-language-german-indicator.sass */
+.offline-ui-side.offline-ui-side-down .offline-ui-side-content:before {
+    content: "Offline";
+}
+
+/* line 3, ../sass/_offline-theme-base-indicator.sass */
+.offline-ui-side, .offline-ui-side *, .offline-ui-side:before, .offline-ui-side:after, .offline-ui-side *:before, .offline-ui-side *:after {
+    -webkit-box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    box-sizing: border-box;
+}
+
+/* line 6, ../sass/_offline-theme-base-indicator.sass */
+.offline-ui-side {
+    position: fixed;
+    background: white;
+    z-index: 2000;
+    display: inline-block;
+}
+/* line 13, ../sass/_offline-theme-base-indicator.sass */
+.offline-ui-side .offline-ui-side-retry {
+    display: none;
+}
+/* line 16, ../sass/_offline-theme-base-indicator.sass */
+.offline-ui-side.offline-ui-side-up {
+    display: inline-block;
+}
+/* line 19, ../sass/_offline-theme-base-indicator.sass */
+.offline-ui-side.offline-ui-side-down {
+    display: inline-block;
+}
+
+/* line 8, ../sass/offline-theme-chrome-indicator.sass */
+.offline-ui-side {
+    font-family: "Lucida Grande", sans-serif;
+    font-size: 12px;
+    padding: 7px;
+    background: #f8f9fa;
+    color: #888888;
+    bottom: 0;
+    left: 0;
+    box-shadow: inset -1px 1px 0 rgba(0, 0, 0, .1);
+}
+/* line 19, ../sass/offline-theme-chrome-indicator.sass */
+.offline-ui-side .offline-ui-side-content {
+    padding-left: 16px;
+}
+/* line 22, ../sass/offline-theme-chrome-indicator.sass */
+.offline-ui-side .offline-ui-side-content:after {
+    -webkit-border-radius: 50%;
+    -moz-border-radius: 50%;
+    -ms-border-radius: 50%;
+    -o-border-radius: 50%;
+    border-radius: 50%;
+    content: " ";
+    display: block;
+    position: absolute;
+    top: 0;
+    bottom: 1px;
+    left: 8px;
+    margin: auto;
+    height: 9px;
+    width: 9px;
+}
+/* line 36, ../sass/offline-theme-chrome-indicator.sass */
+.offline-ui-side.offline-ui-side-up .offline-ui-side-content:after {
+    background: #80d580;
+}
+/* line 41, ../sass/offline-theme-chrome-indicator.sass */
+.offline-ui-side.offline-ui-side-down .offline-ui-side-content:after {
+    background: #ec8787;
+}
+
+.fitparentWidth {
+    width: 100%;
+}

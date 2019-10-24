@@ -1,0 +1,41 @@
+.size-hole-window {
+    height: 100vh;
+}
+
+.center-vert {
+    margin-top: auto !important;
+    margin-bottom: auto !important;
+}
+
+.center-horz {
+    margin-left: auto !important;
+    margin-right: auto !important;
+}
+
+.footer {
+    position: fixed;
+    left: 0;
+    bottom: 0;
+    width: 100%;
+}
+
+.error {
+    width: 70%;
+}
+
+.card-login {
+    border: 0;
+    border-radius: 1em;
+}
+
+.gradientDivLogin {
+    opacity: 1.0;
+    background: linear-gradient(to right, rgba(0,0,0, 0.2), rgba(16,164,34, 0.2));
+}
+
+.backgroundPicLogin {
+    background-image: url("../../img/background.jpeg");
+    background-repeat: no-repeat;
+    background-position: center;
+    background-attachment: fixed;
+}

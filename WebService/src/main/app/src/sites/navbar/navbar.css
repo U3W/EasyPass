@@ -1,0 +1,474 @@
+
+.fitparentWidth {
+    width: 100%;
+}
+.navbarHeight {
+    height: 15%;
+}
+
+.fitparentHeight {
+    height: 100%;
+}
+
+.restHeight {
+    height: 85%;
+}
+
+.textRight {
+    text-align: right;
+    padding-right: 1.2em;
+}
+
+
+.search {
+    width: 100% !important;
+}
+
+.right {
+    float: right;
+    padding-right: 0 !important;
+}
+
+.dropDownMargin {
+    margin-left: 0.5em;
+}
+
+.clickable {
+    cursor: pointer;
+}
+
+.boxshadow {
+    box-shadow: inset 0 -1px 0 rgba(0, 0, 0, .1);
+    z-index: 2 !important; /* Damit das vor der Navbar ist */
+}
+
+.navbarback {
+    background-color: #f8f9fa !important;
+}
+
+.navbarborderVert {
+    border-left: 0.2em;
+    border-style: solid;
+    border-image:
+            linear-gradient(
+                    to bottom,
+                    #9DD3F1,
+                    rgba(256, 256, 256, 100)
+            ) 1 100% !important;
+}
+
+.navbarborder {
+    border-bottom: 0.2em solid #9DD3F1!important;
+}
+
+.navbarvert {
+    background-color: #f8f9fa !important;
+    border-color: #e0e1e2 !important;
+    border-bottom: 0 solid #ccc!important;
+}
+
+.navbarvert:hover {
+    background-color: #cacbcc !important;
+}
+
+.navbarvertActive {
+    background-color: #cacbcc !important;
+}
+
+.noPadding {
+    padding: 0 !important;
+}
+
+.noMarginRight {
+    margin-right: 0 !important;
+}
+
+.grow {
+    transition:width 0.5s !important;
+    -webkit-transition:width 0.5s !important;
+    text-align: center;
+
+}
+.grow:hover {
+    width: 225%; /* This is the width on hover */
+}
+
+.logoutBut {
+    height: 45px;
+    width: 45px;
+    padding: .25rem .75rem;
+    font-size: 1.25rem;
+    line-height: 1;
+    color: rgba(0,0,0,.5);
+    border-color: rgba(0,0,0,.1);
+    border-radius: .25rem;
+    margin-right: 15px;
+    margin-left: 15px;
+}
+
+.navbar-dropdown-float-left {
+    float: left !important;
+}
+
+
+.settingsPopUp .aria-expanded {
+    margin-bottom: 15px;
+}
+
+.fixesNavbarParant {
+    display: flex;
+}
+
+.fixedLogout {
+}
+
+.fixedToggle {
+    top: 20px;
+    height: 45px;
+    right: 85px;
+    position: absolute;
+}
+
+.fixedLogoutParent {
+    right: 0;
+    position: absolute;
+    top: 20px;
+}
+
+.fixedNavbar {
+    width: 100%;
+}
+
+@media (max-width: 300px) {
+    .fixedToggle {
+        right: 65px !important;
+    }
+    .fixName {
+        font-size: 0.75rem !important;
+        display: inline-block;
+    }
+}
+
+@media (max-width: 350px) {
+    .fixedToggle {
+        right: 75px;
+    }
+    .fixName {
+        font-size: 1rem;
+        display: inline-block;
+    }
+}
+@media (min-width: 350px) {
+    .fixName {
+        font-size: 1.25rem;
+        display: inline-block;
+    }
+}
+
+.search-bar {
+    margin-left: 15px;
+}
+.search-bar-size {
+    width: 100%;
+}
+@media (min-width: 992px) {
+    .search-bar-size {
+        width: 78%;
+    }
+}
+
+
+.dropDown .dropdown-menu .dropdown-item {
+    color: rgba(0,0,0,.7);
+    font-size: 0.85em;
+}
+
+
+/*
+ * Sidebar
+ */
+
+.sidebar {
+    position: absolute;
+    margin-top: 86px;
+    /*position: inherit;*/
+    top: 0;
+    bottom: 0;
+    left: 0;
+    z-index: 1; /* Behind the navbar (navbar 2)*/
+    box-shadow: inset -1px 0 0 rgba(0, 0, 0, .1);
+    padding-left: 10px;
+    padding-right: 5px;
+
+}
+
+.sidebar-sticky {
+    position: relative;
+    top: 0;
+    height: calc(100% - 86px);
+    padding-top: .5rem;
+    overflow-x: hidden;
+    overflow-y: auto; /* Scrollable contents if viewport is shorter than content. */
+}
+
+@supports ((position: -webkit-sticky) or (position: sticky)) {
+    .sidebar-sticky {
+        position: -webkit-sticky;
+        position: sticky;
+    }
+}
+
+.sidebar .nav-link {
+    font-weight: 500;
+    /* Font Color! */
+    color: #707070;
+    /*color: #333;*/
+}
+
+.sidebar .nav-link .feather {
+    margin-right: 4px;
+
+    color: #999;
+}
+
+.sidebar .nav-link.active {
+    color: #D31E14;
+}
+
+.nav-link-click .nav-link:hover {
+    color: #333;
+}
+
+.active :hover{
+    color: #9e1512 !important;
+}
+
+.sidebar .nav-link:hover .feather,
+.sidebar .nav-link.active .feather {
+    color: inherit;
+}
+
+.nav-link-kat {
+    display: block;
+    padding: .5rem 1rem;
+}
+
+.sec {
+    display: block;
+    padding: .5rem 1.45rem;
+}
+
+.thr {
+    display: block;
+    padding: .5rem 1.9rem;
+}
+
+.sidebar .nav-link-kat {
+    font-weight: 500;
+    /* Font Color! */
+    color: #707070;
+    /*color: #333;*/
+}
+
+.sidebar .nav-link-kat .feather {
+    margin-right: 4px;
+    color: #999;
+}
+
+.sidebar .nav-link-kat.active {
+    color: #707070;
+}
+
+.nav-link-click .nav-link-kat:hover {
+    color: #333;
+}
+
+.sidebar-heading {
+    font-size: 1.1rem;
+    text-transform: uppercase;
+}
+
+.sidebar hr {
+    border: 0;
+    clear:both;
+    display:block;
+    width: 95%;
+    margin-top: 8px;
+    margin-bottom: 2px;
+    background-color: rgba(0,0,0,.1);
+    height: 1px;
+}
+
+.fixKat {
+    margin-top: 10px !important;
+}
+
+/*
+ * Sidebar Kategorien
+ */
+
+
+/*
+ * Sidebar - bottom
+ */
+
+.bottom {
+    box-shadow: inset 0 -1px 0 rgba(0, 0, 0, .1);
+}
+
+.bottom .nav-link {
+    font-weight: 500;
+    color: #ffffff;
+}
+
+.bottom .nav-link .feather {
+    margin-right: 4px;
+    color: #ffffff;
+}
+
+.bottom .nav-link.active  {
+    color: #dc3545;
+}
+
+.bottom .nav-link:hover {
+    color: #e6e6e6;
+}
+.bottom .nav-link.active:hover {
+
+}
+
+.bottom .nav-link:hover .feather,
+.bottom .nav-link.active .feather {
+    color: inherit;
+}
+
+.bottom-heading {
+    font-size: .75rem;
+    text-transform: uppercase;
+}
+
+@media (min-width: 425px) {
+    .bottom {
+        box-shadow: inset 0 -1px 0 rgba(0, 0, 0, .1);
+        display: none!important
+    }
+    .d-sm-block {
+        display: block!important;
+    }
+}
+
+@media (max-width: 425px) {
+    .bottom {
+        box-shadow: inset 0 -1px 0 rgba(0, 0, 0, .1);
+        display: block!important;
+    }
+    .d-sm-block {
+        display: none!important
+    }
+}
+
+.bottom hr {
+    border: none;
+    border-left: 1px solid hsl(4, 100%, 61%);
+    height: 100%;
+    width: 1px;
+    position: absolute;
+}
+
+/*
+ * Logout Button
+ */
+#logoutBut {
+    position:relative;
+}
+
+#logoutBut #logoutButIcon {
+    position: absolute;
+    background-image: url("../../img/icons/logout.svg");
+    top: 7px;
+    left: 24px;
+    height: 30px;
+    width: 30px;
+}
+
+#logoutBut #logoutButIconHover {
+    position: absolute;
+    background-image: url("../../img/icons/logout_hover.svg");
+    top: 7px;
+    left: 24px;
+    height: 30px;
+    width: 30px;
+}
+
+#logoutBut :hover #logoutButIcon {
+    background-image: url("../../img/icons/logout_hover.svg");
+    -webkit-transition: opacity .15s ease-in-out;
+    -moz-transition: opacity .15s ease-in-out;
+    -o-transition: opacity .15s ease-in-out;
+    transition: opacity .15s ease-in-out;
+}
+
+
+/*
+ * Icons (Seitlich)
+ */
+
+#groupPassword #groupPasswordIcon{
+    background-image: url("../../img/icons/tab_group_password.svg");
+    height: 16px;
+    width: 16px;
+}
+
+#groupPassword :hover #groupPasswordIcon {
+    background-image: url("../../img/icons/tab_group_password_hover.svg");
+}
+
+#privPassword #privPasswordIcon{
+    background-image: url("../../img/icons/tab_password.svg");
+    height: 16px;
+    width: 16px;
+}
+
+#privPassword :hover #privPasswordIcon {
+    background-image: url("../../img/icons/tab_password_hover.svg");
+}
+
+/*
+ * Icons (auf unten angepasst)
+ */
+
+#navbar-bot #groupPassword #groupPasswordIcon {
+    background-image: url("../../img/icons/tab_group_password.svg");
+    height: 32px;
+    width: 32px;
+}
+
+#navbar-bot #groupPassword :hover #groupPasswordIcon {
+    background-image: url("../../img/icons/tab_group_password_bot_hover.svg");
+}
+
+#navbar-bot #privPassword #privPasswordIcon {
+    background-image: url("../../img/icons/tab_password.svg");
+    height: 32px;
+    width: 32px;
+}
+
+#navbar-bot #privPassword :hover #privPasswordIcon {
+    background-image: url("../../img/icons/tab_password_bot_hover.svg");
+}
+
+/*
+ * Active Bottom Icons + Hover
+ */
+#privPassword.active #privPasswordIcon {
+    background-image: url("../../img/icons/tab_password_bot_hover.svg") !important;
+}
+#groupPassword.active #groupPasswordIcon {
+    background-image: url("../../img/icons/tab_group_password_bot_hover.svg") !important;
+}
+#privPassword.active :hover #privPasswordIcon {
+    background-image: url("../../img/icons/tab_password_bot_active_hover.svg") !important;
+}
+#groupPassword.active :hover #groupPasswordIcon {
+    background-image: url("../../img/icons/tab_group_password_bot_active_hover.svg") !important;
+}
