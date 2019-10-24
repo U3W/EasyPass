@@ -4,8 +4,8 @@ import {
     BrowserRouter as Router,
     Switch
 } from "react-router-dom";
-import Redirect from "react-router-dom/Redirect";
-import Route from "react-router-dom/Route";
+import {Redirect} from "react-router-dom";
+import {Route} from "react-router-dom";
 
 
 import "./index.css";
@@ -24,10 +24,14 @@ import {handleConnection} from "./network/network.functions";
 import Dashboard from "./sites/dashboard/dashboard";
 import LoginAuth from "./authentification/auth.login"
 
+// Load backend with WebAssembly
+const worker = new Worker('worker.js');
+
 // If you want your app to work offline and load faster, you can change
 // unregister() to register() below. Note this comes with some pitfalls.
 // Learn more about service workers: https://bit.ly/CRA-PWA
 serviceWorker.register();
+
 
 // Für Storage
 const store = createStore(rootReducer, applyMiddleware(thunk));

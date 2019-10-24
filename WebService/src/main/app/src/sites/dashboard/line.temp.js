@@ -1,7 +1,7 @@
 import React from "react"
-import Route from "react-router-dom/Route";
+import { Route } from "react-router-dom";
 import LoginAuth from "../../authentification/auth.login";
-import Redirect from "react-router-dom/Redirect";
+import {Redirect} from "react-router-dom";
 import VerifyAuth from "../../authentification/auth.masterpassword";
 import Card from "react-bootstrap/Card";
 import Button from "react-bootstrap/Button";

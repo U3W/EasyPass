@@ -123,7 +123,7 @@ class Login extends React.Component {
         if ( this.state.missingUsername )
         {
             return (
-                <Form.Group controlId="formBasicEmail">
+                <Form.Group>
                     <Form.Label className="text-danger">{username}</Form.Label>
                     <Form.Control className="is-invalid" type="username" id="inpUsername" placeholder={usernamePlaceholder} value={this.state.inpUsername}
                                   onKeyDown={this.handleKeyevent} onChange={this.handleChange} />
@@ -133,7 +133,7 @@ class Login extends React.Component {
         else
         {
             return (
-                <Form.Group controlId="formBasicEmail">
+                <Form.Group>
                     <Form.Label>{username}</Form.Label>
                     <Form.Control type="username" id="inpUsername" placeholder={usernamePlaceholder} value={this.state.inpUsername}
                                   onKeyDown={this.handleKeyevent} onChange={this.handleChange} />
@@ -146,7 +146,7 @@ class Login extends React.Component {
         if ( this.state.missingPassword )
         {
             return (
-                <Form.Group controlId="formBasicPassword">
+                <Form.Group>
                     <Form.Label className="text-danger">{password}</Form.Label>
                     <Form.Control className="is-invalid" type="password" id="inpPassword" placeholder={passwordPlaceholder} value={this.state.inpPassword}
                                   onKeyDown={this.handleKeyevent} onChange={this.handleChange} />
@@ -156,7 +156,7 @@ class Login extends React.Component {
         else
         {
             return (
-                <Form.Group controlId="formBasicPassword">
+                <Form.Group>
                     <Form.Label>{password}</Form.Label>
                     <Form.Control type="password" id="inpPassword" placeholder={passwordPlaceholder} value={this.state.inpPassword}
                                   onKeyDown={this.handleKeyevent} onChange={this.handleChange} />
@@ -179,7 +179,7 @@ class Login extends React.Component {
                                         <Form>
                                             {this.getInputUsername()}
                                             {this.getInputPassword()}
-                                            <Form.Group controlId="formBasicCheckbox">
+                                            <Form.Group>
                                                 <Form.Check type="checkbox" id="inpKeepLoggedIn" label={keepLoggedIn} />
                                             </Form.Group>
                                             <Button variant="danger" className={"float-right"} onClick={this.handleSubmit}>
