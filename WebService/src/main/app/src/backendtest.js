@@ -1,7 +1,7 @@
 const worker = new Worker('worker.js');
 
 function sayHI2() {
-    worker.postMessage({'cmd': 'start', 'msg': 'Hi'});
+    worker.postMessage({'cmd': 'start', 'msg': 'adapter'});
 }
 
 function unknownCmd2() {

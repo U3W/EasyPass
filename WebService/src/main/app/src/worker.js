@@ -1,11 +1,13 @@
+importScripts("bower_components/pouchdb/dist/pouchdb.min.js");
 import("../pkg").then(wasm => {
-    //wasm.init();
-    self.addEventListener('message', function(e) {
-        var data = e.data;
-        const controller = new wasm.Worker();
+    let worker = new wasm.Worker();
+    self.addEventListener('message', async function(e) {
+        const data = e.data;
         switch (data.cmd) {
             case 'start':
-                self.postMessage('WORKER STARTED: ' + data.msg + ", " + controller.start() + " " + controller.stop());
+                worker = await wasm.process(worker, "adapter");
+                let msg = worker.get_output();
+                self.postMessage('WORKER STARTED: ' + msg);
                 break;
             case 'stop':
                 self.postMessage('WORKER STOPPED: ' + data.msg + '. (buttons will no longer work)');
