@@ -5,7 +5,7 @@ import("../pkg").then(wasm => {
         const controller = new wasm.Worker();
         switch (data.cmd) {
             case 'start':
-                self.postMessage('WORKER STARTED: ' + data.msg + ", " + controller.start());
+                self.postMessage('WORKER STARTED: ' + data.msg + ", " + controller.start() + " " + controller.stop());
                 break;
             case 'stop':
                 self.postMessage('WORKER STOPPED: ' + data.msg + '. (buttons will no longer work)');

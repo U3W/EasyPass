@@ -23,13 +23,13 @@ node {
     // If false, it will try to use globally installed node.
     download = true
     // Set the work directory for unpacking node
-    workDir = file("${project.buildDir}/nodejs")
+    workDir = file("${project.buildDir}/src/main/app")
     // Set the work directory for NPM
-    npmWorkDir = file("${project.buildDir}/npm")
+    npmWorkDir = file("${project.buildDir}/src/main/app")
     // Set the work directory for Yarn
-    yarnWorkDir = file("${project.buildDir}/yarn")
+    yarnWorkDir = file("${project.buildDir}/src/main/app")
     // Set the work directory where node_modules should be located
-    nodeModulesDir = file("${project.projectDir}")
+    nodeModulesDir = file("${project.projectDir}/src/main/app")
 }
 
 group = "dev.easypass"
@@ -83,25 +83,28 @@ tasks.withType<KotlinCompile> {
 }
 
 task<NpmTask>("appInstall") {
+    group = "easypass"
     description = "Installs all dependencies from package.json"
     setWorkingDir(file("${project.projectDir}/src/main/app"))
-    //rgs = listOf("install")
     setArgs(listOf("install"))
 }
 
 task<NpmTask>("appBuild") {
+    group = "easypass"
     description = "Builds production version of the webapp"
     setWorkingDir(file("${project.projectDir}/src/main/app"))
     setArgs(listOf("run", "build"))
 }
 
 task<NpmTask>("appTest") {
+    group = "easypass"
     description = "Runs all tests of the webapp"
     setWorkingDir(file("${project.projectDir}/src/main/app"))
     setArgs(listOf("test"))
 }
 
 task("appCopy") {
+    group = "easypass"
     copy {
         from("src/main/app/build")
         into("out/production/resources/main/static/")
@@ -132,21 +135,33 @@ task("appCopy") {
     }
 }
 
-task<Exec>("wasmBuild") {
+task<Exec>("wasmBuildProcess") {
     val folder = File("src/main/app/pkg")
-    if( !folder.exists() ) {
+    if (!folder.exists()) {
         folder.mkdirs()
     }
-
+    val target = File("src/main/rust/pkg")
+    target.mkdirs();
     workingDir = File("src/main/rust")
     commandLine = if (System.getProperty("os.name").toLowerCase().contains("windows")) {
-        listOf("cmd", "/c", "wasm-pack", "build")
+        listOf("cmd", "/c", "wasm-pack", "build", "--release", "--no-typescript")
     } else {
-        listOf("wasm-pack", "build")
+        listOf("wasm-pack", "build", "--release", "--no-typescript")
     }
-    copy {
-        from("src/main/rust/pkg")
-        into("src/main/app/pkg")
+}
+
+task("wasmBuild") {
+    group = "easypass"
+    dependsOn("wasmBuildProcess")
+    doLast {
+        val folder = File("src/main/rust/pkg")
+        while (folder.list().size < 2) {
+            println("Waiting for 'wasm-pack' to finish building...")
+        }
+        copy {
+            from("src/main/rust/pkg")
+            into("src/main/app/pkg")
+        }
     }
 }
 
