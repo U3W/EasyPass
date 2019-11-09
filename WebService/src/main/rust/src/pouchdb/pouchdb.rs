@@ -53,4 +53,7 @@ extern "C" {
 
     #[wasm_bindgen(method, js_class = "PouchDB", js_name = get)]
     pub fn get(this: &PouchDB, doc_id: &str) -> Promise;
+
+    #[wasm_bindgen(method, js_class = "PouchDB", js_name = find)]
+    pub fn find(this: &PouchDB, query: &JsValue) -> Promise;
 }

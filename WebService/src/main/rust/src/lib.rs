@@ -13,6 +13,10 @@ use wasm_bindgen_futures::JsFuture;
 use serde_json::{Value};
 use js_sys::{Promise};
 use serde::{Deserialize, Serialize};
+use wasm_bindgen::__rt::std::future::Future;
+use wasm_bindgen::__rt::std::rc::Rc;
+use wasm_bindgen::__rt::core::cell::RefCell;
+
 
 #[cfg(feature = "wee_alloc")]
 #[global_allocator]
@@ -27,8 +31,7 @@ extern {
 #[wasm_bindgen]
 pub struct Worker {
     user: PouchDB,
-    group: PouchDB,
-    output: String
+    group: PouchDB
 }
 
 #[wasm_bindgen]
@@ -40,52 +43,63 @@ impl Worker {
         Worker {
             user: PouchDB::new("UserDB", &JsValue::from_serde(&settings).unwrap()),
             group: PouchDB::new("GroupDB", &JsValue::from_serde(&settings).unwrap()),
-            output: String::new() }
-
-    }
-
-    pub fn get_output(&self) -> String {
-        String::from(self.output.as_str())
-    }
-}
-
-#[wasm_bindgen]
-pub async fn save(worker: Worker, db: String, data: JsValue) -> Worker {
-    log(&format!("Saved: {:?}", &data.into_serde::<Value>().unwrap()));
-    match db.as_str() {
-        "GroupDB" => {
-            let _ = JsFuture::from(worker.group.post(&data)).await;
-        },
-        _ => {
-            let _ = JsFuture::from(worker.user.post(&data)).await;
         }
     }
-    worker
-}
 
-#[wasm_bindgen]
-pub async fn process(mut worker: Worker, command: String) -> Worker {
-    let output = match command.as_str() {
-        "adapter" => { worker.user.adapter() }
-        "info" => {
-            match JsFuture::from(worker.user.info()).await {
-                // Check if syntax is resolved
-                Ok(resolved) => {
-                    // Check if serialization worked
-                    // Does not work on remote databases yet
-                    // Reason: Info-struct is
-                    match resolved.into_serde::<Info>() {
-                        Ok(val) => format!("{:?}", &val),
-                        Err(_) => "Deserialize error".to_string(),
-                    }
-                },
-                Err(_) => "Promise error".to_string(),
+    pub fn save(&self, db: String, data: JsValue) -> Promise {
+        //log(&format!("Saved: {:?}", &data.into_serde::<Value>().unwrap()));
+        let action = match db.as_str() {
+            "GroupDB" => {
+                JsFuture::from(self.group.post(&data))
+            },
+            _ => {
+                JsFuture::from(self.user.post(&data))
             }
-        }
-        _ => String::from("Unknown command")
-    };
-    worker.output = output;
-    worker
+        };
+        future_to_promise(async move {
+            action.await;
+            Ok(JsValue::undefined())
+        })
+    }
+
+    pub fn find(&self, db: String, data: JsValue) -> Promise {
+        //log(&format!("Query: {:?}", &data.into_serde::<Value>().unwrap()));
+        let action = match db.as_str() {
+            "GroupDB" => {
+                JsFuture::from(self.group.find(&data))
+            },
+            _ => {
+                JsFuture::from(self.user.find(&data))
+            }
+        };
+        future_to_promise(async move {
+            action.await
+        })
+    }
+
+    pub fn process(&self, command: String) -> Promise {
+        let info = JsFuture::from(self.user.info());
+        let adapter = self.user.adapter();
+
+        future_to_promise(async move {
+            let output = match command.as_str() {
+                "adapter" => adapter,
+                "info" => {
+                    match info.await {
+                        Ok(resolved) => {
+                            match resolved.into_serde::<Info>() {
+                                Ok(val) => format!("{:?}", &val),
+                                Err(_) => "Deserialize error".to_string(),
+                            }
+                        },
+                        Err(_) => "Promise error".to_string(),
+                    }
+                }
+                _ => String::from("Unknown command")
+            };
+            Ok(JsValue::from(output))
+        })
+    }
 }
 
 
