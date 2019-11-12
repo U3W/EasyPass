@@ -8,7 +8,7 @@ import org.ektorp.support.GenerateView
 import org.springframework.stereotype.Component
 
 @Component
-class GroupRepository(db: CouchDbConnector = CouchDbDatabaseConnector().getDBConnection("UserManagement") ) : CouchDbRepositorySupport<Group>(Group::class.java, db) {
+class GroupRepository(db: CouchDbConnector) : CouchDbRepositorySupport<Group>(Group::class.java, db) {
 
     init {
         //The initStandardDesignDocument-method throws a NullPointerException when a view already exists in the database
