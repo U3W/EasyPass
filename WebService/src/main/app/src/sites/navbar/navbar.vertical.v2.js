@@ -12,8 +12,9 @@ class NavbarVerticalEP2 extends React.Component {
         super(props);
 
         this.state = {
-
+            catCounter: 1,
         };
+
     }
 
     /**
@@ -27,30 +28,50 @@ class NavbarVerticalEP2 extends React.Component {
         this.props.callback.changeCat(changeTo);
     }
 
+    returnCatBase ( id, name) {
+        let getActive = "nav-link-kat sec";
+        if ( this.props.callback.state.catselected === id)
+        {
+            getActive = "nav-link-kat sec active";
+        }
 
-    getKat() {
-        // immmer
-        let start = (<li className="d-flex align-items-center text-muted clickable nav-link-click" onClick={() => this.catChange(1)}>
-                        <div className="nav-link-kat">
+        return (
+            <li key={id} className="d-flex align-items-center text-muted clickable nav-link-kat-click" onClick={() => this.catChange(id)}>
+                <div className={getActive}>
+                    {name}
+                </div>
+            </li>
+        );
+    }
+
+
+    getCat() {
+        let getActive = "nav-link-kat";
+        if ( this.props.callback.state.catselected === 0)
+        {
+            getActive = "nav-link-kat active";
+        }
+        // always
+        let start = (<li key={0} className="d-flex align-items-center text-muted clickable nav-link-kat-click" onClick={() => this.catChange(0)}>
+                        <div className={getActive}>
                             Alle Kategorien
                         </div>
                     </li>);
-        // einzelne kategorienen --> Aufruf von Kacper
-
-        // Schleife mit onClick={() => this.catChange(i)}> --> i++
+        // single cat.
+        let cats = this.props.callback.getCats();
+        for ( let i = 0; i < cats.length; i++ )
+        {
+            cats[i].idCat = i+1;
+        }
+        // counter for the cats
+        let finalCats = cats.map((item) =>
+            this.returnCatBase(item.idCat, item.name)
+        );
+        // loop with onClick={() => this.catChange(i)}> --> i++
         return (
             <>
                 {start}
-                <li className="d-flex align-items-center text-muted clickable nav-link-click" onClick={() => this.catChange(1)}>
-                    <div className="nav-link-kat sec">
-                        Kategorie
-                    </div>
-                </li>
-                <li className="d-flex align-items-center text-muted clickable nav-link-click" onClick={() => this.catChange(2)}>
-                    <div className="nav-link-kat thr">
-                        Unterkategorie
-                    </div>
-                </li>
+                {finalCats}
             </>
         );
     }
@@ -105,7 +126,7 @@ class NavbarVerticalEP2 extends React.Component {
                                 <span>Kategorien</span>
                             </h6>
                             <hr />
-                            {this.getKat()}
+                            {this.getCat()}
                         </ul>
 
                     </div>

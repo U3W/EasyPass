@@ -6,29 +6,23 @@ import Logo from "../../../img/logo/LogoV2.svg"
 import Row from "react-bootstrap/Row";
 import Col from "react-bootstrap/Col";
 import {Container} from "react-bootstrap";
+import {PassLine} from "../line.temp";
+import Accordion from "react-bootstrap/Accordion";
 
 class GroupPassword extends React.Component {
     constructor(props) {
         super(props);
-
     }
 
     render() {
         return (
             <>
                <h1>Group Passwords</h1>
+                <hr/>
                 <Container>
-                    <hr/>
-                    <Row>
-                        <Col md={6} lg={4}><PassCard title="Test" pass="test" user="test-user" img={Logo} /></Col>
-                        <Col md={6} lg={4}><PassCard title="Test" pass="test" user="test-user" img={Logo} /></Col>
-                        <Col md={6} lg={4}><PassCard title="Test" pass="test" user="test-user" img={Logo} /></Col>
-                    </Row>
-                    <Row>
-                        <Col><PassCard title="Test" pass="test" user="test-user" img={Logo} /></Col>
-                        <Col><PassCard title="Test" pass="test" user="test-user" img={Logo} /></Col>
-                        <Col><PassCard title="Test" pass="test" user="test-user" img={Logo} /></Col>
-                    </Row>
+                    <Accordion id="passwords">
+                        {this.props.callback.renderCat()}
+                    </Accordion>
                 </Container>
             </>
         );

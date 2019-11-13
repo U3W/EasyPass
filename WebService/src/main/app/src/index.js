@@ -2,10 +2,10 @@ import React from "react";
 import ReactDOM from "react-dom";
 import {
     BrowserRouter as Router,
-    Switch
+    Switch,
+    Redirect,
+    Route
 } from "react-router-dom";
-import {Redirect} from "react-router-dom";
-import {Route} from "react-router-dom";
 
 
 import "./index.css";
@@ -24,14 +24,10 @@ import {handleConnection} from "./network/network.functions";
 import Dashboard from "./sites/dashboard/dashboard";
 import LoginAuth from "./authentification/auth.login"
 
-// Load backend with WebAssembly
-const worker = new Worker('worker.js');
-
 // If you want your app to work offline and load faster, you can change
 // unregister() to register() below. Note this comes with some pitfalls.
 // Learn more about service workers: https://bit.ly/CRA-PWA
 serviceWorker.register();
-
 
 // Für Storage
 const store = createStore(rootReducer, applyMiddleware(thunk));
@@ -96,6 +92,7 @@ class App extends React.Component {
         else
         {
             let redirect = <div/>;
+            console.log(LoginAuth.getLoggedIn());
             if (!LoginAuth.getLoggedIn())
             {
                 redirect = <Redirect to="/verify"/>

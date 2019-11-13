@@ -17,18 +17,48 @@ body {
 
 .fixMain {
     overflow-y: auto;
-    height: calc(100% - 86px);
+    height: calc(100vh - 86px);
     right: 0;
-    position: absolute;
+    position: fixed;
+    padding-bottom: 75px;
+    transition: height 0.35s ease;
+}
+
+.expanded {
+    height: calc(100vh - 161px) !important;
+    transition: height 0.35s ease;
+}
+.expadedSettings {
+    /* 209.2 */
+    /* 160.8 */
+    height: calc(100vh - 210px) !important;
+}
+
+removeAnimation {
+    transition: height 0s ease !important;
 }
 
 .fixScroll {
     display: flex;
+    overflow-x: hidden;
+    overflow-y: hidden;
 }
 
 @media (max-width: 425px) {
     .fixMain {
         flex: 0 0 100%;
         max-width: 100%;
+        height: calc(100vh - 151px);
+    }
+
+    .expanded {
+        height: calc(100vh - 226px) !important;
+        transition: height 0.35s ease;
+    }
+
+    .expadedSettings {
+        /* 209.2 */
+        /* 160.8 */
+        height: calc(100vh - 275px) !important;
     }
 }
