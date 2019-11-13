@@ -7,3 +7,11 @@ fun encrypt(message: String, key: String): String{
 fun decrypt(message: String, key: String): String{
     return message.dropLast(key.length)
 }
+
+fun generateKeyPair(): String{
+
+}
+
+fun generateChallenge(public: String): String{
+    return "abc"+public
+}
