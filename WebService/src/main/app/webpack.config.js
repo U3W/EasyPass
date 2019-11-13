@@ -75,6 +75,11 @@ const workerConfig = {
     path: path.resolve(__dirname, "build"),
     filename: "worker.js"
   },
+  plugins: [
+    new CopyWebPackPlugin([
+      { from: "bower_components", to: "bower_components" }
+    ])
+  ],
   mode: "development"
 };
 
