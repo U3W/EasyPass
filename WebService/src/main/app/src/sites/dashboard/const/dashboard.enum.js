@@ -1,6 +1,7 @@
-const dashboardEnum = {
+const dashboardConst = {
     tabselected: 0,
-    catselected: 1
+    catselectedPriv: 1,
+    catselectedGroup: 2
 };
 
-export default dashboardEnum;
+export default dashboardConst;

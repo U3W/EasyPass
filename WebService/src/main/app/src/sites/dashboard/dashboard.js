@@ -12,23 +12,48 @@ import PrivatePassword from "./tabs/private.password";
 import GroupPassword from "./tabs/group.password";
 import MockPasswords from "./MockPasswords";
 import {PassLine} from "./line.temp";
-import {authConstants} from "../../authentification/auth.const.localstorage";
-
+import {authConstants as dashboardConst, authConstants} from "../../authentification/auth.const.localstorage";
+import {
+    saveCat,
+    saveTab
+} from "../../action/dashboard.action";
+import dashboardState from "./dashboard.saved.state"
 class Dashboard extends React.Component {
 
     constructor(props){
         super(props);
 
+        // check storage
+        //this.fixStorage();
+
+
+        // Status holen
+        let cat;
+        let tab = dashboardState.getTab();
+        if ( tab === tabs.PRIVPASS )
+        {
+            console.log("Priv");
+            cat = dashboardState.getCatPriv();
+        }
+        else {
+            console.log("Group");
+            cat = dashboardState.getCatGroup();
+        }
+
+
+        console.log("Tab: " + tab);
+        console.log("Cat: " + cat);
+        console.log("Start");
+        console.log(localStorage.getItem(dashboardConst.tabselected));
+        console.log(tab);
+        console.log(cat);
         this.state = {
             search: "",
             username: "Username",
-            tabselected: tabs.PRIVPASS,
-            catselected: 0, // für Alle Kat
+            tabselected: tab, // tabs.PRIVPASS
+            catselected: cat, //JSON.parse(localStorage.getItem(dashboardConst.catselectedPriv)),
             expanded: false
         };
-
-        localStorage.setItem(authConstants.verified, "true");
-
 
 
         this.handleSearch = this.handleSearch.bind(this);
@@ -36,20 +61,37 @@ class Dashboard extends React.Component {
         this.logoutDash = this.logoutDash.bind(this);
         this.getTab = this.getTab.bind(this);
         this.getCats = this.getCats.bind(this);
-        this.getSelectedCat = this.getSelectedCat.bind(this);
+        this.changeCat = this.changeCat.bind(this);
+        this.changeTab = this.changeTab.bind(this);
+    }
+
+    fixStorage() {
+        if (localStorage.getItem(dashboardConst.tabselected) == null) {
+            console.log("Neusetzten: ");
+            localStorage.setItem(dashboardConst.tabselected, JSON.stringify(tabs.PRIVPASS));
+        }
+        if (localStorage.getItem(dashboardConst.catselectedPriv) == null){
+            console.log("Neusetzten: ");
+            localStorage.setItem(dashboardConst.catselectedPriv, JSON.stringify(0)); // 0 für Alle Kat
+        }
+        if (localStorage.getItem(dashboardConst.catselectedGroup) == null){
+            console.log("Neusetzten: ");
+            localStorage.setItem(dashboardConst.catselectedGroup, JSON.stringify(0)); // 0 für Alle Kat
+        }
     }
 
     renderCat() {
-        let out;
-
         let cats = this.getCats();
-        let selectedCat = this.getSelectedCat();
+        let selectedCat = this.state.catselected;
+        console.log("Cats");
         console.log(cats);
-        console.log("Selected cat: "+ selectedCat);
+        //console.log("Selected cat: "+ selectedCat);
         if ( selectedCat === 0 )
         {
             let passwords = this.renderLines(cats);
             let final = cats.map(function (cat) {
+                console.log("Einzelne Cat");
+                console.log(cat);
                 return (
                     <div key={cat.id} >
                         <strong>{cat.name}</strong>
@@ -71,7 +113,10 @@ class Dashboard extends React.Component {
 
         }
         else {
+            console.log(selectedCat);
             let cat = cats[selectedCat-1];
+            console.log("Einzelne Cat");
+            console.log(cat);
             let passwords = this.renderLines([cat]);
             return (
                 <div>
@@ -82,7 +127,6 @@ class Dashboard extends React.Component {
                 </div>
             );
         }
-        return out;
     }
 
     renderLines(cats) {
@@ -201,24 +245,35 @@ class Dashboard extends React.Component {
     }
 
     changeTab( changeTo ) {
-        console.log("Changed to");
+        console.log("Changed to Tab:");
         console.log(changeTo);
+        this.props.saveTab(changeTo, this.state.catselected);
         this.setState({
-                tabselected: changeTo
+                tabselected: changeTo,
             }
         );
+        if ( changeTo === tabs.PRIVPASS )
+        {
+            console.log("Priv");
+            this.setState({
+                catselected: dashboardState.getCatPriv()
+            });
+        }
+        else {
+            console.log("Group");
+            this.setState({
+                catselected: dashboardState.getCatGroup()
+            });
+        }
+
     }
 
     changeCat( changeTo ) {
+        this.props.saveCat(this.state.tabselected, changeTo);
         this.setState({
             catselected: changeTo
         });
-        console.log("Changed to");
-        console.log(changeTo);
-    }
 
-    getSelectedCat() {
-        return this.state.catselected;
     }
 
     /**
@@ -275,14 +330,20 @@ class Dashboard extends React.Component {
 const mapDispatchToProps3 = (dispatch) => {
     return {
         login: (creds) => dispatch(login(creds)),
-        logout: () => dispatch(logout())
+        logout: () => dispatch(logout()),
+        saveTab: (tabselected, catselected) => dispatch(saveTab(tabselected, catselected)),
+        saveCat: (tabselected, catselected) => dispatch(saveCat(tabselected, catselected)),
     }
 };
 
 const mapStateToProps3 = (state) => {
+    console.log("State in save");
     console.log(state);
     return{
-        loggedIn: state.auth.loggedIn
+        loggedIn: state.auth.loggedIn,
+        tab: state.save.tab,
+        catPriv: state.save.catPriv,
+        catGroup: state.save.catGroup
     }
 };
 
