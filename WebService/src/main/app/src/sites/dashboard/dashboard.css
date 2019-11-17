@@ -34,10 +34,6 @@ body {
     height: calc(100vh - 210px) !important;
 }
 
-removeAnimation {
-    transition: height 0s ease !important;
-}
-
 .fixScroll {
     display: flex;
     overflow-x: hidden;
@@ -48,17 +44,13 @@ removeAnimation {
     .fixMain {
         flex: 0 0 100%;
         max-width: 100%;
-        height: calc(100vh - 151px);
+        height: calc(100vh - 197px);
     }
 
     .expanded {
-        height: calc(100vh - 226px) !important;
+        height: calc(100vh - 272px) !important;
         transition: height 0.35s ease;
     }
 
-    .expadedSettings {
-        /* 209.2 */
-        /* 160.8 */
-        height: calc(100vh - 275px) !important;
-    }
+
 }

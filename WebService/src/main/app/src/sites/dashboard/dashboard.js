@@ -40,13 +40,6 @@ class Dashboard extends React.Component {
             cat = dashboardState.getCatGroup();
         }
 
-
-        console.log("Tab: " + tab);
-        console.log("Cat: " + cat);
-        console.log("Start");
-        console.log(localStorage.getItem(dashboardConst.tabselected));
-        console.log(tab);
-        console.log(cat);
         this.state = {
             search: "",
             username: "Username",
@@ -129,6 +122,15 @@ class Dashboard extends React.Component {
         }
     }
 
+    addCallback( catData ) {
+
+        for (let i = 0; i < catData.length; i++ ) {
+            catData[i]["callback"] = this;
+        }
+
+        return catData;
+    }
+
     renderLines(cats) {
         let passwords = {};
         for ( let i = 0; i < cats.length; i++ ) {
@@ -136,16 +138,14 @@ class Dashboard extends React.Component {
             let catName = cats[i].name;
             //TODO mocking Object
             let catData = MockPasswords.getCatData(catName);
+            // add callback to array
+            catData = this.addCallback(catData);
             console.log("Data");
             console.log(catData);
             passwords[catName] = catData.map(function (singleCat) {
                 function correctUrl(imgUrl) {
 
                     let out = "http://"+extractHostname(imgUrl);
-                    /*
-                    if (!( imgUrl.includes("https://www") || imgUrl.includes("http://www") || imgUrl.includes("http://") || imgUrl.includes("https://"))) {
-                        out = "https://www." + imgUrl;
-                    }*/
                     if ( out.charAt(out.length-1) !== "/" )
                     {
                         out += "/"
@@ -173,12 +173,30 @@ class Dashboard extends React.Component {
 
 
                 let imgSrc = correctUrl(singleCat.url);
+                console.log("Vor dem rendern");
                 return (
-                    <PassLine key={singleCat.id} img={imgSrc} id={singleCat.id} title={singleCat.title} user={singleCat.user} pass={singleCat.pass} url={singleCat.url}/>
+                    <PassLine key={singleCat.id} img={imgSrc} id={singleCat.id} title={singleCat.title} user={singleCat.user} pass={singleCat.pass} url={singleCat.url} callback={singleCat.callback}/>
                 );
             })
         }
         return passwords;
+    }
+
+    copyPass(id) {
+        console.log("Password");
+
+    }
+
+    goToPage(id) {
+        function correctUrl(url) {
+            let out = url;
+            if (!( url.includes("https://") || url.includes("https://") )) {
+                out = "https://" + url;
+            }
+            return out;
+        }
+        // TODO Mockobjekt
+        window.open(correctUrl("https://login.live.com/login.srf?wa=wsignin1.0&rpsnv=13&ct=1573646035&rver=7.0.6737.0&wp=MBI_SSL&wreply=https%3a%2f%2foutlook.live.com%2fowa%2f%3fnlp%3d1%26RpsCsrfState%3da992ae5f-b164-bd0f-15d4-cca75d3498f8&id=292841&aadredir=1&CBCXT=out&lw=1&fl=dob%2cflname%2cwld&cobrandid=90015"), "_blank");
     }
 
 
@@ -247,7 +265,7 @@ class Dashboard extends React.Component {
     changeTab( changeTo ) {
         console.log("Changed to Tab:");
         console.log(changeTo);
-        this.props.saveTab(changeTo, this.state.catselected);
+        this.props.saveTab(changeTo);
         this.setState({
                 tabselected: changeTo,
             }
@@ -269,6 +287,7 @@ class Dashboard extends React.Component {
     }
 
     changeCat( changeTo ) {
+        console.log("Change to: " + changeTo);
         this.props.saveCat(this.state.tabselected, changeTo);
         this.setState({
             catselected: changeTo
@@ -282,6 +301,22 @@ class Dashboard extends React.Component {
     getCats() {
         //TODO mocking Object
         return MockPasswords.getCats(this.state.tabselected);
+    }
+
+    getSelectedCatName() {
+        let selected = this.state.catselected;
+        if ( selected === 0 )
+        {
+            // TODO change language
+            return "Alle Kategorien"
+        }
+        let cats = this.getCats();
+        for ( let i = 0; i < cats.length; i++ )
+        {
+            if ( cats[i].id === selected ) {
+                return cats[i].name;
+            }
+        }
     }
 
     getTab() {
@@ -331,8 +366,8 @@ const mapDispatchToProps3 = (dispatch) => {
     return {
         login: (creds) => dispatch(login(creds)),
         logout: () => dispatch(logout()),
-        saveTab: (tabselected, catselected) => dispatch(saveTab(tabselected, catselected)),
-        saveCat: (tabselected, catselected) => dispatch(saveCat(tabselected, catselected)),
+        saveTab: (tabselected) => dispatch(saveTab(tabselected)),
+        saveCat: (tabselected, catselected) => dispatch(saveCat(tabselected, catselected))
     }
 };
 
@@ -340,10 +375,7 @@ const mapStateToProps3 = (state) => {
     console.log("State in save");
     console.log(state);
     return{
-        loggedIn: state.auth.loggedIn,
-        tab: state.save.tab,
-        catPriv: state.save.catPriv,
-        catGroup: state.save.catGroup
+        loggedIn: state.auth.loggedIn
     }
 };
 

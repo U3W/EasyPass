@@ -14,6 +14,8 @@ import Button from "react-bootstrap/Button";
 import VerifyAuth from "../../authentification/auth.masterpassword";
 import Alert from "react-bootstrap/Alert";
 import Indicator from "../../network/network.indicator";
+import tabs from "../dashboard/tabs/tab.enum";
+import {saveCat, saveTab} from "../../action/dashboard.action";
 
 class Masterpassword extends React.Component {
 
@@ -114,6 +116,10 @@ class Masterpassword extends React.Component {
 
 
             this.props.mlogin(this.state);
+            // reset state from dashboard
+            this.props.saveTab(tabs.PRIVPASS);
+            this.props.saveCat(tabs.PRIVPASS, tabs.ALLCAT);
+            this.props.saveCat(tabs.GROUPPASS, tabs.ALLCAT);
 
             if ( VerifyAuth.getVerified() )
             {
@@ -342,7 +348,9 @@ export function PrintError({caller: ob}) {
 const mapDispatchToProps1 = (dispatch) => {
     return {
         mlogin: (creds) => dispatch(mlogin(creds)),
-        mlogout: () => dispatch(mlogout())
+        mlogout: () => dispatch(mlogout()),
+        saveTab: (tabselected) => dispatch(saveTab(tabselected)),
+        saveCat: (tabselected, catselected) => dispatch(saveCat(tabselected, catselected))
     }
 };
 

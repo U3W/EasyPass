@@ -13,6 +13,7 @@ import {connect} from "react-redux";
 import Logo from "../../img/logo/LogoSchnlüsselV2.svg"
 import Modal from "react-bootstrap/Modal";
 import NavbarVerticalEP from "./navbar.vertcal";
+import Table from "react-bootstrap/Table";
 
 class NavbarEP extends React.Component {
     constructor(props) {
@@ -23,6 +24,7 @@ class NavbarEP extends React.Component {
             expanded: false,
             settingsExpanded: false,
             popUpShow: false,
+            popUpCatShow: false,
             isHoveringOverLogout: false,
         };
 
@@ -38,6 +40,9 @@ class NavbarEP extends React.Component {
         this.setPopupSave = this.setPopupSave.bind(this);
         this.getPopUp = this.getPopUp.bind(this);
         this.setSettingExpanded = this.setSettingExpanded.bind(this);
+
+        this.setPopUpCatDisabled = this.setPopUpCatDisabled.bind(this);
+        this.setPopUpCatEnabled = this.setPopUpCatEnabled.bind(this);
     }
 
 
@@ -74,6 +79,68 @@ class NavbarEP extends React.Component {
     setSettingExpanded() {
         this.props.callback.setSettingExpanded();
     }
+
+    setPopUpCatDisabled() {
+        console.log("Dismissed");
+        this.setState({
+            popUpCatShow: false
+        });
+    }
+
+    setPopUpCatEnabled() {
+        this.setState({
+            popUpCatShow: true
+        });
+    }
+
+
+
+    returnCatBase ( id, name) {
+        console.log("Render: " + id + ", " + name);
+        return (
+            <tr key={id}>
+                <td onClick={() => this.changeCat(id)}>
+                    {name}
+                </td>
+            </tr>
+        );
+    }
+    changeCat(id) {
+        this.setPopUpCatDisabled();
+        this.props.callback.changeCat(id);
+    }
+
+    getPopUpCat()  {
+        let cats = this.props.callback.getCats();
+
+        let finalCats = cats.map((item) =>
+            this.returnCatBase(item.id, item.name)
+        );
+
+        return (
+            <>
+                <Modal show={this.state.popUpCatShow} onHide={this.setPopUpCatDisabled}>
+                    <Modal.Header closeButton>
+                        <Modal.Title>Kategorie auswählen:</Modal.Title>
+                    </Modal.Header>
+                    <Modal.Body>
+                        <Table striped bordered hover className="modal-table">
+                            <tbody>
+                                <tr key={0}>
+                                    <td onClick={() => this.changeCat(0)}>
+                                        Alle Kateogrien
+                                    </td>
+                                </tr>
+                                {finalCats}
+                            </tbody>
+                        </Table>
+                    </Modal.Body>
+                </Modal>
+            </>
+        );
+    }
+
+
 
     getPopUp() {
         return (
@@ -134,6 +201,13 @@ class NavbarEP extends React.Component {
                             </Navbar.Collapse>
 
                             {this.getPopUp()}
+                        </Navbar>
+                        <Navbar collapseOnSelect className="catnav catselectSize" expand="lg" bg="dark" variant="dark">
+                            <Navbar.Brand className="catName" href="#home">{this.props.callback.getSelectedCatName()}</Navbar.Brand>
+                            <button type="button" aria-label="Toggle navigation" className="toggler navbar-toggler collapsed" onClick={this.setPopUpCatEnabled}>
+                                <span className="navbar-toggler-icon"/>
+                            </button>
+                            {this.getPopUpCat()}
                         </Navbar>
                     </div>
                 </div>

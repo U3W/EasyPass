@@ -1,7 +1,6 @@
 import React from "react"
 import Card from "react-bootstrap/Card";
 import Button from "react-bootstrap/Button";
-import "./card.style.css"
 
 // Nach dem machen --> https://www.youtube.com/watch?v=rH9jM-8hAD8
 /**

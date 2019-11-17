@@ -30,6 +30,8 @@ import { connect } from 'react-redux';
 import {login, logout} from "../../action/auth.action";
 import {authConstants} from "../../authentification/auth.const.localstorage";
 import Indicator from "../../network/network.indicator";
+import {saveCat, saveTab} from "../../action/dashboard.action";
+import tabs from "../dashboard/tabs/tab.enum";
 
 //<Row className="justify-content-center">
 class Login extends React.Component {
@@ -110,7 +112,6 @@ class Login extends React.Component {
             this.setState({missingPassword: false });
 
             this.props.login(this.state);
-
 
             if (LoginAuth.getLoggedIn()) {
                 this.props.history.push("/verify");
@@ -230,7 +231,7 @@ function sleep (time) {
 const mapDispatchToProps = (dispatch) => {
     return {
         login: (creds) => dispatch(login(creds)),
-        logout: () => dispatch(logout())
+        logout: () => dispatch(logout()),
     }
 };
 
