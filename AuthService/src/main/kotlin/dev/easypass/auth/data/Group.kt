@@ -1,4 +1,4 @@
-package dev.easypass.auth.repositories
+package dev.easypass.auth.data
 
 import org.ektorp.support.CouchDbDocument
 

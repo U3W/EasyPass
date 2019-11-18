@@ -1,7 +1,6 @@
-package dev.easypass.auth.repositories
+package dev.easypass.auth.data
 
 import org.ektorp.support.CouchDbDocument
-import org.ektorp.support.TypeDiscriminator
 
 /**
  * @uname: the username of the user

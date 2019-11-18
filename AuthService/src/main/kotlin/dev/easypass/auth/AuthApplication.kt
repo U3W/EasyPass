@@ -1,10 +1,8 @@
 package dev.easypass.auth
 
-import dev.easypass.auth.repositories.UserRepository
 import org.ektorp.CouchDbConnector
 import org.ektorp.http.StdHttpClient
 import org.ektorp.impl.StdCouchDbInstance
-import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.boot.runApplication
 import org.springframework.cloud.client.discovery.EnableDiscoveryClient
@@ -13,7 +11,6 @@ import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Primary
 import org.springframework.util.ResourceUtils
 import java.io.FileInputStream
-import java.io.FileReader
 import java.util.Properties
 
 @SpringBootApplication
@@ -35,9 +32,9 @@ class AuthApplication {
     @Primary
     fun CouchDbConnector(properties: Properties): CouchDbConnector {
         val url = properties.getProperty("couchdb.url")
-        val uname = properties.getProperty("couchdb.uname")
-        val pwd = properties.getProperty("couchdb.pwd")
-        val dbname = properties.getProperty("couchdb.dbname")
+        val uname = properties.getProperty("couchdb.username")
+        val pwd = properties.getProperty("couchdb.password")
+        val dbname = properties.getProperty("couchdb.databaseName")
         val httpClient = StdHttpClient.Builder()
                 .url(url)
                 .username(uname)

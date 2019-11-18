@@ -1,4 +1,4 @@
-package dev.easypass.auth.repositories
+package dev.easypass.auth.data
 
 import dev.easypass.auth.exception.EntityAlreadyinDatabaseException
 import org.ektorp.*
