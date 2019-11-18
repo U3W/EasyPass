@@ -1,7 +1,6 @@
 package dev.easypass.auth.repositories
 
 import dev.easypass.auth.exception.EntityAlreadyinDatabaseException
-import dev.easypass.auth.staticMethods.*
 import org.ektorp.*
 import org.ektorp.support.CouchDbRepositorySupport
 import org.ektorp.support.GenerateView
@@ -25,7 +24,7 @@ class GroupRepository(db: CouchDbConnector) : CouchDbRepositorySupport<Group>(Gr
     }
 
     override fun add(entity: Group) = try {
-        if (!findByGname(entity.gname).isEmpty()) {
+        if (findByGname(entity.gname).isNotEmpty()) {
             throw EntityAlreadyinDatabaseException()
         } else {
             throw DocumentNotFoundException("Exception is caught later! ")

@@ -9,12 +9,9 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.ComponentScan
 
-
-
 @Configuration
 @EnableWebSecurity
-@ComponentScan("dev.easypass.auth")
-class SecSecurityConfig : WebSecurityConfigurerAdapter() {
+class EPSecurityConfiguration : WebSecurityConfigurerAdapter() {
 
     @Autowired
     private val authProvider: EPAuthenticationProvider? = null
@@ -26,7 +23,6 @@ class SecSecurityConfig : WebSecurityConfigurerAdapter() {
 
     @Throws(Exception::class)
     override fun configure(http: HttpSecurity) {
-        http.authorizeRequests().anyRequest().authenticated()
-                .and().httpBasic();
+        http.authorizeRequests().antMatchers("/auth/**", "/").permitAll().anyRequest().authenticated().and().httpBasic()
     }
 }

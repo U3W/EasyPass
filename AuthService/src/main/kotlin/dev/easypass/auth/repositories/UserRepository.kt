@@ -24,7 +24,7 @@ class UserRepository(db: CouchDbConnector) : CouchDbRepositorySupport<User>(User
     }
 
     override fun add(entity: User) = try {
-            if (!findByUname(entity.uname).isEmpty()) {
+            if (findByUname(entity.uname).isNotEmpty()) {
                 throw EntityAlreadyinDatabaseException()
             } else {
                 throw DocumentNotFoundException("Exception is caught later! ")

@@ -33,6 +33,7 @@ class AuthApplication {
         val dbInstance = StdCouchDbInstance(httpClient)
         return dbInstance.createConnector(dbname, true)!!
     }
+
 }
 
 fun main(args: Array<String>) {

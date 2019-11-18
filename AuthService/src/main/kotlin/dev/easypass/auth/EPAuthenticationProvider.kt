@@ -36,7 +36,6 @@ class EPAuthenticationProvider : AuthenticationProvider {
     }
 
     fun checkAuthentication(authentication: Authentication): Boolean {
-        print("-----------------------------------try to authenticate-------------------------------------")
-        return true
+        return false
     }
 }
