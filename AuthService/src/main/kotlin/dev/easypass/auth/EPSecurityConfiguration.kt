@@ -8,13 +8,12 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.ComponentScan
+import org.springframework.security.authentication.AuthenticationProvider
+import java.security.AuthProvider
 
 @Configuration
 @EnableWebSecurity
-class EPSecurityConfiguration : WebSecurityConfigurerAdapter() {
-
-    @Autowired
-    private val authProvider: EPAuthenticationProvider? = null
+class EPSecurityConfiguration(val authProvider: EPAuthenticationProvider) : WebSecurityConfigurerAdapter() {
 
     @Throws(Exception::class)
     override fun configure(auth: AuthenticationManagerBuilder) {

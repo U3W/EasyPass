@@ -12,10 +12,7 @@ import org.springframework.stereotype.Component
 import org.springframework.stereotype.Service
 
 @Component
-class EPAuthenticationProvider : AuthenticationProvider {
-
-    @Autowired
-    private val userRepository:  UserRepository?= null
+class EPAuthenticationProvider(val userRepository: UserRepository) : AuthenticationProvider {
 
     @Throws(AuthenticationException::class)
     override fun authenticate(authentication: Authentication): Authentication? {
