@@ -17,7 +17,6 @@ import java.util.Properties
 @EnableZuulProxy
 @EnableDiscoveryClient
 class AuthApplication {
-
     @Bean
     @Primary
     fun ApplicationProperties(): Properties {
@@ -26,23 +25,6 @@ class AuthApplication {
         val stream = FileInputStream(file)
         properties.load(stream)
         return properties
-    }
-
-    @Bean
-    @Primary
-    fun CouchDbConnector(properties: Properties): CouchDbConnector {
-        val url = properties.getProperty("couchdb.url")
-        val uname = properties.getProperty("couchdb.username")
-        val pwd = properties.getProperty("couchdb.password")
-        val dbname = properties.getProperty("couchdb.databaseName")
-        val httpClient = StdHttpClient.Builder()
-                .url(url)
-                .username(uname)
-                .password(pwd)
-                .build()
-
-        val dbInstance = StdCouchDbInstance(httpClient)
-        return dbInstance.createConnector(dbname, true)!!
     }
 }
 
