@@ -23,6 +23,15 @@ class UserRepository(db: CouchDbConnector) : CouchDbRepositorySupport<User>(User
         return queryView("by_uname", uname)
     }
 
+    fun findOneByUname(uname: String?): User {
+        val listOfUsers = findByUname(uname)
+        if (listOfUsers.isEmpty())
+            throw DocumentNotFoundException("The User [$uname] is NOT FOUND in the database")
+        if (listOfUsers.size > 1)
+            throw DocumentNotFoundException("The User [$uname] has MULTIPLE ENTRIES in the database")
+        return listOfUsers[0]
+    }
+
     override fun add(entity: User) = try {
             if (findByUname(entity.uname).isNotEmpty()) {
                 throw EntityAlreadyinDatabaseException()
@@ -32,5 +41,4 @@ class UserRepository(db: CouchDbConnector) : CouchDbRepositorySupport<User>(User
         } catch (e: DocumentNotFoundException) {
             super.add(entity)
         }
-
 }

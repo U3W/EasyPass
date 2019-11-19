@@ -19,9 +19,11 @@ class EPSecurityConfiguration(private val authProvider: EPAuthenticationProvider
 
     @Throws(Exception::class)
     override fun configure(http: HttpSecurity) {
-        http.csrf().disable()
+        http
+                .csrf().disable()
                 .authorizeRequests()
                 .antMatchers(HttpMethod.POST,"/auth/**").permitAll()
+                .antMatchers(HttpMethod.GET,"/auth/**").permitAll()
                 .anyRequest().authenticated()
                 .and()
                 .httpBasic()

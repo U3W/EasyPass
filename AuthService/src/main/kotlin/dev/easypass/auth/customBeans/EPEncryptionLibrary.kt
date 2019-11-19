@@ -1,21 +1,21 @@
 package dev.easypass.auth.customBeans
 
-import dev.easypass.auth.data.AuthenticationChallenge
-import dev.easypass.auth.data.AuthenticationForm
+import dev.easypass.auth.data.ChallengeForUserAuth
+import dev.easypass.auth.data.AuthenticationRequest
 import dev.easypass.auth.data.User
 import org.springframework.stereotype.Component
 import java.util.*
 
 @Component
 class EPEncryptionLibrary(private val properties: Properties) {
-    fun generateAuthenticationChallenge(): AuthenticationChallenge {
+    fun generateAuthenticationChallenge(): ChallengeForUserAuth {
         //TODO Eine wirkliche Challenge Erzeugung einbauen
         var challenge = "D_A_S___I_S_T___E_I_N_E___C_H_A_L_L_E_N_G_E"
 
-        return AuthenticationChallenge(challenge, properties.getProperty("auth.challengeTimeout").toInt())
+        return ChallengeForUserAuth(challenge, properties.getProperty("auth.challengeTimeout").toInt())
     }
-    fun generateAuthenticationForm(challenge: AuthenticationChallenge, user: User): AuthenticationForm {
-        return AuthenticationForm(encrypt(challenge.decryptedChallenge, user.publicKey), user.privateKey)
+    fun generateAuthenticationForm(challengeForUserAuth: ChallengeForUserAuth, user: User): AuthenticationRequest {
+        return AuthenticationRequest(encrypt(challengeForUserAuth.decryptedChallenge, user.publicKey), user.privateKey)
     }
     fun generateDummyUser(uname: String): User {
         //TODO Ein wirkliches Keypair hinzufügen
