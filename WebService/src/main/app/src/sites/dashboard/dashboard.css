@@ -54,3 +54,32 @@ body {
 
 
 }
+
+/* Copy alert */
+.in-front {
+    z-index: 2001;
+}
+.center-text {
+    align-content: center;
+    text-align: center;
+}
+
+@media (max-width: 425px) {
+    .fixed-top-easypass {
+        position: fixed;
+        /* 132 + 5 */
+        top: 137px;
+        right: 0;
+        left: 0;
+    }
+}
+
+@media (min-width: 425px) {
+    .fixed-top-easypass {
+        position: fixed;
+        /* 86 + 5 */
+        top: 91px;
+        right: 0;
+        left: 0;
+    }
+}

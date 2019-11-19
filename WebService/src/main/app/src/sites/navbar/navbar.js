@@ -119,12 +119,12 @@ class NavbarEP extends React.Component {
 
         return (
             <>
-                <Modal show={this.state.popUpCatShow} onHide={this.setPopUpCatDisabled}>
+                <Modal show={this.state.popUpCatShow} onHide={this.setPopUpCatDisabled} className="ep-modal-dialog">
                     <Modal.Header closeButton>
                         <Modal.Title>Kategorie auswählen:</Modal.Title>
                     </Modal.Header>
-                    <Modal.Body>
-                        <Table striped bordered hover className="modal-table">
+                    <Modal.Body className="ep-modal-body">
+                        <Table striped bordered hover className="ep-modal-table">
                             <tbody>
                                 <tr key={0}>
                                     <td onClick={() => this.changeCat(0)}>
@@ -199,8 +199,6 @@ class NavbarEP extends React.Component {
                                     </NavDropdown>
                                 </Nav>
                             </Navbar.Collapse>
-
-                            {this.getPopUp()}
                         </Navbar>
                         <Navbar collapseOnSelect className="catnav catselectSize" expand="lg" bg="dark" variant="dark">
                             <Navbar.Brand className="catName" href="#home">{this.props.callback.getSelectedCatName()}</Navbar.Brand>
@@ -211,6 +209,7 @@ class NavbarEP extends React.Component {
                         </Navbar>
                     </div>
                 </div>
+                {this.getPopUp()}
             </>
         );
     }

@@ -22,6 +22,7 @@
     margin-left: 3px;
 }
 
+
 .no-padding {
     padding: 0;
 }
@@ -29,6 +30,61 @@
 .card-header {
     border-bottom: 0 solid rgba(0,0,0,.125);
     background-color: #f8f9fa !important;
+}
+
+
+/* Copy button inline */
+.buttonSpaceInline {
+    right: 8px;
+    padding: 1px;
+    font-size: .75rem;
+    height: 31px;
+    width: 33px;
+    border-bottom-left-radius: 0;
+    border-top-left-radius: 0;
+}
+.notRound {
+    border-radius: 0;
+}
+.vertical-button-sep {
+    margin: 0;
+    padding: 0;
+    background-color: #ced4da;
+    height: 31px;
+    width: 1.2px;
+    border: 0;
+}
+
+/* Title */
+@media (min-width: 768px) {
+    .fixUsername {
+        margin-left: 7px;
+    }
+    .fixTitle {
+        display: none;
+    }
+}
+@media (max-width: 768px) {
+    .fixTitle {
+        display: block;
+    }
+    .fixUsername {
+        margin: 0 !important;
+    }
+    .setButtonsRight {
+        top: 15px;
+    }
+
+    .fixLogo {
+        height: 28px;
+        width: 28px;
+        margin-top: 9px;
+    }
+
+    .fixLogoCol {
+        padding-left: 8px;
+    }
+
 }
 
 /* Footer Buttons */

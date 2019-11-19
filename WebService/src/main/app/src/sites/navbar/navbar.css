@@ -360,32 +360,35 @@
     font-size: 0.9rem;
     padding: 0.2rem 0.4rem;
 }
+
 /* Mobile dialog */
-.modal-dialog {
+/* Old Settings
     position:absolute;
     top:50%;
     left:50%;
-    width:92%;  /* adjust as per your needs */
-    height:50%;   /* adjust as per your needs */
-    margin-left:-46%;   /* negative half of width above */
-    margin-top:-50%;   /* negative half of height above */
+    width:92%;          -- adjust as per your needs
+    height:50%;         -- adjust as per your needs
+    margin-left:-46%;   -- negative half of width above
+    margin-top:-50%;    -- negative half of height above
+*/
+.ep-modal-dialog {
+    top:35%; /* to put it right in the middle of the screen */
 }
-.modal-content {
+.ep-modal-content {
 }
-.modal-body {
+.ep-modal-body {
     padding: 0;
 }
-.modal-table {
+.ep-modal-table {
     width: 100%;
     height: 100%;
     margin: 0;
 }
-.modal-table td {
+.ep-modal-table td {
     cursor: pointer;
 }
-.modal-table tr :last-child {
+.ep-modal-table tr :last-child {
     border: 1px solid rgba(222, 226, 230, 0.2);
-
     border-radius: 0.3rem;
 }
 

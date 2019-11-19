@@ -11,13 +11,16 @@ import tabs from "./tabs/tab.enum";
 import PrivatePassword from "./tabs/private.password";
 import GroupPassword from "./tabs/group.password";
 import MockPasswords from "./MockPasswords";
-import {PassLine} from "./line.temp";
+import PassLine from "./line.temp";
 import {authConstants as dashboardConst, authConstants} from "../../authentification/auth.const.localstorage";
 import {
     saveCat,
     saveTab
 } from "../../action/dashboard.action";
 import dashboardState from "./dashboard.saved.state"
+import Alert from "react-bootstrap/Alert";
+import {wrongLogin, wrongLoginHeader} from "../../strings/stings";
+import {dashboardAlerts} from "./const/dashboard.enum";
 class Dashboard extends React.Component {
 
     constructor(props){
@@ -45,7 +48,11 @@ class Dashboard extends React.Component {
             username: "Username",
             tabselected: tab, // tabs.PRIVPASS
             catselected: cat, //JSON.parse(localStorage.getItem(dashboardConst.catselectedPriv)),
-            expanded: false
+            expanded: false,
+            // alerts
+            showCopyAlert: false,
+            showCopyUsernameAlert: false,
+            showCopyURLAlert: false,
         };
 
 
@@ -56,22 +63,16 @@ class Dashboard extends React.Component {
         this.getCats = this.getCats.bind(this);
         this.changeCat = this.changeCat.bind(this);
         this.changeTab = this.changeTab.bind(this);
+        this.dismissCopy = this.dismissCopy.bind(this);
+        this.closeCopy = this.closeCopy.bind(this);
+        this.saveEdit = this.saveEdit.bind(this);
     }
 
-    fixStorage() {
-        if (localStorage.getItem(dashboardConst.tabselected) == null) {
-            console.log("Neusetzten: ");
-            localStorage.setItem(dashboardConst.tabselected, JSON.stringify(tabs.PRIVPASS));
-        }
-        if (localStorage.getItem(dashboardConst.catselectedPriv) == null){
-            console.log("Neusetzten: ");
-            localStorage.setItem(dashboardConst.catselectedPriv, JSON.stringify(0)); // 0 für Alle Kat
-        }
-        if (localStorage.getItem(dashboardConst.catselectedGroup) == null){
-            console.log("Neusetzten: ");
-            localStorage.setItem(dashboardConst.catselectedGroup, JSON.stringify(0)); // 0 für Alle Kat
-        }
+
+    saveEdit(id, userNew, passwordNew, titleNew, catNew, tagNew) {
+
     }
+
 
     renderCat() {
         let cats = this.getCats();
@@ -121,6 +122,12 @@ class Dashboard extends React.Component {
             );
         }
     }
+
+    getPassword( id ) {
+        // TODO Mockobjekt
+        return MockPasswords.getPassword(id);
+    }
+
 
     addCallback( catData ) {
 
@@ -175,19 +182,115 @@ class Dashboard extends React.Component {
                 let imgSrc = correctUrl(singleCat.url);
                 console.log("Vor dem rendern");
                 return (
-                    <PassLine key={singleCat.id} img={imgSrc} id={singleCat.id} title={singleCat.title} user={singleCat.user} pass={singleCat.pass} url={singleCat.url} callback={singleCat.callback}/>
+                    <PassLine key={singleCat.id} tag={singleCat.tag} img={imgSrc} id={singleCat.id} title={singleCat.title} user={singleCat.user} pass={singleCat.pass} url={singleCat.url} callback={singleCat.callback}/>
                 );
             })
         }
         return passwords;
     }
 
-    copyPass(id) {
-        console.log("Password");
+
+    closeCopy(which) {
+        switch (which) {
+            case dashboardAlerts.showCopyAlert:
+                this.setState({showCopyAlert: false});
+                break;
+            case dashboardAlerts.showCopyUsernameAlert:
+                this.setState({showCopyUsernameAlert: false});
+                break;
+            case dashboardAlerts.showCopyURLAlert:
+                this.setState({showCopyURLAlert: false});
+                break;
+        }
+    }
+
+
+    printCopy() {
+        const show = this.state.showCopyAlert;
+        return (
+            <Alert show={show} variant="success" className="center-horz center-vert error fixed-top-easypass in-front"
+                   onClose={() => this.closeCopy("showCopyAlert")}>
+                <p className="center-horz center-vert center-text">
+                    Passwort wurde in die Zwischenablage kopiert!
+                </p>
+            </Alert>
+        );
+    }
+
+    printUser() {
+        const show = this.state.showCopyUsernameAlert;
+        return (
+            <Alert show={show} variant="success" className="center-horz center-vert error fixed-top-easypass in-front"
+                   onClose={() => this.closeCopy("showCopyUsernameAlert")}>
+                <p className="center-horz center-vert center-text">
+                    Username wurde in die Zwischenablage kopiert!
+                </p>
+            </Alert>
+        );
+    }
+
+    dismissCopy( which ) {
+        sleep(1250).then(() => {
+                switch (which) {
+                    case "showCopyAlert":
+                        this.setState({showCopyAlert: false});
+                        break;
+                    case "showCopyUsernameAlert":
+                        this.setState({showCopyUsernameAlert: false});
+                        break;
+                }
+            }
+        );
 
     }
 
-    goToPage(id) {
+    clipboardCopy( text ) {
+        // Create new element
+        let el = document.createElement('textarea');
+        el.value = text;
+        el.setAttribute('readonly', '');
+        el.style = {display: 'none',};
+        document.body.appendChild(el);
+        el.select();
+        el.setSelectionRange(0, 99999);
+        // Copy text to clipboard
+        document.execCommand('copy');
+        // Remove temporary element
+        document.body.removeChild(el);
+    }
+
+    copy( toCopy, which ) {
+        switch (which) {
+            case dashboardAlerts.showCopyUsernameAlert:
+                this.setState({
+                    showCopyUsernameAlert: true,
+                });
+                this.dismissCopy(dashboardAlerts.showCopyUsernameAlert);
+                break;
+            case dashboardAlerts.showCopyURLAlert:
+                this.setState({
+                    showCopyURLAlert: true,
+                });
+                this.dismissCopy(dashboardAlerts.showCopyURLAlert);
+                break;
+        }
+
+        this.clipboardCopy(toCopy);
+    }
+
+    copyPass(id) {
+        let pass = this.getPassword(id);
+
+        // Popup starten
+        this.setState({
+            showCopyAlert: true,
+        });
+        this.dismissCopy("showCopyAlert");
+
+        this.clipboardCopy(pass);
+    }
+
+    goToPage(url) {
         function correctUrl(url) {
             let out = url;
             if (!( url.includes("https://") || url.includes("https://") )) {
@@ -196,7 +299,12 @@ class Dashboard extends React.Component {
             return out;
         }
         // TODO Mockobjekt
-        window.open(correctUrl("https://login.live.com/login.srf?wa=wsignin1.0&rpsnv=13&ct=1573646035&rver=7.0.6737.0&wp=MBI_SSL&wreply=https%3a%2f%2foutlook.live.com%2fowa%2f%3fnlp%3d1%26RpsCsrfState%3da992ae5f-b164-bd0f-15d4-cca75d3498f8&id=292841&aadredir=1&CBCXT=out&lw=1&fl=dob%2cflname%2cwld&cobrandid=90015"), "_blank");
+        window.open(correctUrl(url), "_blank");
+        // Popup starten
+        this.setState({
+            showCopyAlert: true,
+        });
+        this.dismissCopy("showCopyAlert");
     }
 
 
@@ -319,6 +427,14 @@ class Dashboard extends React.Component {
         }
     }
 
+    deletePass(id) {
+
+    }
+
+    editPass(id, title, user, password, tags, cats ) {
+
+    }
+
     getTab() {
         let out;
         switch (this.state.tabselected) {
@@ -357,6 +473,8 @@ class Dashboard extends React.Component {
                         <IndicatorSide />
                     </Row>
                 </div>
+                {this.printCopy()}
+                {this.printUser()}
             </div>
         );
     }
@@ -378,5 +496,10 @@ const mapStateToProps3 = (state) => {
         loggedIn: state.auth.loggedIn
     }
 };
+
+
+function sleep (time) {
+    return new Promise((resolve) => setTimeout(resolve, time));
+}
 
 export default connect(mapStateToProps3, mapDispatchToProps3, null, { pure: false})(Dashboard)

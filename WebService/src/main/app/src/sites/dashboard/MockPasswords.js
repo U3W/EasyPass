@@ -1,21 +1,31 @@
 import tabs from "./tabs/tab.enum";
 
 class MockPasswords {
+
+    constructor(props) {
+
+        this.state = {
+            sozialMedia: [{id: 0, title: "Google", user: "Sebooo@gmail.com", url: "google.com", tag: [{"Kommentar": "Suche"}]}, {id: 1, title: "Instagram", user: "Sebo", pass: "Geheim", url: "instagram.com/", tag: [{"Kommentar": "Für die Werbebilder"}]},{id: 2, title: "Youtube", user: "michael.meyer@gmail.com", pass: "Geheim", url: "youtube.com", tag: [{"Kommentar": "Werbevideos"}]}],
+            email: [{id: 3, title: "Outlook", user: "swahl@student.tgm.ac.at", url: "https://login.live.com/login.srf?wa=wsignin1.0&rpsnv=13&ct=1573646035&rver=7.0.6737.0&wp=MBI_SSL&wreply=https%3a%2f%2foutlook.live.com%2fowa%2f%3fnlp%3d1%26RpsCsrfState%3da992ae5f-b164-bd0f-15d4-cca75d3498f8&id=292841&aadredir=1&CBCXT=out&lw=1&fl=dob%2cflname%2cwld&cobrandid=90015", tag: [{"Kommentar": "Mail"}]}, {id: 4, title: "Outlook", user: "swahl@student.tgm.ac.at", url: "outlook.com", tag: [{"Kommentar": "Outlook-Mail"}]}, {id: 5, title: "GMX", user: "m.meyer@gmx.at", url: "gmx.com", tag: [{"Kommentar": "GMX-Mail"}]}],
+            easyPass: [{id: 6, title: "Hehehe", user: "Damn", url: "pornhub.com", tag: [{"Wozu": "Hehehe"}]}],
+            pass: [{id: 0, pass: "supergeheim" }, {id: 1, pass: "supergeheim" }, {id: 2, pass: "supergeheim" }, {id: 3, pass: "supergeheim" }, {id: 4, pass: "supergeheim" }, {id: 5, pass: "supergeheim" }, {id: 6, pass: "supergeheim" }],
+        };
+
+        this.updatePass = this.updatePass.bind(this);
+    }
+
+
     getCatData( cat ) {
         let out;
         switch (cat) {
             case "Social Media":
-                out= [{id: 0, image: "", title: "Instagram", user: "Hello", pass: "Geheim", url: "google.com"}, {id: 1, image: "https://www.instagram.com/", title: "Instagram", user: "Hello", pass: "Geheim", url: "instagram.com/"},{id: 2,image: "https://www.instagram.com/", title: "Instagram", user: "Hello", pass: "Geheim", url: "google.com"}];
+                out = this.state.sozialMedia;
                 break;
             case "Email":
-                out = [{id: 3, image: "", title: "Outlook", user: "Hello", pass: "Geheim", url: "https://login.live.com/login.srf?wa=wsignin1.0&rpsnv=13&ct=1573646035&rver=7.0.6737.0&wp=MBI_SSL&wreply=https%3a%2f%2foutlook.live.com%2fowa%2f%3fnlp%3d1%26RpsCsrfState%3da992ae5f-b164-bd0f-15d4-cca75d3498f8&id=292841&aadredir=1&CBCXT=out&lw=1&fl=dob%2cflname%2cwld&cobrandid=90015"}, {id: 4, image: "https://www.outlook.com/", title: "Outlook", user: "Hello", pass: "Geheim", url: "outlook.com"}, {id: 5, image: "https://www.gmx.at/", title: "GMX", user: "Hello", pass: "Geheim", url: "gmx.com"}];
+                out = this.state.email;
                 break;
             case "EasyPass":
-                out = [{id: 6, image: "", title: "Hehehe", user: "Hello", pass: "Geheim", url: "pornhub.com"}];
-                break;
-            case "*":
-                out= [{catName: "Social Media", entries: [{image: "", title: "Instagram", user: "Hello", pass: "Geheim", url: "google.com"}, {image: "https://www.instagram.com/", title: "Instagram", user: "Hello", pass: "Geheim", url: "instagram.com/"},{image: "https://www.instagram.com/", title: "Instagram", user: "Hello", pass: "Geheim", url: "google.com"}]},
-                    {catName: "Email", entries: [{image: "", title: "Outlook", user: "Hello", pass: "Geheim", url: "outlook.com"}, {image: "https://www.outlook.com/", title: "Outlook", user: "Hello", pass: "Geheim", url: "outlook.com"}, {image: "https://www.gmx.at/", title: "GMX", user: "Hello", pass: "Geheim", url: "gmx.com"}]}];
+                out = this.state.easyPass;
                 break;
         }
         return out;
@@ -30,9 +40,24 @@ class MockPasswords {
                 out = [{id:1, name:"EasyPass", desc:"Huiiii"} ];
                 break;
         }
-
         return out;
     }
+
+    getPassword(id) {
+        const pass = this.state.pass;
+        for ( let i = 0; i < pass.length; i++ ) {
+            if ( pass[i].id === id) {
+                return pass[i].pass;
+            }
+        }
+        return null;
+    }
+
+    updatePass(id, title, user, url, pass ) {
+        // kommt noch
+    }
+
+
 }
 
 export default new MockPasswords();

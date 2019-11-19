@@ -117,9 +117,9 @@ class Masterpassword extends React.Component {
 
             this.props.mlogin(this.state);
             // reset state from dashboard
-            this.props.saveTab(tabs.PRIVPASS);
-            this.props.saveCat(tabs.PRIVPASS, tabs.ALLCAT);
-            this.props.saveCat(tabs.GROUPPASS, tabs.ALLCAT);
+            //this.props.saveTab(tabs.PRIVPASS);
+            //this.props.saveCat(tabs.PRIVPASS, tabs.ALLCAT);
+            //this.props.saveCat(tabs.GROUPPASS, tabs.ALLCAT);
 
             if ( VerifyAuth.getVerified() )
             {
