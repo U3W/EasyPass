@@ -66,26 +66,21 @@ class Dashboard extends React.Component {
         this.dismissCopy = this.dismissCopy.bind(this);
         this.closeCopy = this.closeCopy.bind(this);
         this.saveEdit = this.saveEdit.bind(this);
+        this.renderCat = this.renderCat.bind(this);
     }
 
 
-    saveEdit(id, userNew, passwordNew, titleNew, catNew, tagNew) {
 
-    }
 
 
     renderCat() {
         let cats = this.getCats();
         let selectedCat = this.state.catselected;
-        console.log("Cats");
-        console.log(cats);
         //console.log("Selected cat: "+ selectedCat);
         if ( selectedCat === 0 )
         {
             let passwords = this.renderLines(cats);
             let final = cats.map(function (cat) {
-                console.log("Einzelne Cat");
-                console.log(cat);
                 return (
                     <div key={cat.id} >
                         <strong>{cat.name}</strong>
@@ -107,10 +102,7 @@ class Dashboard extends React.Component {
 
         }
         else {
-            console.log(selectedCat);
             let cat = cats[selectedCat-1];
-            console.log("Einzelne Cat");
-            console.log(cat);
             let passwords = this.renderLines([cat]);
             return (
                 <div>
@@ -149,7 +141,7 @@ class Dashboard extends React.Component {
             catData = this.addCallback(catData);
             console.log("Data");
             console.log(catData);
-            passwords[catName] = catData.map(function (singleCat) {
+            passwords[catName] = catData.map(function (singlePass) {
                 function correctUrl(imgUrl) {
 
                     let out = "http://"+extractHostname(imgUrl);
@@ -179,10 +171,10 @@ class Dashboard extends React.Component {
                 }
 
 
-                let imgSrc = correctUrl(singleCat.url);
+                let imgSrc = correctUrl(singlePass.url);
                 console.log("Vor dem rendern");
                 return (
-                    <PassLine key={singleCat.id} tag={singleCat.tag} img={imgSrc} id={singleCat.id} title={singleCat.title} user={singleCat.user} pass={singleCat.pass} url={singleCat.url} callback={singleCat.callback}/>
+                    <PassLine key={singlePass.id} tag={singlePass.tag} img={imgSrc} id={singlePass.id} cat={singlePass.cat} title={singlePass.title} user={singlePass.user} pass={singlePass.pass} url={singlePass.url} callback={singlePass.callback}/>
                 );
             })
         }
@@ -428,11 +420,11 @@ class Dashboard extends React.Component {
     }
 
     deletePass(id) {
-
+        // ToDO call Kacper method
     }
 
-    editPass(id, title, user, password, tags, cats ) {
-
+    saveEdit(id, userNew, passwordNew, urlNew, titleNew, catNew, tagNew) {
+        // ToDo call Kacper method
     }
 
     getTab() {

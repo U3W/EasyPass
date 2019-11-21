@@ -32,6 +32,21 @@
     background-color: #f8f9fa !important;
 }
 
+/* Cat */
+.round-cat {
+    border-top-left-radius: 0.2rem;
+    border-bottom-left-radius: 0.2rem;
+}
+
+.editCat .round-cat {
+    cursor: pointer !important;
+}
+
+/* Tag */
+.fixTag {
+    width: 150px !important;
+    align-items: center;
+}
 
 /* Copy button inline */
 .buttonSpaceInline {
