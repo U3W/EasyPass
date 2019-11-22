@@ -17,7 +17,7 @@ class GroupPassword extends React.Component {
     render() {
         return (
             <>
-               <h1>Group Passwords</h1>
+               <h1 className="fixHeader">Group Passwords</h1>
                 <hr/>
                 <Container>
                     <Accordion id="passwords">

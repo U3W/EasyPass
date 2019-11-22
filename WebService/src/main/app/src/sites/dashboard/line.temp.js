@@ -24,6 +24,7 @@ import * as $ from "../../../bower_components/pouchdb-find/dist/pouchdb.find";
 import {Nav, NavDropdown} from "react-bootstrap";
 import Modal from "react-bootstrap/Modal";
 import Table from "react-bootstrap/Table";
+import {dashboardAlerts} from "./const/dashboard.enum";
 
 /**
  * @param id: which element in a list f.e. (must be unique, because with this id the collapsible div will be opened then toggled)
@@ -88,70 +89,79 @@ export default class PassLine extends React.Component {
     }
 
     changeTagListener (key, value, i, e ) {
-        // just tags
-        let tagNew = this.state.tagNew;
-        if (e.target.id.length > 8 ) {
-            // tagValue + i
-            if ( e.target.id.includes("tagValue") ) {
-                console.log("tagValue");
-                console.log(e.target.value);
-                let test = this.findTagKeyIndex(key);
-                tagNew[i][key] = e.target.value;
-                this.setState({
-                    tagNew: tagNew
-                });
-            }
-        } else if ( e.target.id.length > 6 ) {
-            // tagKey + i
-            if ( e.target.id.includes("tagKey") ) {
-                console.log("tagKey");
-                console.log(key);
-                tagNew = tagNew.map(s => {
-                    if (s.hasOwnProperty(key)) {
-                        s[e.target.value] = s[key];
-                        delete s[key];
-                    }
-                    return s;
-                });
+        if ( this.state.edit )
+        {
+            // just tags
+            let tagNew = this.state.tagNew;
+            if (e.target.id.length > 8 ) {
+                // tagValue + i
+                if ( e.target.id.includes("tagValue") ) {
+                    console.log("tagValue");
+                    console.log(e.target.value);
+                    let test = this.findTagKeyIndex(key);
+                    tagNew[i][key] = e.target.value;
+                    this.setState({
+                        tagNew: tagNew
+                    });
+                }
+            } else if ( e.target.id.length > 6 ) {
+                // tagKey + i
+                if ( e.target.id.includes("tagKey") ) {
+                    console.log("tagKey");
+                    console.log(key);
+                    tagNew = tagNew.map(s => {
+                        if (s.hasOwnProperty(key)) {
+                            s[e.target.value] = s[key];
+                            delete s[key];
+                        }
+                        return s;
+                    });
 
-                this.setState({
-                    tagNew: tagNew
-                })
+                    this.setState({
+                        tagNew: tagNew
+                    })
+                }
             }
         }
     }
 
     addTag() {
-        let tagNew = this.state.tagNew;
-        tagNew[this.state.tagNew.length] = {"":""};
-        this.setState({
-            tagNew: tagNew,
-        });
+        if ( this.state.edit )
+        {
+            let tagNew = this.state.tagNew;
+            tagNew[this.state.tagNew.length] = {"":""};
+            this.setState({
+                tagNew: tagNew,
+            });
+        }
     }
     changeListener( e ) {
-        switch (e.target.id) {
-            case "password":
-                this.setState({
-                    passwordNew: e.target.value
-                });
-                break;
-            case "username":
-                this.setState({
-                    userNew: e.target.value
-                });
-                break;
-            case "title":
-                this.setState({
-                    titleNew: e.target.value
-                });
-                break;
-            case "url":
-                this.setState({
-                    urlNew: e.target.value
-                });
-                break;
-            case "cat":
-                break;
+        if ( this.state.edit )
+        {
+            switch (e.target.id) {
+                case "password":
+                    this.setState({
+                        passwordNew: e.target.value
+                    });
+                    break;
+                case "username":
+                    this.setState({
+                        userNew: e.target.value
+                    });
+                    break;
+                case "title":
+                    this.setState({
+                        titleNew: e.target.value
+                    });
+                    break;
+                case "url":
+                    this.setState({
+                        urlNew: e.target.value
+                    });
+                    break;
+                case "cat":
+                    break;
+            }
         }
     }
 
@@ -173,14 +183,16 @@ export default class PassLine extends React.Component {
             });
         }
         else {
-            this.setState({
-                passwordNew: "",
-                userNew: this.props.user,
-                titleNew: this.props.title,
-                urlNew: this.props.url,
-                catIdNew: this.props.cat,
-                tagNew: this.deepCopyTags(this.props.tag),
-            });
+            if ( !succ ) {
+                this.setState({
+                    passwordNew: "",
+                    userNew: this.props.user,
+                    titleNew: this.props.title,
+                    urlNew: this.props.url,
+                    catIdNew: this.props.cat,
+                    tagNew: this.deepCopyTags(this.props.tag),
+                });
+            }
         }
         this.setState({
             edit: changeTo,
@@ -245,9 +257,9 @@ export default class PassLine extends React.Component {
                 tagCompArray[i] = (
                     <InputGroup size="sm" className="mb-3">
                         <InputGroup.Prepend>
-                            <input className="input-group-text fixTag" id="inputGroup-sizing-sm" disabled={true} value={tagKeys[0]} />
+                            <input className="input-group-text fixTag" id="inputGroup-sizing-sm" disabled={true} value={tagKeys[0]} onChange={(e) => this.changeTagListener(tagKeys[0], tag[i][tagKeys[0]], i, e)}/>
                         </InputGroup.Prepend>
-                        <FormControl aria-label="Small" aria-describedby="inputGroup-sizing-sm" disabled={true} value={tag[i][tagKeys[0]]}/>
+                        <FormControl aria-label="Small" aria-describedby="inputGroup-sizing-sm" disabled={true} value={tag[i][tagKeys[0]]} onChange={(e) => this.changeTagListener(tagKeys[0], tag[i][tagKeys[0]], i, e)}/>
                         {but}
                     </InputGroup>
                 );
@@ -285,16 +297,17 @@ export default class PassLine extends React.Component {
     }
 
     setPopUpCatDisabled() {
-        console.log("Dismissed");
         this.setState({
             popUpCatShow: false
         });
     }
 
     setPopUpCatEnabled() {
-        this.setState({
-            popUpCatShow: true
-        });
+        if ( this.state.edit ) {
+            this.setState({
+                popUpCatShow: true
+            });
+        }
     }
 
     getPopUpCat()  {
@@ -332,7 +345,7 @@ export default class PassLine extends React.Component {
             }
         }
         let but = (
-            <Button variant="dark" className="dropdown-toggle dropdown-toggle-split" disabled={true}>
+            <Button variant="dark" className="dropdown-toggle dropdown-toggle-split" disabled={true} onClick={this.setPopUpCatEnabled}>
                 <span className="sr-only">Toggle Dropdown</span>
             </Button>
         );
@@ -345,7 +358,7 @@ export default class PassLine extends React.Component {
         }
 
         let all = (
-            <InputGroup size="sm" className="mb-3" >
+            <InputGroup size="sm" className="mb-3" onClick={this.setPopUpCatEnabled}>
                 <FormControl aria-label="Small" className="round-cat dropdown-toggle nav-link" role="button" value={catName} aria-describedby="inputGroup-sizing-sm" disabled={true} />
                 <InputGroup.Append>
                     {but}
@@ -373,7 +386,8 @@ export default class PassLine extends React.Component {
     render() {
         let password = this.getPassword(this.props.id);
 
-        console.log("Start of render");
+        console.log("Start of render", this.state.urlNew);
+        let url = this.state.urlNew;
 
         let catRender = this.renderCat();
 
@@ -382,9 +396,9 @@ export default class PassLine extends React.Component {
         let noEdit = (
             <>
                 {this.state.show === true ?
-                    <FormControl aria-label="Small" aria-describedby="inputGroup-sizing-sm" type={"text"} disabled={true} value={password}/>
+                    <FormControl aria-label="Small" aria-describedby="inputGroup-sizing-sm" type={"text"} disabled={true}  onChange={this.changeListener} value={password}/>
                     :
-                    <FormControl aria-label="Small" aria-describedby="inputGroup-sizing-sm" type={"password"} disabled={true} value={"*****"}/>
+                    <FormControl aria-label="Small" aria-describedby="inputGroup-sizing-sm" type={"password"} disabled={true}  onChange={this.changeListener} value={"*****"}/>
                 }
                 {this.state.show === true ?
                     <Button variant="dark" className="buttonSpaceInline notRound" onClick={this.setPassword}>
@@ -439,25 +453,18 @@ export default class PassLine extends React.Component {
                             />
                         </Col>
                         <Col sm={10} md={10} lg={10} xs={10} className="">
-                            <Row className="no-padding ">
-                                <Col>
-                                    <h5 className="inline">{this.props.title}</h5>
-                                    <br className="fixTitle"/>
-                                    <div className="username inline fixUsername">
-                                        {this.props.user}
-                                    </div>
-                                </Col>
-                                <Col>
-
-                                </Col>
-                            </Row>
+                            <h5 className="inline">{this.state.titleNew}</h5>
+                            <br className="fixTitle"/>
+                            <div className="username inline fixUsername">
+                                {this.state.userNew}
+                            </div>
                         </Col>
                     </Row>
                 </Accordion.Toggle>
                 <div className="center-vert setButtonsRight">
                     {this.state.edit === true ? // Copy and GoToWebsite Buttons
                         <>
-                            <Button variant="dark" className="buttonSpace" disabled={true}>
+                            <Button variant="dark" className="buttonSpace" disabled={true} onClick={() => { if ( !this.state.edit ) this.props.callback.copyPass(this.state.id) }}>
                                 <img
                                     src={CopyIcon}
                                     alt=""
@@ -466,7 +473,7 @@ export default class PassLine extends React.Component {
                                     className="d-inline-block scaleimg"
                                 />
                             </Button>
-                            <Button variant="dark" className="buttonSpace" disabled={true}>
+                            <Button variant="dark" className="buttonSpace" disabled={true} onClick={() => { if ( !this.state.edit ) this.props.callback.goToPage(this.state.urlNew) }}>
                                 <img
                                     src={GoToIcon}
                                     alt=""
@@ -478,7 +485,7 @@ export default class PassLine extends React.Component {
                         </>
                         :
                         <>
-                            <Button variant="dark" className="buttonSpace" onClick={() => this.props.callback.copyPass(this.props.id)}>
+                            <Button variant="dark" className="buttonSpace" onClick={() => { if ( !this.state.edit ) this.props.callback.copyPass(this.state.id) }}>
                                 <img
                                     src={CopyIcon}
                                     alt=""
@@ -487,7 +494,7 @@ export default class PassLine extends React.Component {
                                     className="d-inline-block scaleimg"
                                 />
                             </Button>
-                            <Button variant="dark" className="buttonSpace" onClick={() => this.props.callback.goToPage(this.props.url)}>
+                            <Button variant="dark" className="buttonSpace" onClick={() => { if ( !this.state.edit ) this.props.callback.goToPage(this.state.urlNew) }}>
                                 <img
                                     src={GoToIcon}
                                     alt=""
@@ -534,8 +541,8 @@ export default class PassLine extends React.Component {
                                         </>
                                         :
                                         <>
-                                            <FormControl aria-label="Small" aria-describedby="inputGroup-sizing-sm" disabled={true} value={this.props.user}/>
-                                            <Button variant="dark" className="buttonSpaceInline" onClick={() => this.props.callback.copy(this.props.user)}>
+                                            <FormControl aria-label="Small" aria-describedby="inputGroup-sizing-sm" disabled={true} onChange={this.changeListener} value={this.state.userNew}/>
+                                            <Button variant="dark" className="buttonSpaceInline" onClick={() => this.props.callback.copy(this.props.user, dashboardAlerts.showCopyUsernameAlert)}>
                                                 <img
                                                     src={CopyIcon}
                                                     alt=""
@@ -599,8 +606,8 @@ export default class PassLine extends React.Component {
                                         </>
                                         :
                                         <>
-                                            <FormControl aria-label="Small" aria-describedby="inputGroup-sizing-sm" disabled={true} value={this.props.url}/>
-                                            <Button variant="dark" className="buttonSpaceInline" onClick={() => this.props.callback.copy(this.props.url)}>
+                                            <FormControl aria-label="Small" aria-describedby="inputGroup-sizing-sm" disabled={true} value={this.state.urlNew} onChange={this.changeListener}/>
+                                            <Button variant="dark" className="buttonSpaceInline" onClick={() => this.props.callback.copy(this.props.url, dashboardAlerts.showCopyURLAlert)}>
                                                 <img
                                                     src={CopyIcon}
                                                     alt=""

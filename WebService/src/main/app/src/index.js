@@ -22,7 +22,8 @@ import thunk from "redux-thunk";
 import { Offline, Online, Detector } from "react-detect-offline";
 import {handleConnection} from "./network/network.functions";
 import Dashboard from "./sites/dashboard/dashboard";
-import LoginAuth from "./authentification/auth.login"
+import VerifyAuth from "./authentification/auth.masterpassword"
+
 
 // If you want your app to work offline and load faster, you can change
 // unregister() to register() below. Note this comes with some pitfalls.
@@ -92,9 +93,11 @@ class App extends React.Component {
         else
         {
             let redirect = <div/>;
-            console.log(LoginAuth.getLoggedIn());
-            if (!LoginAuth.getLoggedIn())
+            if (VerifyAuth.getVerified())
             {
+                redirect = <Redirect to="/dashboard"/>
+            }
+            else {
                 redirect = <Redirect to="/verify"/>
             }
             console.log("Disconn: " + redirect);

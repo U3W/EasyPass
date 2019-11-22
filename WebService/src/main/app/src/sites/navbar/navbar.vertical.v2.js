@@ -1,11 +1,15 @@
 import React from "react"
-import {Col} from "react-bootstrap";
+import {Button, Col} from "react-bootstrap";
 import Row from "react-bootstrap/Row";
 import groupPass from "../../img/icons/tab_group_password.svg"
 import privPass from "../../img/icons/tab_password.svg"
 import logoutImg from "../../img/icons/logout.svg";
 import tabs from "../dashboard/tabs/tab.enum";
 import IndicatorBot from "../../network/network.indicator.bottombar";
+
+// Icons
+import AddCat from "../../img/icons/password_add_tag.svg";
+import EditCat from "../../img/icons/password_edit_white.svg"
 
 class NavbarVerticalEP2 extends React.Component {
     constructor(props) {
@@ -46,10 +50,10 @@ class NavbarVerticalEP2 extends React.Component {
 
 
     getCat() {
-        let getActive = "nav-link-kat";
+        let getActive = "nav-link-kat fitparentWidth";
         if ( this.props.callback.state.catselected === 0)
         {
-            getActive = "nav-link-kat active";
+            getActive = "nav-link-kat fitparentWidth active";
         }
         // always
         let start = (<li key={0} className="d-flex align-items-center text-muted clickable nav-link-kat-click" onClick={() => this.catChange(0)}>
@@ -74,6 +78,43 @@ class NavbarVerticalEP2 extends React.Component {
                 {finalCats}
             </>
         );
+    }
+
+    getEditCat() {
+        let out = (
+            <>
+                <li key={0} className="d-flex align-items-center text-muted clickable nav-link-kat-click" onClick={() => this.props.callback.setPopUpAddCatEnabled()}>
+                    <div className="nav-link-kat fitparentWidth" >
+                        Kategorie hinzufügen
+                        <Button variant="dark" className="catButton round">
+                            <img
+                                src={AddCat}
+                                alt=""
+                                width="10"
+                                height="10"
+                                className="d-inline-block"
+                            />
+                        </Button>
+                    </div>
+                </li>
+                <li key={1} className="d-flex align-items-center text-muted clickable nav-link-kat-click" onClick={() => alert("Bearbeiten")}>
+                    <div className="nav-link-kat fitparentWidth" >
+                        Kategorie bearbeiten
+                        <Button variant="dark" className="catButton round">
+                            <img
+                                src={EditCat}
+                                alt=""
+                                width="10"
+                                height="10"
+                                className="d-inline-block"
+                            />
+                        </Button>
+                    </div>
+                </li>
+            </>
+        );
+
+        return out;
     }
 
 
@@ -127,6 +168,8 @@ class NavbarVerticalEP2 extends React.Component {
                             </h6>
                             <hr />
                             {this.getCat()}
+                            <hr />
+                            {this.getEditCat()}
                         </ul>
 
                     </div>

@@ -1,5 +1,5 @@
 import React from "react";
-import {Col, Row} from "react-bootstrap";
+import {Button, Col, Row} from "react-bootstrap";
 import NavbarEP from "../navbar/navbar";
 import "../navbar/navbar.css";
 import "./dashboard.css";
@@ -21,6 +21,12 @@ import dashboardState from "./dashboard.saved.state"
 import Alert from "react-bootstrap/Alert";
 import {wrongLogin, wrongLoginHeader} from "../../strings/stings";
 import {dashboardAlerts} from "./const/dashboard.enum";
+import Modal from "react-bootstrap/Modal";
+import Table from "react-bootstrap/Table";
+import useWindowDimensions from "../../window/window.size";
+
+// Icons
+import AddPass from "../../img/icons/password_add_pass.svg";
 class Dashboard extends React.Component {
 
     constructor(props){
@@ -53,8 +59,12 @@ class Dashboard extends React.Component {
             showCopyAlert: false,
             showCopyUsernameAlert: false,
             showCopyURLAlert: false,
+            // cat add
+            popUpAddCatShow: false,
+            // with, height
+            width: 0,
+            height: 0,
         };
-
 
         this.handleSearch = this.handleSearch.bind(this);
         this.setExpanded = this.setExpanded.bind(this);
@@ -67,9 +77,25 @@ class Dashboard extends React.Component {
         this.closeCopy = this.closeCopy.bind(this);
         this.saveEdit = this.saveEdit.bind(this);
         this.renderCat = this.renderCat.bind(this);
+        this.setPopUpAddCatDisabled = this.setPopUpAddCatDisabled.bind(this);
+        this.setPopUpAddCatEnabled = this.setPopUpAddCatEnabled.bind(this);
+
+        // WindowDimensions
+        this.updateWindowDimensions = this.updateWindowDimensions.bind(this);
     }
 
+    componentDidMount() {
+        this.updateWindowDimensions();
+        window.addEventListener('resize', this.updateWindowDimensions);
+    }
 
+    componentWillUnmount() {
+        window.removeEventListener('resize', this.updateWindowDimensions);
+    }
+
+    updateWindowDimensions() {
+        this.setState({ width: window.innerWidth, height: window.innerHeight });
+    }
 
 
 
@@ -427,6 +453,44 @@ class Dashboard extends React.Component {
         // ToDo call Kacper method
     }
 
+    addCat() {
+
+    }
+
+    setPopUpAddCatDisabled() {
+        this.setState({
+            popUpAddCatShow: false,
+        })
+    }
+
+    setPopUpAddCatEnabled() {
+        this.setState({
+            popUpAddCatShow: true,
+        })
+    }
+
+    getPopUpAddCat()  {
+        let cats = this.getCats();
+
+
+        return (
+            <>
+                <Modal show={this.state.popUpAddCatShow} onHide={this.setPopUpAddCatDisabled} className="ep-modal-dialog">
+                    <Modal.Header closeButton>
+                        <Modal.Title>Kategorie hinzufügen</Modal.Title>
+                    </Modal.Header>
+                    <Modal.Body className="ep-modal-body">
+                        <Table striped bordered hover className="ep-modal-table">
+                            <tbody>
+
+                            </tbody>
+                        </Table>
+                    </Modal.Body>
+                </Modal>
+            </>
+        );
+    }
+
     getTab() {
         let out;
         switch (this.state.tabselected) {
@@ -446,10 +510,14 @@ class Dashboard extends React.Component {
         // <div className="size-hole-window">
         // ml-sm-auto col-lg-10 px-4
 
+
         let mainClasses = "fixMain";
         if ( this.state.expanded )
         {
-            mainClasses = "fixMain expanded"
+            // >= 992px the navbar is never expandable
+            if ( this.state.width < 992 ) {
+                mainClasses = "fixMain expanded"
+            }
         }
 
         return (
@@ -464,9 +532,22 @@ class Dashboard extends React.Component {
                         <hr/>
                         <IndicatorSide />
                     </Row>
+                    <Button className="fab" variant="danger">
+                        <img
+                            src={AddPass}
+                            alt=""
+                            width="20"
+                            height="20"
+                            className="d-inline-block addIcon"
+                        />
+                        <div className="text">
+                            <span>Passwort hinzufügen</span>
+                        </div>
+                    </Button>
                 </div>
                 {this.printCopy()}
                 {this.printUser()}
+                {this.getPopUpAddCat()}
             </div>
         );
     }

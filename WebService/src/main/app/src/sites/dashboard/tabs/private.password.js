@@ -17,7 +17,7 @@ class PrivatePassword extends React.Component {
         // url zum favcon holen: https://www.google.com/s2/favicons?domain=
         return (
             <>
-                <h1>Private Passwörter</h1>
+                <h1 className="fixHeader">Private Passwörter</h1>
                 <hr/>
                 <Container>
                     <Accordion id="passwords">
