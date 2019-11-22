@@ -10,13 +10,18 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.web.authentication.AnonymousAuthenticationFilter
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationFailureHandler
 
+
+/**
+ * Contains the Security Configuration for the Authentication-Service  of the EasyPass-Application
+ * @param authProvider: that contains the configuration for the custom Challenge-Authentication
+ */
 @Configuration
 @EnableWebSecurity
-class SecurityConfiguration(private val authProviderSecurityForChallengeAuthenticationProvider: ChallengeAuthenticationProvider) : WebSecurityConfigurerAdapter() {
+class SecurityConfiguration(private val authProvider: ChallengeAuthenticationProvider) : WebSecurityConfigurerAdapter() {
 
     @Throws(Exception::class)
     override fun configure(auth: AuthenticationManagerBuilder) {
-        auth.authenticationProvider(authProviderSecurityForChallengeAuthenticationProvider)
+        auth.authenticationProvider(authProvider)
     }
 
     @Throws(Exception::class)

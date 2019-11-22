@@ -8,6 +8,10 @@ import org.springframework.context.annotation.Primary
 import org.springframework.stereotype.Component
 import java.util.*
 
+/**
+ * Contains a bean, which provides a [CouchDbConnector] to the user-database, specified in the file application.properties
+ * @param properties: the application.properties
+ */
 @Component
 class CouchDBConnectionProvider(private val properties: Properties) {
     @Bean
@@ -16,6 +20,11 @@ class CouchDBConnectionProvider(private val properties: Properties) {
         return createCouchDbConnector(properties.getProperty("couchDB.userDatabase"))
     }
 
+    /**
+     * Connects to a CouchDB-Database
+     * @param dbname: the name of the database
+     * @return an instance of the class [CouchDbConnector]
+     */
     fun createCouchDbConnector (dbname: String): CouchDbConnector {
         val url = properties.getProperty("couchDB.url")
         val uname = properties.getProperty("couchDB.username")

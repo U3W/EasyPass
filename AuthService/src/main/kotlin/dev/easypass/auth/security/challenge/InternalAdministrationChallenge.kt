@@ -5,6 +5,9 @@ import java.time.Duration
 import java.time.LocalDateTime
 import java.util.*
 
+/**
+ *
+ */
 class InternalAdministrationChallenge(private val encryptionLibrary: EncryptionLibrary, private val properties: Properties) {
     private val decryptedChallenge: String = encryptionLibrary.generateAuthenticationChallenge()
     private val timeCreated: LocalDateTime = LocalDateTime.now()

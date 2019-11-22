@@ -7,6 +7,10 @@ import org.ektorp.support.CouchDbRepositorySupport
 import org.ektorp.support.GenerateView
 import org.springframework.stereotype.Component
 
+/**
+ * Provides Ektorp Repository Support for the class [User]
+ * @param db: is initialized by the Bean [CouchDbConnector], the connection to the Database
+ */
 @Component
 class UserRepository(db: CouchDbConnector) : CouchDbRepositorySupport<User>(User::class.java, db) {
 
