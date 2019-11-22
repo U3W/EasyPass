@@ -23,7 +23,11 @@ class ChallengeAuthenticationProvider(private val userRepository: UserRepository
         val challenge = authentication.getCredentials().toString()
         val authorities = ArrayList<GrantedAuthority>()
         authorities.add(SimpleGrantedAuthority(uname))
+        println(uname)
+        println(challenge)
+        println(authorities)
         return if (currentChallenges[uname] != null && currentChallenges[uname]!!.checkChallenge(challenge)) {
+            currentChallenges.remove(uname)
             UsernamePasswordAuthenticationToken(uname, challenge, authorities)
         } else {
             null

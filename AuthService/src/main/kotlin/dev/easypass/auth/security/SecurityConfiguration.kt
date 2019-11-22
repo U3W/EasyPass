@@ -27,10 +27,10 @@ class SecurityConfiguration(private val authProviderSecurityForChallengeAuthenti
                 .and()
                 .authorizeRequests()
                 .antMatchers("/couchdb/**").permitAll()
-                .antMatchers(HttpMethod.GET,"/auth/**").permitAll()
-                .antMatchers("/**").denyAll()
+                .antMatchers(HttpMethod.GET,"/unlockChallenge").permitAll()
+                .anyRequest().authenticated()
                 .and()
-                .formLogin().loginPage("/auth/login")
+                .formLogin()
                 .failureHandler(SimpleUrlAuthenticationFailureHandler())
                 .and()
                 .logout();

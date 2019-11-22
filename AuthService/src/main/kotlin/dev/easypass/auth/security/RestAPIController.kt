@@ -13,7 +13,7 @@ class RestAPIController(private val challengeAuthenticationProvider: ChallengeAu
         response.sendRedirect("https://easypass.dev/")
     }
 
-    @GetMapping("/auth/unlockChallenge")
+    @GetMapping("/unlockChallenge")
     @ResponseBody
     fun unlockChallenge(@RequestParam uname: String): UserAuthenticationChallenge {
         return challengeAuthenticationProvider.addUserChallenge(uname)

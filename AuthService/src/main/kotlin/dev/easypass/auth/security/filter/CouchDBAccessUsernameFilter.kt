@@ -13,6 +13,7 @@ class CouchDBAccessUsernameFilter: GenericFilterBean() {
     override fun doFilter(request: ServletRequest?, response: ServletResponse?, chain: FilterChain?) {
         val url = (request as HttpServletRequest).requestURL.toString()
         val authorities = AuthorityUtils.authorityListToSet(SecurityContextHolder.getContext().authentication.authorities)
+        println(url)
         if (url.contains("/couchdb/")){
             if(!authorities.contains(url.substringAfterLast("couchdb/").split("/")[0])) {
                 (response as HttpServletResponse).sendError(HttpServletResponse.SC_FORBIDDEN, "Unauthorized database access.")
