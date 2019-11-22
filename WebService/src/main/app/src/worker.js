@@ -1,7 +1,24 @@
 importScripts("bower_components/pouchdb/dist/pouchdb.min.js");
 importScripts("bower_components/pouchdb/dist/pouchdb.find.min.js");
 //importScripts("bower_components/pouchdb-find/dist/pouchdb.find.min.js");
-import("../pkg").then(wasm => {
+import("../../rust/pkg").then(wasm => {
+
+    fetch("http://localhost:8090/redirect").then(async function (response) {
+        const url = await response.json();
+        console.log(JSON.stringify(url));
+        console.log(url.db);
+        const pouchTest = new PouchDB(url.db);
+        pouchTest.put({
+            _id: 'mydoc3',
+            title: 'Heroes3'
+        }).then(function (response) {
+            // handle response
+        }).catch(function (err) {
+            console.log(err);
+        });
+    });
+
+
     let worker = new wasm.Worker();
     //let test = PouchDB("UserDB");
     //let result = test.find({"selector":{"name": "Genesis"}});
