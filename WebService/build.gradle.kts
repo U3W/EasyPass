@@ -180,12 +180,6 @@ task("appCopyProduction") {
 
 task<Exec>("wasmBuild") {
     group = "easypass"
-    /**val folder = File("src/main/app/pkg")
-    if (!folder.exists()) {
-        folder.mkdirs()
-    }
-    val target = File("src/main/rust/pkg")
-    target.mkdirs()*/
     workingDir = File("src/main/rust")
     commandLine = if (System.getProperty("os.name").toLowerCase().contains("windows")) {
         listOf("cmd", "/c", "wasm-pack", "build", "--release", "--no-typescript")
@@ -193,22 +187,6 @@ task<Exec>("wasmBuild") {
         listOf("wasm-pack", "build", "--release", "--no-typescript")
     }
 }
-
-/**
-task("wasmBuild") {
-    group = "easypass"
-    dependsOn("wasmBuildProcess")
-    doLast {
-        val folder = File("src/main/rust/pkg")
-        while (folder.list().size < 2) {
-            println("Waiting for 'wasm-pack' to finish building...")
-        }
-        copy {
-            from("src/main/rust/pkg")
-            into("src/main/app/pkg")
-        }
-    }
-}*/
 
 
 

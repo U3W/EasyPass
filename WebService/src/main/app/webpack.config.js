@@ -1,6 +1,7 @@
 const HtmlWebPackPlugin = require("html-webpack-plugin");
 const CopyWebPackPlugin = require("copy-webpack-plugin");
 const HtmlWebpackExcludeAssetsPlugin = require('html-webpack-exclude-assets-plugin');
+const WorkboxPlugin = require('workbox-webpack-plugin');
 
 const path = require('path');
 
@@ -40,19 +41,42 @@ const appConfig = {
   plugins: [
     new HtmlWebPackPlugin({
       template: "./public/index.html",
-      filename: "./index.html",
+      filename: "index.html",
       excludeAssets: [/backendtest.*.js/]
     }),
     new HtmlWebpackExcludeAssetsPlugin(),
     new HtmlWebPackPlugin({
       template: "./public/backendtest.html",
-      filename: "./backendtest.html",
+      filename: "backendtest.html",
       excludeAssets: [/index.*.js/]
     }),
     new HtmlWebpackExcludeAssetsPlugin(),
     new CopyWebPackPlugin([
       { from: "public", ignore: ["index.html"] }
-    ])
+    ]),
+      /**
+    new CopyWebPackPlugin([
+      { from: "src/serviceWorker.js", to: "serviceWorker.js"}
+    ]),*/
+    new WorkboxPlugin.GenerateSW({
+      clientsClaim: true,
+      skipWaiting: true,
+      manifestTransforms: [
+        // Add mappings used by Spring WebServer
+        (originalManifest) => {
+          const manifest = originalManifest.map(entry => {
+            if (entry.url.startsWith('/index.html')) {
+              entry.url = '/';
+            } else if (entry.url.startsWith('/backendtest.html')) {
+              entry.url = '/backendtest';
+            }
+            return entry;
+          });
+          const warnings = [];
+          return {manifest, warnings};
+        }
+      ]
+    })
   ],
   output: {
     path: path.resolve(__dirname, "build"),
@@ -60,7 +84,8 @@ const appConfig = {
   },
   devServer: {
     historyApiFallback: true,
-  }
+  },
+  mode: "production"
 };
 
 // Configure WebWorker with WebAssembly
@@ -80,7 +105,7 @@ const workerConfig = {
       { from: "bower_components", to: "bower_components" }
     ])
   ],
-  mode: "development"
+  mode: "production"
 };
 
 module.exports = [appConfig, workerConfig];
