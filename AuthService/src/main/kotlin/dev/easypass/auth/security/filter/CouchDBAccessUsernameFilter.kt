@@ -1,6 +1,5 @@
-package dev.easypass.auth
+package dev.easypass.auth.security.filter
 
-import org.springframework.security.access.AccessDeniedException
 import org.springframework.security.core.authority.AuthorityUtils
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.web.filter.GenericFilterBean
@@ -10,7 +9,7 @@ import javax.servlet.ServletResponse
 import javax.servlet.http.HttpServletRequest
 import javax.servlet.http.HttpServletResponse
 
-class CouchDBUsernameFilter: GenericFilterBean() {
+class CouchDBAccessUsernameFilter: GenericFilterBean() {
     override fun doFilter(request: ServletRequest?, response: ServletResponse?, chain: FilterChain?) {
         val url = (request as HttpServletRequest).requestURL.toString()
         val authorities = AuthorityUtils.authorityListToSet(SecurityContextHolder.getContext().authentication.authorities)

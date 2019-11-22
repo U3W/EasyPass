@@ -1,6 +1,5 @@
-package dev.easypass.auth.data
+package dev.easypass.auth.datstore.document
 
-import com.fasterxml.jackson.annotation.JsonProperty
 import org.ektorp.support.CouchDbDocument
 
 /**

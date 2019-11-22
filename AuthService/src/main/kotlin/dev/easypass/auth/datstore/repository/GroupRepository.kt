@@ -1,6 +1,7 @@
-package dev.easypass.auth.data
+package dev.easypass.auth.datstore.repository
 
-import dev.easypass.auth.exception.EntityAlreadyinDatabaseException
+import dev.easypass.auth.datstore.document.Group
+import dev.easypass.auth.datstore.exception.EntityAlreadyinDatabaseException
 import org.ektorp.*
 import org.ektorp.support.CouchDbRepositorySupport
 import org.ektorp.support.GenerateView

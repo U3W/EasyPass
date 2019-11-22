@@ -1,8 +1,8 @@
-package dev.easypass.auth.customBeans
+package dev.easypass.auth.security
 
-import dev.easypass.auth.data.AuthenticationRequest
-import dev.easypass.auth.data.ChallengeForUserAuth
-import dev.easypass.auth.data.UserRepository
+import dev.easypass.auth.security.challenge.UserAuthenticationChallenge
+import dev.easypass.auth.security.challenge.InternalAdministrationChallenge
+import dev.easypass.auth.datstore.repository.UserRepository
 import org.ektorp.DocumentNotFoundException
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
 import java.util.ArrayList
@@ -14,8 +14,8 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority
 import org.springframework.stereotype.Component
 
 @Component
-class EPSecurityAuthenticationProvider(private val userRepository: UserRepository, private val epEncryptionLibrary: EPEncryptionLibrary) : AuthenticationProvider {
-    private var currentChallenges = HashMap<String, ChallengeForUserAuth>()
+class ChallengeAuthenticationProvider(private val userRepository: UserRepository, private val encryptionLibrary: EncryptionLibrary) : AuthenticationProvider {
+    private var currentChallenges = HashMap<String, InternalAdministrationChallenge>()
 
     @Throws(AuthenticationException::class)
     override fun authenticate(authentication: Authentication): Authentication? {
@@ -23,7 +23,7 @@ class EPSecurityAuthenticationProvider(private val userRepository: UserRepositor
         val challenge = authentication.getCredentials().toString()
         val authorities = ArrayList<GrantedAuthority>()
         authorities.add(SimpleGrantedAuthority(uname))
-        return if (currentChallenges[uname] != null && currentChallenges[uname]?.decryptedChallenge == challenge) {
+        return if (currentChallenges[uname] != null && currentChallenges[uname]!!.checkChallenge(challenge)) {
             UsernamePasswordAuthenticationToken(uname, challenge, authorities)
         } else {
             null
@@ -34,13 +34,12 @@ class EPSecurityAuthenticationProvider(private val userRepository: UserRepositor
         return authentication == UsernamePasswordAuthenticationToken::class.java
     }
 
-    fun addUserChallenge(uname: String): AuthenticationRequest {
+    fun addUserChallenge(uname: String): UserAuthenticationChallenge {
         return try {
-            currentChallenges[uname] = epEncryptionLibrary.generateAuthenticationChallenge()
-            epEncryptionLibrary.generateAuthenticationForm(currentChallenges[uname]!!, userRepository.findOneByUname(uname))
+            currentChallenges[uname] = encryptionLibrary.getObjOfChallengeDataForInternalAdministration()
+            UserAuthenticationChallenge(currentChallenges[uname]!!.getChallengeEncryptedByPublicKey(userRepository.findOneByUname(uname).publicKey), uname)
         } catch (ex: DocumentNotFoundException) {
-            println(ex.message)
-            epEncryptionLibrary.generateAuthenticationForm(epEncryptionLibrary.generateAuthenticationChallenge(), epEncryptionLibrary.generateDummyUser(uname))
+            UserAuthenticationChallenge(encryptionLibrary.getObjOfChallengeDataForInternalAdministration().getChallengeEncryptedByPublicKey(encryptionLibrary.generateDummyUser(uname).publicKey), uname)
         }
     }
 }

@@ -1,6 +1,6 @@
-package dev.easypass.auth.customBeans
+package dev.easypass.auth.security
 
-import dev.easypass.auth.CouchDBUsernameFilter
+import dev.easypass.auth.security.filter.CouchDBAccessUsernameFilter
 import org.springframework.security.config.annotation.web.builders.HttpSecurity
 import org.springframework.context.annotation.Configuration
 import org.springframework.http.HttpMethod
@@ -9,15 +9,14 @@ import org.springframework.security.config.annotation.web.configuration.WebSecur
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity
 import org.springframework.security.web.authentication.AnonymousAuthenticationFilter
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationFailureHandler
-import org.springframework.security.web.authentication.www.BasicAuthenticationFilter
 
 @Configuration
 @EnableWebSecurity
-class EPSecurityConfiguration(private val authProviderSecurity: EPSecurityAuthenticationProvider) : WebSecurityConfigurerAdapter() {
+class SecurityConfiguration(private val authProviderSecurityForChallengeAuthenticationProvider: ChallengeAuthenticationProvider) : WebSecurityConfigurerAdapter() {
 
     @Throws(Exception::class)
     override fun configure(auth: AuthenticationManagerBuilder) {
-        auth.authenticationProvider(authProviderSecurity)
+        auth.authenticationProvider(authProviderSecurityForChallengeAuthenticationProvider)
     }
 
     @Throws(Exception::class)
@@ -35,6 +34,6 @@ class EPSecurityConfiguration(private val authProviderSecurity: EPSecurityAuthen
                 .failureHandler(SimpleUrlAuthenticationFailureHandler())
                 .and()
                 .logout();
-        http.addFilterAfter(CouchDBUsernameFilter(), AnonymousAuthenticationFilter::class.java)
+        http.addFilterAfter(CouchDBAccessUsernameFilter(), AnonymousAuthenticationFilter::class.java)
     }
 }

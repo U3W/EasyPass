@@ -1,4 +1,4 @@
-package dev.easypass.auth.customBeans
+package dev.easypass.auth.datstore
 
 import org.ektorp.CouchDbConnector
 import org.ektorp.http.StdHttpClient
@@ -9,7 +9,7 @@ import org.springframework.stereotype.Component
 import java.util.*
 
 @Component
-class EPDatabaseConnector(private val properties: Properties) {
+class CouchDBConnectionProvider(private val properties: Properties) {
     @Bean
     @Primary
     fun UserDatabaseConnector(): CouchDbConnector {
