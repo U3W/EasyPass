@@ -13,7 +13,7 @@ import {NoMatch} from "./sites/errors";
 import Login from "./sites/login/login";
 import Masterpassword from "./sites/verify/masterpassword";
 import 'bootstrap/dist/css/bootstrap.min.css';
-import * as serviceWorker from './serviceWorker';
+// import * as serviceWorker from './service-worker/serviceWorker';
 import {ProtectedRoute} from "./routing/ProtectedRoute"
 import {createStore, applyMiddleware} from "redux";
 import rootReducer from "./store/reducers/root.reducer";
@@ -33,7 +33,7 @@ const worker = new Worker('worker.js');
 
 
 // serviceWorker.register();
-
+/**
 if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
         navigator.serviceWorker.register('/service-worker.js').then(registration => {
@@ -41,6 +41,17 @@ if ('serviceWorker' in navigator) {
         }).catch(registrationError => {
             console.log('SW registration failed: ', registrationError);
         });
+    });
+}*/
+
+
+if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('service-main.js')
+    .then(function(registration) {
+        console.log('Registered:', registration);
+    })
+    .catch(function(error) {
+        console.log('Registration failed: ', error);
     });
 }
 

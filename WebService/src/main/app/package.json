@@ -53,8 +53,9 @@
     "webpack": "^4.41.2",
     "webpack-cli": "^3.3.9",
     "webpack-dev-server": "^3.8.2",
-    "//": "Workbox Version 5 is beeing needed to alter precache of compiled output",
-    "workbox-webpack-plugin": "^5.0.0-rc.0"
+    "workbox-webpack-plugin": "^4.3.1",
+    "q": "^1.5.1",
+    "on-build-webpack": "^0.1.0"
   },
   "jest": {
     "globals": {
