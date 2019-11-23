@@ -5,6 +5,7 @@ const WorkboxPlugin = require('workbox-webpack-plugin');
 const os = require('os')
 const path = require('path');
 const fs = require('fs');
+const fsExtra = require('fs-extra');
 const Q = require('q');
 
 // Configure React-App
@@ -56,32 +57,9 @@ const appConfig = {
     new CopyWebPackPlugin([
       { from: "public", ignore: ["index.html"] }
     ]),
-      /** ,
-    new CopyWebPackPlugin([
-      { from: "src/serviceWorker.js", to: "serviceWorker.js"}
-    ])*/
     new WorkboxPlugin.InjectManifest({
       swSrc: './src/service-worker/service-worker.js',
-      include: [/\.wasm$/, /\.html$/, /\.js$/, /\.ico$/, /\.png$/, /\.jpeg$/]
-      //clientsClaim: true,
-      //skipWaiting: true,
-      /**
-      manifestTransforms: [
-       // Add mappings used by Spring WebServer
-       (originalManifest) => {
-          const manifest = originalManifest.map(entry => {
-            console.log(manifest);
-            if (entry.url.startsWith('/index.html')) {
-              entry.url = '/';
-            } else if (entry.url.startsWith('/backendtest.html')) {
-              entry.url = '/backendtest';
-            }
-            return entry;
-          });
-          const warnings = [];
-          return {manifest, warnings};
-        }
-       ]*/
+      include: [/\.wasm$/, /\.html$/, /\.js$/, /\.ico$/, /\.png$/, /\.jpeg$/, /\.json$/]
     })
   ],
   output: {
@@ -110,24 +88,38 @@ const workerConfig = {
     new CopyWebPackPlugin([
       { from: "bower_components", to: "bower_components" }
     ]),
+    // TODO exclude unnecessary bower components
     new WorkboxPlugin.InjectManifest({
       swSrc: './src/service-worker/service-worker.js',
       swDest: 'tmp.txt',
-      include: [/\.wasm$/, /\.html$/, /\.js$/, /\.ico$/, /\.png$/, /\.jpeg$/]
+      include: [/\.wasm$/, /\.html$/, /\.js$/, /\.ico$/, /\.png$/, /\.jpeg$/, /\.json$/]
     }),
     {
+      // Removes all files from the build directory before the build-process starts.
       apply: (compiler) => {
-        compiler.hooks.afterEmit.tap('AfterEmitPlugin', (compilation) => {
-          function sleep(ms) {
+        compiler.hooks.beforeRun.tap('CleanUpBeforeBuild', (compilation) => {
+          fsExtra.emptyDirSync('build')
+        });
+      }
+    },
+    {
+      // The EasyPass project has two entry points — one for the main app, one for the worker.
+      // This means every entry creates an individual precache for the service-worker.
+      // The problem is, the workbox plugin always overwrites the service-worker file and
+      // the plugin is being executed two times because of the two entry points.
+      // That means, one precache will always be missing. To fix this, the precache import
+      // of the worker entry is manually added to the service-worker file at the end.
+      apply: (compiler) => {
+        compiler.hooks.afterEmit.tap('ServiceWorkerPrecache', (compilation) => {
+          const sleep = (ms) => {
             return new Promise(resolve => setTimeout(resolve, ms));
-          }
-
-          function readFirstLine (path) {
+          };
+          const readFirstLine = (path) => {
             return Q.promise(function (resolve, reject) {
-              var rs = fs.createReadStream(path, {encoding: 'utf8'});
-              var acc = '';
-              var pos = 0;
-              var index;
+              const rs = fs.createReadStream(path, {encoding: 'utf8'});
+              let acc = '';
+              let pos = 0;
+              let index;
               rs
                   .on('data', function (chunk) {
                     index = chunk.indexOf('\n');
@@ -141,30 +133,19 @@ const workerConfig = {
                     reject(err);
                   })
             });
-          }
-
-          async function combinePrecaches() {
-            //await sleep(1300);
+          };
+          const combinePrecaches = async () => {
             while (!fs.existsSync('build/service-worker.js')) {
               await sleep(100);
             }
-
-            const text = await readFirstLine('build/tmp.txt');
-
-            const data = fs.readFileSync('build/service-worker.js'); //read existing contents into data
+            const missingPrecache = await readFirstLine('build/tmp.txt');
+            const serviceWorker = fs.readFileSync('build/service-worker.js');
             const fd = fs.openSync('build/service-worker.js', 'w+');
-            const buffer = new Buffer.from(text);
-            console.log(buffer.toString());
-            console.log(data.toString());
-            //fs.writeSync(fd, buffer, 0, buffer.length, 0); //write new data
-            //fs.writeSync(fd, data, 0, data.length, buffer.length); //append old data
-            //fs.appendFileSync(fd, data);
-            fs.appendFileSync(fd, text + os.EOL);
-            fs.appendFileSync(fd, data);
-            fs.close(fd);
-            console.log(text);
-          }
-
+            fs.appendFileSync(fd, missingPrecache + os.EOL);
+            fs.appendFileSync(fd, serviceWorker);
+            fs.closeSync(fd);
+            fs.unlinkSync('build/tmp.txt')
+          };
           combinePrecaches();
         });
       }
