@@ -23,6 +23,7 @@ import { Offline, Online, Detector } from "react-detect-offline";
 import {handleConnection} from "./network/network.functions";
 import Dashboard from "./sites/dashboard/dashboard";
 import LoginAuth from "./authentification/auth.login"
+import {swLogger} from "./service-worker/sw-handler";
 
 // Load backend with WebAssembly
 const worker = new Worker('worker.js');
@@ -44,14 +45,28 @@ if ('serviceWorker' in navigator) {
     });
 }*/
 
+/**
+const swStyle = [
+    `background: salmon`,
+    `border-radius: 0.5em`,
+    `color: white`,
+    `font-weight: bold`,
+    `padding: 2px 0.5em`,
+];
+
+// When in a group, the workbox prefix is not displayed.
+//const logPrefix = ['%cservice-worker', styles.join(';')];
+console.log('%cservice-worker%cRegistered', swStyle.join(';'), '');*/
+
+
 
 if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('service-main.js')
+    navigator.serviceWorker.register('service-worker.js')
     .then(function(registration) {
-        console.log('Registered:', registration);
+        swLogger('Registered', registration);
     })
     .catch(function(error) {
-        console.log('Registration failed: ', error);
+        swLogger('Registration failed', error);
     });
 }
 
