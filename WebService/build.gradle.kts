@@ -135,33 +135,56 @@ task("appCopy") {
     }
 }
 
-task<Exec>("wasmBuildProcess") {
-    val folder = File("src/main/app/pkg")
-    if (!folder.exists()) {
-        folder.mkdirs()
+task("appCopyProduction") {
+    group = "easypass"
+    copy {
+        from("src/main/app/build")
+        into("out/production/resources/main/static/")
+        exclude("index.html", "backendtest.html")
     }
-    val target = File("src/main/rust/pkg")
-    target.mkdirs();
+    copy {
+        from("src/main/app/build")
+        into("build/resources/main/static/")
+        exclude("index.html", "backendtest.html")
+    }
+    copy {
+        from("src/main/app/build")
+        into("src/main/resources/static/")
+        exclude("index.html", "backendtest.html")
+    }
+    copy {
+        from(File("src/main/app/build/index.html"))
+        into("out/production/resources/main/templates")
+    }
+    copy {
+        from(File("src/main/app/build/backendtest.html"))
+        into("out/production/resources/main/templates")
+    }
+    copy {
+        from(File("src/main/app/build/index.html"))
+        into("build/resources/main/templates")
+    }
+    copy {
+        from(File("src/main/app/build/backendtest.html"))
+        into("build/resources/main/templates")
+    }
+    copy {
+        from(File("src/main/app/build/index.html"))
+        into("src/main/resources/templates")
+    }
+    copy {
+        from(File("src/main/app/build/backendtest.html"))
+        into("src/main/resources/templates")
+    }
+}
+
+task<Exec>("wasmBuild") {
+    group = "easypass"
     workingDir = File("src/main/rust")
     commandLine = if (System.getProperty("os.name").toLowerCase().contains("windows")) {
         listOf("cmd", "/c", "wasm-pack", "build", "--release", "--no-typescript")
     } else {
         listOf("wasm-pack", "build", "--release", "--no-typescript")
-    }
-}
-
-task("wasmBuild") {
-    group = "easypass"
-    dependsOn("wasmBuildProcess")
-    doLast {
-        val folder = File("src/main/rust/pkg")
-        while (folder.list().size < 2) {
-            println("Waiting for 'wasm-pack' to finish building...")
-        }
-        copy {
-            from("src/main/rust/pkg")
-            into("src/main/app/pkg")
-        }
     }
 }
 

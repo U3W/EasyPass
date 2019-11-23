@@ -13,7 +13,6 @@ import {NoMatch} from "./sites/errors";
 import Login from "./sites/login/login";
 import Masterpassword from "./sites/verify/masterpassword";
 import 'bootstrap/dist/css/bootstrap.min.css';
-import * as serviceWorker from './serviceWorker';
 import {ProtectedRoute} from "./routing/ProtectedRoute"
 import {createStore, applyMiddleware} from "redux";
 import rootReducer from "./store/reducers/root.reducer";
@@ -23,11 +22,12 @@ import { Offline, Online, Detector } from "react-detect-offline";
 import {handleConnection} from "./network/network.functions";
 import Dashboard from "./sites/dashboard/dashboard";
 import VerifyAuth from "./authentification/auth.masterpassword"
+import * as serviceWorker from "./service-worker/sw-handler";
 
+// Load backend with WebAssembly
+const worker = new Worker('worker.js');
 
-// If you want your app to work offline and load faster, you can change
-// unregister() to register() below. Note this comes with some pitfalls.
-// Learn more about service workers: https://bit.ly/CRA-PWA
+// Load service worker
 serviceWorker.register();
 
 // Für Storage
