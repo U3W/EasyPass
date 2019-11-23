@@ -20,7 +20,10 @@ workbox.precaching.precacheAndRoute(self.__precacheManifest);
 
 // Navigation Routing is required for usage in a single page app
 workbox.routing.registerNavigationRoute(
-    // Assuming '/single-page-app.html' has been precached,
-    // look up its corresponding cache key.
-    workbox.precaching.getCacheKeyForURL('/')
+    // Blacklist is needed for testing in development
+    workbox.precaching.getCacheKeyForURL('/'), {
+        blacklist: [
+            new RegExp('/backendtest.html')
+        ]
+    }
 );
