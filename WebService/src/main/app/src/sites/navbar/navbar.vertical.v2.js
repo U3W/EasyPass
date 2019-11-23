@@ -1,5 +1,5 @@
 import React from "react"
-import {Col} from "react-bootstrap";
+import {Button, Col} from "react-bootstrap";
 import Row from "react-bootstrap/Row";
 import groupPass from "../../img/icons/tab_group_password.svg"
 import privPass from "../../img/icons/tab_password.svg"
@@ -7,13 +7,18 @@ import logoutImg from "../../img/icons/logout.svg";
 import tabs from "../dashboard/tabs/tab.enum";
 import IndicatorBot from "../../network/network.indicator.bottombar";
 
+// Icons
+import AddCat from "../../img/icons/password_add_tag.svg";
+import EditCat from "../../img/icons/password_edit_white.svg"
+
 class NavbarVerticalEP2 extends React.Component {
     constructor(props) {
         super(props);
 
         this.state = {
-
+            catCounter: 1,
         };
+
     }
 
     /**
@@ -27,32 +32,89 @@ class NavbarVerticalEP2 extends React.Component {
         this.props.callback.changeCat(changeTo);
     }
 
+    returnCatBase ( id, name) {
+        let getActive = "nav-link-kat sec";
+        if ( this.props.callback.state.catselected === id)
+        {
+            getActive = "nav-link-kat sec active";
+        }
 
-    getKat() {
-        // immmer
-        let start = (<li className="d-flex align-items-center text-muted clickable nav-link-click" onClick={() => this.catChange(1)}>
-                        <div className="nav-link-kat">
+        return (
+            <li key={id} className="d-flex align-items-center text-muted clickable nav-link-kat-click" onClick={() => this.catChange(id)}>
+                <div className={getActive}>
+                    {name}
+                </div>
+            </li>
+        );
+    }
+
+
+    getCat() {
+        let getActive = "nav-link-kat fitparentWidth";
+        if ( this.props.callback.state.catselected === 0)
+        {
+            getActive = "nav-link-kat fitparentWidth active";
+        }
+        // always
+        let start = (<li key={0} className="d-flex align-items-center text-muted clickable nav-link-kat-click" onClick={() => this.catChange(0)}>
+                        <div className={getActive}>
                             Alle Kategorien
                         </div>
                     </li>);
-        // einzelne kategorienen --> Aufruf von Kacper
-
-        // Schleife mit onClick={() => this.catChange(i)}> --> i++
+        // single cat.
+        let cats = this.props.callback.getCats();
+        for ( let i = 0; i < cats.length; i++ )
+        {
+            cats[i].idCat = i+1;
+        }
+        // counter for the cats
+        let finalCats = cats.map((item) =>
+            this.returnCatBase(item.idCat, item.name)
+        );
+        // loop with onClick={() => this.catChange(i)}> --> i++
         return (
             <>
                 {start}
-                <li className="d-flex align-items-center text-muted clickable nav-link-click" onClick={() => this.catChange(1)}>
-                    <div className="nav-link-kat sec">
-                        Kategorie
+                {finalCats}
+            </>
+        );
+    }
+
+    getEditCat() {
+        let out = (
+            <>
+                <li key={0} className="d-flex align-items-center text-muted clickable nav-link-kat-click" onClick={() => this.props.callback.setPopUpAddCatEnabled()}>
+                    <div className="nav-link-kat fitparentWidth" >
+                        Kategorie hinzufügen
+                        <Button variant="dark" className="catButton round">
+                            <img
+                                src={AddCat}
+                                alt=""
+                                width="10"
+                                height="10"
+                                className="d-inline-block"
+                            />
+                        </Button>
                     </div>
                 </li>
-                <li className="d-flex align-items-center text-muted clickable nav-link-click" onClick={() => this.catChange(2)}>
-                    <div className="nav-link-kat thr">
-                        Unterkategorie
+                <li key={1} className="d-flex align-items-center text-muted clickable nav-link-kat-click" onClick={() => alert("Bearbeiten")}>
+                    <div className="nav-link-kat fitparentWidth" >
+                        Kategorie bearbeiten
+                        <Button variant="dark" className="catButton round">
+                            <img
+                                src={EditCat}
+                                alt=""
+                                width="10"
+                                height="10"
+                                className="d-inline-block"
+                            />
+                        </Button>
                     </div>
                 </li>
             </>
         );
+
+        return out;
     }
 
 
@@ -105,7 +167,9 @@ class NavbarVerticalEP2 extends React.Component {
                                 <span>Kategorien</span>
                             </h6>
                             <hr />
-                            {this.getKat()}
+                            {this.getCat()}
+                            <hr />
+                            {this.getEditCat()}
                         </ul>
 
                     </div>

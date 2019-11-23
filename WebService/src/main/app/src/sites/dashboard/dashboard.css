@@ -15,20 +15,140 @@ body {
     overflow-y: hidden;
 }
 
+.fixHeader {
+    margin-top: 10px;
+}
+
 .fixMain {
     overflow-y: auto;
-    height: calc(100% - 86px);
+    height: calc(100vh - 86px);
     right: 0;
-    position: absolute;
+    position: fixed;
+    padding-bottom: 75px;
+    transition: height 0.35s ease;
+}
+
+.expanded {
+    height: calc(100vh - 161px) !important;
+    transition: height 0.35s ease;
+}
+.expadedSettings {
+    /* 209.2 */
+    /* 160.8 */
+    height: calc(100vh - 210px) !important;
 }
 
 .fixScroll {
     display: flex;
+    overflow-x: hidden;
+    overflow-y: hidden;
 }
 
 @media (max-width: 425px) {
     .fixMain {
         flex: 0 0 100%;
         max-width: 100%;
+        height: calc(100vh - 197px);
+    }
+
+    .expanded {
+        height: calc(100vh - 272px) !important;
+        transition: height 0.35s ease;
+    }
+
+
+}
+
+/* Add password */
+.fab {
+    width: 50px;
+    height: 50px;
+    background-color: #D31E14;
+    border-radius: 25px;
+
+    box-shadow: 2px 2px 20px rgba(0,0,0,0.1);
+    transition: all 0.3s ease-in-out;
+
+    position: fixed;
+    right: 30px;
+    bottom: 15px;
+    overflow: hidden;
+
+}
+
+.fab .addIcon {
+    position: absolute;
+    left: 15px;
+    top: 15px;
+}
+
+.fab:hover .addIcon {
+
+}
+
+.fab .text {
+    opacity:0;
+    transition-delay: 0s;
+    transition-duration: 0.4s;
+    position: absolute;
+    white-space: nowrap;
+    left: 45px;
+    top: 12px
+}
+.fab:hover .text {
+    opacity:1;
+    transform: translateX(0px);
+    -webkit-transform: translateX(0px);
+}
+
+.fab:hover {
+    width: 210px;
+    border-radius: 25px;
+    background-color: #9e1512;
+    border-color: #9c000a !important;
+    box-shadow: 5px 10px 20px 1px rgba(0, 0, 0, 0.25);
+    transition: all 0.3s ease-in-out;
+}
+
+@media (max-width: 425px) {
+    .fab {
+        right: 15px;
+        bottom: 75px;
+    }
+}
+
+@media (min-width: 425px) {
+    .fab {
+        right: 30px;
+        bottom: 15px;
+    }
+}
+
+/* Copy alert */
+.in-front {
+    z-index: 2001;
+}
+.center-text {
+    align-content: center;
+    text-align: center;
+}
+
+@media (max-width: 425px) {
+    .fixed-top-easypass {
+        position: fixed;
+        /* 132 + 5 */
+        top: 137px;
+        right: 0;
+        left: 0;
+    }
+}
+
+@media (min-width: 425px) {
+    .fixed-top-easypass {
+        position: fixed;
+        /* 86 + 5 */
+        top: 91px;
+        right: 0;
+        left: 0;
     }
 }

@@ -14,6 +14,8 @@ import Button from "react-bootstrap/Button";
 import VerifyAuth from "../../authentification/auth.masterpassword";
 import Alert from "react-bootstrap/Alert";
 import Indicator from "../../network/network.indicator";
+import tabs from "../dashboard/tabs/tab.enum";
+import {saveCat, saveTab} from "../../action/dashboard.action";
 
 class Masterpassword extends React.Component {
 
@@ -56,6 +58,25 @@ class Masterpassword extends React.Component {
         }
     }
 
+    setShow( show ) {
+        this.setState({
+            error: show
+        });
+    }
+
+    printError() {
+        const show = this.state.error;
+        return (
+            <Alert show={show} variant="danger" className="center-horz error" dismissible
+                   onClose={() => this.setShow(false)}>
+                <Alert.Heading>{wrongLoginHeader}</Alert.Heading>
+                <p>
+                    {wrongLogin}
+                </p>
+            </Alert>
+        );
+    }
+
     handleRadioButtons(event) {
 
     }
@@ -95,6 +116,10 @@ class Masterpassword extends React.Component {
 
 
             this.props.mlogin(this.state);
+            // reset state from dashboard
+            //this.props.saveTab(tabs.PRIVPASS);
+            //this.props.saveCat(tabs.PRIVPASS, tabs.ALLCAT);
+            //this.props.saveCat(tabs.GROUPPASS, tabs.ALLCAT);
 
             if ( VerifyAuth.getVerified() )
             {
@@ -104,6 +129,7 @@ class Masterpassword extends React.Component {
             {
                 // Fehlermeldung
                 this.setState({error: true});
+                this.dismissError()
             }
 
 
@@ -119,7 +145,7 @@ class Masterpassword extends React.Component {
         }
     }
 
-    dismissError( ob ) {
+    dismissError() {
         sleep(3500).then(() => {
                 this.setState({error: false});
             }
@@ -131,7 +157,7 @@ class Masterpassword extends React.Component {
         if ( this.state.missingMasterpassword )
         {
             return (
-                <Form.Group controlId="formMasterpass">
+                <Form.Group>
                     <Row>
                         <Col sm={12}>
                             <Form.Label className="text-danger">Masterpasswort</Form.Label>
@@ -148,7 +174,7 @@ class Masterpassword extends React.Component {
         else
         {
             return (
-                <Form.Group controlId="formMasterpass">
+                <Form.Group>
                     <Row>
                         <Col sm={12}>
                             <Form.Label>Masterpasswort</Form.Label>
@@ -171,7 +197,7 @@ class Masterpassword extends React.Component {
             if ( this.state.missingKey)
             {
                 return (
-                    <Form.Group controlId="form2FA-Pass">
+                    <Form.Group>
                         <Row>
                             <Col sm={12}>
                                 <Form.Label className="text-danger">Key</Form.Label>
@@ -188,7 +214,7 @@ class Masterpassword extends React.Component {
             else
             {
                 return (
-                    <Form.Group controlId="form2FA-Pass">
+                    <Form.Group>
                         <Row>
                             <Col sm={12}>
                                 <Form.Label>
@@ -254,9 +280,9 @@ class Masterpassword extends React.Component {
                             <Col xs={9} sm={8} md={6} lg={5} className="center-vert center-horz">
                                 <Card className="card-login">
                                     <Card.Body>
-                                        <Form>
+                                        <Form autoComplete="off">
                                             {this.getInputMasterpassword()}
-                                            <Form.Group controlId="form2FA">
+                                            <Form.Group>
                                                 <Row>
                                                     <Col sm={12}>
                                                         <Form.Label>
@@ -283,7 +309,7 @@ class Masterpassword extends React.Component {
                                 </Card>
                             </Col>
                             <div className="footer">
-                                <PrintError caller={this}/>
+                                {this.printError()}
                             </div>
                             <Indicator />
                         </Row>
@@ -322,7 +348,9 @@ export function PrintError({caller: ob}) {
 const mapDispatchToProps1 = (dispatch) => {
     return {
         mlogin: (creds) => dispatch(mlogin(creds)),
-        mlogout: () => dispatch(mlogout())
+        mlogout: () => dispatch(mlogout()),
+        saveTab: (tabselected) => dispatch(saveTab(tabselected)),
+        saveCat: (tabselected, catselected) => dispatch(saveCat(tabselected, catselected))
     }
 };
 

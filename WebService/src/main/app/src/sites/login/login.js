@@ -30,6 +30,8 @@ import { connect } from 'react-redux';
 import {login, logout} from "../../action/auth.action";
 import {authConstants} from "../../authentification/auth.const.localstorage";
 import Indicator from "../../network/network.indicator";
+import {saveCat, saveTab} from "../../action/dashboard.action";
+import tabs from "../dashboard/tabs/tab.enum";
 
 //<Row className="justify-content-center">
 class Login extends React.Component {
@@ -48,6 +50,7 @@ class Login extends React.Component {
         this.handleChange = this.handleChange.bind(this);
         this.handleSubmit = this.handleSubmit.bind(this);
         this.handleKeyevent = this.handleKeyevent.bind(this);
+        this.printError = this.printError.bind(this);
     }
 
     handleChange = (e) => {
@@ -70,6 +73,26 @@ class Login extends React.Component {
         this.submit();
     }
 
+
+    setShow( show ) {
+        this.setState({
+            error: show
+        });
+    }
+
+    printError() {
+        const show = this.state.error;
+        return (
+            <Alert show={show} variant="danger" className="center-horz error" dismissible
+                   onClose={() => this.setShow(false)}>
+                <Alert.Heading>{wrongLoginHeader}</Alert.Heading>
+                <p>
+                    {wrongLogin}
+                </p>
+            </Alert>
+        );
+    }
+
     submit() {
         let err = false;
         // schauen ob leer
@@ -90,12 +113,12 @@ class Login extends React.Component {
 
             this.props.login(this.state);
 
-
             if (LoginAuth.getLoggedIn()) {
                 this.props.history.push("/verify");
             } else {
                 // Fehlermeldung
                 this.setState({error: true});
+                this.dismissError();
             }
 
 
@@ -110,7 +133,7 @@ class Login extends React.Component {
         }
     }
 
-    dismissError( ob ) {
+    dismissError() {
         sleep(3500).then(() => {
                 this.setState({error: false});
             }
@@ -176,7 +199,7 @@ class Login extends React.Component {
                                 <Card className="card-login">
                                     <Card.Img variant="top" src={Logo} />
                                     <Card.Body>
-                                        <Form>
+                                        <Form autoComplete="off">
                                             {this.getInputUsername()}
                                             {this.getInputPassword()}
                                             <Form.Group>
@@ -190,7 +213,7 @@ class Login extends React.Component {
                                 </Card>
                             </Col>
                             <div className="footer">
-                                <PrintError caller={this}/>
+                                {this.printError()}
                             </div>
                             <Indicator />
                         </Row>
@@ -205,31 +228,10 @@ function sleep (time) {
     return new Promise((resolve) => setTimeout(resolve, time));
 }
 
-export function PrintError({caller: ob}) {
-    if ( ob.state.error )
-    {
-        return (
-            <Alert variant="danger" className="center-horz error" onClick={ob.dismissError(ob)}>
-                <Alert.Heading>{wrongLoginHeader}</Alert.Heading>
-                <p>
-                    {wrongLogin}
-                </p>
-            </Alert>
-        );
-    }
-    else
-    {
-        return (
-            <p>&nbsp;</p>
-        );
-    }
-
-}
-
 const mapDispatchToProps = (dispatch) => {
     return {
         login: (creds) => dispatch(login(creds)),
-        logout: () => dispatch(logout())
+        logout: () => dispatch(logout()),
     }
 };
 
