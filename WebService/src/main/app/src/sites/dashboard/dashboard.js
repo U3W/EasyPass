@@ -23,10 +23,10 @@ import {wrongLogin, wrongLoginHeader} from "../../strings/stings";
 import {dashboardAlerts} from "./const/dashboard.enum";
 import Modal from "react-bootstrap/Modal";
 import Table from "react-bootstrap/Table";
-import useWindowDimensions from "../../window/window.size";
-
+import AddPassword from "../dashboard/add.password"
 // Icons
 import AddPass from "../../img/icons/password_add_pass.svg";
+import AddCategory from "./add.cat";
 class Dashboard extends React.Component {
 
     constructor(props){
@@ -61,6 +61,8 @@ class Dashboard extends React.Component {
             showCopyURLAlert: false,
             // cat add
             popUpAddCatShow: false,
+            // password add
+            popUpAddPassShow: false,
             // with, height
             width: 0,
             height: 0,
@@ -77,8 +79,15 @@ class Dashboard extends React.Component {
         this.closeCopy = this.closeCopy.bind(this);
         this.saveEdit = this.saveEdit.bind(this);
         this.renderCat = this.renderCat.bind(this);
-        this.setPopUpAddCatDisabled = this.setPopUpAddCatDisabled.bind(this);
-        this.setPopUpAddCatEnabled = this.setPopUpAddCatEnabled.bind(this);
+
+        // Popups
+        this.dismissAddCat = this.dismissAddCat.bind(this);
+        this.showAddCat = this.showAddCat.bind(this);
+        this.getCatAddShow = this.getCatAddShow.bind(this);
+        this.showAddPass = this.showAddPass.bind(this);
+        this.dismissAddPass = this.dismissAddPass.bind(this);
+        this.getPassAddShow = this.getPassAddShow.bind(this);
+
 
         // WindowDimensions
         this.updateWindowDimensions = this.updateWindowDimensions.bind(this);
@@ -445,50 +454,59 @@ class Dashboard extends React.Component {
         }
     }
 
+    addPass(user, pass, url, title, catID, tag) {
+        // ToDO call Kacpers method
+        alert("Password added");
+        this.dismissAddPass();
+    }
+
     deletePass(id) {
-        // ToDO call Kacper method
+        // ToDO call Kacpers method
     }
 
     saveEdit(id, userNew, passwordNew, urlNew, titleNew, catNew, tagNew) {
-        // ToDo call Kacper method
+        // ToDo call Kacpers method
     }
 
     addCat() {
+        // ToDO call Kacpers method
+        alert("Cat added");
+        this.dismissCopy();
+    }
+
+    editCat() {
 
     }
 
-    setPopUpAddCatDisabled() {
+    showAddPass() {
+        this.setState({
+            popUpAddPassShow: true,
+        })
+    }
+
+    dismissAddPass() {
+        this.setState({
+            popUpAddPassShow: false,
+        })
+    }
+    getPassAddShow() {
+        return this.state.popUpAddPassShow;
+    }
+
+    dismissAddCat() {
         this.setState({
             popUpAddCatShow: false,
         })
     }
 
-    setPopUpAddCatEnabled() {
+    showAddCat() {
         this.setState({
             popUpAddCatShow: true,
         })
     }
 
-    getPopUpAddCat()  {
-        let cats = this.getCats();
-
-
-        return (
-            <>
-                <Modal show={this.state.popUpAddCatShow} onHide={this.setPopUpAddCatDisabled} className="ep-modal-dialog">
-                    <Modal.Header closeButton>
-                        <Modal.Title>Kategorie hinzufügen</Modal.Title>
-                    </Modal.Header>
-                    <Modal.Body className="ep-modal-body">
-                        <Table striped bordered hover className="ep-modal-table">
-                            <tbody>
-
-                            </tbody>
-                        </Table>
-                    </Modal.Body>
-                </Modal>
-            </>
-        );
+    getCatAddShow() {
+        return this.state.popUpAddCatShow;
     }
 
     getTab() {
@@ -532,7 +550,7 @@ class Dashboard extends React.Component {
                         <hr/>
                         <IndicatorSide />
                     </Row>
-                    <Button className="fab" variant="danger">
+                    <Button className="fab" variant="danger" onClick={this.showAddPass}>
                         <img
                             src={AddPass}
                             alt=""
@@ -544,10 +562,11 @@ class Dashboard extends React.Component {
                             <span>Passwort hinzufügen</span>
                         </div>
                     </Button>
+                    <AddPassword callback={this}/>
                 </div>
+                <AddCategory callback={this}/>
                 {this.printCopy()}
                 {this.printUser()}
-                {this.getPopUpAddCat()}
             </div>
         );
     }

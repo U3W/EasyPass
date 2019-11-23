@@ -145,7 +145,7 @@ class NavbarEP extends React.Component {
     getPopUp() {
         return (
             <>
-                <Modal show={this.state.popUpShow} onHide={this.setPopUpDisabled}>
+                <Modal show={this.state.popUpShow} onHide={this.setPopUpDisabled} className="ep-modal-dialog">
                     <Modal.Header closeButton>
                         <Modal.Title>Account Settings</Modal.Title>
                     </Modal.Header>

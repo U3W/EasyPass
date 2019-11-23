@@ -277,7 +277,7 @@ class Masterpassword extends React.Component {
                 <div className="gradientDivMasterpassword">
                     <Container>
                         <Row className="size-hole-window">
-                            <Col xs={9} sm={8} md={6} lg={5} className="center-vert center-horz">
+                            <Col xs={12} sm={8} md={6} lg={5} className="center-vert center-horz">
                                 <Card className="card-login">
                                     <Card.Body>
                                         <Form autoComplete="off">

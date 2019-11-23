@@ -195,8 +195,8 @@ class Login extends React.Component {
                 <div className="gradientDivLogin">
                     <Container>
                         <Row className="size-hole-window">
-                            <Col xs={9} sm={8} md={6} lg={5} className="center-vert center-horz card-login">
-                                <Card className="card-login">
+                            <Col xs={12} sm={8} md={6} lg={5} className="center-vert center-horz">
+                                <Card className="card-login login">
                                     <Card.Img variant="top" src={Logo} />
                                     <Card.Body>
                                         <Form autoComplete="off">

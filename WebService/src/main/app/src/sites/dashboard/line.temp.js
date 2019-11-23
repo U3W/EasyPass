@@ -79,9 +79,6 @@ export default class PassLine extends React.Component {
     findTagKeyIndex ( keyComp ) {
         for ( let i = 0; i < this.state.tagNew.length; i++ ) {
             let key = Object.keys(this.state.tagNew[i]);
-            console.log("TagNew", i, this.state.tagNew[i]);
-            console.log(key);
-            console.log(keyComp);
             if ( key[0] === keyComp) {
                 return i;
             }
@@ -257,7 +254,7 @@ export default class PassLine extends React.Component {
                 tagCompArray[i] = (
                     <InputGroup size="sm" className="mb-3">
                         <InputGroup.Prepend>
-                            <input className="input-group-text fixTag" id="inputGroup-sizing-sm" disabled={true} value={tagKeys[0]} onChange={(e) => this.changeTagListener(tagKeys[0], tag[i][tagKeys[0]], i, e)}/>
+                            <input className="input-group-text fixTag" disabled={true} value={tagKeys[0]} onChange={(e) => this.changeTagListener(tagKeys[0], tag[i][tagKeys[0]], i, e)}/>
                         </InputGroup.Prepend>
                         <FormControl aria-label="Small" aria-describedby="inputGroup-sizing-sm" disabled={true} value={tag[i][tagKeys[0]]} onChange={(e) => this.changeTagListener(tagKeys[0], tag[i][tagKeys[0]], i, e)}/>
                         {but}

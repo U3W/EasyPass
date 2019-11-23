@@ -83,7 +83,7 @@ class NavbarVerticalEP2 extends React.Component {
     getEditCat() {
         let out = (
             <>
-                <li key={0} className="d-flex align-items-center text-muted clickable nav-link-kat-click" onClick={() => this.props.callback.setPopUpAddCatEnabled()}>
+                <li key={0} className="d-flex align-items-center text-muted clickable nav-link-kat-click" onClick={() => this.props.callback.showAddCat()}>
                     <div className="nav-link-kat fitparentWidth" >
                         Kategorie hinzufügen
                         <Button variant="dark" className="catButton round">
