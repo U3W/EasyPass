@@ -19,11 +19,19 @@ import org.springframework.security.web.authentication.SimpleUrlAuthenticationFa
 @EnableWebSecurity
 class SecurityConfiguration(private val authProvider: ChallengeAuthenticationProvider) : WebSecurityConfigurerAdapter() {
 
+    /**
+     * This method is used to add the [ChallengeAuthenticationProvider] to Spring-Security
+     * @param auth: the [AuthenticationManagerBuilder] were the [ChallengeAuthenticationProvider] is set
+     */
     @Throws(Exception::class)
     override fun configure(auth: AuthenticationManagerBuilder) {
         auth.authenticationProvider(authProvider)
     }
 
+    /**
+     * Defines the url access control
+     * @param http: the [HttpSecurity] were the configuration is set
+     */
     @Throws(Exception::class)
     override fun configure(http: HttpSecurity) {
         http
@@ -38,7 +46,8 @@ class SecurityConfiguration(private val authProvider: ChallengeAuthenticationPro
                 .formLogin()
                 .failureHandler(SimpleUrlAuthenticationFailureHandler())
                 .and()
-                .logout();
+                .logout()
+
         http.addFilterAfter(CouchDBAccessUsernameFilter(), AnonymousAuthenticationFilter::class.java)
     }
 }

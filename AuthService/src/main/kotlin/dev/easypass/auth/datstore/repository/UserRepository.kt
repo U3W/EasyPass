@@ -14,6 +14,9 @@ import org.springframework.stereotype.Component
 @Component
 class UserRepository(db: CouchDbConnector) : CouchDbRepositorySupport<User>(User::class.java, db) {
 
+    /**
+     * Generates the views required by the repository
+     */
     init {
         //The initStandardDesignDocument-method throws a NullPointerException when a view already exists in the database
         for (doc in db.allDocIds) {
@@ -23,11 +26,19 @@ class UserRepository(db: CouchDbConnector) : CouchDbRepositorySupport<User>(User
         initStandardDesignDocument()
     }
 
+    /**
+     * returns a [List] of all the entries with the passed [uname], that are stored in the database
+     * @param uname: the name of the uname
+     */
     @GenerateView
     fun findByUname(uname: String?): List<User> {
         return queryView("by_uname", uname)
     }
 
+    /**
+     * returns only the first entry of the [List] of all the entries with the passed [uname], that are stored in the database
+     * @param uname: the name of the user
+     */
     fun findOneByUname(uname: String?): User {
         val listOfUsers = findByUname(uname)
         if (listOfUsers.isEmpty())
@@ -37,6 +48,10 @@ class UserRepository(db: CouchDbConnector) : CouchDbRepositorySupport<User>(User
         return listOfUsers[0]
     }
 
+    /**
+     * This methods overrides the add-method of [CouchDbRepositorySupport], throws an [EntityAlreadyinDatabaseException], when an entity with the same uname as [entity] is already saved in the database
+     * @param entity: a user object to save in the database
+     */
     override fun add(entity: User) = try {
             if (findByUname(entity.uname).isNotEmpty()) {
                 throw EntityAlreadyinDatabaseException()

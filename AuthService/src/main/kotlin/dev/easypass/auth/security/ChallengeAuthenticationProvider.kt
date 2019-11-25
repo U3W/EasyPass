@@ -13,19 +13,25 @@ import org.springframework.security.core.GrantedAuthority
 import org.springframework.security.core.authority.SimpleGrantedAuthority
 import org.springframework.stereotype.Component
 
+/**
+ * Enables the authentication with challenges
+ * @param userRepository: provides the required database support to administer [dev.easypass.auth.datstore.document.User] objects
+ * @param encryptionLibrary: this class provides the required encryption methods
+ */
 @Component
 class ChallengeAuthenticationProvider(private val userRepository: UserRepository, private val encryptionLibrary: EncryptionLibrary) : AuthenticationProvider {
     private var currentChallenges = HashMap<String, InternalAdministrationChallenge>()
 
+    /**
+     * Checks if the user credentials are correct
+     * @param authentication: the [Authentication] which contains the user credentials
+     */
     @Throws(AuthenticationException::class)
     override fun authenticate(authentication: Authentication): Authentication? {
         val uname = authentication.getName()
         val challenge = authentication.getCredentials().toString()
         val authorities = ArrayList<GrantedAuthority>()
         authorities.add(SimpleGrantedAuthority(uname))
-        println(uname)
-        println(challenge)
-        println(authorities)
         return if (currentChallenges[uname] != null && currentChallenges[uname]!!.checkChallenge(challenge)) {
             currentChallenges.remove(uname)
             UsernamePasswordAuthenticationToken(uname, challenge, authorities)
@@ -34,16 +40,24 @@ class ChallengeAuthenticationProvider(private val userRepository: UserRepository
         }
     }
 
+    /**
+     * Checks if the given token is supported by the application
+     * @param authentication: the token-object to be verified
+     */
     override fun supports(authentication: Class<*>): Boolean {
         return authentication == UsernamePasswordAuthenticationToken::class.java
     }
 
+    /**
+     * Adds a new [InternalAdministrationChallenge] to the [currentChallenges]
+     * @param uname: the name of the user
+     */
     fun addUserChallenge(uname: String): UserAuthenticationChallenge {
         return try {
-            currentChallenges[uname] = encryptionLibrary.getObjOfChallengeDataForInternalAdministration()
+            currentChallenges[uname] = encryptionLibrary.generateInternalAdministrationChallenge()
             UserAuthenticationChallenge(currentChallenges[uname]!!.getChallengeEncryptedByPublicKey(userRepository.findOneByUname(uname).publicKey), uname)
         } catch (ex: DocumentNotFoundException) {
-            UserAuthenticationChallenge(encryptionLibrary.getObjOfChallengeDataForInternalAdministration().getChallengeEncryptedByPublicKey(encryptionLibrary.generateDummyUser(uname).publicKey), uname)
+            UserAuthenticationChallenge(encryptionLibrary.generateInternalAdministrationChallenge().getChallengeEncryptedByPublicKey(encryptionLibrary.generateDummyUser(uname).publicKey), uname)
         }
     }
 }

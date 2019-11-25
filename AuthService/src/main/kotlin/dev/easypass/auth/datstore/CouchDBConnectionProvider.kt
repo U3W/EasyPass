@@ -10,10 +10,14 @@ import java.util.*
 
 /**
  * Contains a bean, which provides a [CouchDbConnector] to the user-database, specified in the file application.properties
- * @param properties: the application.properties
+ * @param properties: the application.properties as java bean
  */
 @Component
 class CouchDBConnectionProvider(private val properties: Properties) {
+
+    /**
+     * The bean which provides the connection to the [dev.easypass.auth.datstore.document.User] database
+     */
     @Bean
     @Primary
     fun UserDatabaseConnector(): CouchDbConnector {
