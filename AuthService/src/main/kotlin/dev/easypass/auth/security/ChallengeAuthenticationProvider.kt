@@ -55,9 +55,11 @@ class ChallengeAuthenticationProvider(private val userRepository: UserRepository
     fun addUserChallenge(uname: String): UserAuthenticationChallenge {
         return try {
             currentChallenges[uname] = encryptionLibrary.generateInternalAdministrationChallenge()
-            UserAuthenticationChallenge(currentChallenges[uname]!!.getChallengeEncryptedByPublicKey(userRepository.findOneByUname(uname).publicKey), uname)
+            val user = userRepository.findOneByUname(uname)
+            UserAuthenticationChallenge(currentChallenges[uname]!!.getChallengeEncryptedByPublicKey(user.publicKey), user.privateKey)
         } catch (ex: DocumentNotFoundException) {
-            UserAuthenticationChallenge(encryptionLibrary.generateInternalAdministrationChallenge().getChallengeEncryptedByPublicKey(encryptionLibrary.generateDummyUser(uname).publicKey), uname)
+            val user = encryptionLibrary.generateDummyUser(uname)
+            UserAuthenticationChallenge(encryptionLibrary.generateInternalAdministrationChallenge().getChallengeEncryptedByPublicKey(user.publicKey), user.privateKey)
         }
     }
 }

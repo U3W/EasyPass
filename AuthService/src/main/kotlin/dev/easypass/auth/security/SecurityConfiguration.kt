@@ -40,7 +40,7 @@ class SecurityConfiguration(private val authProvider: ChallengeAuthenticationPro
                 .and()
                 .authorizeRequests()
                 .antMatchers("/couchdb/**").permitAll()
-                .antMatchers(HttpMethod.GET,"/unlockChallenge").permitAll()
+                .antMatchers(HttpMethod.POST,"/auth/**").permitAll()
                 .anyRequest().authenticated()
                 .and()
                 .formLogin()
