@@ -28,3 +28,24 @@ curl -i --header "Accept:application/json" -X GET -b cookieMwustinger.txt http:/
 
 ```
 
+Wrong Authentication:
+
+```
+curl -i -X POST http://localhost:7000/auth/challenge?uname=mwustinger
+
+curl -i -X POST -d username=mwustinger -d password=D_A_S___I_S_T___K_E_I_N_E___C_H_A_L_L_E_N_G_E -c cookieMwustinger.txt http://localhost:7000/login
+
+curl -i -X POST -d username=mwustinger -d password=D_A_S___I_S_T___E_I_N_E___C_H_A_L_L_E_N_G_E -c cookieMwustinger.txt http://localhost:7000/login
+
+curl -i --header "Accept:application/json" -X GET -b cookieMwustinger.txt http://localhost:7000/couchdb/mwustinger
+
+curl -i -X POST -d username=mwustinger -d password=D_A_S___I_S_T___K_E_I_N_E___C_H_A_L_L_E_N_G_E -c cookieMwustinger.txt http://localhost:7000/login
+
+curl -i -X POST -d username=mwustinger -d password=D_A_S___I_S_T___K_E_I_N_E___C_H_A_L_L_E_N_G_E -c cookieMwustinger.txt http://localhost:7000/login
+
+curl -i -X POST -d username=mwustinger -d password=D_A_S___I_S_T___K_E_I_N_E___C_H_A_L_L_E_N_G_E -c cookieMwustinger.txt http://localhost:7000/login
+
+
+
+```
+

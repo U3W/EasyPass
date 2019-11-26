@@ -6,6 +6,7 @@ import dev.easypass.auth.datstore.exception.EntityAlreadyinDatabaseException
 import dev.easypass.auth.datstore.repository.UserRepository
 import dev.easypass.auth.security.challenge.UserAuthenticationChallenge
 import org.springframework.web.bind.annotation.*
+import javax.servlet.http.HttpServletRequest
 import javax.servlet.http.HttpServletResponse
 
 /**
@@ -29,8 +30,8 @@ class RestAPIController(private val challengeAuthenticationProvider: ChallengeAu
      */
     @PostMapping("/auth/challenge")
     @ResponseBody
-    fun unlockChallenge(@RequestParam uname: String): UserAuthenticationChallenge {
-        return challengeAuthenticationProvider.addUserChallenge(uname)
+    fun unlockChallenge(request: HttpServletRequest, @RequestParam uname: String): UserAuthenticationChallenge {
+        return challengeAuthenticationProvider.addUserChallenge(request.remoteAddr, uname)
     }
 
     /**
