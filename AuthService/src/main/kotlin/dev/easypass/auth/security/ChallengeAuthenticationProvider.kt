@@ -1,7 +1,9 @@
 package dev.easypass.auth.security
 
 import dev.easypass.auth.datstore.repository.UserRepository
-import dev.easypass.auth.security.challenge.InternalAdministrationChallenge
+import dev.easypass.auth.security.exception.NoActiveChallengeException
+import dev.easypass.auth.security.exception.UserIsBlockedException
+import dev.easypass.auth.security.challenge.InternalAuthenticationChallenge
 import dev.easypass.auth.security.challenge.UserAuthenticationChallenge
 import org.ektorp.DocumentNotFoundException
 import org.springframework.security.authentication.AuthenticationProvider
@@ -13,6 +15,8 @@ import org.springframework.security.core.GrantedAuthority
 import org.springframework.security.core.authority.SimpleGrantedAuthority
 import org.springframework.security.web.authentication.WebAuthenticationDetails
 import org.springframework.stereotype.Component
+import java.time.Duration
+import java.time.LocalDateTime
 import java.util.*
 import kotlin.collections.HashMap
 
@@ -24,7 +28,8 @@ import kotlin.collections.HashMap
  */
 @Component
 class ChallengeAuthenticationProvider(private val userRepository: UserRepository, private val encryptionLibrary: EncryptionLibrary, private val properties: Properties) : AuthenticationProvider {
-    private val currentChallenges = HashMap<String, InternalAdministrationChallenge>()
+    private val currentChallenges = HashMap<Pair<String, String>, InternalAuthenticationChallenge>()
+    private var attemptCounter = HashMap<Pair<String, String>, Pair<Int, LocalDateTime>>()
 
     /**
      * Checks if the user credentials are correct
@@ -37,14 +42,30 @@ class ChallengeAuthenticationProvider(private val userRepository: UserRepository
         val challenge = authentication.credentials.toString()
         val authorities = ArrayList<GrantedAuthority>()
         authorities.add(SimpleGrantedAuthority(uname))
-        if (currentChallenges[ip] != null) {
-            if (currentChallenges[ip]!!.checkChallenge(challenge)) {
-                currentChallenges.remove(ip)
-                return UsernamePasswordAuthenticationToken(uname, challenge, authorities)
-            } else
-                throw BadCredentialsException("Wrong credentials provided ")
-        } else
-            throw BadCredentialsException("There is no active challenge for this user!")
+
+        val key = Pair(ip, uname)
+        println(currentChallenges)
+        println(attemptCounter)
+
+        if (currentChallenges[key] == null) {
+            loginFailed(key)
+            throw NoActiveChallengeException()
+        }
+        else if (!currentChallenges[key]!!.isActive()) {
+            loginFailed(key)
+            currentChallenges.remove(key)
+            throw NoActiveChallengeException()
+        }
+        else if (isBlocked(key)) {
+            throw UserIsBlockedException()
+        }
+        else if (!currentChallenges[key]!!.checkChallenge(challenge)){
+            loginFailed(key)
+            throw BadCredentialsException("Wrong credentials provided")
+        } else {
+            loginSucceeded(key)
+            return UsernamePasswordAuthenticationToken(uname, challenge, authorities)
+        }
     }
 
     /**
@@ -55,23 +76,38 @@ class ChallengeAuthenticationProvider(private val userRepository: UserRepository
         return authentication == UsernamePasswordAuthenticationToken::class.java
     }
 
-    fun loginSucceeded(ip: String) {
-        println("$ip successfully loged in")
+    fun loginSucceeded(key: Pair<String, String>) {
+        currentChallenges.remove(key)
+        attemptCounter.remove(key)
     }
 
-    fun loginFailed(ip: String) {
-        println("$ip login failed")
+    fun loginFailed(key: Pair<String, String>) {
+        if(attemptCounter[key] == null)
+            attemptCounter[key] = Pair(1, LocalDateTime.now())
+        else
+            attemptCounter[key] = Pair(attemptCounter[key]!!.first+1, LocalDateTime.now())
+    }
+
+    fun isBlocked(key: Pair<String, String>): Boolean {
+        if (attemptCounter[key] != null) {
+            if (Duration.between(attemptCounter[key]!!.second, LocalDateTime.now()).toMillis() >= properties.getProperty("auth.minutesAfterAttemptsAreReset").toInt())
+                attemptCounter.remove(key)
+            else if (attemptCounter[key]!!.first > properties.getProperty("auth.allowedWrongAttemptsUntilBlock").toInt())
+                return true
+        }
+        return false
     }
 
     /**
-     * Adds a new [InternalAdministrationChallenge] to the [currentChallenges]
+     * Adds a new [InternalAuthenticationChallenge] to the [currentChallenges]
      * @param uname: the name of the user
      */
     fun addUserChallenge(ip: String, uname: String): UserAuthenticationChallenge {
+        val key = Pair(ip, uname)
         return try {
-            currentChallenges[ip] = encryptionLibrary.generateInternalAdministrationChallenge()
+            currentChallenges[key] = encryptionLibrary.generateInternalAdministrationChallenge()
             val user = userRepository.findOneByUname(uname)
-            UserAuthenticationChallenge(currentChallenges[ip]!!.getChallengeEncryptedByPublicKey(user.publicKey), user.privateKey)
+            UserAuthenticationChallenge(currentChallenges[key]!!.getChallengeEncryptedByPublicKey(user.publicKey), user.privateKey)
         } catch (ex: DocumentNotFoundException) {
             val user = encryptionLibrary.generateDummyUser(uname)
             UserAuthenticationChallenge(encryptionLibrary.generateInternalAdministrationChallenge().getChallengeEncryptedByPublicKey(user.publicKey), user.privateKey)

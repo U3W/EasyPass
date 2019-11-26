@@ -10,7 +10,7 @@ import java.util.*
  * @param encryptionLibrary: this class provides the required encryption methods
  * @param properties: the application.properties as java bean
  */
-class InternalAdministrationChallenge(private val encryptionLibrary: EncryptionLibrary, private val properties: Properties) {
+class InternalAuthenticationChallenge(private val encryptionLibrary: EncryptionLibrary, private val properties: Properties) {
     private val decryptedChallenge: String = encryptionLibrary.generateAuthenticationChallenge()
     private val timeCreated: LocalDateTime = LocalDateTime.now()
 
@@ -19,8 +19,7 @@ class InternalAdministrationChallenge(private val encryptionLibrary: EncryptionL
      * @param challenge: the [String] that should be compared to the internal [decryptedChallenge]
      */
     fun checkChallenge(challenge: String): Boolean {
-        val timeDelta = Duration.between(timeCreated, LocalDateTime.now()).toMillis()
-        if (timeDelta < properties.getProperty("auth.challengeTimeout").toInt()) {
+        if (isActive()) {
             return this.decryptedChallenge == challenge
         }
         return false
@@ -33,4 +32,6 @@ class InternalAdministrationChallenge(private val encryptionLibrary: EncryptionL
     fun getChallengeEncryptedByPublicKey(publicKey: String): String{
         return encryptionLibrary.encrypt(decryptedChallenge, publicKey)
     }
+
+    fun isActive(): Boolean = Duration.between(timeCreated, LocalDateTime.now()).toMillis() < properties.getProperty("auth.challengeTimeout").toInt()
 }
