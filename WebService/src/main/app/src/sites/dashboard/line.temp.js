@@ -51,6 +51,7 @@ export default class PassLine extends React.Component {
             urlNew: this.props.url,
             catIdNew: this.props.cat,
             tagNew: this.deepCopyTags(this.props.tag),
+            tagAdded: this.setTagAddedRight(this.props.tag),
             popUpCatShow: false,
         };
 
@@ -66,6 +67,10 @@ export default class PassLine extends React.Component {
         this.setPopUpCatDisabled = this.setPopUpCatDisabled.bind(this);
         this.setPopUpCatEnabled = this.setPopUpCatEnabled.bind(this);
         this.getPopUpCat = this.getPopUpCat.bind(this);
+    }
+
+    setTagAddedRight( tags ) {
+        return tags.length > 0;
     }
 
     deepCopyTags( tags ) {
@@ -86,15 +91,14 @@ export default class PassLine extends React.Component {
     }
 
     changeTagListener (key, value, i, e ) {
-        if ( this.state.edit )
+        if ( this.state.edit && this.state.tagAdded )
         {
+            console.log("Teest");
             // just tags
             let tagNew = this.state.tagNew;
             if (e.target.id.length > 8 ) {
                 // tagValue + i
                 if ( e.target.id.includes("tagValue") ) {
-                    console.log("tagValue");
-                    console.log(e.target.value);
                     let test = this.findTagKeyIndex(key);
                     tagNew[i][key] = e.target.value;
                     this.setState({
@@ -104,15 +108,8 @@ export default class PassLine extends React.Component {
             } else if ( e.target.id.length > 6 ) {
                 // tagKey + i
                 if ( e.target.id.includes("tagKey") ) {
-                    console.log("tagKey");
-                    console.log(key);
-                    tagNew = tagNew.map(s => {
-                        if (s.hasOwnProperty(key)) {
-                            s[e.target.value] = s[key];
-                            delete s[key];
-                        }
-                        return s;
-                    });
+                    tagNew[i][e.target.value] = tagNew[i][key];
+                    delete tagNew[i][key];
 
                     this.setState({
                         tagNew: tagNew
@@ -125,6 +122,11 @@ export default class PassLine extends React.Component {
     addTag() {
         if ( this.state.edit )
         {
+            if ( !this.state.tagAdded ) {
+                this.setState({
+                    tagAdded: true,
+                });
+            }
             let tagNew = this.state.tagNew;
             tagNew[this.state.tagNew.length] = {"":""};
             this.setState({
@@ -187,6 +189,7 @@ export default class PassLine extends React.Component {
                     titleNew: this.props.title,
                     urlNew: this.props.url,
                     catIdNew: this.props.cat,
+                    tagAdded: this.setTagAddedRight(this.props.tag),
                     tagNew: this.deepCopyTags(this.props.tag),
                 });
             }
@@ -220,6 +223,31 @@ export default class PassLine extends React.Component {
         console.log("TagInRender", tag, this.props.tag);
         let tagCompArray = [];
 
+        if ( tag.length === 0 ) {
+            if ( this.state.edit ) {
+                let but = (
+                    <Button variant="dark" className="buttonSpaceInline" onClick={this.addTag}>
+                        <img
+                            src={AddTag}
+                            alt=""
+                            width="14"
+                            height="14"
+                            className="d-inline-block"
+                        />
+                    </Button>
+                );
+                tagCompArray[0] = (
+                    <InputGroup size="sm" className="mb-3">
+                        <FormControl id={"tagKey" + 0 } className="" aria-label="Small" aria-describedby="inputGroup-sizing-sm" disabled={!this.state.tagAdded} value={""} onChange={(e) => this.changeTagListener("", "", 0, e)} />
+                        <FormControl id={"tagValue" + 0 } aria-label="Small" aria-describedby="inputGroup-sizing-sm" disabled={!this.state.tagAdded} value={""} onChange={(e) => this.changeTagListener("", "", 0, e)} />
+                        {but}
+                    </InputGroup>
+                );
+            }
+            else {
+                tagCompArray[0] = "Keine Tags vorhanden";
+            }
+        }
         for ( let i = 0; i < tag.length; i++ )
         {
             console.log("Tag single: ",tag[i], "I: ", i);
@@ -604,7 +632,7 @@ export default class PassLine extends React.Component {
                                         :
                                         <>
                                             <FormControl aria-label="Small" aria-describedby="inputGroup-sizing-sm" disabled={true} value={this.state.urlNew} onChange={this.changeListener}/>
-                                            <Button variant="dark" className="buttonSpaceInline" onClick={() => this.props.callback.copy(this.props.url, dashboardAlerts.showCopyURLAlert)}>
+                                            <Button variant="dark" className="buttonSpaceInline" onClick={() => this.props.callback.copy(this.state.urlNew, dashboardAlerts.showCopyURLAlert)}>
                                                 <img
                                                     src={CopyIcon}
                                                     alt=""

@@ -362,6 +362,17 @@
     text-transform: uppercase;
 }
 
+/* Mobile add Car / edit Cat */
+.editBut {
+    height: 25px;
+    width: 25px;
+    margin-right: 90px;
+}
+.addBut {
+    height: 25px;
+    width: 25px;
+    margin-right: 55px;
+}
 /* Mobile Cat */
 .catselectSize {
     height: 46px;
@@ -435,6 +446,33 @@
         display: none!important
     }
 }
+
+/* Sidebar toggle */
+.sidebarToggle {
+    height: 30px;
+    width: 30px;
+    padding: .25rem 0.25rem;
+    font-size: 1rem;
+    line-height: 0em;
+    color: rgba(0,0,0,.5);
+    border-color: rgba(0,0,0,.1);
+    border-radius: .25rem;
+
+    position: absolute;
+    top: 50%;
+    right: -20px;
+}
+
+.sidebarToggle :hover img{
+}
+
+.animateTransform {
+    transition: all 0.3s ease-in-out;
+}
+.sidebarClosed {
+    transform: translateX(-98%);
+}
+
 
 .bottom hr {
     border: none;

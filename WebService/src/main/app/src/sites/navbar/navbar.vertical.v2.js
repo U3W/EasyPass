@@ -1,24 +1,30 @@
 import React from "react"
 import {Button, Col} from "react-bootstrap";
 import Row from "react-bootstrap/Row";
-import groupPass from "../../img/icons/tab_group_password.svg"
-import privPass from "../../img/icons/tab_password.svg"
-import logoutImg from "../../img/icons/logout.svg";
 import tabs from "../dashboard/tabs/tab.enum";
 import IndicatorBot from "../../network/network.indicator.bottombar";
-
+import dashboardState from "../dashboard/dashboard.saved.state";
 // Icons
 import AddCat from "../../img/icons/password_add_tag.svg";
 import EditCat from "../../img/icons/password_edit_white.svg"
+import OpenSidebar from "../../img/icons/sidebar_open.svg"
+import CloseSidebar from "../../img/icons/sidebar_close.svg"
 
 class NavbarVerticalEP2 extends React.Component {
     constructor(props) {
         super(props);
 
         this.state = {
-            catCounter: 1,
+            sidebarClosed: dashboardState.getSidebarClosed(),
         };
 
+    }
+
+    setClose( to ) {
+        this.setState({
+            sidebarClosed: to,
+        });
+        this.props.callback.setSidebarState(to);
     }
 
     /**
@@ -81,10 +87,11 @@ class NavbarVerticalEP2 extends React.Component {
     }
 
     getEditCat() {
-        let out = (
+        return (
             <>
-                <li key={0} className="d-flex align-items-center text-muted clickable nav-link-kat-click" onClick={() => this.props.callback.showAddCat()}>
-                    <div className="nav-link-kat fitparentWidth" >
+                <li key={0} className="d-flex align-items-center text-muted clickable nav-link-kat-click"
+                    onClick={() => this.props.callback.showAddCat()}>
+                    <div className="nav-link-kat fitparentWidth">
                         Kategorie hinzufügen
                         <Button variant="dark" className="catButton round">
                             <img
@@ -97,8 +104,9 @@ class NavbarVerticalEP2 extends React.Component {
                         </Button>
                     </div>
                 </li>
-                <li key={1} className="d-flex align-items-center text-muted clickable nav-link-kat-click" onClick={() => alert("Bearbeiten")}>
-                    <div className="nav-link-kat fitparentWidth" >
+                <li key={1} className="d-flex align-items-center text-muted clickable nav-link-kat-click"
+                    onClick={() => alert("Bearbeiten")}>
+                    <div className="nav-link-kat fitparentWidth">
                         Kategorie bearbeiten
                         <Button variant="dark" className="catButton round">
                             <img
@@ -113,16 +121,35 @@ class NavbarVerticalEP2 extends React.Component {
                 </li>
             </>
         );
-
-        return out;
     }
 
 
     render() {
         const tabselected = this.props.callback.state.tabselected;
+
+        let sidebarToggle = CloseSidebar;
+        let classes = "col-md-3 col-sm-5 col-5 d-none d-sm-block bg-light sidebar animateTransform";
+        let classesNetwork = "";
+        if ( this.state.sidebarClosed ) {
+            sidebarToggle = OpenSidebar;
+            classes = classes + " sidebarClosed";
+            classesNetwork = "sindebarCloased";
+            console.log("Closed");
+        }
         return (
             <>
-                <nav className="col-md-3 col-sm-5 col-5 d-none d-sm-block bg-light sidebar">
+                <nav className={classes}>
+                    <button type="button" className="sidebarToggle clickable btn btn-light" onClick={() => this.setClose(!this.state.sidebarClosed)}>
+                        <div>
+                            <img
+                                src={sidebarToggle}
+                                alt=""
+                                width="15"
+                                height="15"
+                                className="sidebarToggleImg d-inline-block"
+                            />
+                        </div>
+                    </button>
                     <div className="sidebar-sticky">
                         <ul className="nav flex-column">
                             <h1 className="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-1 mb-1 text-muted">

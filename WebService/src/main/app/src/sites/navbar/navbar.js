@@ -15,6 +15,10 @@ import Modal from "react-bootstrap/Modal";
 import NavbarVerticalEP from "./navbar.vertcal";
 import Table from "react-bootstrap/Table";
 
+// Icons
+import AddCat from "../../img/icons/password_add_tag_black.svg";
+import EditCat from "../../img/icons/password_edit.svg";
+
 class NavbarEP extends React.Component {
     constructor(props) {
         super(props);
@@ -202,6 +206,24 @@ class NavbarEP extends React.Component {
                         </Navbar>
                         <Navbar collapseOnSelect className="catnav catselectSize" expand="lg" bg="dark" variant="dark">
                             <Navbar.Brand className="catName" href="#home">{this.props.callback.getSelectedCatName()}</Navbar.Brand>
+                            <Button variant="light" className="catButton round editBut" onClick={() => alert("Kategorie bearbeiten")}>
+                                <img
+                                    src={EditCat}
+                                    alt=""
+                                    width="15"
+                                    height="15"
+                                    className="d-inline-block"
+                                />
+                            </Button>
+                            <Button variant="light" className="catButton round addBut" onClick={() => this.props.callback.showAddCat()}>
+                                <img
+                                    src={AddCat}
+                                    alt=""
+                                    width="15"
+                                    height="15"
+                                    className="d-inline-block"
+                                />
+                            </Button>
                             <button type="button" aria-label="Toggle navigation" className="toggler navbar-toggler collapsed" onClick={this.setPopUpCatEnabled}>
                                 <span className="navbar-toggler-icon"/>
                             </button>

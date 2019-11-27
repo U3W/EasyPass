@@ -14,7 +14,7 @@ import MockPasswords from "./MockPasswords";
 import PassLine from "./line.temp";
 import {authConstants as dashboardConst, authConstants} from "../../authentification/auth.const.localstorage";
 import {
-    saveCat,
+    saveCat, saveSidebarClosed,
     saveTab
 } from "../../action/dashboard.action";
 import dashboardState from "./dashboard.saved.state"
@@ -59,6 +59,12 @@ class Dashboard extends React.Component {
             showCopyAlert: false,
             showCopyUsernameAlert: false,
             showCopyURLAlert: false,
+            showAddedPass: false,
+            showEditedPass: false,
+            showAddedCat: false,
+            showEditedCat: false,
+            // alert state
+            alertState: "success",
             // cat add
             popUpAddCatShow: false,
             // password add
@@ -66,6 +72,8 @@ class Dashboard extends React.Component {
             // with, height
             width: 0,
             height: 0,
+            // sidebar
+            sidebarClosed: dashboardState.getSidebarClosed(),
         };
 
         this.handleSearch = this.handleSearch.bind(this);
@@ -76,7 +84,6 @@ class Dashboard extends React.Component {
         this.changeCat = this.changeCat.bind(this);
         this.changeTab = this.changeTab.bind(this);
         this.dismissCopy = this.dismissCopy.bind(this);
-        this.closeCopy = this.closeCopy.bind(this);
         this.saveEdit = this.saveEdit.bind(this);
         this.renderCat = this.renderCat.bind(this);
 
@@ -217,28 +224,86 @@ class Dashboard extends React.Component {
     }
 
 
-    closeCopy(which) {
-        switch (which) {
-            case dashboardAlerts.showCopyAlert:
-                this.setState({showCopyAlert: false});
-                break;
-            case dashboardAlerts.showCopyUsernameAlert:
-                this.setState({showCopyUsernameAlert: false});
-                break;
-            case dashboardAlerts.showCopyURLAlert:
-                this.setState({showCopyURLAlert: false});
-                break;
-        }
+    printCopy() {
+        const show = this.state.showCopyAlert;
+        let succ = "Passwort wurde in die Zwischenablage kopiert!";
+        let err = "Ein Fehler ist aufgetreten. Bitte versuchen Sie es erneut!";
+        return (
+            <Alert show={show} variant={this.state.alertState} className="center-horz center-vert error fixed-top-easypass in-front">
+                <p className="center-horz center-vert center-text">
+                    {this.state.alertState === "success" ?
+                        succ
+                        :
+                        err
+                    }
+                </p>
+            </Alert>
+        );
     }
 
 
-    printCopy() {
-        const show = this.state.showCopyAlert;
+    printURL() {
+        const show = this.state.showCopyURLAlert;
         return (
-            <Alert show={show} variant="success" className="center-horz center-vert error fixed-top-easypass in-front"
-                   onClose={() => this.closeCopy("showCopyAlert")}>
+            <Alert show={show} variant="success" className="center-horz center-vert error fixed-top-easypass in-front">
                 <p className="center-horz center-vert center-text">
-                    Passwort wurde in die Zwischenablage kopiert!
+                    URL wurde in die Zwischenablage kopiert!
+                </p>
+            </Alert>
+        );
+    }
+
+    printAddCat() {
+        const show = this.state.showAddedCat;
+        return (
+            <Alert show={show} variant="success" className="center-horz center-vert error fixed-top-easypass in-front">
+                <p className="center-horz center-vert center-text">
+                    URL wurde in die Zwischenablage kopiert!
+                </p>
+            </Alert>
+        );
+    }
+
+    printEditCat() {
+        const show = this.state.showEditedCat;
+        return (
+            <Alert show={show} variant="success" className="center-horz center-vert error fixed-top-easypass in-front">
+                <p className="center-horz center-vert center-text">
+                    URL wurde in die Zwischenablage kopiert!
+                </p>
+            </Alert>
+        );
+    }
+
+    printEditPass() {
+        const show = this.state.showEditedPass;
+        let succ = "Bearbeitetes Password gespeichert";
+        let err = "Beim Passwort hinzufügen ist ein Fehler aufgetreten. Bitte versuchen Sie es erneut!";
+        return (
+            <Alert show={show} variant={this.state.alertState} className="center-horz center-vert error fixed-top-easypass in-front">
+                <p className="center-horz center-vert center-text">
+                    {this.state.alertState === "success" ?
+                        succ
+                        :
+                        err
+                    }
+                </p>
+            </Alert>
+        );
+    }
+
+    printAddPass() {
+        const show = this.state.showAddedPass;
+        let succ = "Passwort hinzugefügt";
+        let err = "Beim Passwort hinzufügen ist ein Fehler aufgetreten. Bitte versuchen Sie es erneut!";
+        return (
+            <Alert show={show} variant={this.state.alertState} className="center-horz center-vert error fixed-top-easypass in-front">
+                <p className="center-horz center-vert center-text">
+                    {this.state.alertState === "success" ?
+                        succ
+                        :
+                        err
+                    }
                 </p>
             </Alert>
         );
@@ -247,8 +312,7 @@ class Dashboard extends React.Component {
     printUser() {
         const show = this.state.showCopyUsernameAlert;
         return (
-            <Alert show={show} variant="success" className="center-horz center-vert error fixed-top-easypass in-front"
-                   onClose={() => this.closeCopy("showCopyUsernameAlert")}>
+            <Alert show={show} variant="success" className="center-horz center-vert error fixed-top-easypass in-front">
                 <p className="center-horz center-vert center-text">
                     Username wurde in die Zwischenablage kopiert!
                 </p>
@@ -257,13 +321,29 @@ class Dashboard extends React.Component {
     }
 
     dismissCopy( which ) {
-        sleep(1250).then(() => {
+        console.log("Going to dismiss");
+        sleep(2125).then(() => {
                 switch (which) {
-                    case "showCopyAlert":
+                    case dashboardAlerts.showCopyAlert:
                         this.setState({showCopyAlert: false});
                         break;
-                    case "showCopyUsernameAlert":
+                    case dashboardAlerts.showCopyUsernameAlert:
                         this.setState({showCopyUsernameAlert: false});
+                        break;
+                    case dashboardAlerts.showCopyURLAlert:
+                        this.setState({showCopyURLAlert: false});
+                        break;
+                    case dashboardAlerts.showAddedPass:
+                        this.setState({showAddedPass: false});
+                        break;
+                    case dashboardAlerts.showEditedPass:
+                        this.setState({showEditedPass: false});
+                        break;
+                    case dashboardAlerts.showAddedCat:
+                        this.setState({showAddedCat: false});
+                        break;
+                    case dashboardAlerts.showEditedCat:
+                        this.setState({showEditedCat: false});
                         break;
                 }
             }
@@ -286,7 +366,7 @@ class Dashboard extends React.Component {
         document.body.removeChild(el);
     }
 
-    copy( toCopy, which ) {
+    copy( toCopy, which, succ ) {
         switch (which) {
             case dashboardAlerts.showCopyUsernameAlert:
                 this.setState({
@@ -295,14 +375,53 @@ class Dashboard extends React.Component {
                 this.dismissCopy(dashboardAlerts.showCopyUsernameAlert);
                 break;
             case dashboardAlerts.showCopyURLAlert:
+                console.log("Url aus true");
                 this.setState({
                     showCopyURLAlert: true,
                 });
                 this.dismissCopy(dashboardAlerts.showCopyURLAlert);
                 break;
+            case dashboardAlerts.showAddedPass:
+                this.setState({
+                    showAddedPass: true,
+                });
+                this.dismissCopy(dashboardAlerts.showAddedPass);
+                break;
+            case dashboardAlerts.showAddedCat:
+                this.setState({
+                    showAddedCat: true,
+                });
+                this.dismissCopy(dashboardAlerts.showAddedCat);
+
+                break;
+            case dashboardAlerts.showEditedPass:
+                this.setState({
+                    showEditedPass: true,
+                });
+                this.dismissCopy(dashboardAlerts.showEditedPass);
+                break;
+            case dashboardAlerts.showEditedCat:
+                this.setState({
+                    showEditedCat: true,
+                });
+                this.dismissCopy(dashboardAlerts.showEditedCat);
+                break;
         }
 
-        this.clipboardCopy(toCopy);
+        if ( succ ) {
+            this.setState({
+                alertState: "success",
+            });
+        }
+        else {
+            this.setState({
+                alertState: "danger",
+            });
+        }
+
+        if ( toCopy === "" ) {
+            this.clipboardCopy(toCopy);
+        }
     }
 
     copyPass(id) {
@@ -456,7 +575,7 @@ class Dashboard extends React.Component {
 
     addPass(user, pass, url, title, catID, tag) {
         // ToDO call Kacpers method
-        alert("Password added");
+        this.copy("", dashboardAlerts.showAddedPass, false);
         this.dismissAddPass();
     }
 
@@ -466,6 +585,7 @@ class Dashboard extends React.Component {
 
     saveEdit(id, userNew, passwordNew, urlNew, titleNew, catNew, tagNew) {
         // ToDo call Kacpers method
+        this.copy("", dashboardAlerts.showEditedPass, true);
     }
 
     addCat() {
@@ -476,6 +596,13 @@ class Dashboard extends React.Component {
 
     editCat() {
 
+    }
+
+    setSidebarState( to ) {
+        this.setState({
+            sidebarClosed: to,
+        });
+        this.props.saveSidebarClosed(to);
     }
 
     showAddPass() {
@@ -529,26 +656,38 @@ class Dashboard extends React.Component {
         // ml-sm-auto col-lg-10 px-4
 
 
-        let mainClasses = "fixMain";
+        let mainClasses = "fixMain animateWidth";
         if ( this.state.expanded )
         {
             // >= 992px the navbar is never expandable
             if ( this.state.width < 992 ) {
-                mainClasses = "fixMain expanded"
+                mainClasses += " expanded"
             }
         }
 
+        let indicatorClass = "animateTransform";
+        if ( this.state.sidebarClosed )
+        {
+            indicatorClass += " sidebarClosed";
+        }
         return (
             <div className="size-hole-window-hidden-scroll">
                 <NavbarEP callback={this} />
                 <div className="container-fluid fixScroll">
                     <Row>
                         <NavbarVerticalEP2 callback={this} />
-                        <Col md={9} sm={7} xs={7} lg={9} className={mainClasses}>
-                            {this.getTab()}
-                        </Col>
+                        { this.state.sidebarClosed ?
+                            <Col className={mainClasses + " fitHole"}>
+                                {this.getTab()}
+                            </Col>
+                            :
+                            <Col md={9} sm={7} xs={7} lg={9} className={mainClasses}>
+                                {this.getTab()}
+                            </Col>
+                        }
+
                         <hr/>
-                        <IndicatorSide />
+                        <IndicatorSide className={indicatorClass} />
                     </Row>
                     <Button className="fab" variant="danger" onClick={this.showAddPass}>
                         <img
@@ -567,6 +706,11 @@ class Dashboard extends React.Component {
                 <AddCategory callback={this}/>
                 {this.printCopy()}
                 {this.printUser()}
+                {this.printURL()}
+                {this.printAddPass()}
+                {this.printEditPass()}
+                {this.printEditCat()}
+                {this.printAddPass()}
             </div>
         );
     }
@@ -577,8 +721,9 @@ const mapDispatchToProps3 = (dispatch) => {
         login: (creds) => dispatch(login(creds)),
         logout: () => dispatch(logout()),
         saveTab: (tabselected) => dispatch(saveTab(tabselected)),
-        saveCat: (tabselected, catselected) => dispatch(saveCat(tabselected, catselected))
-    }
+        saveCat: (tabselected, catselected) => dispatch(saveCat(tabselected, catselected)),
+        saveSidebarClosed: (sidebarClosed) => dispatch(saveSidebarClosed(sidebarClosed)),
+    };
 };
 
 const mapStateToProps3 = (state) => {

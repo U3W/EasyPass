@@ -5,23 +5,31 @@ class dashboardState {
 
     getTab() {
         if ( JSON.parse(localStorage.getItem(dashboardConst.tabselected)) === null ) {
-            return 0
+            return 0;
         }
         return JSON.parse(localStorage.getItem(dashboardConst.tabselected));
     }
 
     getCatPriv() {
         if ( JSON.parse(localStorage.getItem(dashboardConst.catselectedPriv)) === null ) {
-            return 0
+            return 0;
         }
         return JSON.parse(localStorage.getItem(dashboardConst.catselectedPriv));
     }
 
     getCatGroup() {
         if ( JSON.parse(localStorage.getItem(dashboardConst.catselectedGroup)) === null ) {
-            return 0
+            return 0;
         }
         return JSON.parse(localStorage.getItem(dashboardConst.catselectedGroup));
+    }
+
+    getSidebarClosed() {
+        if ( JSON.parse(localStorage.getItem(dashboardConst.sidebarClosed)) === null )
+        {
+            return false;
+        }
+        return JSON.parse(localStorage.getItem(dashboardConst.sidebarClosed));
     }
 
 }

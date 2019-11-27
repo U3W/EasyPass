@@ -6,6 +6,10 @@ import InputGroup from "react-bootstrap/InputGroup";
 import {Card} from "react-bootstrap";
 import Button from "react-bootstrap/Button";
 import AddTag from "../../img/icons/password_add_tag.svg";
+import {dashboardAlerts} from "./const/dashboard.enum";
+import "./add.password.css"
+// Icons
+import GeneratePass from "../../img/icons/generate_password_white.svg";
 
 export default class AddPassword extends React.Component {
 
@@ -17,6 +21,7 @@ export default class AddPassword extends React.Component {
             user: "",
             pass: "",
             url: "",
+            tagAdded: false,
             tag: [{"":""}],
             catID: -1,
             // Popup
@@ -38,49 +43,67 @@ export default class AddPassword extends React.Component {
     }
 
     dismissPopUp() {
+        this.resetState();
         this.props.callback.dismissAddPass();
+    }
+
+    resetState() {
+        this.setState({
+            title: "",
+            user: "",
+            pass: "",
+            url: "",
+            tagAdded: false,
+            tag: [{"":""}],
+            catID: -1,
+            // Popup
+            popUpCatShow: false,
+        })
     }
 
 
     changeTagListener (key, value, i, e ) {
-        // just tags
-        let tagNew = this.state.tag;
-        if (e.target.id.length > 8 ) {
-            // tagValue + i
-            if ( e.target.id.includes("tagValue") ) {
-                console.log("tagValue");
-                console.log(e.target.value);
-                tagNew[i][key] = e.target.value;
-                this.setState({
-                    tag: tagNew
-                });
-            }
-        } else if ( e.target.id.length > 6 ) {
-            // tagKey + i
-            if ( e.target.id.includes("tagKey") ) {
-                console.log("tagKey");
-                console.log(key);
-                tagNew = tagNew.map(s => {
-                    if (s.hasOwnProperty(key)) {
-                        s[e.target.value] = s[key];
-                        delete s[key];
-                    }
-                    return s;
-                });
+        if ( this.state.tagAdded ) {
+            // just tags
+            let tagNew = this.state.tag;
+            console.log("Thisss", tagNew, "key", key);
+            if (e.target.id.length > 8) {
+                // tagValue + i
+                if (e.target.id.includes("tagValue")) {
 
-                this.setState({
-                    tag: tagNew
-                })
+                    tagNew[i][key] = e.target.value;
+                    this.setState({
+                        tag: tagNew
+                    });
+                }
+            } else if (e.target.id.length > 6) {
+                // tagKey + i
+
+                if (e.target.id.includes("tagKey")) {
+                    tagNew[i][e.target.value] = tagNew[i][key];
+                    delete tagNew[i][key];
+
+                    this.setState({
+                        tag: tagNew
+                    })
+                }
             }
         }
     }
 
     addTag() {
-        let tag = this.state.tag;
-        tag[tag.length] = {"":""};
-        this.setState({
-            tag: tag,
-        });
+        if ( !this.state.tagAdded ) {
+            this.setState({
+                tagAdded: true,
+            });
+        }
+        else {
+            let tag = this.state.tag;
+            tag[tag.length] = {"": ""};
+            this.setState({
+                tag: tag,
+            });
+        }
     }
 
     renderTag() {
@@ -106,11 +129,12 @@ export default class AddPassword extends React.Component {
             }
             tagCompArray[i] = (
                 <InputGroup size="sm" className="mb-3">
-                    <FormControl autoComplete="off" id={"tagKey" + i } className="" aria-label="Small" aria-describedby="inputGroup-sizing-sm" disabled={false} value={tagKeys[0]} onChange={(e) => this.changeTagListener(tagKeys[0], tag[i][tagKeys[0]], i, e)} />
-                    <FormControl autoComplete="off" id={"tagValue" + i } aria-label="Small" aria-describedby="inputGroup-sizing-sm" disabled={false} value={tag[i][tagKeys[0]]} onChange={(e) => this.changeTagListener(tagKeys[0], tag[i][tagKeys[0]], i, e)} />
+                    <FormControl autoComplete="off" id={"tagKey" + i } className="" aria-label="Small" aria-describedby="inputGroup-sizing-sm" disabled={!this.state.tagAdded} value={tagKeys[0]} onChange={(e) => this.changeTagListener(tagKeys[0], tag[i][tagKeys[0]], i, e)} />
+                    <FormControl autoComplete="off" id={"tagValue" + i } aria-label="Small" aria-describedby="inputGroup-sizing-sm" disabled={!this.state.tagAdded} value={tag[i][tagKeys[0]]} onChange={(e) => this.changeTagListener(tagKeys[0], tag[i][tagKeys[0]], i, e)} />
                     {but}
                 </InputGroup>
             );
+
         }
         let key = -1;
         return tagCompArray.map(function (tagComp) {
@@ -207,7 +231,7 @@ export default class AddPassword extends React.Component {
                                 </InputGroup.Prepend>
                                 <FormControl autoComplete="off" id="title" aria-label="Large" aria-describedby="inputGroup-sizing-sm"/>
                             </InputGroup>
-
+                            <hr/>
                             <InputGroup size="sm" className="mb-3">
                                 <InputGroup.Prepend>
                                     <InputGroup.Text id="inputGroup-sizing-sm">User</InputGroup.Text>
@@ -219,23 +243,26 @@ export default class AddPassword extends React.Component {
                                 <InputGroup.Prepend>
                                     <InputGroup.Text id="inputGroup-sizing-sm">Password</InputGroup.Text>
                                 </InputGroup.Prepend>
-                                <FormControl autoComplete="off" id="username" aria-label="Small" aria-describedby="inputGroup-sizing-sm"/>
+                                <FormControl autoComplete="off" id="password" aria-label="Small" aria-describedby="inputGroup-sizing-sm"/>
+                                <Button variant="dark" className="buttonSpaceInline" onClick={() => this.props.callback.copy(this.state.urlNew, dashboardAlerts.showCopyURLAlert)}>
+                                    <img
+                                        src={GeneratePass}
+                                        alt=""
+                                        width="14"
+                                        height="14"
+                                        className="d-inline-block"
+                                    />
+                                </Button>
                             </InputGroup>
 
                             <InputGroup size="sm" className="mb-3">
                                 <InputGroup.Prepend>
                                     <InputGroup.Text id="inputGroup-sizing-sm">Website (Login)</InputGroup.Text>
                                 </InputGroup.Prepend>
-                                <FormControl autoComplete="off" id="username" aria-label="Small" aria-describedby="inputGroup-sizing-sm"/>
+                                <FormControl autoComplete="off" id="url" aria-label="Small" aria-describedby="inputGroup-sizing-sm"/>
                             </InputGroup>
 
-                            <InputGroup size="sm" className="mb-3">
-                                <InputGroup.Prepend>
-                                    <InputGroup.Text id="inputGroup-sizing-sm">Website (Login)</InputGroup.Text>
-                                </InputGroup.Prepend>
-                                <FormControl autoComplete="off"id="username" aria-label="Small" aria-describedby="inputGroup-sizing-sm"/>
-                            </InputGroup>
-
+                            <hr/>
                             <div>
                                 <h6>Tags</h6>
                                 {this.renderTag()}
