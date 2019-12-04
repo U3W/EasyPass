@@ -16,8 +16,42 @@ class NavbarVerticalEP2 extends React.Component {
 
         this.state = {
             sidebarClosed: dashboardState.getSidebarClosed(),
+            sidebarFlag: true,
+            // with, height
+            width: 0,
+            height: 0,
         };
 
+        // WindowDimensions
+        this.updateWindowDimensions = this.updateWindowDimensions.bind(this);
+    }
+
+    componentDidMount() {
+        this.updateWindowDimensions();
+        window.addEventListener('resize', this.updateWindowDimensions);
+    }
+
+    componentWillUnmount() {
+        window.removeEventListener('resize', this.updateWindowDimensions);
+    }
+
+    updateWindowDimensions() {
+        if ( this.state.sidebarFlag && window.innerWidth < 680 ) {
+            this.setClose(true);
+            this.setState({
+                sidebarFlag: false,
+            });
+        }
+        else if ( window.innerWidth > 680 ) {
+            if ( !this.state.sidebarFlag )
+            {
+                this.setClose(false);
+                this.setState({
+                    sidebarFlag: true,
+                });
+            }
+        }
+        this.setState({ width: window.innerWidth, height: window.innerHeight });
     }
 
     setClose( to ) {
@@ -105,7 +139,7 @@ class NavbarVerticalEP2 extends React.Component {
                     </div>
                 </li>
                 <li key={1} className="d-flex align-items-center text-muted clickable nav-link-kat-click"
-                    onClick={() => alert("Bearbeiten")}>
+                    onClick={() => this.props.callback.showEditCat()}>
                     <div className="nav-link-kat fitparentWidth">
                         Kategorie bearbeiten
                         <Button variant="dark" className="catButton round">
@@ -129,12 +163,11 @@ class NavbarVerticalEP2 extends React.Component {
 
         let sidebarToggle = CloseSidebar;
         let classes = "col-md-3 col-sm-5 col-5 d-none d-sm-block bg-light sidebar animateTransform";
-        let classesNetwork = "";
+        let classesIntern = "sidebar-sticky animateTransformWidth";
         if ( this.state.sidebarClosed ) {
             sidebarToggle = OpenSidebar;
-            classes = classes + " sidebarClosed";
-            classesNetwork = "sindebarCloased";
-            console.log("Closed");
+            classes += " sidebarClosed";
+            classesIntern += " sidebarClosedMore";
         }
         return (
             <>
@@ -150,7 +183,7 @@ class NavbarVerticalEP2 extends React.Component {
                             />
                         </div>
                     </button>
-                    <div className="sidebar-sticky">
+                    <div className={classesIntern}>
                         <ul className="nav flex-column">
                             <h1 className="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-1 mb-1 text-muted">
                                 <span>Menü</span>

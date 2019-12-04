@@ -6,7 +6,9 @@ import Container from "react-bootstrap/Container";
 import Card from "react-bootstrap/Card";
 import "./masterpassword.css"
 import {login, logout} from "../../action/auth.action";
-import {loginButton, masterpassword, wrongLogin, wrongLoginHeader} from "../../strings/stings";
+
+// Strings
+import StringSelector from "../../strings/stings";
 
 import {mlogin, mlogout} from "../../action/mauth.action";
 import {connect} from "react-redux";
@@ -16,6 +18,7 @@ import Alert from "react-bootstrap/Alert";
 import Indicator from "../../network/network.indicator";
 import tabs from "../dashboard/tabs/tab.enum";
 import {saveCat, saveTab} from "../../action/dashboard.action";
+import dashboardState from "../dashboard/dashboard.saved.state";
 
 class Masterpassword extends React.Component {
 
@@ -23,6 +26,8 @@ class Masterpassword extends React.Component {
         super(props);
 
         this.state = {
+            language: dashboardState.getSelectedLanguage(),
+
             inpMasterpassword: "",
             inpKey: "",
             inpFile: "",
@@ -69,9 +74,9 @@ class Masterpassword extends React.Component {
         return (
             <Alert show={show} variant="danger" className="center-horz error" dismissible
                    onClose={() => this.setShow(false)}>
-                <Alert.Heading>{wrongLoginHeader}</Alert.Heading>
+                <Alert.Heading>{StringSelector.getString(this.state.language).wrongLoginHeader}</Alert.Heading>
                 <p>
-                    {wrongLogin}
+                    {StringSelector.getString(this.state.language).wrongLogin}
                 </p>
             </Alert>
         );
@@ -299,7 +304,7 @@ class Masterpassword extends React.Component {
                                             <Row>
                                                 <Col sm={12}>
                                                     <Button className={"float-right"} variant="primary" onClick={this.handleSubmit}>
-                                                        {loginButton}
+                                                        {StringSelector.getString(this.state.language).loginButton}
                                                     </Button>
                                                 </Col>
                                             </Row>

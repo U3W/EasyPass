@@ -3,6 +3,7 @@ import {authConstants as dashboardConst} from "../authentification/auth.const.lo
 export const SAVE_TAB = "SAVE_TAB";
 export const SAVE_CAT = "SAVE_CAT";
 export const SAVE_SIDEBAR = "SAVE_SIDEBAR";
+export const SAVE_LANGUAGE = "SAVE_LANGUAGE";
 
 export const saveTab = (tabselected) => ({
     type: SAVE_TAB,
@@ -18,4 +19,9 @@ export const saveCat = (tabselected, catselected) => ({
 export const saveSidebarClosed = (sidebarClosed) => ({
     type: SAVE_SIDEBAR,
     sidebarClosed,
+});
+
+export const changeLanguage = (language) => ({
+    type: SAVE_LANGUAGE,
+    language,
 });

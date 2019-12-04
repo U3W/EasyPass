@@ -18,6 +18,16 @@
     padding-right: 1.2em;
 }
 
+/* Navbar Settings */
+.stickRight {
+    margin-right: 50%;
+}
+
+.stickRightText {
+    background-color: rgba(0,0,0,0.0) !important;
+    border: 0;
+}
+
 /* Round add button */
 .round {
     border-radius: 50% !important;
@@ -471,6 +481,13 @@
 }
 .sidebarClosed {
     transform: translateX(-98%);
+}
+.animateTransformWidth {
+    transition: width 0.3s ease-in-out !important;
+    width: 100% !important;
+}
+.sidebarClosedMore {
+    width: 80% !important;
 }
 
 

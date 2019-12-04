@@ -3,13 +3,15 @@ import Modal from "react-bootstrap/Modal";
 import Table from "react-bootstrap/Table";
 import FormControl from "react-bootstrap/FormControl";
 import InputGroup from "react-bootstrap/InputGroup";
-import {Card} from "react-bootstrap";
+import {Card, Col, Form} from "react-bootstrap";
 import Button from "react-bootstrap/Button";
-import AddTag from "../../img/icons/password_add_tag.svg";
-import {dashboardAlerts} from "./const/dashboard.enum";
 import "./add.password.css"
 // Icons
-import GeneratePass from "../../img/icons/generate_password_white.svg";
+import GeneratePassIcon from "../../img/icons/generate_password_white.svg";
+import ReloadPass from "../../img/icons/generate_reload_white.svg"
+import AddTag from "../../img/icons/password_add_tag.svg";
+import Row from "react-bootstrap/Row";
+import GeneratePass from "./generatepass";
 
 export default class AddPassword extends React.Component {
 
@@ -23,10 +25,14 @@ export default class AddPassword extends React.Component {
             url: "",
             tagAdded: false,
             tag: [{"":""}],
-            catID: -1,
+            catID: 0,
             // Popup
             popUpCatShow: false,
+            generatePassShow: false,
         };
+
+        this.dismissGeneratePass = this.dismissGeneratePass.bind(this);
+        this.openGeneratePass = this.openGeneratePass.bind(this);
 
         this.dismissPopUp = this.dismissPopUp.bind(this);
         this.renderTag = this.renderTag.bind(this);
@@ -42,6 +48,27 @@ export default class AddPassword extends React.Component {
         this.changeCat = this.changeCat.bind(this);
     }
 
+    dismissGeneratePass() {
+        this.setState({
+            generatePassShow: false,
+        });
+    }
+
+    openGeneratePass() {
+        this.setState({
+            generatePassShow: true,
+        });
+    }
+
+
+
+    addPassword( pass ) {
+        this.setState({
+            pass: pass,
+        });
+        this.dismissGeneratePass();
+    }
+
     dismissPopUp() {
         this.resetState();
         this.props.callback.dismissAddPass();
@@ -55,7 +82,7 @@ export default class AddPassword extends React.Component {
             url: "",
             tagAdded: false,
             tag: [{"":""}],
-            catID: -1,
+            catID: 0,
             // Popup
             popUpCatShow: false,
         })
@@ -193,7 +220,12 @@ export default class AddPassword extends React.Component {
                     <Modal.Body className="ep-modal-body">
                         <Table striped bordered hover className="ep-modal-table">
                             <tbody>
-                            {finalCats}
+                                {finalCats}
+                                <tr>
+                                    <td onClick={() => this.changeCat(0)}>
+                                        Keiner Kategorie zuordnen
+                                    </td>
+                                </tr>
                             </tbody>
                         </Table>
                     </Modal.Body>
@@ -205,21 +237,51 @@ export default class AddPassword extends React.Component {
     getCatName() {
         let cats = this.props.callback.getCats();
         let catName;
-        if ( this.state.catID === -1 ) {
-            return ""
+        if ( this.state.catID === 0 ) {
+            return "Keiner Kategorie zugeordnet"
         }
-        for ( let i = 0; i < cats.length; i++ ) {
-            if ( cats[i].id === this.state.catID ) {
-                catName = cats[i].name;
+        else {
+            for ( let i = 0; i < cats.length; i++ ) {
+                if ( cats[i].id === this.state.catID ) {
+                    catName = cats[i].name;
+                }
             }
         }
+
         return catName
     }
+
+
+    changeInput = (e) => {
+        switch (e.target.id) {
+            case "title":
+                this.setState({
+                    title: e.target.value
+                });
+                break;
+            case "username":
+                this.setState({
+                    user: e.target.value,
+                });
+                break;
+            case "password":
+                this.setState({
+                   pass: e.target.value,
+                });
+                break;
+            case "url":
+                this.setState({
+                    url: e.target.value,
+                });
+                break;
+        }
+    };
+
 
     render() {
         return (
             <>
-                <Modal show={this.props.callback.getPassAddShow()} onHide={this.dismissPopUp} className="ep-modal-dialog">
+                <Modal show={this.props.callback.getPassAddShow()} onHide={this.dismissPopUp} className="ep-modal-dialog addPassPopUp">
                     <Modal.Header closeButton>
                         <Modal.Title>Passwort hinzufügen:</Modal.Title>
                     </Modal.Header>
@@ -227,26 +289,26 @@ export default class AddPassword extends React.Component {
                         <Card.Body>
                             <InputGroup size="lg" className="mb-3">
                                 <InputGroup.Prepend>
-                                    <InputGroup.Text id="inputGroup-sizing-lg">Name</InputGroup.Text>
+                                    <InputGroup.Text id="inputGroup-sizing-lg">Titel</InputGroup.Text>
                                 </InputGroup.Prepend>
-                                <FormControl autoComplete="off" id="title" aria-label="Large" aria-describedby="inputGroup-sizing-sm"/>
+                                <FormControl autoComplete="off" id="title" aria-label="Large" aria-describedby="inputGroup-sizing-sm" value={this.state.title} onChange={this.changeInput}/>
                             </InputGroup>
                             <hr/>
                             <InputGroup size="sm" className="mb-3">
                                 <InputGroup.Prepend>
                                     <InputGroup.Text id="inputGroup-sizing-sm">User</InputGroup.Text>
                                 </InputGroup.Prepend>
-                                <FormControl autoComplete="off" id="username" aria-label="Small" aria-describedby="inputGroup-sizing-sm"/>
+                                <FormControl autoComplete="off" id="username" aria-label="Small" aria-describedby="inputGroup-sizing-sm" value={this.state.user} onChange={this.changeInput}/>
                             </InputGroup>
 
                             <InputGroup size="sm" className="mb-3">
                                 <InputGroup.Prepend>
                                     <InputGroup.Text id="inputGroup-sizing-sm">Password</InputGroup.Text>
                                 </InputGroup.Prepend>
-                                <FormControl autoComplete="off" id="password" aria-label="Small" aria-describedby="inputGroup-sizing-sm"/>
-                                <Button variant="dark" className="buttonSpaceInline" onClick={() => this.props.callback.copy(this.state.urlNew, dashboardAlerts.showCopyURLAlert)}>
+                                <FormControl autoComplete="off" id="password" aria-label="Small" aria-describedby="inputGroup-sizing-sm" value={this.state.pass} onChange={this.changeInput}/>
+                                <Button variant="dark" className="buttonSpaceInline" onClick={() => this.openGeneratePass()}>
                                     <img
-                                        src={GeneratePass}
+                                        src={GeneratePassIcon}
                                         alt=""
                                         width="14"
                                         height="14"
@@ -259,7 +321,7 @@ export default class AddPassword extends React.Component {
                                 <InputGroup.Prepend>
                                     <InputGroup.Text id="inputGroup-sizing-sm">Website (Login)</InputGroup.Text>
                                 </InputGroup.Prepend>
-                                <FormControl autoComplete="off" id="url" aria-label="Small" aria-describedby="inputGroup-sizing-sm"/>
+                                <FormControl autoComplete="off" id="url" aria-label="Small" aria-describedby="inputGroup-sizing-sm" value={this.state.url} onChange={this.changeInput}/>
                             </InputGroup>
 
                             <hr/>
@@ -286,6 +348,7 @@ export default class AddPassword extends React.Component {
                     </Modal.Footer>
                 </Modal>
                 {this.getPopUpCat()}
+                <GeneratePass callback={this} show={this.state.generatePassShow}/>
             </>
         );
     }

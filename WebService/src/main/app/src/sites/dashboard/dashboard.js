@@ -14,19 +14,21 @@ import MockPasswords from "./MockPasswords";
 import PassLine from "./line.temp";
 import {authConstants as dashboardConst, authConstants} from "../../authentification/auth.const.localstorage";
 import {
+    changeLanguage,
     saveCat, saveSidebarClosed,
     saveTab
 } from "../../action/dashboard.action";
 import dashboardState from "./dashboard.saved.state"
 import Alert from "react-bootstrap/Alert";
 import {wrongLogin, wrongLoginHeader} from "../../strings/stings";
-import {dashboardAlerts} from "./const/dashboard.enum";
+import {dashboardAlerts, dashboardLanguage} from "./const/dashboard.enum";
 import Modal from "react-bootstrap/Modal";
 import Table from "react-bootstrap/Table";
 import AddPassword from "../dashboard/add.password"
 // Icons
 import AddPass from "../../img/icons/password_add_pass.svg";
 import AddCategory from "./add.cat";
+import EditCategory from "./edit.cat";
 class Dashboard extends React.Component {
 
     constructor(props){
@@ -50,6 +52,9 @@ class Dashboard extends React.Component {
         }
 
         this.state = {
+            // language
+            language: dashboardState.getSelectedLanguage(), // 0 - Deutsch, 1 - English
+
             search: "",
             username: "Username",
             tabselected: tab, // tabs.PRIVPASS
@@ -67,6 +72,8 @@ class Dashboard extends React.Component {
             alertState: "success",
             // cat add
             popUpAddCatShow: false,
+            // cat edit
+            popUpEditCatShow: false,
             // password add
             popUpAddPassShow: false,
             // with, height
@@ -114,31 +121,59 @@ class Dashboard extends React.Component {
     }
 
 
+    changeLanguageTo( to ) {
+        this.setState({
+            language: to
+        });
+    }
+
 
     renderCat() {
         let cats = this.getCats();
         let selectedCat = this.state.catselected;
+        console.log("Cats:", cats);
         //console.log("Selected cat: "+ selectedCat);
         if ( selectedCat === 0 )
         {
             let passwords = this.renderLines(cats);
+            let passwordsSonst = this.renderLinesSonstige();
+            console.log("Cats: Pass:", passwordsSonst, passwords);
             let final = cats.map(function (cat) {
                 return (
                     <div key={cat.id} >
                         <strong>{cat.name}</strong>
-                        <br/>
+                        {cat.desc.length === 0 ?
+                            ""
+                            :
+                            <br/>
+                        }
                         {cat.desc}
                         <hr/>
-                        {passwords[cat.name]}
+                        {passwords[cat.id]}
                     </div>
                 );
             });
+
+            let notAddedToCat = (
+                <div>
+                    <strong>Nicht zugeordnet</strong>
+                    <br/>
+                    Hier befinden sich alle Passwörter, die keine Kategorie zugeordnet wurden
+                    <hr/>
+                    {passwordsSonst[0]}
+                </div>
+            );
+
+            if ( passwordsSonst[0].length === 0 ) {
+                notAddedToCat = "";
+            }
 
             return (
                 <>
                     <h5>Alle Kategorien</h5>
                     <hr/>
                     {final}
+                    {notAddedToCat}
                 </>
             );
 
@@ -151,7 +186,7 @@ class Dashboard extends React.Component {
                     <h5>{cat.name}</h5>
                     {cat.desc}
                     <hr/>
-                    {passwords[cat.name]}
+                    {passwords[cat.id]}
                 </div>
             );
         }
@@ -172,51 +207,37 @@ class Dashboard extends React.Component {
         return catData;
     }
 
+    renderLinesSonstige() {
+        let passwords = {};
+        //TODO mocking Object
+        let catData = MockPasswords.getCatData(0);
+        // add callback to array
+        catData = this.addCallback(catData);
+        let selectedTab = this.state.tabselected;
+        passwords[0] = catData.map(function (singlePass) {
+            console.log("Heyjooo", singlePass.tabID, selectedTab);
+            if ( singlePass.tabID === selectedTab  )
+            {
+                return (
+                    <PassLine key={singlePass.id} tag={singlePass.tag} id={singlePass.id} cat={singlePass.cat} title={singlePass.title} user={singlePass.user} pass={singlePass.pass} url={singlePass.url} callback={singlePass.callback}/>
+                );
+            }
+        });
+        return passwords;
+    }
+
     renderLines(cats) {
         let passwords = {};
         for ( let i = 0; i < cats.length; i++ ) {
             //out += <b>{cats[i].name}</b>
-            let catName = cats[i].name;
+            let catId = cats[i].id;
             //TODO mocking Object
-            let catData = MockPasswords.getCatData(catName);
+            let catData = MockPasswords.getCatData(catId);
             // add callback to array
             catData = this.addCallback(catData);
-            console.log("Data");
-            console.log(catData);
-            passwords[catName] = catData.map(function (singlePass) {
-                function correctUrl(imgUrl) {
-
-                    let out = "http://"+extractHostname(imgUrl);
-                    if ( out.charAt(out.length-1) !== "/" )
-                    {
-                        out += "/"
-                    }
-                    return out;
-                }
-
-                function extractHostname(url) {
-                    let hostname;
-                    //find & remove protocol (http, ftp, etc.) and get hostname
-                    if (url.indexOf("//") > -1) {
-                        hostname = url.split('/')[2];
-                    }
-                    else {
-                        hostname = url.split('/')[0];
-                    }
-
-                    //find & remove port number
-                    hostname = hostname.split(':')[0];
-                    //find & remove "?"
-                    hostname = hostname.split('?')[0];
-
-                    return hostname;
-                }
-
-
-                let imgSrc = correctUrl(singlePass.url);
-                console.log("Vor dem rendern");
+            passwords[catId] = catData.map(function (singlePass) {
                 return (
-                    <PassLine key={singlePass.id} tag={singlePass.tag} img={imgSrc} id={singlePass.id} cat={singlePass.cat} title={singlePass.title} user={singlePass.user} pass={singlePass.pass} url={singlePass.url} callback={singlePass.callback}/>
+                    <PassLine key={singlePass.id} tag={singlePass.tag} id={singlePass.id} cat={singlePass.cat} title={singlePass.title} user={singlePass.user} pass={singlePass.pass} url={singlePass.url} callback={singlePass.callback}/>
                 );
             })
         }
@@ -255,10 +276,16 @@ class Dashboard extends React.Component {
 
     printAddCat() {
         const show = this.state.showAddedCat;
+        let succ = "Kategorie hinzugefügt";
+        let err = "Beim Hinzufügen der Kategorie ist ein Fehler aufgetreten. Bitte versuchen Sie es erneut!";
         return (
-            <Alert show={show} variant="success" className="center-horz center-vert error fixed-top-easypass in-front">
+            <Alert show={show} variant={this.state.alertState} className="center-horz center-vert error fixed-top-easypass in-front">
                 <p className="center-horz center-vert center-text">
-                    URL wurde in die Zwischenablage kopiert!
+                    { this.state.alertState === "success" ?
+                        succ
+                        :
+                        err
+                    }
                 </p>
             </Alert>
         );
@@ -266,10 +293,16 @@ class Dashboard extends React.Component {
 
     printEditCat() {
         const show = this.state.showEditedCat;
+        let succ = "Bearbeitete Kategorie gespeichert";
+        let err = "Beim Bearbeiten ist ein Fehler aufgetreten. Bitte versuchen Sie es erneut!";
         return (
-            <Alert show={show} variant="success" className="center-horz center-vert error fixed-top-easypass in-front">
+            <Alert show={show} variant={this.state.alertState} className="center-horz center-vert error fixed-top-easypass in-front">
                 <p className="center-horz center-vert center-text">
-                    URL wurde in die Zwischenablage kopiert!
+                    {this.state.alertState === "success" ?
+                        succ
+                        :
+                        err
+                    }
                 </p>
             </Alert>
         );
@@ -278,7 +311,7 @@ class Dashboard extends React.Component {
     printEditPass() {
         const show = this.state.showEditedPass;
         let succ = "Bearbeitetes Password gespeichert";
-        let err = "Beim Passwort hinzufügen ist ein Fehler aufgetreten. Bitte versuchen Sie es erneut!";
+        let err = "Beim Bearbeiten des Passworts ist ein Fehler aufgetreten. Bitte versuchen Sie es erneut!";
         return (
             <Alert show={show} variant={this.state.alertState} className="center-horz center-vert error fixed-top-easypass in-front">
                 <p className="center-horz center-vert center-text">
@@ -295,7 +328,7 @@ class Dashboard extends React.Component {
     printAddPass() {
         const show = this.state.showAddedPass;
         let succ = "Passwort hinzugefügt";
-        let err = "Beim Passwort hinzufügen ist ein Fehler aufgetreten. Bitte versuchen Sie es erneut!";
+        let err = "Beim Hinzufügen des Passworts ist ein Fehler aufgetreten. Bitte versuchen Sie es erneut!";
         return (
             <Alert show={show} variant={this.state.alertState} className="center-horz center-vert error fixed-top-easypass in-front">
                 <p className="center-horz center-vert center-text">
@@ -419,7 +452,7 @@ class Dashboard extends React.Component {
             });
         }
 
-        if ( toCopy === "" ) {
+        if ( toCopy !== "" ) {
             this.clipboardCopy(toCopy);
         }
     }
@@ -464,6 +497,7 @@ class Dashboard extends React.Component {
 
         filter = input.toUpperCase();
         passwords = document.getElementById("passwords");
+        console.log("Passwords", passwords);
         div = passwords.children;
         for (let j = 0; j < div.length; j++) {
             if (div[j].tagName === "DIV") {
@@ -496,7 +530,13 @@ class Dashboard extends React.Component {
     }
 
     saveSettings() {
-        alert("Test");
+        this.props.changeLanguage(this.state.language);
+    }
+
+    cancelSettings() {
+        this.setState({
+            language: dashboardState.getSelectedLanguage(),
+        });
     }
 
     setExpanded() {
@@ -588,14 +628,16 @@ class Dashboard extends React.Component {
         this.copy("", dashboardAlerts.showEditedPass, true);
     }
 
-    addCat() {
+    addCat( name, description) {
         // ToDO call Kacpers method
-        alert("Cat added");
-        this.dismissCopy();
+        this.copy("", dashboardAlerts.showAddedCat, true);
+        this.dismissAddCat();
     }
 
-    editCat() {
-
+    editCat( id, name, description) {
+        // ToDo call Kacpers method
+        this.copy("", dashboardAlerts.showEditedCat, false);
+        this.dismissEditCat();
     }
 
     setSidebarState( to ) {
@@ -636,6 +678,22 @@ class Dashboard extends React.Component {
         return this.state.popUpAddCatShow;
     }
 
+    dismissEditCat() {
+        this.setState({
+            popUpEditCatShow: false,
+        })
+    }
+
+    showEditCat() {
+        this.setState({
+            popUpEditCatShow: true,
+        })
+    }
+
+    getCatEditShow() {
+        return this.state.popUpEditCatShow;
+    }
+
     getTab() {
         let out;
         switch (this.state.tabselected) {
@@ -672,10 +730,10 @@ class Dashboard extends React.Component {
         }
         return (
             <div className="size-hole-window-hidden-scroll">
-                <NavbarEP callback={this} />
+                <NavbarEP callback={this} width={this.state.width} language={this.state.language}/>
                 <div className="container-fluid fixScroll">
                     <Row>
-                        <NavbarVerticalEP2 callback={this} />
+                        <NavbarVerticalEP2 callback={this}  />
                         { this.state.sidebarClosed ?
                             <Col className={mainClasses + " fitHole"}>
                                 {this.getTab()}
@@ -704,13 +762,14 @@ class Dashboard extends React.Component {
                     <AddPassword callback={this}/>
                 </div>
                 <AddCategory callback={this}/>
+                <EditCategory callback={this}/>
                 {this.printCopy()}
                 {this.printUser()}
                 {this.printURL()}
                 {this.printAddPass()}
                 {this.printEditPass()}
                 {this.printEditCat()}
-                {this.printAddPass()}
+                {this.printAddCat()}
             </div>
         );
     }
@@ -723,12 +782,11 @@ const mapDispatchToProps3 = (dispatch) => {
         saveTab: (tabselected) => dispatch(saveTab(tabselected)),
         saveCat: (tabselected, catselected) => dispatch(saveCat(tabselected, catselected)),
         saveSidebarClosed: (sidebarClosed) => dispatch(saveSidebarClosed(sidebarClosed)),
+        changeLanguage: (language) => dispatch(changeLanguage(language)),
     };
 };
 
 const mapStateToProps3 = (state) => {
-    console.log("State in save");
-    console.log(state);
     return{
         loggedIn: state.auth.loggedIn
     }

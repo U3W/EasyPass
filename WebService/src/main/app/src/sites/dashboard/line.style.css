@@ -107,6 +107,14 @@
         margin-right: 5px;
     }
 
+    .spinnerMargin {
+        margin-left: 10px;
+    }
+
+}
+/* Spinner */
+.spinnerMargin {
+    margin-left: 6px;
 }
 
 /* Footer Buttons */
@@ -125,8 +133,11 @@
 }
 
 /* The fast way */
+.accordion>.card {
+    border: 1px solid rgba(248, 249, 250, 0.12) !important;
+}
 .pass-card {
-    border: 1px solid rgba(248, 249, 250, 0.12);
+    border: 1px solid rgba(248, 249, 250, 0.12) !important;
     box-shadow: 2px 2px 20px rgba(0,0,0,0.1);
     transition: box-shadow 0.3s ease-in-out;
     overflow: hidden;

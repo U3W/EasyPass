@@ -3,6 +3,12 @@ export const dashboardConst = {
     catselectedPriv: "1",
     catselectedGroup: "2",
     sidebarClosed: "3",
+    languageSelected: "4",
+};
+
+export const dashboardLanguage  = {
+    german: 0,
+    english: 1,
 };
 
 
