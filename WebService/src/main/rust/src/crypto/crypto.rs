@@ -5,10 +5,9 @@ use wasm_bindgen::prelude::*;
 use poly1305::{universal_hash::UniversalHash, Poly1305, KEY_SIZE};
 extern crate base64;
 use std::str;
+use rand::prelude::*;
 
-pub fn encrypt(msg: &str) -> String {
-    let key = "an example very very secret key.";
-    let iv = get_random_iv();
+pub fn encrypt(msg: &str, key: &str, iv: &str) -> String {
     let mut c2 = ChaCha20Poly1305::new(key,iv);
     c2.set_plaintext(msg);
     c2.encryption();
@@ -16,7 +15,7 @@ pub fn encrypt(msg: &str) -> String {
     return to_bas64(buffer);
 }
 
-pub fn decrypt(msg: &str) -> Result<String, i32> {
+pub fn decrypt(msg: &str, key: &str, iv: &str) -> Result<String, i32> {
     let key = "";
     let iv = "";
     let mut c2 = ChaCha20Poly1305::new(key,iv);
@@ -35,8 +34,13 @@ pub fn decrypt(msg: &str) -> Result<String, i32> {
     return res;
 }
 
-pub fn get_random_iv<'a>() -> &'a str {
-    return "some random iv which is way too long";
+pub fn get_random_iv<'a>() -> String {
+    let mut alphabet = "abcdefghijklmnopqrstuvwxyzäöüßABCDEFGHIJKLMNOPQRSTUVWXYZÄÖÜ1234567890!\"#$%&'()*+,-./:;<=>?@[\\]^_`{|}~ ".as_bytes().to_vec();
+    let mut rng = rand::thread_rng();
+    alphabet.shuffle(&mut rng);
+    let (left, _right) = alphabet.split_at(8);
+    let iv = String::from_utf8(Vec::from(left)).unwrap();
+    return iv;
 }
 
 pub fn from_base64(message: &str) -> Vec<u8>{
@@ -53,6 +57,7 @@ pub struct ChaCha20Poly1305{
     buffer: Vec<u8>,
     poly1305: Poly1305,
 }
+//TODO handle keys which are longer than 32 chars, we do want to limit useres at 64 chars or not limit them at all
 impl ChaCha20Poly1305{
     pub fn new(key: &str, iv: &str) -> ChaCha20Poly1305{
         let key = key.as_bytes();
@@ -90,7 +95,6 @@ impl ChaCha20Poly1305{
         self.poly1305.reset();
         self.poly1305.update(&mut self.buffer);
         let mut hash = self.poly1305.clone().result().into_bytes().to_vec();
-        //TODO append 16 char hash to encrypted stuff
         self.buffer.append(&mut hash);
     }
 
@@ -100,7 +104,6 @@ impl ChaCha20Poly1305{
         self.buffer  = ciphertext.to_vec().clone();
         let (_left, mac) = self.buffer.split_at(self.buffer.len()-16);
         let mac = mac.to_vec();
-        //TODO get 16 chars from hash and compare it
         self.poly1305.reset();
         self.poly1305.update(&mut self.buffer);
         let mut hash = self.poly1305.clone().result().into_bytes().to_vec();
