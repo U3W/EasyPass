@@ -20,11 +20,12 @@ pub fn decrypt(msg: &str) -> Result<String, i32> {
     let key = "";
     let iv = "";
     let mut c2 = ChaCha20Poly1305::new(key,iv);
-    let msg = from_base64(msg);
-    c2.set_buffer_vec(msg);
+    let msg_vec = from_base64(msg);
+    c2.set_buffer_vec(msg_vec);
     c2.decrypt();
     let mut buffer: Vec<u8> = c2.get_buffer();
-    if msg.eq(buffer.as_ref()) {
+    let msg_vec = from_base64(msg);
+    if msg_vec.as_slice().eq(buffer.as_slice()) {
         let res : Result<String, i32> = Err(-1);
         return res;
     }
@@ -95,13 +96,16 @@ impl ChaCha20Poly1305{
 
     pub fn decrypt(&mut self){
 
-        let (left, right) = self.buffer.split_at(self.buffer.len()-16);
-        self.buffer  = left.to_vec();
+        let (ciphertext, _right) = self.buffer.split_at(self.buffer.len()-16);
+        self.buffer  = ciphertext.to_vec().clone();
+        let (_left, mac) = self.buffer.split_at(self.buffer.len()-16);
+        let mac = mac.to_vec();
         //TODO get 16 chars from hash and compare it
         self.poly1305.reset();
         self.poly1305.update(&mut self.buffer);
         let mut hash = self.poly1305.clone().result().into_bytes().to_vec();
-        if hash.eq(right.to_vec().as_ref()) {
+
+        if hash.as_slice().eq(mac.as_slice()) {
             self.c2chacha20.seek(0);
             self.c2chacha20.apply_keystream(&mut self.buffer);
         }
