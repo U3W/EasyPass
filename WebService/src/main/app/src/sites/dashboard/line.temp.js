@@ -654,7 +654,7 @@ export default class PassLine extends React.Component {
                                     className="d-inline-block scaleimg"
                                 />
                             </Button>
-                            <Button variant="dark" className="buttonSpace" disabled={true} onClick={() => { if ( !this.state.edit ) this.props.callback.goToPage(this.state.urlNew) }}>
+                            <Button variant="dark" className="buttonSpace" disabled={true} onClick={() => { if ( !this.state.edit ) this.props.callback.goToPage(this.state.urlNew, this.state.id) }}>
                                 <img
                                     src={GoToIcon}
                                     alt=""
@@ -700,15 +700,28 @@ export default class PassLine extends React.Component {
                                             </Tooltip>
                                         }
                                     >
-                                        <Button variant="dark" className="buttonSpace" onClick={() => { if ( !this.state.edit ) this.props.callback.goToPage(this.state.urlNew) }}>
-                                            <img
-                                                src={GoToIcon}
-                                                alt=""
-                                                width="24"
-                                                height="24"
-                                                className="d-inline-block scaleimg"
-                                            />
-                                        </Button>
+                                        { this.state.urlNew.length === 0 ?
+                                            <Button variant="dark" className="buttonSpace" disabled={true} onClick={() => { if ( !this.state.edit && this.state.urlNew.length > 0 )  this.props.callback.goToPage(this.state.urlNew, this.state.id) }}>
+                                                <img
+                                                    src={GoToIcon}
+                                                    alt=""
+                                                    width="24"
+                                                    height="24"
+                                                    className="d-inline-block scaleimg"
+                                                />
+                                            </Button>
+                                            :
+                                            <Button variant="dark" className="buttonSpace" onClick={() => { if ( !this.state.edit )  this.props.callback.goToPage(this.state.urlNew, this.state.id) }}>
+                                                <img
+                                                    src={GoToIcon}
+                                                    alt=""
+                                                    width="24"
+                                                    height="24"
+                                                    className="d-inline-block scaleimg"
+                                                />
+                                            </Button>
+                                        }
+
                                     </OverlayTrigger>
                                 ))}
                             </>

@@ -6,9 +6,10 @@ import IndicatorBot from "../../network/network.indicator.bottombar";
 import dashboardState from "../dashboard/dashboard.saved.state";
 // Icons
 import AddCat from "../../img/icons/password_add_tag.svg";
-import EditCat from "../../img/icons/password_edit_white.svg"
-import OpenSidebar from "../../img/icons/sidebar_open.svg"
-import CloseSidebar from "../../img/icons/sidebar_close.svg"
+import EditCat from "../../img/icons/password_edit_white.svg";
+import DeleteCat from "../../img/icons/dashboard_deleteCat_white.svg";
+import OpenSidebar from "../../img/icons/sidebar_open.svg";
+import CloseSidebar from "../../img/icons/sidebar_close.svg";
 
 class NavbarVerticalEP2 extends React.Component {
     constructor(props) {
@@ -153,6 +154,21 @@ class NavbarVerticalEP2 extends React.Component {
                         </Button>
                     </div>
                 </li>
+                <li key={2} className="d-flex align-items-center text-muted clickable nav-link-kat-click"
+                    onClick={() => this.props.callback.showDeleteCat()}>
+                    <div className="nav-link-kat fitparentWidth">
+                        Kategorie löschen
+                        <Button variant="dark" className="catButton round">
+                            <img
+                                src={DeleteCat}
+                                alt=""
+                                width="10"
+                                height="10"
+                                className="d-inline-block"
+                            />
+                        </Button>
+                    </div>
+                </li>
             </>
         );
     }
@@ -162,7 +178,7 @@ class NavbarVerticalEP2 extends React.Component {
         const tabselected = this.props.callback.state.tabselected;
 
         let sidebarToggle = CloseSidebar;
-        let classes = "col-md-3 col-sm-5 col-5 d-none d-sm-block bg-light sidebar animateTransform";
+        let classes = "col-md-3 col-sm-5 col-5 d-none d-sm-block bg-light sidebar animateTransform " + this.props.className;
         let classesIntern = "sidebar-sticky animateTransformWidth";
         if ( this.state.sidebarClosed ) {
             sidebarToggle = OpenSidebar;
@@ -231,7 +247,6 @@ class NavbarVerticalEP2 extends React.Component {
                             <hr />
                             {this.getEditCat()}
                         </ul>
-
                     </div>
                 </nav>
                 <nav id="navbar-bot" className="bottom navbar fixed-bottom navbar-expand-sm navbar-dark bg-dark">
@@ -263,7 +278,6 @@ class NavbarVerticalEP2 extends React.Component {
                                 </a>
                             </Col>)
                         }
-
                     </Row>
                 </nav>
             </>

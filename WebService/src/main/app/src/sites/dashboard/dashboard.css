@@ -2,6 +2,25 @@ body {
     font-size: .875rem;
 }
 
+/* Rückgängig */
+.makeLookLikeLink {
+    color: #007bff !important;
+    background-color: transparent;
+    cursor: pointer !important;
+}
+.makeLookLikeLink img {
+    transition: all 0.3s ease-in-out;
+    transform: scale(1);
+    margin-left: 1px;
+}
+.makeLookLikeLink:hover {
+    text-decoration: underline !important;
+}
+.makeLookLikeLink:hover img{
+    transform: scale(1.3);
+
+}
+
 .feather {
     width: 16px;
     height: 16px;
@@ -25,17 +44,25 @@ body {
     right: 0;
     position: fixed;
     padding-bottom: 75px;
-    transition: height 0.35s ease;
+    transition: height 0.35s ease-in-out;
 }
 
 .expanded {
     height: calc(100vh - 161px) !important;
-    transition: height 0.35s ease;
+    transition: height 0.35s ease-in-out;
 }
-.expadedSettings {
+.expandedSettings {
     /* 209.2 */
     /* 160.8 */
     height: calc(100vh - 210px) !important;
+}
+
+.expandedSidebar {
+    margin-top: 161px;
+}
+
+.expandedSidebarSettings {
+    margin-top: 208px;
 }
 
 .fixScroll {
@@ -56,7 +83,10 @@ body {
         transition: height 0.35s ease;
     }
 
-
+    .expandedSettings {
+        height: calc(100vh - 317px) !important;
+        transition: height 0.35s ease;
+    }
 }
 
 /* Add password */

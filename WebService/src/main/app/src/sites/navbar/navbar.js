@@ -1,5 +1,5 @@
 import React from "react"
-import {Card, Dropdown, DropdownButton, Nav, Navbar, NavDropdown} from "react-bootstrap";
+import {Card, Col, Dropdown, DropdownButton, Nav, Navbar, NavDropdown} from "react-bootstrap";
 import Form from "react-bootstrap/Form";
 
 import Button from "react-bootstrap/Button";
@@ -13,6 +13,7 @@ import Table from "react-bootstrap/Table";
 // Icons
 import AddCat from "../../img/icons/password_add_tag_black.svg";
 import EditCat from "../../img/icons/password_edit.svg";
+import DeleteCat from "../../img/icons/dashboard_deleteCat.svg";
 import ButtonGroup from "react-bootstrap/ButtonGroup";
 import InputGroup from "react-bootstrap/InputGroup";
 import {dashboardAlerts, dashboardLanguage} from "../dashboard/const/dashboard.enum";
@@ -151,24 +152,28 @@ class NavbarEP extends React.Component {
                     <Modal.Body>
                         <Card.Body>
                             <Row>
-                                <InputGroup size="sm" className="mb-3">
+                                <Col className="noPadding">
                                     <InputGroup.Prepend className="stickRight">
-                                        <InputGroup.Text className="stickRightText" >Sprache</InputGroup.Text>
+                                        <InputGroup.Text>Sprache</InputGroup.Text>
                                     </InputGroup.Prepend>
-                                    <ButtonGroup>
-                                        { this.props.language === dashboardLanguage.german ?
-                                            <>
-                                                <Button variant="danger" onClick={() => this.changeLanguageTo(dashboardLanguage.german)}>Deutsch</Button>
-                                                <Button variant="secondary" onClick={() => this.changeLanguageTo(dashboardLanguage.english)}>English</Button>
-                                            </>
-                                            :
-                                            <>
-                                                <Button variant="secondary" onClick={() => this.changeLanguageTo(dashboardLanguage.german)}>Deutsch</Button>
-                                                <Button variant="danger" onClick={() => this.changeLanguageTo(dashboardLanguage.english)}>English</Button>
-                                            </>
-                                        }
-                                    </ButtonGroup>
-                                </InputGroup>
+                                </Col>
+                                <Col className="noPadding">
+                                    <div className="float-right">
+                                        <ButtonGroup>
+                                            { this.props.language === dashboardLanguage.german ?
+                                                <>
+                                                    <Button variant="danger" onClick={() => this.changeLanguageTo(dashboardLanguage.german)}>Deutsch</Button>
+                                                    <Button variant="secondary" onClick={() => this.changeLanguageTo(dashboardLanguage.english)}>English</Button>
+                                                </>
+                                                :
+                                                <>
+                                                    <Button variant="secondary" onClick={() => this.changeLanguageTo(dashboardLanguage.german)}>Deutsch</Button>
+                                                    <Button variant="danger" onClick={() => this.changeLanguageTo(dashboardLanguage.english)}>English</Button>
+                                                </>
+                                            }
+                                        </ButtonGroup>
+                                    </div>
+                                </Col>
                             </Row>
                         </Card.Body>
                     </Modal.Body>
@@ -224,7 +229,7 @@ class NavbarEP extends React.Component {
                         </Navbar>
                         <Navbar collapseOnSelect className="catnav catselectSize" expand="lg" bg="dark" variant="dark">
                             <Navbar.Brand className="catName" href="#home">{this.props.callback.getSelectedCatName()}</Navbar.Brand>
-                            <Button variant="light" className="catButton round editBut" onClick={() => alert("Kategorie bearbeiten")}>
+                            <Button variant="light" className="catButton round editBut" onClick={() => this.props.callback.showEditCat()}>
                                 <img
                                     src={EditCat}
                                     alt=""
@@ -236,6 +241,15 @@ class NavbarEP extends React.Component {
                             <Button variant="light" className="catButton round addBut" onClick={() => this.props.callback.showAddCat()}>
                                 <img
                                     src={AddCat}
+                                    alt=""
+                                    width="15"
+                                    height="15"
+                                    className="d-inline-block"
+                                />
+                            </Button>
+                            <Button variant="light" className="catButton round delBut" onClick={() => this.props.callback.showDeleteCat()}>
+                                <img
+                                    src={DeleteCat}
                                     alt=""
                                     width="15"
                                     height="15"

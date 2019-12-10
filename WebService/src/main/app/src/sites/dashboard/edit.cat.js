@@ -19,6 +19,8 @@ export default class EditCategory extends React.Component {
             descriptionNew: "",
 
             catPopUpShow: false,
+
+            missingName: false,
         };
 
         this.dismissPopUp = this.dismissPopUp.bind(this);
@@ -29,13 +31,15 @@ export default class EditCategory extends React.Component {
         this.changeInput = this.changeInput.bind(this);
 
         this.resetState = this.resetState.bind(this);
+
+        this.handleKeyevent = this.handleKeyevent.bind(this);
     }
 
     changeInput = (e) => {
         this.setState({
             [e.target.id]: e.target.value,
-        });
-
+        }, () => { if ( this.state.nameNew.length > 0 ) { this.setState({ missingName: false})} });
+        console.log("Target:", e.target.id);
     };
 
     dismissPopUp() {
@@ -70,8 +74,8 @@ export default class EditCategory extends React.Component {
         this.setState({
             id: id,
             catName: name,
-            name: name,
-            description: desc,
+            nameNew: name,
+            descriptionNew: desc,
         });
     }
     getPopUpCat()  {
@@ -110,18 +114,31 @@ export default class EditCategory extends React.Component {
 
             catPopUpShow: false,
 
-            nameError: false,
+            missingName: false,
         })
     }
 
     editCat() {
         if ( this.state.nameNew.length !== 0 ) {
-            this.props.callback.editCat(this.state.id, this.state.nameNew, this.state.descriptionNew)
+            this.props.callback.editCat(this.state.id, this.state.nameNew, this.state.descriptionNew);
+            this.resetState();
         }
         else {
             // error
+            this.setState({
+                missingName: true,
+            })
         }
     }
+
+    handleKeyevent(event) {
+        if (event.keyCode === 13 )
+        {
+            // Enter
+            this.editCat()
+        }
+    }
+
 
     render() {
 
@@ -131,32 +148,43 @@ export default class EditCategory extends React.Component {
                     <InputGroup.Prepend>
                         <InputGroup.Text id="inputGroup-sizing-lg">Name</InputGroup.Text>
                     </InputGroup.Prepend>
-                    <FormControl autoComplete="off" id="name" aria-label="Large" aria-describedby="inputGroup-sizing-sm" value={this.state.name} disabled={true} onChange={() => { if ( this.state.id !== 0 ) this.changeInput() }}/>
+                    <FormControl autoComplete="off" id="nameNew" aria-label="Large" aria-describedby="inputGroup-sizing-sm" value={this.state.nameNew} disabled={true} onChange={() => { if ( this.state.id !== 0 ) this.changeInput() }}/>
                 </InputGroup>
                 <hr/>
                 <InputGroup size="sm" className="mb-3">
                     <InputGroup.Prepend>
                         <InputGroup.Text id="inputGroup-sizing-sm">Beschreibung</InputGroup.Text>
                     </InputGroup.Prepend>
-                    <FormControl autoComplete="off" id="description" aria-label="Small" aria-describedby="inputGroup-sizing-sm" value={this.state.description} disabled={true} onChange={() => { if ( this.state.id !== 0 ) this.changeInput() }}/>
+                    <FormControl autoComplete="off" id="descriptionNew" aria-label="Small" aria-describedby="inputGroup-sizing-sm" value={this.state.descriptionNew} disabled={true} onChange={() => { if ( this.state.id !== 0 ) this.changeInput() }}/>
                 </InputGroup>
             </>
         );
 
         let edit = (
             <>
-                <InputGroup size="lg" className="mb-3">
-                    <InputGroup.Prepend>
-                        <InputGroup.Text id="inputGroup-sizing-lg">Name</InputGroup.Text>
-                    </InputGroup.Prepend>
-                    <FormControl autoComplete="off" id="name" aria-label="Large" aria-describedby="inputGroup-sizing-sm" value={this.state.name} onChange={this.changeInput}/>
-                </InputGroup>
+                { this.state.missingName ?
+                    <InputGroup size="lg" className="mb-3">
+                        <InputGroup.Prepend>
+                            <InputGroup.Text id="inputGroup-sizing-lg">Name</InputGroup.Text>
+                        </InputGroup.Prepend>
+                        <FormControl className="text-danger is-invalid"  autoComplete="off" id="nameNew" aria-label="Large" aria-describedby="inputGroup-sizing-sm" value={this.state.nameNew} onChange={this.changeInput}/>
+                    </InputGroup>
+                    :
+                    <InputGroup size="lg" className="mb-3">
+                        <InputGroup.Prepend>
+                            <InputGroup.Text id="inputGroup-sizing-lg">Name</InputGroup.Text>
+                        </InputGroup.Prepend>
+                        <FormControl autoComplete="off" id="nameNew" aria-label="Large" aria-describedby="inputGroup-sizing-sm" value={this.state.nameNew} onChange={this.changeInput}/>
+                    </InputGroup>
+                }
+
                 <hr/>
+
                 <InputGroup size="sm" className="mb-3">
                     <InputGroup.Prepend>
                         <InputGroup.Text id="inputGroup-sizing-sm">Beschreibung</InputGroup.Text>
                     </InputGroup.Prepend>
-                    <FormControl autoComplete="off" id="description" aria-label="Small" aria-describedby="inputGroup-sizing-sm" value={this.state.description} onChange={this.changeInput}/>
+                    <FormControl autoComplete="off" id="descriptionNew" aria-label="Small" aria-describedby="inputGroup-sizing-sm" value={this.state.descriptionNew} onChange={this.changeInput}/>
                 </InputGroup>
             </>
         );
@@ -164,7 +192,7 @@ export default class EditCategory extends React.Component {
 
         return (
             <>
-                <Modal show={this.props.callback.getCatEditShow()} onHide={this.dismissPopUp} className="ep-modal-dialog addPassPopUp">
+                <Modal onKeyDown={this.handleKeyevent} show={this.props.callback.getCatEditShow()} onHide={this.dismissPopUp} className="ep-modal-dialog addPassPopUp">
                     <Modal.Header closeButton>
                         <Modal.Title>Kategorie bearbeiten</Modal.Title>
                     </Modal.Header>
@@ -186,7 +214,7 @@ export default class EditCategory extends React.Component {
                         </Card.Body>
                     </Modal.Body>
                     <Modal.Footer>
-                        <Button variant={"danger"} onClick={() => this.editCat()}>Hinzufügen</Button>
+                        <Button variant={"danger"} onClick={this.editCat}>Speichern</Button>
                     </Modal.Footer>
                 </Modal>
                 {this.getPopUpCat()}

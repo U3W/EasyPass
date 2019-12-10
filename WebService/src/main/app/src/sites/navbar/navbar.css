@@ -18,6 +18,8 @@
     padding-right: 1.2em;
 }
 
+
+
 /* Navbar Settings */
 .stickRight {
     margin-right: 50%;
@@ -185,6 +187,11 @@
         font-size: 1.25rem;
         display: inline-block;
     }
+}
+
+/* Navbar animation */
+.collapsing {
+    transition: height 0.3s ease-in-out !important;
 }
 
 .search-bar {
@@ -372,7 +379,41 @@
     text-transform: uppercase;
 }
 
-/* Mobile add Car / edit Cat */
+/* Settings */
+
+.settingsPopUp .dropdown-item {
+    background-color: #FFFFFF !important;
+}
+
+.dropdown-menu {
+    display: block !important;
+    transition: all 0.3s ease-in-out ;
+    height: 0 !important;
+    padding: 0;
+    margin: 0;
+    opacity: 0;
+}
+
+.dropdown-menu.show {
+    border: 1px solid rgba(0,0,0,.15);
+    display: block !important;
+    height: 45px !important;
+    padding: .5rem 0;
+    margin: .125rem 0 0;
+    opacity: 100%;
+}
+
+.dropdown-menu:not(.show) .dropdown-item{
+    display: none !important;
+    transition: all 0.3s ease-in-out ;
+    height: 0 !important;
+}
+.dropdown-menu.show .dropdown-item{
+    display: block !important;
+    height: 28px !important;
+}
+/* Mobile add Car / edit Cat / delete Cat */
+
 .editBut {
     height: 25px;
     width: 25px;
@@ -382,6 +423,11 @@
     height: 25px;
     width: 25px;
     margin-right: 55px;
+}
+.delBut {
+    height: 25px;
+    width: 25px;
+    margin-right: 125px;
 }
 /* Mobile Cat */
 .catselectSize {
@@ -394,6 +440,37 @@
     font-size: 0.9rem;
     padding: 0.2rem 0.4rem;
 }
+
+/* delete cat table */
+
+.del-modal-dialog .modal-content {
+    max-height: calc(100vh - 86px);
+    border-radius: .3rem;
+}
+
+.del-modal-dialog  .float-center {
+    margin: auto;
+    width: 50%;
+}
+
+.del-modal-body {
+    overflow: auto;
+    padding: 0;
+    margin-right: 0;
+    margin-top: 0;
+    margin-bottom: 0;
+}
+.del-modal-table {
+    border: 0;
+    width: 100%;
+    height: 100%;
+    margin: 0;
+}
+.del-modal-table td {
+    cursor: pointer;
+    border-radius: 0 !important;
+}
+
 
 /* Mobile dialog */
 /* Old Settings

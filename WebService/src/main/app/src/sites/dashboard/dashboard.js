@@ -12,7 +12,6 @@ import PrivatePassword from "./tabs/private.password";
 import GroupPassword from "./tabs/group.password";
 import MockPasswords from "./MockPasswords";
 import PassLine from "./line.temp";
-import {authConstants as dashboardConst, authConstants} from "../../authentification/auth.const.localstorage";
 import {
     changeLanguage,
     saveCat, saveSidebarClosed,
@@ -20,15 +19,15 @@ import {
 } from "../../action/dashboard.action";
 import dashboardState from "./dashboard.saved.state"
 import Alert from "react-bootstrap/Alert";
-import {wrongLogin, wrongLoginHeader} from "../../strings/stings";
 import {dashboardAlerts, dashboardLanguage} from "./const/dashboard.enum";
-import Modal from "react-bootstrap/Modal";
-import Table from "react-bootstrap/Table";
 import AddPassword from "../dashboard/add.password"
 // Icons
 import AddPass from "../../img/icons/password_add_pass.svg";
+import Undo from "../../img/icons/password_delete_undo_blue.svg"
+
 import AddCategory from "./add.cat";
 import EditCategory from "./edit.cat";
+import DeleteCategory from "./delete.cat";
 class Dashboard extends React.Component {
 
     constructor(props){
@@ -60,6 +59,7 @@ class Dashboard extends React.Component {
             tabselected: tab, // tabs.PRIVPASS
             catselected: cat, //JSON.parse(localStorage.getItem(dashboardConst.catselectedPriv)),
             expanded: false,
+            settingsExpanded: false,
             // alerts
             showCopyAlert: false,
             showCopyUsernameAlert: false,
@@ -74,8 +74,16 @@ class Dashboard extends React.Component {
             popUpAddCatShow: false,
             // cat edit
             popUpEditCatShow: false,
+            // cat delete
+            showDeleteCatAlert: false,
             // password add
             popUpAddPassShow: false,
+            // password delete
+            showDeletePassAlert: false,
+
+            // for the undo delete
+            currentCatDelete: [],
+            currentPassDelete: -1,
             // with, height
             width: 0,
             height: 0,
@@ -93,7 +101,8 @@ class Dashboard extends React.Component {
         this.dismissCopy = this.dismissCopy.bind(this);
         this.saveEdit = this.saveEdit.bind(this);
         this.renderCat = this.renderCat.bind(this);
-
+        this.stopDelete = this.stopDelete.bind(this);
+        this.resetSettingsExpanded = this.resetSettingsExpanded.bind(this);
         // Popups
         this.dismissAddCat = this.dismissAddCat.bind(this);
         this.showAddCat = this.showAddCat.bind(this);
@@ -209,11 +218,11 @@ class Dashboard extends React.Component {
 
     renderLinesSonstige() {
         let passwords = {};
+        let selectedTab = this.state.tabselected;
         //TODO mocking Object
-        let catData = MockPasswords.getCatData(0);
+        let catData = MockPasswords.getCatData(0, selectedTab);
         // add callback to array
         catData = this.addCallback(catData);
-        let selectedTab = this.state.tabselected;
         passwords[0] = catData.map(function (singlePass) {
             console.log("Heyjooo", singlePass.tabID, selectedTab);
             if ( singlePass.tabID === selectedTab  )
@@ -227,12 +236,13 @@ class Dashboard extends React.Component {
     }
 
     renderLines(cats) {
+        console.log("RenderLines", cats);
         let passwords = {};
         for ( let i = 0; i < cats.length; i++ ) {
             //out += <b>{cats[i].name}</b>
             let catId = cats[i].id;
             //TODO mocking Object
-            let catData = MockPasswords.getCatData(catId);
+            let catData = MockPasswords.getCatData(catId, this.state.tabselected);
             // add callback to array
             catData = this.addCallback(catData);
             passwords[catId] = catData.map(function (singlePass) {
@@ -325,6 +335,72 @@ class Dashboard extends React.Component {
         );
     }
 
+    printDeleteCat() {
+        const show = this.state.showDeleteCatAlert;
+        let succ;
+        let err;
+        if ( this.state.currentCatDelete.length > 1 ) {
+            succ = "Kateogrien gelöscht ";
+            err = "Beim Löschen der Kategorien ist ein Fehler aufgetreten. Bitte versuchen Sie es erneut!";
+        }
+        else {
+            succ = "Kateogrie gelöscht ";
+            err = "Beim Löschen der Kategorie ist ein Fehler aufgetreten. Bitte versuchen Sie es erneut!";
+        }
+        return (
+            <Alert show={show} variant={this.state.alertState} className="center-horz center-vert error fixed-top-easypass in-front">
+                <p className="center-horz center-vert center-text">
+                    { this.state.alertState === "success" ?
+                        <>
+                            {succ}
+                            <a className="makeLookLikeLink" onClick={() => this.stopDelete(dashboardAlerts.showDeleteCatAlert, this.state.currentCatDelete)}>
+                                Rückgängig
+                                <img
+                                    src={Undo}
+                                    alt=""
+                                    width="20"
+                                    height="20"
+                                    className="d-inline-block"
+                                />
+                            </a>
+                        </>
+                        :
+                        err
+                    }
+                </p>
+            </Alert>
+        );
+    }
+
+    printDeletePass() {
+        const show = this.state.showDeletePassAlert;
+        let succ = "Password gelöscht ";
+        let err = "Beim Löschen des Passworts ist ein Fehler aufgetreten. Bitte versuchen Sie es erneut!";
+        return (
+            <Alert show={show} variant={this.state.alertState} className="center-horz center-vert error fixed-top-easypass in-front">
+                <p className="center-horz center-vert center-text">
+                    { this.state.alertState === "success" ?
+                        <>
+                            {succ}
+                            <a className="makeLookLikeLink" onClick={() => this.stopDelete(dashboardAlerts.showDeletePassAlert, this.state.currentPassDelete)}>
+                                Rückgängig
+                                <img
+                                    src={Undo}
+                                    alt=""
+                                    width="20"
+                                    height="20"
+                                    className="d-inline-block"
+                                />
+                            </a>
+                        </>
+                        :
+                        err
+                    }
+                </p>
+            </Alert>
+        );
+    }
+
     printAddPass() {
         const show = this.state.showAddedPass;
         let succ = "Passwort hinzugefügt";
@@ -354,7 +430,6 @@ class Dashboard extends React.Component {
     }
 
     dismissCopy( which ) {
-        console.log("Going to dismiss");
         sleep(2125).then(() => {
                 switch (which) {
                     case dashboardAlerts.showCopyAlert:
@@ -388,7 +463,7 @@ class Dashboard extends React.Component {
         // Create new element
         let el = document.createElement('textarea');
         el.value = text;
-        el.setAttribute('readonly', '');
+        el.setAttribute('readonly', text);
         el.style = {display: 'none',};
         document.body.appendChild(el);
         el.select();
@@ -397,6 +472,44 @@ class Dashboard extends React.Component {
         document.execCommand('copy');
         // Remove temporary element
         document.body.removeChild(el);
+    }
+
+    showDeletePopUp( which, succ ) {
+        switch (which) {
+            case dashboardAlerts.showDeletePassAlert:
+                this.setState({
+                    showDeletePassAlert: true,
+                });
+                sleep(4000).then(() => {
+                        this.setState({
+                            showDeletePassAlert: false,
+                        })
+                    }
+                );
+                break;
+            case dashboardAlerts.showDeleteCatAlert:
+                this.setState({
+                    showDeleteCatAlert: true,
+                });
+                sleep(4000).then(() => {
+                        this.setState({
+                            showDeleteCatAlert: false,
+                        })
+                    }
+                );
+                break;
+        }
+        if ( succ ) {
+            this.setState({
+                alertState: "success",
+            });
+        }
+        else {
+            this.setState({
+                alertState: "danger",
+            });
+        }
+
     }
 
     copy( toCopy, which, succ ) {
@@ -459,17 +572,17 @@ class Dashboard extends React.Component {
 
     copyPass(id) {
         let pass = this.getPassword(id);
-
         // Popup starten
         this.setState({
             showCopyAlert: true,
         });
         this.dismissCopy("showCopyAlert");
 
+
         this.clipboardCopy(pass);
     }
 
-    goToPage(url) {
+    goToPage(url, id) {
         function correctUrl(url) {
             let out = url;
             if (!( url.includes("https://") || url.includes("https://") )) {
@@ -477,13 +590,8 @@ class Dashboard extends React.Component {
             }
             return out;
         }
-        // TODO Mockobjekt
+        this.copyPass(id);
         window.open(correctUrl(url), "_blank");
-        // Popup starten
-        this.setState({
-            showCopyAlert: true,
-        });
-        this.dismissCopy("showCopyAlert");
     }
 
 
@@ -539,6 +647,8 @@ class Dashboard extends React.Component {
         });
     }
 
+
+
     setExpanded() {
         this.setState({
             expanded: !this.state.expanded
@@ -547,13 +657,21 @@ class Dashboard extends React.Component {
 
     setSettingExpandedFalse() {
         this.setState({
-            settingsExanded: false
+            settingsExpanded: false,
         });
     }
     setSettingExpanded() {
         this.setState({
-            settingsExanded: !this.state.settingsExanded
+            settingsExpanded: !this.state.settingsExpanded,
         });
+    }
+
+    resetSettingsExpanded() {
+        if ( this.state.settingsExpanded ) {
+            this.setState({
+                settingsExpanded: false,
+            });
+        }
     }
 
     changeTab( changeTo ) {
@@ -621,6 +739,27 @@ class Dashboard extends React.Component {
 
     deletePass(id) {
         // ToDO call Kacpers method
+        this.setState({
+            currentPassDelete: id,
+        });
+        this.showDeletePopUp(dashboardAlerts.showDeletePassAlert, false);
+    }
+
+    stopDelete( which, id ) {
+        switch (which) {
+            case dashboardAlerts.showDeleteCatAlert:
+                // ToDo call Kacpers  with id
+                this.setState({
+                    showDeleteCatAlert: false,
+                });
+                break;
+            case dashboardAlerts.showDeletePassAlert:
+                // ToDo call Kacpers method with id
+                this.setState({
+                    showDeletePassAlert: false,
+                });
+                break;
+        }
     }
 
     saveEdit(id, userNew, passwordNew, urlNew, titleNew, catNew, tagNew) {
@@ -634,10 +773,19 @@ class Dashboard extends React.Component {
         this.dismissAddCat();
     }
 
-    editCat( id, name, description) {
+    editCat( id, nameNew, descriptionNew) {
         // ToDo call Kacpers method
         this.copy("", dashboardAlerts.showEditedCat, false);
         this.dismissEditCat();
+    }
+
+    deleteCat(id) {
+        // ToDo call Kacpers method
+        this.setState({
+            currentCatDelete: id,
+        });
+        this.showDeletePopUp(dashboardAlerts.showDeleteCatAlert, true);
+        this.dismissDeleteCat()
     }
 
     setSidebarState( to ) {
@@ -681,17 +829,33 @@ class Dashboard extends React.Component {
     dismissEditCat() {
         this.setState({
             popUpEditCatShow: false,
-        })
+        });
     }
 
     showEditCat() {
         this.setState({
             popUpEditCatShow: true,
-        })
+        });
     }
 
     getCatEditShow() {
         return this.state.popUpEditCatShow;
+    }
+
+    dismissDeleteCat() {
+        this.setState({
+            popUpDeleteCatShow: false,
+        });
+    }
+
+    showDeleteCat() {
+        this.setState({
+            popUpDeleteCatShow: true,
+        });
+    }
+
+    getCatDeleteShow() {
+        return this.state.popUpDeleteCatShow;
     }
 
     getTab() {
@@ -715,11 +879,17 @@ class Dashboard extends React.Component {
 
 
         let mainClasses = "fixMain animateWidth";
+        let sidebarClass = "";
         if ( this.state.expanded )
         {
             // >= 992px the navbar is never expandable
             if ( this.state.width < 992 ) {
-                mainClasses += " expanded"
+                mainClasses += " expanded";
+                sidebarClass += " expandedSidebar";
+                if ( this.state.settingsExpanded) {
+                    mainClasses += " expandedSettings";
+                    sidebarClass += " expandedSidebarSettings";
+                }
             }
         }
 
@@ -728,12 +898,13 @@ class Dashboard extends React.Component {
         {
             indicatorClass += " sidebarClosed";
         }
+
         return (
-            <div className="size-hole-window-hidden-scroll">
+            <div className="size-hole-window-hidden-scroll" onClick={this.resetSettingsExpanded}>
                 <NavbarEP callback={this} width={this.state.width} language={this.state.language}/>
                 <div className="container-fluid fixScroll">
                     <Row>
-                        <NavbarVerticalEP2 callback={this}  />
+                        <NavbarVerticalEP2 callback={this} className={sidebarClass} />
                         { this.state.sidebarClosed ?
                             <Col className={mainClasses + " fitHole"}>
                                 {this.getTab()}
@@ -763,13 +934,16 @@ class Dashboard extends React.Component {
                 </div>
                 <AddCategory callback={this}/>
                 <EditCategory callback={this}/>
+                <DeleteCategory callback={this}/>
                 {this.printCopy()}
                 {this.printUser()}
                 {this.printURL()}
                 {this.printAddPass()}
                 {this.printEditPass()}
+                {this.printDeletePass()}
                 {this.printEditCat()}
                 {this.printAddCat()}
+                {this.printDeleteCat()}
             </div>
         );
     }

@@ -20,6 +20,8 @@ export const dashboardAlerts = {
     showAddedCat: "showAddedCat",
     showEditedPass: "showEditedPass",
     showEditedCat: "showEditedCat",
+    showDeletePassAlert: "showDeletePassAlert",
+    showDeleteCatAlert: "showDeleteCatAlert",
 
     alertState: "alertState",
 };

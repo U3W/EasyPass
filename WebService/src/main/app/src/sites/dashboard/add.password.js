@@ -29,6 +29,11 @@ export default class AddPassword extends React.Component {
             // Popup
             popUpCatShow: false,
             generatePassShow: false,
+
+            // errors / fields
+            missingTitle: false,
+            missingUser: false,
+            missingPass: false,
         };
 
         this.dismissGeneratePass = this.dismissGeneratePass.bind(this);
@@ -46,6 +51,9 @@ export default class AddPassword extends React.Component {
         this.getCatName = this.getCatName.bind(this);
 
         this.changeCat = this.changeCat.bind(this);
+
+        this.handleKeyevent = this.handleKeyevent.bind(this);
+        this.addPass = this.addPass.bind(this);
     }
 
     dismissGeneratePass() {
@@ -85,6 +93,10 @@ export default class AddPassword extends React.Component {
             catID: 0,
             // Popup
             popUpCatShow: false,
+            // errors / fields
+            missingTitle: false,
+            missingUser: false,
+            missingPass: false,
         })
     }
 
@@ -257,17 +269,17 @@ export default class AddPassword extends React.Component {
             case "title":
                 this.setState({
                     title: e.target.value
-                });
+                }, () => { if ( this.state.title.length > 0 ) { this.setState({missingTitle: false})}});
                 break;
             case "username":
                 this.setState({
                     user: e.target.value,
-                });
+                }, () => { if ( this.state.user.length > 0 ) { this.setState({missingUser: false})}});
                 break;
             case "password":
                 this.setState({
                    pass: e.target.value,
-                });
+                }, () => { if ( this.state.user.length > 0 ) { this.setState({missingPass: false})}});
                 break;
             case "url":
                 this.setState({
@@ -277,11 +289,44 @@ export default class AddPassword extends React.Component {
         }
     };
 
+    handleKeyevent(event) {
+        if (event.keyCode === 13 )
+        {
+            // Enter
+            this.addPass();
+        }
+    }
+
+    addPass() {
+        if ( this.state.user.length > 0 && this.state.title.length > 0 && this.state.pass.length > 0) {
+            this.props.callback.addPass(this.state.user, this.state.pass, this.state.url, this.state.title, this.state.catID, this.state.tag);
+            this.resetState();
+        }
+        else {
+            // Error
+            if ( this.state.user.length === 0 ) {
+                this.setState({
+                    missingUser: true,
+                });
+            }
+            if ( this.state.title.length === 0 ) {
+                this.setState({
+                    missingTitle: true,
+                });
+            }
+            if ( this.state.pass.length === 0 ) {
+                this.setState({
+                    missingPass: true,
+                });
+            }
+        }
+    }
+
 
     render() {
         return (
             <>
-                <Modal show={this.props.callback.getPassAddShow()} onHide={this.dismissPopUp} className="ep-modal-dialog addPassPopUp">
+                <Modal onKeyDown={this.handleKeyevent} show={this.props.callback.getPassAddShow()} onHide={this.dismissPopUp} className="ep-modal-dialog addPassPopUp">
                     <Modal.Header closeButton>
                         <Modal.Title>Passwort hinzufügen:</Modal.Title>
                     </Modal.Header>
@@ -291,21 +336,33 @@ export default class AddPassword extends React.Component {
                                 <InputGroup.Prepend>
                                     <InputGroup.Text id="inputGroup-sizing-lg">Titel</InputGroup.Text>
                                 </InputGroup.Prepend>
-                                <FormControl autoComplete="off" id="title" aria-label="Large" aria-describedby="inputGroup-sizing-sm" value={this.state.title} onChange={this.changeInput}/>
+                                { this.state.missingTitle ?
+                                    <FormControl className="text-danger is-invalid" autoComplete="off" id="title" aria-label="Large" aria-describedby="inputGroup-sizing-sm" value={this.state.title} onChange={this.changeInput}/>
+                                    :
+                                    <FormControl autoComplete="off" id="title" aria-label="Large" aria-describedby="inputGroup-sizing-sm" value={this.state.title} onChange={this.changeInput}/>
+                                }
                             </InputGroup>
                             <hr/>
                             <InputGroup size="sm" className="mb-3">
                                 <InputGroup.Prepend>
                                     <InputGroup.Text id="inputGroup-sizing-sm">User</InputGroup.Text>
                                 </InputGroup.Prepend>
-                                <FormControl autoComplete="off" id="username" aria-label="Small" aria-describedby="inputGroup-sizing-sm" value={this.state.user} onChange={this.changeInput}/>
+                                { this.state.missingUser ?
+                                    <FormControl className="text-danger is-invalid" autoComplete="off" id="username" aria-label="Small" aria-describedby="inputGroup-sizing-sm" value={this.state.user} onChange={this.changeInput}/>
+                                    :
+                                    <FormControl autoComplete="off" id="username" aria-label="Small" aria-describedby="inputGroup-sizing-sm" value={this.state.user} onChange={this.changeInput}/>
+                                }
                             </InputGroup>
 
                             <InputGroup size="sm" className="mb-3">
                                 <InputGroup.Prepend>
                                     <InputGroup.Text id="inputGroup-sizing-sm">Password</InputGroup.Text>
                                 </InputGroup.Prepend>
-                                <FormControl autoComplete="off" id="password" aria-label="Small" aria-describedby="inputGroup-sizing-sm" value={this.state.pass} onChange={this.changeInput}/>
+                                { this.state.missingPass ?
+                                    <FormControl className="text-danger is-invalid" autoComplete="off" id="password" aria-label="Small" aria-describedby="inputGroup-sizing-sm" value={this.state.pass} onChange={this.changeInput}/>
+                                    :
+                                    <FormControl autoComplete="off" id="password" aria-label="Small" aria-describedby="inputGroup-sizing-sm" value={this.state.pass} onChange={this.changeInput}/>
+                                }
                                 <Button variant="dark" className="buttonSpaceInline" onClick={() => this.openGeneratePass()}>
                                     <img
                                         src={GeneratePassIcon}
@@ -344,7 +401,7 @@ export default class AddPassword extends React.Component {
                         </Card.Body>
                     </Modal.Body>
                     <Modal.Footer>
-                        <Button variant={"danger"} onClick={() => this.props.callback.addPass(this.state.user, this.state.pass, this.state.url, this.state.title, this.state.catID, this.state.tag)}>Hinzufügen</Button>
+                        <Button variant={"danger"} onClick={this.addPass}>Hinzufügen</Button>
                     </Modal.Footer>
                 </Modal>
                 {this.getPopUpCat()}
