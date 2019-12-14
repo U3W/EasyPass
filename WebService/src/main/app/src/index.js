@@ -12,6 +12,7 @@ import "./index.css";
 import {NoMatch} from "./sites/errors";
 import Login from "./sites/login/login";
 import Masterpassword from "./sites/verify/masterpassword";
+import Registration from "./sites/registration/registration";
 import 'bootstrap/dist/css/bootstrap.min.css';
 import {ProtectedRoute} from "./routing/ProtectedRoute"
 import {createStore, applyMiddleware} from "redux";
@@ -83,6 +84,7 @@ class App extends React.Component {
                 <div className="App">
                     <Switch>
                         <Route exact path="/" component={Login} />
+                        <Route exact path="/registration" component={Registration}/>
                         <ProtectedRoute exact path="/verify" component={Masterpassword} netState="online" type="auth" />
                         <ProtectedRoute exact path="/dashboard" component={Dashboard} netState="online" type="verify" />
                         <Route path="*" component={NoMatch} />

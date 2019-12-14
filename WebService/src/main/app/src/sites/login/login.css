@@ -40,3 +40,9 @@
     background-position: center;
     background-attachment: fixed;
 }
+
+@media (min-width: 1500px) {
+    .backgroundPicLogin {
+        background-image: url("../../img/background1.jpg");
+    }
+}

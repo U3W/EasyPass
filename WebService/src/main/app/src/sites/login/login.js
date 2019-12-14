@@ -13,7 +13,7 @@ import dashboardState from "../dashboard/dashboard.saved.state";
 import StringSelector from "../../strings/stings";
 
 // Rest
-import {Card} from "react-bootstrap";
+import {Card, Nav} from "react-bootstrap";
 import Logo from "../../img/logo/LogoV2.svg"
 import LoginAuth from "../../authentification/auth.login"
 import Alert from "react-bootstrap/Alert";
@@ -45,6 +45,7 @@ class Login extends React.Component {
         this.handleSubmit = this.handleSubmit.bind(this);
         this.handleKeyevent = this.handleKeyevent.bind(this);
         this.printError = this.printError.bind(this);
+        this.switchToRegister = this.switchToRegister.bind(this);
     }
 
     handleChange = (e) => {
@@ -159,6 +160,10 @@ class Login extends React.Component {
         }
     }
 
+    switchToRegister() {
+        this.props.history.push("/registration");
+    }
+
     getInputPassword() {
         if ( this.state.missingPassword )
         {
@@ -198,6 +203,7 @@ class Login extends React.Component {
                                             {this.getInputPassword()}
                                             <Form.Group>
                                                 <Form.Check type="checkbox" id="inpKeepLoggedIn" label={StringSelector.getString(this.state.language).keepLoggedIn} />
+                                                <Nav.Link onClick={this.switchToRegister}>Noch kein Account? Hier registrieren</Nav.Link>
                                             </Form.Group>
                                             <Button variant="danger" className={"float-right"} onClick={this.handleSubmit}>
                                             {StringSelector.getString(this.state.language).loginButton}

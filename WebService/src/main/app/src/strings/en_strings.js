@@ -13,6 +13,8 @@ export const strings = {
     wrongLoginHeader: "Login failed!",
     wrongLogin: "Username or password are wrong!",
 
+    // Registration
+    registButton: "Register",
 
     // verify
     masterpassword: "Masterpassword",

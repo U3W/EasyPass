@@ -26,6 +26,8 @@ export const strings = {
     wrongLoginHeader: "Anmeldung fehgeschlagen!",
     wrongLogin: "Username oder Passwort sind falsch!",
 
+    // Registration
+    registButton: "Registrieren",
 
     // verify
     masterpassword: "Masterpasswort",
