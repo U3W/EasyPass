@@ -154,7 +154,7 @@ body {
     }
 }
 
-@media (min-width: 425px) {
+@media (min-width: 426px) {
     .fab {
         right: 30px;
         bottom: 15px;

@@ -23,6 +23,7 @@ import Indicator from "../../network/network.indicator";
 import {saveCat, saveTab} from "../../action/dashboard.action";
 import tabs from "../dashboard/tabs/tab.enum";
 import dashboard from "../dashboard/dashboard";
+import ShowIcon from "../../img/icons/password_show_white.svg";
 
 class Registration extends React.Component {
     constructor(props) {
@@ -45,6 +46,7 @@ class Registration extends React.Component {
             missingUsername: false,
             missingMasterpassword: false,
             missingMasterpasswordSec: false,
+            userAlreadyTaken: false,
             passNoMatch: false,
             masterpassMatchPass: false,
             masterpassNoMatch: false,
@@ -55,13 +57,48 @@ class Registration extends React.Component {
         this.handleSubmit = this.handleSubmit.bind(this);
         this.handleKeyevent = this.handleKeyevent.bind(this);
         this.printError = this.printError.bind(this);
+        this.resetError = this.resetError.bind(this);
+        this.resetToFirst = this.resetToFirst.bind(this);
+        this.exit = this.exit.bind(this);
     }
 
     handleChange = (e) => {
         this.setState({
             [e.target.id]: e.target.value
-        });
+        },this.resetError(e));
     };
+
+    resetError( e ) {
+        if ( e.target.value.length > 0 ) {
+            switch (e.target.id) {
+                case "newPass":
+                    this.setState({
+                        missingPassword: false,
+                    });
+                    break;
+                case "newPassSec":
+                    this.setState({
+                        missingSecPassword: false,
+                    });
+                    break;
+                case "newUser":
+                    this.setState({
+                        missingUsername: false,
+                    });
+                    break;
+                case "newMasterpass":
+                    this.setState({
+                        missingMasterpassword: false,
+                    });
+                    break;
+                case "newMasterpassSec":
+                    this.setState({
+                        missingSecMasterpassword: false,
+                    });
+                    break;
+            }
+        }
+    }
 
     handleKeyevent(event) {
         if (event.keyCode === 13 )
@@ -75,6 +112,18 @@ class Registration extends React.Component {
         event.preventDefault();
 
         this.submit();
+    }
+
+    resetToFirst() {
+        this.setState({
+            newMasterpass: "",
+            newMasterpassSec: "",
+            missingMasterpassword: false,
+            missingMasterpasswordSec: false,
+            masterpassMatchPass: false,
+            masterpassNoMatch: false,
+            step: 1,
+        })
     }
 
 
@@ -116,9 +165,24 @@ class Registration extends React.Component {
                 err = true;
                 this.setState({missingUsername: true});
             }
-            if ( this.state.newPass === this.state.newPassSec ) {
+            else {
+                // TODO call Kascpers method, check if user already taken
+                /*if ( true ) {
+                    err = true;
+                    this.setState({
+                        userAlreadyTaken: true
+                    })
+                }*/
+
+            }
+            if ( this.state.newPass !== this.state.newPassSec ) {
                 err = true;
-                this.setState({passNoMath: true});
+                this.setState({passNoMatch: true});
+            }
+            else {
+                this.setState({
+                    passNoMatch: false,
+                });
             }
 
             if ( !err )
@@ -127,57 +191,77 @@ class Registration extends React.Component {
                     missingUsername: false,
                     missingPassword: false,
                     missingSecPassword: false,
+                    passNoMatch: false,
+                    userAlreadyTaken: false,
                     step: 2,
                 });
-
-                this.props.register(this.state.newPass, this.state.newUser, this.state.newMasterpass);
-
-                if (LoginAuth.getLoggedIn()) {
-                    this.props.history.push("/verify");
-                } else {
-                    // Fehlermeldung
-                    this.setState({error: true});
-                    this.dismissError();
-                }
-
-
-                this.setState({
-                    inpPassword: "",
-                    inpUsername: ""
-                })
-            }
-            else
-            {
-                this.render();
             }
         }
         else {
             if ( this.state.newMasterpass === "" ) {
                 err = true;
-                this.setState({missingMasterpass: true});
+                this.setState({missingMasterpassword: true});
             }
             if ( this.state.newMasterpassSec === "" ) {
                 err = true;
-                this.setState({missingMasterpassSec: true});
+                this.setState({missingSecMasterpassword: true});
             }
             if ( this.state.newMasterpass === this.state.newPass ) {
                 err = true;
-                this.setState({masterpasswordMathPass: true});
+                this.setState({masterpassMatchPass: true});
+            }
+            if ( this.state.newMasterpass !== this.state.newMasterpassSec ) {
+                err = true;
+                this.setState({masterpassNoMatch: true})
             }
             if ( this.state.newMasterpass === this.state.newMasterpassSec ) {
-                err = true;
-                this.setState({masterpasswordNoMath: true})
+                this.setState({
+                    masterpassNoMatch: false,
+                });
+                if ( this.state.newMasterpass !== this.state.newPass) {
+                    this.setState({
+                        masterpassMatchPass: false,
+                    })
+                }
+                else {
+                    this.setState({
+                        masterpassMatchPass: true,
+                    })
+                }
+            }
+            else {
+                this.setState({
+                    masterpassNoMatch: true,
+                });
+                if ( this.state.newMasterpass !== this.state.newPass) {
+                    this.setState({
+                        masterpassMatchPass: false,
+                    })
+                }
+                else {
+                    this.setState({
+                        masterpassMatchPass: true,
+                    })
+                }
             }
 
             if ( !err )
             {
                 this.setState({
-                    // fehler zurücksetzen
+                    error: false,
+                    missingPassword: false,
+                    missingSecPassword: false,
+                    missingUsername: false,
+                    missingMasterpassword: false,
+                    missingMasterpasswordSec: false,
+                    passNoMatch: false,
+                    userAlreadyTaken: true,
+                    masterpassMatchPass: false,
+                    masterpassNoMatch: false,
                 });
 
 
                 // ToDo Kall Kaspers method
-
                 if (true) {
                     this.props.history.push("/");
                 } else {
@@ -188,8 +272,11 @@ class Registration extends React.Component {
 
 
                 this.setState({
-                    inpPassword: "",
-                    inpUsername: ""
+                    newPass: "",
+                    newPassSec: "",
+                    newUser: "",
+                    newMasterpass: "",
+                    newMasterpassSec: "",
                 })
             }
             else
@@ -209,13 +296,20 @@ class Registration extends React.Component {
 
 
     getInputUsername() {
-        if ( this.state.missingUsername )
+        if ( this.state.missingUsername || this.state.userAlreadyTaken )
         {
+            let toAdd;
+            if ( !this.state.missingUsername && this.state.userAlreadyTaken ) {
+                toAdd = (
+                    <a className="text-danger">Username bereits vorhanden!</a>
+                );
+            }
             return (
                 <Form.Group>
                     <Form.Label className="text-danger">{StringSelector.getString(this.state.language).username}</Form.Label>
-                    <Form.Control className="is-invalid" type="username" id="inpUsername" placeholder={StringSelector.getString(this.state.language).usernamePlaceholder} value={this.state.newUser}
+                    <Form.Control className="is-invalid" type="username" id="newUser" placeholder={StringSelector.getString(this.state.language).usernamePlaceholder} value={this.state.newUser}
                                   onKeyDown={this.handleKeyevent} onChange={this.handleChange} />
+                    {toAdd}
                 </Form.Group>
             );
         }
@@ -224,7 +318,7 @@ class Registration extends React.Component {
             return (
                 <Form.Group>
                     <Form.Label>{StringSelector.getString(this.state.language).username}</Form.Label>
-                    <Form.Control type="username" id="inpUsername" placeholder={StringSelector.getString(this.state.language).usernamePlaceholder} value={this.state.newUser}
+                    <Form.Control type="username" id="newUser" placeholder={StringSelector.getString(this.state.language).usernamePlaceholder} value={this.state.newUser}
                                   onKeyDown={this.handleKeyevent} onChange={this.handleChange} />
                 </Form.Group>
             );
@@ -232,13 +326,24 @@ class Registration extends React.Component {
     }
 
     getInputPassword() {
-        if ( this.state.missingPassword )
+        if ( this.state.missingPassword || this.state.passNoMatch)
         {
             return (
                 <Form.Group>
                     <Form.Label className="text-danger">{StringSelector.getString(this.state.language).password}</Form.Label>
-                    <Form.Control className="is-invalid" type="password" id="inpPassword" placeholder={StringSelector.getString(this.state.language).passwordPlaceholder} value={this.state.newPass}
-                                  onKeyDown={this.handleKeyevent} onChange={this.handleChange} />
+                    <Row className="password-row">
+                        <Form.Control className="is-invalid passInp" type="password" id="newPass" placeholder={StringSelector.getString(this.state.language).passwordPlaceholder} value={this.state.newPass}
+                                      onKeyDown={this.handleKeyevent} onChange={this.handleChange} />
+                        <Button variant="dark" className="buttonInline" onClick={this.setPassword}>
+                            <img
+                                src={ShowIcon}
+                                alt=""
+                                width="18"
+                                height="18"
+                                className="d-inline-block"
+                            />
+                        </Button>
+                    </Row>
                 </Form.Group>
             );
         }
@@ -247,22 +352,50 @@ class Registration extends React.Component {
             return (
                 <Form.Group>
                     <Form.Label>{StringSelector.getString(this.state.language).password}</Form.Label>
-                    <Form.Control type="password" id="inpPassword" placeholder={StringSelector.getString(this.state.language).passwordPlaceholder} value={this.state.newPass}
-                                  onKeyDown={this.handleKeyevent} onChange={this.handleChange} />
-
+                    <Row className="password-row">
+                        <Form.Control className="passInp" type="password" id="newPass" placeholder={StringSelector.getString(this.state.language).passwordPlaceholder} value={this.state.newPass}
+                                      onKeyDown={this.handleKeyevent} onChange={this.handleChange} />
+                        <Button variant="dark" className="buttonInline" onClick={this.setPassword}>
+                            <img
+                                src={ShowIcon}
+                                alt=""
+                                width="18"
+                                height="18"
+                                className="d-inline-block"
+                            />
+                        </Button>
+                    </Row>
                 </Form.Group>
             );
         }
     }
 
     getInputSecPassword() {
-        if ( this.state.missingSecPassword )
+        if ( this.state.missingSecPassword || this.state.passNoMatch )
         {
+            let toAdd;
+            if ( !this.state.missingSecPassword && this.state.passNoMatch) {
+                toAdd = (
+                    <a className="text-danger">Passwörter stimmen nicht überein!</a>
+                );
+            }
             return (
                 <Form.Group>
                     <Form.Label className="text-danger">Passwort wiederholen</Form.Label>
-                    <Form.Control className="is-invalid" type="password" id="newPass" placeholder={StringSelector.getString(this.state.language).passwordPlaceholder} value={this.state.newPass}
-                                  onKeyDown={this.handleKeyevent} onChange={this.handleChange} />
+                    <Row className="password-row">
+                        <Form.Control className="is-invalid passInp" type="password" id="newPassSec" placeholder={StringSelector.getString(this.state.language).passwordPlaceholder} value={this.state.newPassSec}
+                                      onKeyDown={this.handleKeyevent} onChange={this.handleChange} />
+                        <Button variant="dark" className="buttonInline" onClick={this.setPassword}>
+                            <img
+                                src={ShowIcon}
+                                alt=""
+                                width="18"
+                                height="18"
+                                className="d-inline-block"
+                            />
+                        </Button>
+                    </Row>
+                    {toAdd}
                 </Form.Group>
             );
         }
@@ -271,8 +404,19 @@ class Registration extends React.Component {
             return (
                 <Form.Group>
                     <Form.Label>Passwort wiederholen</Form.Label>
-                    <Form.Control type="password" id="newPassSec" placeholder={StringSelector.getString(this.state.language).passwordPlaceholder} value={this.state.newPassSec}
+                    <Row className="password-row">
+                        <Form.Control className="passInp" type="password" id="newPassSec" placeholder={StringSelector.getString(this.state.language).passwordPlaceholder} value={this.state.newPassSec}
                                   onKeyDown={this.handleKeyevent} onChange={this.handleChange} />
+                        <Button variant="dark" className="buttonInline" onClick={this.setPassword}>
+                            <img
+                                src={ShowIcon}
+                                alt=""
+                                width="18"
+                                height="18"
+                                className="d-inline-block"
+                            />
+                        </Button>
+                  </Row>
                 </Form.Group>
             );
         }
@@ -280,7 +424,7 @@ class Registration extends React.Component {
 
 
     getInputMasterpass() {
-        if ( this.state.missingMasterpassword )
+        if ( this.state.missingMasterpassword || this.state.masterpassMatchPass || this.state.masterpassNoMatch)
         {
             return (
                 <Form.Group>
@@ -295,7 +439,7 @@ class Registration extends React.Component {
             return (
                 <Form.Group>
                     <Form.Label>Masterpasswort</Form.Label>
-                    <Form.Control type="password" id="inpSecPassword" placeholder={StringSelector.getString(this.state.language).passwordPlaceholder} value={this.state.newMasterpass}
+                    <Form.Control type="password" id="newMasterpass" placeholder={StringSelector.getString(this.state.language).passwordPlaceholder} value={this.state.newMasterpass}
                                   onKeyDown={this.handleKeyevent} onChange={this.handleChange} />
                 </Form.Group>
             );
@@ -304,13 +448,28 @@ class Registration extends React.Component {
 
 
     getInputMasterpassSec() {
-        if ( this.state.missingMasterpassword )
+        if ( this.state.missingSecMasterpassword || this.state.masterpassMatchPass || this.state.masterpassNoMatch)
         {
+            let toAdd;
+            if ( !this.state.missingSecMasterpassword ) {
+                if ( this.state.masterpassNoMatch) {
+                    toAdd = (
+                        <a className="text-danger">Masterpasswörter stimmen nicht überein!</a>
+                    );
+                }
+                else if ( this.state.masterpassMatchPass )
+                {
+                    toAdd = (
+                        <a className="text-danger">Masterpassworter darf nicht mit dem Passwort übereinstimmen!</a>
+                    );
+                }
+            }
             return (
                 <Form.Group>
                     <Form.Label className="text-danger">Masterpasswort wiederholen</Form.Label>
-                    <Form.Control className="is-invalid" type="password" id="newMasterpass" placeholder={StringSelector.getString(this.state.language).passwordPlaceholder} value={this.state.newMasterpassSec}
+                    <Form.Control className="is-invalid" type="password" id="newMasterpassSec" placeholder={StringSelector.getString(this.state.language).passwordPlaceholder} value={this.state.newMasterpassSec}
                                   onKeyDown={this.handleKeyevent} onChange={this.handleChange} />
+                    {toAdd}
                 </Form.Group>
             );
         }
@@ -319,15 +478,38 @@ class Registration extends React.Component {
             return (
                 <Form.Group>
                     <Form.Label>Masterpasswort wiederholen</Form.Label>
-                    <Form.Control type="password" id="inpSecPassword" placeholder={StringSelector.getString(this.state.language).passwordPlaceholder} value={this.state.newMasterpassSec}
+                    <Form.Control type="password" id="newMasterpassSec" placeholder={StringSelector.getString(this.state.language).passwordPlaceholder} value={this.state.newMasterpassSec}
                                   onKeyDown={this.handleKeyevent} onChange={this.handleChange} />
                 </Form.Group>
             );
         }
     }
 
+    exit() {
+        this.props.history.push("/");
+    }
+
 
     render() {
+        let formOut;
+        if ( this.state.step === 1 ) {
+            formOut = (
+                <>
+                    {this.getInputUsername()}
+                    <hr/>
+                    {this.getInputPassword()}
+                    {this.getInputSecPassword()}
+                </>
+            );
+        }
+        else {
+            formOut = (
+                <>
+                    {this.getInputMasterpass()}
+                    {this.getInputMasterpassSec()}
+                </>
+            );
+        }
         return (
             <div className="backgroundPicRegist">
                 <div className="gradientDivLogin">
@@ -335,14 +517,21 @@ class Registration extends React.Component {
                         <Row className="size-hole-window">
                             <Col xs={11} sm={10} md={10} lg={6} className="center-vert center-horz">
                                 <Card className="card-login login">
+                                    <div className="close closeButt" onClick={this.exit}>
+                                        <span aria-hidden="true">×</span>
+                                    </div>
                                     <Card.Img variant="top" src={Logo} className="centerImg"/>
                                     <Card.Body>
                                         <Form autoComplete="off">
-                                            {this.getInputUsername()}
-                                            <hr/>
-                                            {this.getInputPassword()}
-                                            {this.getInputSecPassword()}
-                                            Schritt {this.state.step}/2
+                                            {formOut}
+                                            <Form.Group>
+                                                Schritt {this.state.step}/2
+                                            </Form.Group>
+                                            {this.state.step === 2 &&
+                                                <Button variant="danger" onClick={this.resetToFirst}>
+                                                    Vorheriger Schritt
+                                                </Button>
+                                            }
                                             <Button variant="danger" className={"float-right"} onClick={this.handleSubmit}>
                                                 Nächster Schritt
                                             </Button>
