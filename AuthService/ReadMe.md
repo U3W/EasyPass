@@ -16,15 +16,17 @@ curl -i -X POST -H "Content-Type: application/json" -d "{\"uname\": \"mwustinger
 Authentication Test:
 
 ```
-curl -i -X POST http://localhost:7000/auth/challenge?uname=mwustinger
+curl -i --header "Accept:application/json" -X GET -b cookieMwustinger.txt http://localhost:7000/store/mwustinger
 
-curl -i -X POST -d username=mwustinger -d password=D_A_S___I_S_T___E_I_N_E___C_H_A_L_L_E_N_G_E -c cookieMwustinger.txt http://localhost:7000/login
+curl -X POST http://localhost:7000/auth/challenge?uname=mwustinger
 
-curl -i -X POST -d username=mwelsch -d password=D_A_S___I_S_T___E_I_N_E___C_H_A_L_L_E_N_G_E -c cookieMWelsch.txt http://localhost:7000/login
+curl -X POST -d username=mwustinger -d password=D_A_S___I_S_T___E_I_N_E___C_H_A_L_L_E_N_G_E -c cookieMwustinger.txt http://localhost:7000/auth/login
 
-curl -i --header "Accept:application/json" -X GET -b cookieMwustinger.txt http://localhost:7000/couchdb/mwustinger
+curl --header "Accept:application/json" -X GET -b cookieMwustinger.txt http://localhost:7000/store/mwustinger
 
-curl -i --header "Accept:application/json" -X GET -b cookieMwustinger.txt http://localhost:7000/couchdb/mwelsch
+curl -X POST -c cookieMwustinger.txt http://localhost:7000/auth/logout
+
+curl -i --header "Accept:application/json" -X GET -b cookieMwustinger.txt http://localhost:7000/store/mwustinger
 
 ```
 
@@ -53,5 +55,13 @@ curl -i --header "Accept:application/json" -X GET -b cookieMwustinger.txt http:/
 curl -i --header "Accept:application/json" -X GET -b cookieMwustinger.txt http://localhost:7000/couchdb/mwelsch
 
 curl -i --header "Accept:application/json" -X GET -b cookieMwustinger.txt http://localhost:7000/couchdb/sbreit
+
+
+
+curl -i -X POST http://localhost:7000/auth/challenge?uname=mwustinger
+
+curl -i -X POST -d username=mwustinger -d password=D_A_S___I_S_T___E_I_N_E___C_H_A_L_L_E_N_G_E -c cookieMwustinger.txt http://localhost:7000/auth/login
+
+curl -i --header "Accept:application/json" -X GET -b cookieMwustinger.txt http://localhost:7000/couchdb/mwustinger
 ```
 

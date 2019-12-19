@@ -1,14 +1,12 @@
 package dev.easypass.auth.security
 
-import dev.easypass.auth.security.filter.CouchDBAccessUsernameFilter
+import dev.easypass.auth.security.filter.AuthorizedForStoreMatcher
 import org.springframework.security.config.annotation.web.builders.HttpSecurity
 import org.springframework.context.annotation.Configuration
 import org.springframework.http.HttpMethod
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity
-import org.springframework.security.config.http.SessionCreationPolicy
-import org.springframework.security.web.authentication.AnonymousAuthenticationFilter
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationFailureHandler
 
 
@@ -38,17 +36,22 @@ class SecurityConfiguration(private val authProvider: ChallengeAuthenticationPro
         http
                 .csrf().disable()
                 .exceptionHandling()
+
                 .and()
                 .authorizeRequests()
-                .antMatchers("/couchdb/**").permitAll()
                 .antMatchers(HttpMethod.POST,"/auth/**").permitAll()
-                .anyRequest().authenticated()
+                .antMatchers("/store/**").authenticated()
+                .anyRequest().denyAll()
+
                 .and()
                 .formLogin()
+                .loginProcessingUrl("/auth/login")
                 .failureHandler(SimpleUrlAuthenticationFailureHandler())
+
                 .and()
                 .logout()
-
-        http.addFilterAfter(CouchDBAccessUsernameFilter(), AnonymousAuthenticationFilter::class.java)
+                .logoutUrl("/auth/logout")
+                .invalidateHttpSession(true)
+                .deleteCookies("JSESSIONID")
     }
 }

@@ -1,5 +1,8 @@
 package dev.easypass.auth.security
 
+import dev.easypass.auth.datstore.CouchDBConnectionProvider
+import dev.easypass.auth.datstore.document.User
+import dev.easypass.auth.datstore.exception.EntityAlreadyinDatabaseException
 import dev.easypass.auth.datstore.repository.UserRepository
 import dev.easypass.auth.security.exception.NoActiveChallengeException
 import dev.easypass.auth.security.exception.UserIsBlockedException
@@ -27,7 +30,7 @@ import kotlin.collections.HashMap
  * @param encryptionLibrary: this class provides the required encryption methods
  */
 @Component
-class ChallengeAuthenticationProvider(private val userRepository: UserRepository, private val encryptionLibrary: EncryptionLibrary, private val properties: Properties) : AuthenticationProvider {
+class ChallengeAuthenticationProvider(private val userRepository: UserRepository, private val connector: CouchDBConnectionProvider, private val encryptionLibrary: EncryptionLibrary, private val properties: Properties) : AuthenticationProvider {
     private val currentChallenges = HashMap<Pair<String, String>, InternalAuthenticationChallenge>()
     private var attemptCounter = HashMap<Pair<String, String>, Pair<Int, LocalDateTime>>()
 
@@ -44,8 +47,6 @@ class ChallengeAuthenticationProvider(private val userRepository: UserRepository
         authorities.add(SimpleGrantedAuthority(uname))
 
         val key = Pair(ip, uname)
-        println(currentChallenges)
-        println(attemptCounter)
 
         if (currentChallenges[key] == null) {
             loginFailed(key)
@@ -90,7 +91,7 @@ class ChallengeAuthenticationProvider(private val userRepository: UserRepository
 
     fun isBlocked(key: Pair<String, String>): Boolean {
         if (attemptCounter[key] != null) {
-            if (Duration.between(attemptCounter[key]!!.second, LocalDateTime.now()).toMillis() >= properties.getProperty("auth.minutesAfterAttemptsAreReset").toInt())
+            if (Duration.between(attemptCounter[key]!!.second, LocalDateTime.now()).toMillis()/1000 >= properties.getProperty("auth.secondsAfterAttemptsAreReset").toInt())
                 attemptCounter.remove(key)
             else if (attemptCounter[key]!!.first > properties.getProperty("auth.allowedWrongAttemptsUntilBlock").toInt())
                 return true
@@ -112,5 +113,15 @@ class ChallengeAuthenticationProvider(private val userRepository: UserRepository
             val user = encryptionLibrary.generateDummyUser(uname)
             UserAuthenticationChallenge(encryptionLibrary.generateInternalAdministrationChallenge().getChallengeEncryptedByPublicKey(user.publicKey), user.privateKey)
         }
+    }
+
+    fun registerUser(user: User): String {
+        try {
+            userRepository.add(user)
+            connector.createCouchDbConnector(user.uname)
+        } catch (ex: EntityAlreadyinDatabaseException) {
+            return ex.message.toString()
+        }
+        return "UserAddedSuccessfully"
     }
 }
