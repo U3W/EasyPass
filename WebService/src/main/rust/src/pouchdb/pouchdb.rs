@@ -56,4 +56,10 @@ extern "C" {
 
     #[wasm_bindgen(method, js_class = "PouchDB", js_name = find)]
     pub fn find(this: &PouchDB, query: &JsValue) -> Promise;
+
+    #[wasm_bindgen(js_namespace = PouchDB, js_name = replicate)]
+    pub fn replicate(source: &PouchDB, target: &PouchDB) -> Promise;
+
+    #[wasm_bindgen(method, js_class = "PouchDB", js_name = sync)]
+    pub fn sync(this: &PouchDB, target: &PouchDB) -> Promise;
 }

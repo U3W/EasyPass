@@ -16,6 +16,7 @@ use serde::{Deserialize, Serialize};
 use wasm_bindgen::__rt::std::future::Future;
 use wasm_bindgen::__rt::std::rc::Rc;
 use wasm_bindgen::__rt::core::cell::RefCell;
+use wasm_bindgen::__rt::std::sync::Arc;
 
 
 #[cfg(feature = "wee_alloc")]
@@ -31,7 +32,8 @@ extern {
 #[wasm_bindgen]
 pub struct Worker {
     user: PouchDB,
-    group: PouchDB
+    group: PouchDB,
+    service_status: String,
 }
 
 #[wasm_bindgen]
@@ -43,7 +45,26 @@ impl Worker {
         Worker {
             user: PouchDB::new("UserDB", &JsValue::from_serde(&settings).unwrap()),
             group: PouchDB::new("GroupDB", &JsValue::from_serde(&settings).unwrap()),
+            service_status: String::from("online")
+
         }
+    }
+
+    pub fn set_service_status(&mut self, service_status: String) {
+        self.service_status = service_status;
+    }
+
+    pub fn check(&self, data: JsValue) -> Promise {
+        let replicate = JsFuture::from(PouchDB::replicate(&self.user, &self.group));
+        //let replicate = JsFuture::from(self.user.replicate2().to(&self.group));
+        let action = JsFuture::from(self.user.find(&data));
+        future_to_promise(async move {
+            replicate.await;
+            let result = action.await;
+            let output = result.unwrap().into_serde::<Value>().unwrap();
+            log(&format!("{:?}", &output));
+            Ok(JsValue::undefined())
+        })
     }
 
     pub fn save(&self, db: String, data: JsValue) -> Promise {

@@ -3,6 +3,8 @@ importScripts('https://storage.googleapis.com/workbox-cdn/releases/4.3.1/workbox
 
 /**
  * Service Worker configuration for EasyPass.
+ *
+ * TODO donwload workbox script and import it locally
  */
 
 
