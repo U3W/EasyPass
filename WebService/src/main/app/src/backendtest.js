@@ -42,3 +42,4 @@ document.getElementById("groupsave").addEventListener('click', saveGroup);
 document.getElementById("userfind").addEventListener('click', findUser);
 document.getElementById("groupfind").addEventListener('click', findGroup);
 
+console.log("Process: " + process.env.PORT);

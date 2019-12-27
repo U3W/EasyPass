@@ -7,7 +7,7 @@
   },
   "main": "res/index.js",
   "scripts": {
-    "start": "webpack-dev-server --open --hot --mode development",
+    "start": "webpack-dev-server --hot --mode development",
     "build": "webpack --mode production",
     "test": "jest"
   },
@@ -32,7 +32,7 @@
     "@wasm-tool/wasm-pack-plugin": "^1.0.1",
     "babel-loader": "^8.0.6",
     "bootstrap": "^4.3.1",
-    "copy-webpack-plugin": "^5.0.4",
+    "copy-webpack-plugin": "^5.1.1",
     "css-loader": "^3.2.0",
     "html-loader": "^0.5.5",
     "html-webpack-exclude-assets-plugin": "0.0.7",
@@ -55,7 +55,8 @@
     "webpack-dev-server": "^3.8.2",
     "workbox-webpack-plugin": "^4.3.1",
     "q": "^1.5.1",
-    "fs-extra": "^8.1.0"
+    "fs-extra": "^8.1.0",
+    "dotenv-webpack": "^1.7.0"
   },
   "jest": {
     "globals": {
