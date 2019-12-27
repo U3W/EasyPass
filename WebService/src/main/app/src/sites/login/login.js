@@ -8,21 +8,12 @@ import Col from "react-bootstrap/Col";
 import Form from "react-bootstrap/Form";
 import Button from "react-bootstrap/Button";
 
+import dashboardState from "../dashboard/dashboard.saved.state";
 // Strings
-import { username } from "../../strings/stings";
-import { usernamePlaceholder } from "../../strings/stings";
-
-import { password } from "../../strings/stings";
-import { passwordPlaceholder } from "../../strings/stings";
-
-import { keepLoggedIn } from "../../strings/stings";
-import { loginButton } from "../../strings/stings";
-
-import { wrongLogin } from "../../strings/stings";
-import { wrongLoginHeader } from "../../strings/stings";
+import StringSelector from "../../strings/stings";
 
 // Rest
-import {Card} from "react-bootstrap";
+import {Card, Nav} from "react-bootstrap";
 import Logo from "../../img/logo/LogoV2.svg"
 import LoginAuth from "../../authentification/auth.login"
 import Alert from "react-bootstrap/Alert";
@@ -32,6 +23,7 @@ import {authConstants} from "../../authentification/auth.const.localstorage";
 import Indicator from "../../network/network.indicator";
 import {saveCat, saveTab} from "../../action/dashboard.action";
 import tabs from "../dashboard/tabs/tab.enum";
+import dashboard from "../dashboard/dashboard";
 
 //<Row className="justify-content-center">
 class Login extends React.Component {
@@ -39,6 +31,8 @@ class Login extends React.Component {
         super(props);
 
         this.state = {
+            language: dashboardState.getSelectedLanguage(),
+
             inpPassword: "",
             inpUsername: "",
             error: false,
@@ -51,6 +45,7 @@ class Login extends React.Component {
         this.handleSubmit = this.handleSubmit.bind(this);
         this.handleKeyevent = this.handleKeyevent.bind(this);
         this.printError = this.printError.bind(this);
+        this.switchToRegister = this.switchToRegister.bind(this);
     }
 
     handleChange = (e) => {
@@ -85,9 +80,9 @@ class Login extends React.Component {
         return (
             <Alert show={show} variant="danger" className="center-horz error" dismissible
                    onClose={() => this.setShow(false)}>
-                <Alert.Heading>{wrongLoginHeader}</Alert.Heading>
+                <Alert.Heading>{StringSelector.getString(this.state.language).wrongLoginHeader}</Alert.Heading>
                 <p>
-                    {wrongLogin}
+                    {StringSelector.getString(this.state.language).wrongLogin}
                 </p>
             </Alert>
         );
@@ -147,8 +142,8 @@ class Login extends React.Component {
         {
             return (
                 <Form.Group>
-                    <Form.Label className="text-danger">{username}</Form.Label>
-                    <Form.Control className="is-invalid" type="username" id="inpUsername" placeholder={usernamePlaceholder} value={this.state.inpUsername}
+                    <Form.Label className="text-danger">{StringSelector.getString(this.state.language).username}</Form.Label>
+                    <Form.Control className="is-invalid" type="username" id="inpUsername" placeholder={StringSelector.getString(this.state.language).usernamePlaceholder} value={this.state.inpUsername}
                                   onKeyDown={this.handleKeyevent} onChange={this.handleChange} />
                 </Form.Group>
             );
@@ -157,12 +152,16 @@ class Login extends React.Component {
         {
             return (
                 <Form.Group>
-                    <Form.Label>{username}</Form.Label>
-                    <Form.Control type="username" id="inpUsername" placeholder={usernamePlaceholder} value={this.state.inpUsername}
+                    <Form.Label>{StringSelector.getString(this.state.language).username}</Form.Label>
+                    <Form.Control type="username" id="inpUsername" placeholder={StringSelector.getString(this.state.language).usernamePlaceholder} value={this.state.inpUsername}
                                   onKeyDown={this.handleKeyevent} onChange={this.handleChange} />
                 </Form.Group>
             );
         }
+    }
+
+    switchToRegister() {
+        this.props.history.push("/registration");
     }
 
     getInputPassword() {
@@ -170,8 +169,8 @@ class Login extends React.Component {
         {
             return (
                 <Form.Group>
-                    <Form.Label className="text-danger">{password}</Form.Label>
-                    <Form.Control className="is-invalid" type="password" id="inpPassword" placeholder={passwordPlaceholder} value={this.state.inpPassword}
+                    <Form.Label className="text-danger">{StringSelector.getString(this.state.language).password}</Form.Label>
+                    <Form.Control className="is-invalid" type="password" id="inpPassword" placeholder={StringSelector.getString(this.state.language).passwordPlaceholder} value={this.state.inpPassword}
                                   onKeyDown={this.handleKeyevent} onChange={this.handleChange} />
                 </Form.Group>
             );
@@ -180,8 +179,8 @@ class Login extends React.Component {
         {
             return (
                 <Form.Group>
-                    <Form.Label>{password}</Form.Label>
-                    <Form.Control type="password" id="inpPassword" placeholder={passwordPlaceholder} value={this.state.inpPassword}
+                    <Form.Label>{StringSelector.getString(this.state.language).password}</Form.Label>
+                    <Form.Control type="password" id="inpPassword" placeholder={StringSelector.getString(this.state.language).passwordPlaceholder} value={this.state.inpPassword}
                                   onKeyDown={this.handleKeyevent} onChange={this.handleChange} />
                 </Form.Group>
             );
@@ -195,18 +194,19 @@ class Login extends React.Component {
                 <div className="gradientDivLogin">
                     <Container>
                         <Row className="size-hole-window">
-                            <Col xs={9} sm={8} md={6} lg={5} className="center-vert center-horz card-login">
-                                <Card className="card-login">
+                            <Col xs={12} sm={8} md={6} lg={5} className="center-vert center-horz">
+                                <Card className="card-login login">
                                     <Card.Img variant="top" src={Logo} />
                                     <Card.Body>
                                         <Form autoComplete="off">
                                             {this.getInputUsername()}
                                             {this.getInputPassword()}
                                             <Form.Group>
-                                                <Form.Check type="checkbox" id="inpKeepLoggedIn" label={keepLoggedIn} />
+                                                <Form.Check type="checkbox" id="inpKeepLoggedIn" label={StringSelector.getString(this.state.language).keepLoggedIn} />
+                                                <Nav.Link onClick={this.switchToRegister}>Noch kein Account? Hier registrieren</Nav.Link>
                                             </Form.Group>
                                             <Button variant="danger" className={"float-right"} onClick={this.handleSubmit}>
-                                            {loginButton}
+                                            {StringSelector.getString(this.state.language).loginButton}
                                             </Button>
                                         </Form>
                                     </Card.Body>

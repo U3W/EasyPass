@@ -18,7 +18,7 @@
 .offline-ui-bot {
     position: fixed;
     background: white;
-    z-index: 2000;
+    z-index: 1000;
     display: inline-block;
 }
 /* line 13, ../sass/_offline-theme-base-indicator.sass */

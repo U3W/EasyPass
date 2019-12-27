@@ -2,7 +2,7 @@ import {
     GET_CAT_GROUP,
     GET_CAT_PRIV,
     GET_TAB,
-    SAVE_CAT,
+    SAVE_CAT, SAVE_LANGUAGE, SAVE_SIDEBAR,
     SAVE_TAB
 } from "../../action/dashboard.action";
 import {dashboardConst} from "../../sites/dashboard/const/dashboard.enum";
@@ -24,7 +24,12 @@ const saveReducer = ( state, action) => {
             else {
                 localStorage.setItem(dashboardConst.catselectedGroup, JSON.stringify(cat));
             }
-            console.log("Save Tab + Cat success");
+            return {};
+        case SAVE_SIDEBAR:
+            localStorage.setItem(dashboardConst.sidebarClosed, JSON.stringify(action.sidebarClosed));
+            return {};
+        case SAVE_LANGUAGE:
+            localStorage.setItem(dashboardConst.languageSelected, JSON.stringify(action.language));
             return {};
         default:
             return {};

@@ -3,28 +3,44 @@ import {dashboardConst} from "./const/dashboard.enum";
 
 class dashboardState {
 
-    getTab() {
+    static getTab() {
         if ( JSON.parse(localStorage.getItem(dashboardConst.tabselected)) === null ) {
-            return 0
+            return 0;
         }
         return JSON.parse(localStorage.getItem(dashboardConst.tabselected));
     }
 
-    getCatPriv() {
+    static getCatPriv() {
         if ( JSON.parse(localStorage.getItem(dashboardConst.catselectedPriv)) === null ) {
-            return 0
+            return 0;
         }
         return JSON.parse(localStorage.getItem(dashboardConst.catselectedPriv));
     }
 
-    getCatGroup() {
+    static getCatGroup() {
         if ( JSON.parse(localStorage.getItem(dashboardConst.catselectedGroup)) === null ) {
-            return 0
+            return 0;
         }
         return JSON.parse(localStorage.getItem(dashboardConst.catselectedGroup));
+    }
+
+    static getSidebarClosed() {
+        if ( JSON.parse(localStorage.getItem(dashboardConst.sidebarClosed)) === null )
+        {
+            return false;
+        }
+        return JSON.parse(localStorage.getItem(dashboardConst.sidebarClosed));
+    }
+
+    static getSelectedLanguage() {
+        if ( JSON.parse(localStorage.getItem(dashboardConst.languageSelected)) === null )
+        {
+            return false;
+        }
+        return JSON.parse(localStorage.getItem(dashboardConst.languageSelected));
     }
 
 }
 
 
-export default new dashboardState;
+export default dashboardState;

@@ -1,36 +1,32 @@
 import React from "react"
-import {Card, Dropdown, DropdownButton, Nav, Navbar, NavDropdown} from "react-bootstrap";
+import {Card, Col, Dropdown, DropdownButton, Nav, Navbar, NavDropdown} from "react-bootstrap";
 import Form from "react-bootstrap/Form";
 
 import Button from "react-bootstrap/Button";
 import FormControl from "react-bootstrap/FormControl";
 import Row from "react-bootstrap/Row";
-import Col from "react-bootstrap/Col";
-import logoutImg from "../../img/icons/logout.svg"
 
-import {login, logout} from "../../action/auth.action";
-import {connect} from "react-redux";
 import Logo from "../../img/logo/LogoSchnlüsselV2.svg"
 import Modal from "react-bootstrap/Modal";
-import NavbarVerticalEP from "./navbar.vertcal";
 import Table from "react-bootstrap/Table";
+
+// Icons
+import AddCat from "../../img/icons/password_add_tag_black.svg";
+import EditCat from "../../img/icons/password_edit.svg";
+import DeleteCat from "../../img/icons/dashboard_deleteCat.svg";
+import ButtonGroup from "react-bootstrap/ButtonGroup";
+import InputGroup from "react-bootstrap/InputGroup";
+import {dashboardAlerts, dashboardLanguage} from "../dashboard/const/dashboard.enum";
 
 class NavbarEP extends React.Component {
     constructor(props) {
         super(props);
 
         this.state = {
-            search: "",
             expanded: false,
-            settingsExpanded: false,
             popUpShow: false,
             popUpCatShow: false,
-            isHoveringOverLogout: false,
         };
-
-        console.log("Start");
-        console.log(this.props);
-
 
 
         this.logoutFunc = this.logoutFunc.bind(this);
@@ -59,6 +55,7 @@ class NavbarEP extends React.Component {
 
 
     setPopUpDisabled() {
+        this.props.callback.cancelSettings();
         this.setState({
             popUpShow: false
         });
@@ -81,7 +78,6 @@ class NavbarEP extends React.Component {
     }
 
     setPopUpCatDisabled() {
-        console.log("Dismissed");
         this.setState({
             popUpCatShow: false
         });
@@ -141,21 +137,52 @@ class NavbarEP extends React.Component {
     }
 
 
+    changeLanguageTo ( to ) {
+        this.props.callback.changeLanguageTo(to);
+    }
+
 
     getPopUp() {
         return (
             <>
-                <Modal show={this.state.popUpShow} onHide={this.setPopUpDisabled}>
+                <Modal show={this.state.popUpShow} onHide={this.setPopUpDisabled} className="ep-modal-dialog">
                     <Modal.Header closeButton>
-                        <Modal.Title>Account Settings</Modal.Title>
+                        <Modal.Title>Einstellungen</Modal.Title>
                     </Modal.Header>
-                    <Modal.Body>Text</Modal.Body>
+                    <Modal.Body>
+                        <Card.Body>
+                            <Row>
+                                <Col className="noPadding">
+                                    <InputGroup.Prepend className="stickRight">
+                                        <InputGroup.Text>Sprache</InputGroup.Text>
+                                    </InputGroup.Prepend>
+                                </Col>
+                                <Col className="noPadding">
+                                    <div className="float-right">
+                                        <ButtonGroup>
+                                            { this.props.language === dashboardLanguage.german ?
+                                                <>
+                                                    <Button variant="danger" onClick={() => this.changeLanguageTo(dashboardLanguage.german)}>Deutsch</Button>
+                                                    <Button variant="secondary" onClick={() => this.changeLanguageTo(dashboardLanguage.english)}>English</Button>
+                                                </>
+                                                :
+                                                <>
+                                                    <Button variant="secondary" onClick={() => this.changeLanguageTo(dashboardLanguage.german)}>Deutsch</Button>
+                                                    <Button variant="danger" onClick={() => this.changeLanguageTo(dashboardLanguage.english)}>English</Button>
+                                                </>
+                                            }
+                                        </ButtonGroup>
+                                    </div>
+                                </Col>
+                            </Row>
+                        </Card.Body>
+                    </Modal.Body>
                     <Modal.Footer>
                         <Button variant="secondary" onClick={this.setPopUpDisabled}>
-                            Close
+                            Schließen
                         </Button>
                         <Button variant="danger" onClick={this.setPopupSave}>
-                            Save Changes
+                            Änderungen speichern
                         </Button>
                     </Modal.Footer>
                 </Modal>
@@ -202,6 +229,33 @@ class NavbarEP extends React.Component {
                         </Navbar>
                         <Navbar collapseOnSelect className="catnav catselectSize" expand="lg" bg="dark" variant="dark">
                             <Navbar.Brand className="catName" href="#home">{this.props.callback.getSelectedCatName()}</Navbar.Brand>
+                            <Button variant="light" className="catButton round editBut" onClick={() => this.props.callback.showEditCat()}>
+                                <img
+                                    src={EditCat}
+                                    alt=""
+                                    width="15"
+                                    height="15"
+                                    className="d-inline-block"
+                                />
+                            </Button>
+                            <Button variant="light" className="catButton round addBut" onClick={() => this.props.callback.showAddCat()}>
+                                <img
+                                    src={AddCat}
+                                    alt=""
+                                    width="15"
+                                    height="15"
+                                    className="d-inline-block"
+                                />
+                            </Button>
+                            <Button variant="light" className="catButton round delBut" onClick={() => this.props.callback.showDeleteCat()}>
+                                <img
+                                    src={DeleteCat}
+                                    alt=""
+                                    width="15"
+                                    height="15"
+                                    className="d-inline-block"
+                                />
+                            </Button>
                             <button type="button" aria-label="Toggle navigation" className="toggler navbar-toggler collapsed" onClick={this.setPopUpCatEnabled}>
                                 <span className="navbar-toggler-icon"/>
                             </button>
