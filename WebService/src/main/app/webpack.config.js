@@ -9,14 +9,77 @@ const fsExtra = require('fs-extra');
 const Q = require('q');
 const Dotenv = require('dotenv-webpack');
 let mode = "production";
+let outputPath = "build";
+let precacheImport = "";
 
 
 module.exports = (env, options) => {
+  /**
+   * Set compilation mode
+   */
   mode = options.mode;
-  console.log("Kek" + mode);
+  console.log("Using mode '" + mode + "' for compilation...");
+  if (mode === "development") {
+    outputPath = "buildDev"
+  }
 
+  /**
+   * Functions used for Service Worker configuration
+   */
+  const sleep = (ms) => {
+    return new Promise(resolve => setTimeout(resolve, ms));
+  };
+  const readFirstLine = (path) => {
+    return Q.promise(function (resolve, reject) {
+      const rs = fs.createReadStream(path, {encoding: 'utf8'});
+      let acc = '';
+      let pos = 0;
+      let index;
+      rs
+          .on('data', function (chunk) {
+            index = chunk.indexOf('\n');
+            acc += chunk;
+            index !== -1 ? rs.close() : pos += chunk.length;
+          })
+          .on('close', function () {
+            resolve(acc.slice(0, pos + index));
+          })
+          .on('error', function (err) {
+            reject(err);
+          })
+    });
+  };
+  const combinePrecaches = async () => {
+    while (!fs.existsSync(outputPath + '/service-worker.js')) {
+      await sleep(100);
+    }
+    const missingPrecache = await readFirstLine(outputPath + '/tmp.txt');
+    const serviceWorker = fs.readFileSync(outputPath + '/service-worker.js');
+    // Concat second precache to the first
+    let editPrecacheName = await readFirstLine(outputPath + '/service-worker.js');
+    editPrecacheName = editPrecacheName.replace('importScripts("', "");
+    editPrecacheName = editPrecacheName.substring(0, editPrecacheName.indexOf('",'));
+    editPrecacheName = editPrecacheName.replace("undefined/", "").replace("/", "");
+    let editPrecache = fs.readFileSync(outputPath + '/' + editPrecacheName).toString('UTF-8');
+    editPrecache = editPrecache.replace("self.__precacheManifest = [", "self.__precacheManifest = self.__precacheManifest.concat([");
+    editPrecache = editPrecache.replace("];", "]);");
+    const epFd = fs.openSync( outputPath + '/' + editPrecacheName, 'w+');
+    fs.appendFileSync(epFd, editPrecache);
+    fs.closeSync(epFd);
+    // Assemble service-worker file
+    const fd = fs.openSync( outputPath + '/service-worker.js', 'w+');
+    fs.appendFileSync(fd, missingPrecache + os.EOL);
+    fs.appendFileSync(fd, serviceWorker);
+    fs.closeSync(fd);
+    if (mode === "production") {
+      fs.unlinkSync( outputPath + '/tmp.txt');
+    }
+    return missingPrecache;
+  };
 
-// Configure React-App
+  /**
+   * Configure React-App
+   */
   const appConfig = {
     entry: {
       'index': './src/index.js',
@@ -72,17 +135,20 @@ module.exports = (env, options) => {
       new Dotenv()
     ],
     output: {
-      path: path.resolve(__dirname, "build"),
+      path: path.resolve(__dirname, outputPath),
       publicPath: '/'
     },
     devServer: {
       historyApiFallback: true,
-      writeToDisk: true
+      writeToDisk: true,
+      stats: 'errors-only'
     },
     mode: "production"
   };
 
-// Configure WebWorker with WebAssembly
+  /*
+   * Configure WebWorker with WebAssembly
+   */
   const workerConfig = {
     entry: "./src/worker.js",
     target: "webworker",
@@ -91,7 +157,7 @@ module.exports = (env, options) => {
       extensions: [".js", ".wasm"]
     },
     output: {
-      path: path.resolve(__dirname, "build"),
+      path: path.resolve(__dirname, outputPath),
       publicPath: '/',
       filename: "worker.js"
     },
@@ -110,7 +176,7 @@ module.exports = (env, options) => {
         // Removes all files from the build directory before the build-process starts.
         apply: (compiler) => {
           compiler.hooks.beforeRun.tap('CleanUpBeforeBuild', (compilation) => {
-            fsExtra.emptyDirSync('build')
+            fsExtra.emptyDirSync(outputPath)
           });
         }
       },
@@ -122,58 +188,11 @@ module.exports = (env, options) => {
         // That means, one precache will always be missing. To fix this, the precache import
         // of the worker entry is manually added to the service-worker file at the end.
         apply: (compiler) => {
-          compiler.hooks.afterEmit.tap('ServiceWorkerPrecache', async (compilation) => {
-            console.log("Mode:" + mode);
-            const sleep = (ms) => {
-              return new Promise(resolve => setTimeout(resolve, ms));
-            };
-            const readFirstLine = (path) => {
-              return Q.promise(function (resolve, reject) {
-                const rs = fs.createReadStream(path, {encoding: 'utf8'});
-                let acc = '';
-                let pos = 0;
-                let index;
-                rs
-                    .on('data', function (chunk) {
-                      index = chunk.indexOf('\n');
-                      acc += chunk;
-                      index !== -1 ? rs.close() : pos += chunk.length;
-                    })
-                    .on('close', function () {
-                      resolve(acc.slice(0, pos + index));
-                    })
-                    .on('error', function (err) {
-                      reject(err);
-                    })
-              });
-            };
-            const combinePrecaches = async () => {
-              while (!fs.existsSync('build/service-worker.js')) {
-                await sleep(100);
-              }
-              const missingPrecache = await readFirstLine('build/tmp.txt');
-              const serviceWorker = fs.readFileSync('build/service-worker.js');
-              // Concat second precache to the first
-              let editPrecacheName = await readFirstLine('build/service-worker.js');
-              editPrecacheName = editPrecacheName.replace('importScripts("', "");
-              editPrecacheName = editPrecacheName.substring(0, editPrecacheName.indexOf('",'));
-              editPrecacheName = editPrecacheName.replace("undefined/", "").replace("/", "");
-              let editPrecache = fs.readFileSync('build/' + editPrecacheName).toString('UTF-8');
-              editPrecache = editPrecache.replace("self.__precacheManifest = [", "self.__precacheManifest = self.__precacheManifest.concat([");
-              editPrecache = editPrecache.replace("];", "]);");
-              const epFd = fs.openSync('build/' + editPrecacheName, 'w+');
-              fs.appendFileSync(epFd, editPrecache);
-              fs.closeSync(epFd);
-              // Assemble service-worker file
-              const fd = fs.openSync('build/service-worker.js', 'w+');
-              fs.appendFileSync(fd, missingPrecache + os.EOL);
-              fs.appendFileSync(fd, serviceWorker);
-              fs.closeSync(fd);
-              //if (mode === "production") {
-                fs.unlinkSync('build/tmp.txt');
-              //}
-              console.log("Baum");
-            };
+          compiler.hooks.afterEmit.tapAsync('ServiceWorkerPrecache', async (compilation, callback) => {
+            await combinePrecaches();
+            callback();
+          });
+          compiler.hooks.watchRun.tap('ServiceWorkerPrecache', async (compilation) => {
             await combinePrecaches();
           });
         }
@@ -182,6 +201,5 @@ module.exports = (env, options) => {
     mode: "production"
   };
 
-  //module.exports = [appConfig, workerConfig];
   return [appConfig, workerConfig];
 };

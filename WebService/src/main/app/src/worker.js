@@ -1,7 +1,6 @@
 importScripts("bower_components/pouchdb/dist/pouchdb.min.js");
 importScripts("bower_components/pouchdb/dist/pouchdb.find.min.js");
 import("../../rust/pkg").then(wasm => {
-
     /**
     fetch("http://localhost:8090/redirect").then(async function (response) {
         const url = await response.json();

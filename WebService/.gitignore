@@ -41,10 +41,13 @@ node_modules
 
 # testing
 coverage
-.env
 
 # production
 build
+
+# development
+buildDev
+.env
 
 # misc
 .DS_Store
@@ -61,3 +64,4 @@ yarn-error.log*
 
 ## WebAssembly ##
 pkg/
+
