@@ -21,7 +21,7 @@ import FormControl from "react-bootstrap/FormControl";
 import OverlayTrigger from "react-bootstrap/OverlayTrigger";
 import ButtonToolbar from "react-bootstrap/ButtonToolbar";
 import Tooltip from "react-bootstrap/Tooltip";
-import * as $ from "../../../bower_components/pouchdb-find/dist/pouchdb.find";
+import * as $ from "../../../modules/pouchdb-find/dist/pouchdb.find";
 import {Nav, NavDropdown} from "react-bootstrap";
 import Modal from "react-bootstrap/Modal";
 import Table from "react-bootstrap/Table";

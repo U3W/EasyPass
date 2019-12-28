@@ -1,5 +1,33 @@
-importScripts("bower_components/pouchdb/dist/pouchdb.min.js");
-importScripts("bower_components/pouchdb/dist/pouchdb.find.min.js");
+importScripts("modules/pouchdb/dist/pouchdb.min.js");
+importScripts("modules/pouchdb/dist/pouchdb.find.min.js");
+importScripts("modules/easypass-lib/dist/easypass-lib.js");
+/**
+const asyncIntervals = [];
+
+const runAsyncInterval = async (cb, interval, intervalIndex) => {
+    await cb();
+    if (asyncIntervals[intervalIndex]) {
+        setTimeout(() => runAsyncInterval(cb, interval, intervalIndex), interval);
+    }
+};
+
+const setAsyncInterval = (cb, interval) => {
+    if (cb && typeof cb === "function") {
+        const intervalIndex = asyncIntervals.length;
+        asyncIntervals.push(true);
+        runAsyncInterval(cb, interval, intervalIndex);
+        return intervalIndex;
+    } else {
+        throw new Error('Callback must be a function');
+    }
+};
+
+const clearAsyncInterval = (intervalIndex) => {
+    if (asyncIntervals[intervalIndex]) {
+        asyncIntervals[intervalIndex] = false;
+    }
+};*/
+
 import("../../rust/pkg").then(wasm => {
     /**
     fetch("http://localhost:8090/redirect").then(async function (response) {
@@ -23,28 +51,31 @@ import("../../rust/pkg").then(wasm => {
         // 5 second timeout:
         const timeoutId = setTimeout(() => controller.abort(), 5000);
         fetchPromise.then(response => {
-            console.log("FULLFILL:" + response);
-            //return true;
-        }).catch(response => {
-            console.log("ERROR: " + response);
+            //console.log("FULLFILL:" + response);
+            return true;
+        }).catch(() => {
+            //console.log("ERROR: " + response);
+            return false;
         });
     };
 
+    //wasm.test2();
 
 
     let worker = new wasm.Worker();
 
+    /**
     const sleep = async (ms) => {
         return new Promise(resolve => setTimeout(resolve, ms));
     };
     const heartbeat = async () => {
         while (true) {
             if (navigator.onLine) {
-                /**if (await isReachable('http://localhost:7000')) {
+                if (await isReachable('http://localhost:7000')) {
                     console.log('Service down')
                 } else {
                     console.log("online");
-                }*/
+                }
                 //await isReachable('http://localhost:7000');
                 console.log("online")
             } else {
@@ -54,7 +85,23 @@ import("../../rust/pkg").then(wasm => {
             await sleep(5000);
         }
     };
-    heartbeat();
+    heartbeat();*/
+
+    const heartbeat = async () => {
+        if (navigator.onLine) {
+            if (await isReachable('http://localhost:7000')) {
+                console.log('Online')
+            } else {
+                console.log("Service Down");
+            }
+        } else {
+            console.log("Offline");
+        }
+        console.log("Hi!");
+        await worker.check({"selector":{"name": "Test"}});
+    };
+    setAsyncInterval(heartbeat, 3000);
+
 
     //let test = PouchDB("UserDB");
     //let result = test.find({"selector":{"name": "Genesis"}});

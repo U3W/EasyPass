@@ -163,7 +163,7 @@ module.exports = (env, options) => {
     },
     plugins: [
       new CopyWebPackPlugin([
-        {from: "bower_components", to: "bower_components"}
+        {from: "modules", to: "modules"}
       ]),
       // TODO exclude unnecessary bower components
       new WorkboxPlugin.InjectManifest({
@@ -198,6 +198,35 @@ module.exports = (env, options) => {
         }
       }
     ],
+    mode: "production"
+  };
+
+  /*
+  * Configure extended custom library for EasyPass
+  */
+  const libConfig = {
+    entry: "./modules/easypass-lib/easypass-lib.js",
+    resolve: {
+      extensions: [".js", ".wasm"]
+    },
+    module: {
+      rules: [
+        {
+          test: /\.(js|jsx)$/,
+          exclude: /node_modules/,
+          use: {
+            loader: "babel-loader"
+          }
+        }
+      ]
+    },
+    output: {
+      path: path.resolve(__dirname, outputPath + "/modules/easypass-lib/dist/"),
+      filename: "easypass-lib.js"
+    },
+    optimization: {
+      minimize: true|false|"compress"|"preserve"
+    },
     mode: "production"
   };
 
