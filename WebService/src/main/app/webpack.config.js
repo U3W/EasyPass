@@ -10,7 +10,6 @@ const Q = require('q');
 const Dotenv = require('dotenv-webpack');
 let mode = "production";
 let outputPath = "build";
-let precacheImport = "";
 
 
 module.exports = (env, options) => {
@@ -198,35 +197,6 @@ module.exports = (env, options) => {
         }
       }
     ],
-    mode: "production"
-  };
-
-  /*
-  * Configure extended custom library for EasyPass
-  */
-  const libConfig = {
-    entry: "./modules/easypass-lib/easypass-lib.js",
-    resolve: {
-      extensions: [".js", ".wasm"]
-    },
-    module: {
-      rules: [
-        {
-          test: /\.(js|jsx)$/,
-          exclude: /node_modules/,
-          use: {
-            loader: "babel-loader"
-          }
-        }
-      ]
-    },
-    output: {
-      path: path.resolve(__dirname, outputPath + "/modules/easypass-lib/dist/"),
-      filename: "easypass-lib.js"
-    },
-    optimization: {
-      minimize: true|false|"compress"|"preserve"
-    },
     mode: "production"
   };
 

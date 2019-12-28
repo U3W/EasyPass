@@ -1,33 +1,6 @@
 importScripts("modules/pouchdb/dist/pouchdb.min.js");
 importScripts("modules/pouchdb/dist/pouchdb.find.min.js");
 importScripts("modules/easypass-lib/dist/easypass-lib.js");
-/**
-const asyncIntervals = [];
-
-const runAsyncInterval = async (cb, interval, intervalIndex) => {
-    await cb();
-    if (asyncIntervals[intervalIndex]) {
-        setTimeout(() => runAsyncInterval(cb, interval, intervalIndex), interval);
-    }
-};
-
-const setAsyncInterval = (cb, interval) => {
-    if (cb && typeof cb === "function") {
-        const intervalIndex = asyncIntervals.length;
-        asyncIntervals.push(true);
-        runAsyncInterval(cb, interval, intervalIndex);
-        return intervalIndex;
-    } else {
-        throw new Error('Callback must be a function');
-    }
-};
-
-const clearAsyncInterval = (intervalIndex) => {
-    if (asyncIntervals[intervalIndex]) {
-        asyncIntervals[intervalIndex] = false;
-    }
-};*/
-
 import("../../rust/pkg").then(wasm => {
     /**
     fetch("http://localhost:8090/redirect").then(async function (response) {
