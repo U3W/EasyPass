@@ -3,8 +3,6 @@
 mod utils;
 
 use wasm_bindgen::prelude::*;
-mod crypto;
-use crypto::crypto as Crypto;
 mod pouchdb;
 use pouchdb::pouchdb::*;
 use wasm_bindgen_futures::{spawn_local, future_to_promise};
@@ -17,9 +15,7 @@ use wasm_bindgen::__rt::std::future::Future;
 use wasm_bindgen::__rt::std::rc::Rc;
 use wasm_bindgen::__rt::core::cell::RefCell;
 use wasm_bindgen::__rt::std::sync::Arc;
-use web_sys::Window;
-use wasm_bindgen::closure::Closure;
-use wasm_bindgen::__rt::std::process::Output;
+
 
 #[cfg(feature = "wee_alloc")]
 #[global_allocator]
@@ -33,76 +29,99 @@ extern {
 
 #[wasm_bindgen]
 pub struct Worker {
-    user: PouchDB,
-    group: PouchDB,
+    local: PouchDB,
+    remote: PouchDB,
     service_status: String,
 }
 
 #[wasm_bindgen]
 impl Worker {
     #[wasm_bindgen(constructor)]
-    pub fn new() -> Worker {
+    pub fn new(url: String) -> Worker {
         utils::set_panic_hook();
         let settings = Settings { adapter: "idb".to_string() };
+        log(&format!("Length: {}", url.len()));
+        let remote = if url.len() == 0 {
+            let temporary = Temporary { adapter: "idb".to_string(), skip_setup: true };
+            PouchDB::new("Temporary", &JsValue::from_serde(&temporary).unwrap())
+        } else {
+            PouchDB::new_with_name(&url)
+        };
         Worker {
-            user: PouchDB::new("UserDB", &JsValue::from_serde(&settings).unwrap()),
-            group: PouchDB::new("GroupDB", &JsValue::from_serde(&settings).unwrap()),
+            local: PouchDB::new("Local", &JsValue::from_serde(&settings).unwrap()),
+            remote,
             service_status: String::from("online")
-
         }
+    }
+
+    pub fn set_remote(&mut self, url: String) {
+        self.remote = PouchDB::new_with_name(&url);
     }
 
     pub fn set_service_status(&mut self, service_status: String) {
         self.service_status = service_status;
     }
 
-    pub fn check(&self, data: JsValue) -> Promise {
-        let replicate = JsFuture::from(PouchDB::replicate(&self.user, &self.group));
-        //let replicate = JsFuture::from(self.user.replicate2().to(&self.group));
-        let action = JsFuture::from(self.user.find(&data));
+    // Error is thrown when remote is not established
+    pub fn check(&self) -> Promise {
+        let status = self.service_status.clone();
+        let local: PouchDB = self.local.clone();
+        let replicate = if status == "online" {
+            JsFuture::from(local.sync(&self.remote))
+        } else {
+            //JsFuture::from(PouchDB::replicate(&self.local, &self.remote))
+            JsFuture::from(Promise::resolve(&JsValue::undefined()))
+        };
         future_to_promise(async move {
-            replicate.await;
-            let result = action.await;
-            let output = result.unwrap().into_serde::<Value>().unwrap();
-            log(&format!("{:?}", &output));
-            Ok(JsValue::undefined())
+            return if status == "online" {
+                //log(&format!("{:?}", &JsFuture::from(local.info()).await.unwrap().into_serde::<Info>().unwrap()));
+                //log(&format!("{:?}", &JsFuture::from(local.get_conflicts("4889f782-f945-427a-99f7-1e4b8d32c868")).await.unwrap().into_serde::<Value>().unwrap()));
+                replicate.await
+            } else {
+                replicate.await
+            }
         })
     }
 
-    pub fn save(&self, db: String, data: JsValue) -> Promise {
+    pub fn save(&self, data: JsValue) -> Promise {
         //log(&format!("Saved: {:?}", &data.into_serde::<Value>().unwrap()));
-        let action = match db.as_str() {
-            "GroupDB" => {
-                JsFuture::from(self.group.post(&data))
-            },
-            _ => {
-                JsFuture::from(self.user.post(&data))
-            }
-        };
+        let action = JsFuture::from(self.local.post(&data));
         future_to_promise(async move {
-            action.await;
-            Ok(JsValue::undefined())
+            action.await
         })
     }
 
-    pub fn find(&self, db: String, data: JsValue) -> Promise {
-        //log(&format!("Query: {:?}", &data.into_serde::<Value>().unwrap()));
-        let action = match db.as_str() {
-            "GroupDB" => {
-                JsFuture::from(self.group.find(&data))
-            },
-            _ => {
-                JsFuture::from(self.user.find(&data))
-            }
-        };
+    pub fn update(&self, data: JsValue) -> Promise {
+        let action = JsFuture::from(self.local.put(&data));
+        future_to_promise(async move {
+            action.await
+        })
+    }
+
+    pub fn find(&self, data: JsValue) -> Promise {
+        let action = JsFuture::from(self.local.find(&data));
+        future_to_promise(async move {
+            action.await
+        })
+    }
+
+    pub fn all_docs(&self) -> Promise {
+        let action = JsFuture::from(self.local.all_docs_included());
+        future_to_promise(async move {
+            action.await
+        })
+    }
+
+    pub fn remove(&self, data: JsValue) -> Promise {
+        let action = JsFuture::from(self.local.remove(&data));
         future_to_promise(async move {
             action.await
         })
     }
 
     pub fn process(&self, command: String) -> Promise {
-        let info = JsFuture::from(self.user.info());
-        let adapter = self.user.adapter();
+        let info = JsFuture::from(self.local.info());
+        let adapter = self.local.adapter();
 
         future_to_promise(async move {
             let output = match command.as_str() {

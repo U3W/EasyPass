@@ -1,3 +1,31 @@
+/**
+ * This small library contains functions, that are used by the Web Worker of the App.
+ * To build the library use “npm run buildLib”.
+ */
+
+
+/**
+ * Simple sleep function.
+ */
+const sleep = async (ms) => {
+    return new Promise(resolve => setTimeout(resolve, ms));
+};
+
+/**
+ * Checks if host is reachable.
+ */
+const isReachable = async (url) => {
+    const controller = new AbortController();
+    const signal = controller.signal;
+    const fetchPromise = fetch(url, {signal});
+    // 5 second timeout:
+    const timeoutId = setTimeout(() => controller.abort(), 5000);
+    fetchPromise.then(() => {
+        return true;
+    }).catch(() => {
+        return false;
+    });
+};
 
 /**
  * Functions for setInterval with asynchronous functions.
