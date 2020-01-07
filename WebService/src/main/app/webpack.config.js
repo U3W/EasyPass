@@ -2,6 +2,7 @@ const HtmlWebPackPlugin = require("html-webpack-plugin");
 const CopyWebPackPlugin = require("copy-webpack-plugin");
 const HtmlWebpackExcludeAssetsPlugin = require('html-webpack-exclude-assets-plugin');
 const WorkboxPlugin = require('workbox-webpack-plugin');
+const WorkboxCombinePrechachesPlugin = require('./webpackPlugins/WorkboxCombinePrecachesPlugin');
 const os = require('os');
 const path = require('path');
 const fs = require('fs');
@@ -10,6 +11,7 @@ const Q = require('q');
 const Dotenv = require('dotenv-webpack');
 let mode = "production";
 let outputPath = "build";
+let pc = {flag: false};
 
 module.exports = (args, options) => {
   /**
@@ -139,6 +141,7 @@ module.exports = (args, options) => {
         swSrc: './src/service-worker/service-worker.js',
         include: [/\.wasm$/, /\.html$/, /\.js$/, /\.ico$/, /\.png$/, /\.jpeg$/, /\.json$/]
       }),
+      new WorkboxCombinePrechachesPlugin('combine', null),
       new Dotenv()
     ],
     output: {
@@ -154,6 +157,7 @@ module.exports = (args, options) => {
     },
     mode: "production"
   };
+
 
   /*
    * Configure WebWorker with WebAssembly
@@ -180,6 +184,7 @@ module.exports = (args, options) => {
         swDest: 'tmp.txt',
         include: [/\.wasm$/, /\.html$/, /\.js$/, /\.ico$/, /\.png$/, /\.jpeg$/, /\.json$/]
       }),
+      new WorkboxCombinePrechachesPlugin('save', 'tmp.txt'),
       new Dotenv(),
       {
         // Removes all files from the build directory before the build-process starts.
@@ -190,19 +195,11 @@ module.exports = (args, options) => {
         }
       },
       {
-        // The EasyPass project has two entry points — one for the main app, one for the worker.
-        // This means every entry creates an individual precache for the service-worker.
-        // The problem is, the workbox plugin always overwrites the service-worker file and
-        // the plugin is being executed two times because of the two entry points.
-        // That means, one precache will always be missing. To fix this, the precache import
-        // of the worker entry is manually added to the service-worker file at the end.
         apply: (compiler) => {
-          compiler.hooks.afterEmit.tapAsync('ServiceWorkerPrecache', async (compilation, callback) => {
-            await combinePrecaches();
-            callback();
-          });
-          compiler.hooks.watchRun.tap('ServiceWorkerPrecache', async (compilation) => {
-            await combinePrecaches();
+          compiler.hooks.emit.tap('FileListPlugin', compilation => {
+            //console.log("kek");
+            //console.log(pc);
+            //console.log(pc.getContent());
           });
         }
       }
@@ -212,3 +209,50 @@ module.exports = (args, options) => {
 
   return [appConfig, workerConfig];
 };
+
+/**,
+ {
+        // The EasyPass project has two entry points — one for the main app, one for the worker.
+        // This means every entry creates an individual precache for the service-worker.
+        // The problem is, the workbox plugin always overwrites the service-worker file and
+        // the plugin is being executed two times because of the two entry points.
+        // That means, one precache will always be missing. To fix this, the precache import
+        // of the worker entry is manually added to the service-worker file at the top.
+        apply: (compiler) => {
+          compiler.hooks.emit.tapAsync('FileListPlugin', (compilation, callback) => {
+            const filelist = "kek\nkek!";
+            // Insert this list into the webpack build as a new file asset:
+            compilation.assets['filelist.md'] = {
+              source: function() {
+                return filelist;
+              },
+              size: function() {
+                return filelist.length;
+              }
+            };
+
+            //console.log(compilation.assets);
+
+            callback();
+          });
+
+          compiler.hooks.afterEmit.tapAsync('ServiceWorkerPrecache', async (compilation, callback) => {
+            await combinePrecaches();
+
+            const filelist = "kek\nkek!";
+            // Insert this list into the webpack build as a new file asset:
+            compilation.assets['filelist.md'] = {
+              source: function() {
+                return filelist;
+              },
+              size: function() {
+                return filelist.length;
+              }
+            };
+            callback();
+          });
+          compiler.hooks.watchRun.tap('ServiceWorkerPrecache', async (compilation) => {
+            await combinePrecaches();
+          });
+        }
+      }*/
