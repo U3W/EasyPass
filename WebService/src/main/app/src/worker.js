@@ -5,6 +5,7 @@ import("../../rust/pkg").then(wasm => {
 
     let worker = null;
     let remoteInit = false;
+    let authUrl = null;
 
     // Initialize Worker
     const init = async () => {
@@ -15,6 +16,7 @@ import("../../rust/pkg").then(wasm => {
         if (navigator.onLine) {
             try {
                 const url = await fetch("/database");
+                authUrl = url;
                 const response = await url.json();
                 dbUrl = response.db;
                 remoteInit = true;
@@ -71,6 +73,56 @@ import("../../rust/pkg").then(wasm => {
     };
 
     init();
+
+
+    const registration = async (uname, masterkey) => {
+        // TODO Moritz func call
+        const pubkey = masterkey;
+        const privkey = masterkey;
+        const data = {
+            "uname": uname,
+            "publicKey": pubkey,
+            "privateKey": privkey
+        };
+        const respone = await fetch(authUrl + "register", {
+            method: `POST`,
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(data)
+        });
+    };
+
+    const login = async (uname, masterkey) => {
+        data = { "uname": uname, "publicKey": "", "privateKey": ""};
+        const respone = await fetch(authUrl + "challenge", {
+            method: `POST`,
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(data)
+        });
+        const result = await respone.json();
+        //
+        // result.encryptedPrivateKey
+        // TODO decrypt private key with masterkey
+        const privkey = "";
+        // result.encryptedChallenge
+        // TODO decrypt challenge with private key
+        // const challenge = result.encryptedChallenge;
+        const decryptedChallenge = 'D_A_S___I_S_T___E_I_N_E___C_H_A_L_L_E_N_G_E';
+
+        // TODO login
+        const response2 = await fetch(authUrl + "login", {
+            method: 'post',
+            headers: new Headers({
+                'Authorization': 'Basic '+btoa(uname + ':' + decryptedChallenge),
+                'Content-Type': 'application/x-www-form-urlencoded'
+            })
+        });
+
+
+    };
 
     self.addEventListener('message', async function(e) {
         const cmd = e.data[0];

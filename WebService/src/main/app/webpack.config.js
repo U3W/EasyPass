@@ -11,7 +11,7 @@ const Dotenv = require('dotenv-webpack');
 let mode = "production";
 let outputPath = "build";
 
-module.exports = (env, options) => {
+module.exports = (args, options) => {
   /**
    * Set compilation mode
    */
@@ -28,7 +28,7 @@ module.exports = (env, options) => {
     fs.appendFileSync('.env', 'PORT=8080' + os.EOL);
     fs.appendFileSync('.env', 'OPEN=true'+ os.EOL);
   }
-  const envFile = require('dotenv').config({path: __dirname + '/.env'}).parsed;
+  const env = require('dotenv').config({path: __dirname + '/.env'}).parsed;
 
   /**
    * Functions used for Service Worker configuration
@@ -149,8 +149,8 @@ module.exports = (env, options) => {
       historyApiFallback: true,
       writeToDisk: true,
       stats: 'errors-only',
-      port: envFile.PORT,
-      open: (envFile.OPEN === 'true' || envFile.OPEN === 'TRUE')
+      port: env.PORT,
+      open: (env.OPEN === 'true' || env.OPEN === 'TRUE')
     },
     mode: "production"
   };
