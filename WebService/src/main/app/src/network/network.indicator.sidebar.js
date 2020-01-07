@@ -24,9 +24,11 @@ class IndicatorSide extends React.Component {
 
     render() {
         let render;
+        let classes = this.props.className;
         if ( this.state.online ) {
+            classes += " d-none d-sm-block offline-ui-side offline-ui-side-up";
             render = (
-                <Col sm={5} md={3} xs={5} className="d-none d-sm-block offline-ui-side offline-ui-side-up">
+                <Col sm={5} md={3} xs={5} className={classes}>
                     <div className="offline-ui-side-content" data-retry-in-value="null" data-retry-in-unit="null"/>
                     <a href="" className="offline-ui-side-retry"/>
                 </Col>
@@ -34,8 +36,9 @@ class IndicatorSide extends React.Component {
         }
         else
         {
+            classes += " d-none d-sm-block offline-ui-side offline-ui-side-down";
             render = (
-                <Col sm={5} md={3} xs={5} className="d-none d-sm-block offline-ui-side offline-ui-side-down">
+                <Col sm={5} md={3} xs={5} className={classes}>
                     <div className="offline-ui-side-content" data-retry-in-value="null" data-retry-in-unit="null"/>
                     <a href="" className="offline-ui-side-retry"/>
                 </Col>

@@ -18,6 +18,18 @@
     padding-right: 1.2em;
 }
 
+
+
+/* Navbar Settings */
+.stickRight {
+    margin-right: 50%;
+}
+
+.stickRightText {
+    background-color: rgba(0,0,0,0.0) !important;
+    border: 0;
+}
+
 /* Round add button */
 .round {
     border-radius: 50% !important;
@@ -175,6 +187,11 @@
         font-size: 1.25rem;
         display: inline-block;
     }
+}
+
+/* Navbar animation */
+.collapsing {
+    transition: height 0.3s ease-in-out !important;
 }
 
 .search-bar {
@@ -362,6 +379,56 @@
     text-transform: uppercase;
 }
 
+/* Settings */
+
+.settingsPopUp .dropdown-item {
+    background-color: #FFFFFF !important;
+}
+
+.dropdown-menu {
+    display: block !important;
+    transition: all 0.3s ease-in-out ;
+    height: 0 !important;
+    padding: 0;
+    margin: 0;
+    opacity: 0;
+}
+
+.dropdown-menu.show {
+    border: 1px solid rgba(0,0,0,.15);
+    display: block !important;
+    height: 45px !important;
+    padding: .5rem 0;
+    margin: .125rem 0 0;
+    opacity: 100%;
+}
+
+.dropdown-menu:not(.show) .dropdown-item{
+    display: none !important;
+    transition: all 0.3s ease-in-out ;
+    height: 0 !important;
+}
+.dropdown-menu.show .dropdown-item{
+    display: block !important;
+    height: 28px !important;
+}
+/* Mobile add Car / edit Cat / delete Cat */
+
+.editBut {
+    height: 25px;
+    width: 25px;
+    margin-right: 90px;
+}
+.addBut {
+    height: 25px;
+    width: 25px;
+    margin-right: 55px;
+}
+.delBut {
+    height: 25px;
+    width: 25px;
+    margin-right: 125px;
+}
 /* Mobile Cat */
 .catselectSize {
     height: 46px;
@@ -374,6 +441,37 @@
     padding: 0.2rem 0.4rem;
 }
 
+/* delete cat table */
+
+.del-modal-dialog .modal-content {
+    max-height: calc(100vh - 86px);
+    border-radius: .3rem;
+}
+
+.del-modal-dialog  .float-center {
+    margin: auto;
+    width: 50%;
+}
+
+.del-modal-body {
+    overflow: auto;
+    padding: 0;
+    margin-right: 0;
+    margin-top: 0;
+    margin-bottom: 0;
+}
+.del-modal-table {
+    border: 0;
+    width: 100%;
+    height: 100%;
+    margin: 0;
+}
+.del-modal-table td {
+    cursor: pointer;
+    border-radius: 0 !important;
+}
+
+
 /* Mobile dialog */
 /* Old Settings
     position:absolute;
@@ -384,21 +482,25 @@
     margin-left:-46%;   -- negative half of width above
     margin-top:-50%;    -- negative half of height above
 */
-.ep-modal-dialog {
-    top:35%; /* to put it right in the middle of the screen */
+.ep-modal-dialog .modal-content {
+    max-height: calc(100vh - 86px);
+    border-radius: .3rem;
 }
-.ep-modal-content {
-}
+
 .ep-modal-body {
+    overflow: auto;
     padding: 0;
+    margin-right: 1px;
+    margin-top: 0;
+    margin-bottom: 1px;
 }
 .ep-modal-table {
     width: 100%;
-    height: 100%;
     margin: 0;
 }
 .ep-modal-table td {
     cursor: pointer;
+    border-radius: 0 !important;
 }
 .ep-modal-table tr :last-child {
     border: 1px solid rgba(222, 226, 230, 0.2);
@@ -431,6 +533,40 @@
         display: none!important
     }
 }
+
+/* Sidebar toggle */
+.sidebarToggle {
+    height: 30px;
+    width: 30px;
+    padding: .25rem 0.25rem;
+    font-size: 1rem;
+    line-height: 0em;
+    color: rgba(0,0,0,.5);
+    border-color: rgba(0,0,0,.1);
+    border-radius: .25rem;
+
+    position: absolute;
+    top: 50%;
+    right: -20px;
+}
+
+.sidebarToggle :hover img{
+}
+
+.animateTransform {
+    transition: all 0.3s ease-in-out;
+}
+.sidebarClosed {
+    transform: translateX(-98%);
+}
+.animateTransformWidth {
+    transition: width 0.3s ease-in-out !important;
+    width: 100% !important;
+}
+.sidebarClosedMore {
+    width: 80% !important;
+}
+
 
 .bottom hr {
     border: none;

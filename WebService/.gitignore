@@ -45,6 +45,10 @@ coverage
 # production
 build
 
+# development
+buildDev
+.env
+
 # misc
 .DS_Store
 .env.local
@@ -59,4 +63,5 @@ yarn-error.log*
 /src/main/resources/templates/
 
 ## WebAssembly ##
-pkg/
+# pkg/
+

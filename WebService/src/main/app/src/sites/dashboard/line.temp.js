@@ -13,6 +13,7 @@ import ShowIcon from "../../img/icons/password_show_white.svg"
 import HideIcon from "../../img/icons/password_hide_white.svg"
 import SaveChanges from "../../img/icons/password_savechanges_white.svg"
 import AddTag from "../../img/icons/password_add_tag.svg";
+import NotAvailable from "../../img/icons/password_image_not_available.svg";
 
 import Row from "react-bootstrap/Row";
 import InputGroup from "react-bootstrap/InputGroup";
@@ -20,11 +21,14 @@ import FormControl from "react-bootstrap/FormControl";
 import OverlayTrigger from "react-bootstrap/OverlayTrigger";
 import ButtonToolbar from "react-bootstrap/ButtonToolbar";
 import Tooltip from "react-bootstrap/Tooltip";
-import * as $ from "../../../bower_components/pouchdb-find/dist/pouchdb.find";
+import * as $ from "../../../modules/pouchdb-find/dist/pouchdb.find";
 import {Nav, NavDropdown} from "react-bootstrap";
 import Modal from "react-bootstrap/Modal";
 import Table from "react-bootstrap/Table";
 import {dashboardAlerts} from "./const/dashboard.enum";
+import GeneratePassIcon from "../../img/icons/generate_password_white.svg";
+import GeneratePass from "./generatepass";
+import Spinner from "react-bootstrap/Spinner";
 
 /**
  * @param id: which element in a list f.e. (must be unique, because with this id the collapsible div will be opened then toggled)
@@ -48,11 +52,20 @@ export default class PassLine extends React.Component {
             passwordNew: "",
             userNew: this.props.user,
             titleNew: this.props.title,
+            imgSucc: false,
+            imgNew: null, // null at the beginning
             urlNew: this.props.url,
             catIdNew: this.props.cat,
             tagNew: this.deepCopyTags(this.props.tag),
+            tagAdded: this.setTagAddedRight(this.props.tag),
             popUpCatShow: false,
+
+            // generate popup
+            generatePassShow: false,
         };
+
+        this.dismissGeneratePass = this.dismissGeneratePass.bind(this);
+        this.openGeneratePass = this.openGeneratePass.bind(this);
 
         this.setPassword = this.setPassword.bind(this);
         this.getPassword = this.getPassword.bind(this);
@@ -68,6 +81,124 @@ export default class PassLine extends React.Component {
         this.getPopUpCat = this.getPopUpCat.bind(this);
     }
 
+
+    correctUrl(imgUrl) {
+        let out = "http://"+this.extractHostname(imgUrl);
+        if ( out.charAt(out.length-1) !== "/" )
+        {
+            out += "/"
+        }
+        return out;
+    }
+
+    extractHostname(url) {
+        let hostname;
+        //find & remove protocol (http, ftp, etc.) and get hostname
+        if (url.indexOf("//") > -1) {
+            hostname = url.split('/')[2];
+        }
+        else {
+            hostname = url.split('/')[0];
+        }
+
+        //find & remove port number
+        hostname = hostname.split(':')[0];
+        //find & remove "?"
+        hostname = hostname.split('?')[0];
+
+        return hostname;
+    }
+
+
+    componentDidMount() {
+        function Ping(ip, timeout, callback) {
+
+            if (!this.inUse) {
+                this.status = 'unchecked';
+                this.inUse = true;
+                this.callback = callback;
+                this.ip = ip;
+                let _that = this;
+                this.img = new Image();
+                this.img.onload = function () {
+                    _that.inUse = false;
+                    _that.callback('responded');
+
+                };
+                this.img.onerror = function (e) {
+                    if (_that.inUse) {
+                        _that.inUse = false;
+                        _that.callback('responded', e);
+                    }
+
+                };
+                this.start = new Date().getTime();
+                this.img.src = ip;
+                this.timer = setTimeout(function () {
+                    if (_that.inUse) {
+                        _that.inUse = false;
+                        _that.callback('timeout');
+                    }
+                }, timeout);
+            }
+        }
+
+        this.setState({
+            imgNew: new Image().src = this.correctUrl(this.state.urlNew) + "favicon.ico",
+        });
+        new Ping(this.correctUrl(this.state.urlNew)  + "favicon.ico", 400, ( status, e ) => {
+            console.log("Status", status, e);
+            if ( status !== "timeout" ) {
+                this.setState({
+                    imgSucc: true,
+                });
+            }
+            else {
+                this.setState({
+                    imgSucc: false,
+                });
+                new Ping(this.correctUrl(this.state.urlNew), 600, ( status, e ) => {
+                    console.log("Status", status, e);
+                    if ( status !== "timeout" ) {
+                        this.setState({
+                            imgSucc: true,
+                        });
+                    }
+                    else {
+                        this.setState({
+                            imgSucc: true,
+                            imgNew: new Image().src = NotAvailable,
+                        });
+                    }
+                });
+            }
+        });
+
+    }
+
+    dismissGeneratePass() {
+        this.setState({
+            generatePassShow: false,
+        });
+    }
+
+    openGeneratePass() {
+        this.setState({
+            generatePassShow: true,
+        });
+    }
+
+    addPassword( pass ) {
+        this.setState({
+            passwordNew: pass,
+        });
+        this.dismissGeneratePass();
+    }
+
+    setTagAddedRight( tags ) {
+        return tags.length > 0;
+    }
+
     deepCopyTags( tags ) {
         let out = [];
         for ( let i = 0; i < tags.length; i++ ) {
@@ -79,9 +210,6 @@ export default class PassLine extends React.Component {
     findTagKeyIndex ( keyComp ) {
         for ( let i = 0; i < this.state.tagNew.length; i++ ) {
             let key = Object.keys(this.state.tagNew[i]);
-            console.log("TagNew", i, this.state.tagNew[i]);
-            console.log(key);
-            console.log(keyComp);
             if ( key[0] === keyComp) {
                 return i;
             }
@@ -89,15 +217,14 @@ export default class PassLine extends React.Component {
     }
 
     changeTagListener (key, value, i, e ) {
-        if ( this.state.edit )
+        if ( this.state.edit && this.state.tagAdded )
         {
+            console.log("Teest");
             // just tags
             let tagNew = this.state.tagNew;
             if (e.target.id.length > 8 ) {
                 // tagValue + i
                 if ( e.target.id.includes("tagValue") ) {
-                    console.log("tagValue");
-                    console.log(e.target.value);
                     let test = this.findTagKeyIndex(key);
                     tagNew[i][key] = e.target.value;
                     this.setState({
@@ -107,15 +234,8 @@ export default class PassLine extends React.Component {
             } else if ( e.target.id.length > 6 ) {
                 // tagKey + i
                 if ( e.target.id.includes("tagKey") ) {
-                    console.log("tagKey");
-                    console.log(key);
-                    tagNew = tagNew.map(s => {
-                        if (s.hasOwnProperty(key)) {
-                            s[e.target.value] = s[key];
-                            delete s[key];
-                        }
-                        return s;
-                    });
+                    tagNew[i][e.target.value] = tagNew[i][key];
+                    delete tagNew[i][key];
 
                     this.setState({
                         tagNew: tagNew
@@ -128,6 +248,11 @@ export default class PassLine extends React.Component {
     addTag() {
         if ( this.state.edit )
         {
+            if ( !this.state.tagAdded ) {
+                this.setState({
+                    tagAdded: true,
+                });
+            }
             let tagNew = this.state.tagNew;
             tagNew[this.state.tagNew.length] = {"":""};
             this.setState({
@@ -189,7 +314,9 @@ export default class PassLine extends React.Component {
                     userNew: this.props.user,
                     titleNew: this.props.title,
                     urlNew: this.props.url,
+                    imgNew: null, // null at the beginning
                     catIdNew: this.props.cat,
+                    tagAdded: this.setTagAddedRight(this.props.tag),
                     tagNew: this.deepCopyTags(this.props.tag),
                 });
             }
@@ -223,6 +350,31 @@ export default class PassLine extends React.Component {
         console.log("TagInRender", tag, this.props.tag);
         let tagCompArray = [];
 
+        if ( tag.length === 0 ) {
+            if ( this.state.edit ) {
+                let but = (
+                    <Button variant="dark" className="buttonSpaceInline" onClick={this.addTag}>
+                        <img
+                            src={AddTag}
+                            alt=""
+                            width="14"
+                            height="14"
+                            className="d-inline-block"
+                        />
+                    </Button>
+                );
+                tagCompArray[0] = (
+                    <InputGroup size="sm" className="mb-3">
+                        <FormControl id={"tagKey" + 0 } className="" aria-label="Small" aria-describedby="inputGroup-sizing-sm" disabled={!this.state.tagAdded} value={""} onChange={(e) => this.changeTagListener("", "", 0, e)} />
+                        <FormControl id={"tagValue" + 0 } aria-label="Small" aria-describedby="inputGroup-sizing-sm" disabled={!this.state.tagAdded} value={""} onChange={(e) => this.changeTagListener("", "", 0, e)} />
+                        {but}
+                    </InputGroup>
+                );
+            }
+            else {
+                tagCompArray[0] = "Keine Tags vorhanden";
+            }
+        }
         for ( let i = 0; i < tag.length; i++ )
         {
             console.log("Tag single: ",tag[i], "I: ", i);
@@ -257,7 +409,7 @@ export default class PassLine extends React.Component {
                 tagCompArray[i] = (
                     <InputGroup size="sm" className="mb-3">
                         <InputGroup.Prepend>
-                            <input className="input-group-text fixTag" id="inputGroup-sizing-sm" disabled={true} value={tagKeys[0]} onChange={(e) => this.changeTagListener(tagKeys[0], tag[i][tagKeys[0]], i, e)}/>
+                            <input className="input-group-text fixTag" disabled={true} value={tagKeys[0]} onChange={(e) => this.changeTagListener(tagKeys[0], tag[i][tagKeys[0]], i, e)}/>
                         </InputGroup.Prepend>
                         <FormControl aria-label="Small" aria-describedby="inputGroup-sizing-sm" disabled={true} value={tag[i][tagKeys[0]]} onChange={(e) => this.changeTagListener(tagKeys[0], tag[i][tagKeys[0]], i, e)}/>
                         {but}
@@ -280,7 +432,7 @@ export default class PassLine extends React.Component {
     }
 
     returnCatBase ( id, name) {
-        console.log("Render: " + id + ", " + name);
+        console.log("Render Cat: " + id + ", " + name);
         return (
             <tr key={id}>
                 <td onClick={() => this.changePassCat(id)}>
@@ -327,6 +479,11 @@ export default class PassLine extends React.Component {
                         <Table striped bordered hover className="ep-modal-table">
                             <tbody>
                                 {finalCats}
+                                <tr>
+                                    <td onClick={() => this.changePassCat(0)}>
+                                        Keiner Kategorie zuordnen
+                                    </td>
+                                </tr>
                             </tbody>
                         </Table>
                     </Modal.Body>
@@ -338,12 +495,19 @@ export default class PassLine extends React.Component {
     renderCat() {
         let cats = this.props.callback.getCats();
         let catName;
-        for ( let i = 0; i < cats.length; i++ ) {
-            console.log("Catname", this.state.catIdNew, cats[i].id);
-            if ( cats[i].id === this.state.catIdNew ) {
-                catName = cats[i].name;
+
+        // keiner Kategorie zugeordnet
+        if ( this.state.catIdNew === 0 ) {
+            catName = "Keiner Kategorie zugeordnet";
+        }
+        else {
+            for ( let i = 0; i < cats.length; i++ ) {
+                if ( cats[i].id === this.state.catIdNew ) {
+                    catName = cats[i].name;
+                }
             }
         }
+
         let but = (
             <Button variant="dark" className="dropdown-toggle dropdown-toggle-split" disabled={true} onClick={this.setPopUpCatEnabled}>
                 <span className="sr-only">Toggle Dropdown</span>
@@ -427,6 +591,16 @@ export default class PassLine extends React.Component {
         let edit = (
             <>
                 <FormControl id="password" aria-label="Small" type={"text"} aria-describedby="inputGroup-sizing-sm" onChange={this.changeListener} disabled={false} value={this.state.passwordNew}/>
+                <Button variant="dark" className="notRound buttonSpaceInline" onClick={() => this.openGeneratePass()}>
+                    <img
+                        src={GeneratePassIcon}
+                        alt=""
+                        width="14"
+                        height="14"
+                        className="d-inline-block"
+                    />
+                </Button>
+                <hr className="vertical-button-sep"/>
                 <Button variant="dark" disabled={true} className="buttonSpaceInline notRound">
                     <img
                         src={HideIcon}
@@ -444,13 +618,20 @@ export default class PassLine extends React.Component {
                 <Accordion.Toggle as={Card.Header} className="clickable center-vert" eventKey={this.props.id} onClick={() => this.setPasswordTo(false)}>
                     <Row>
                         <Col sm={1} md={1} lg={1} xs={1} className="fixLogoCol">
-                            <img
-                                src={this.props.img + "favicon.ico"}
-                                alt=""
-                                width="24"
-                                height="24"
-                                className="d-inline-block scaleimg fixLogo"
-                            />
+                            { this.state.imgSucc ?
+                                <img
+                                    src={this.state.imgNew}
+                                    alt=""
+                                    width="24"
+                                    height="24"
+                                    className="d-inline-block scaleimg fixLogo"
+                                />
+                                :
+                                <div className="d-inline-block scaleimg fixLogo">
+                                    <Spinner animation="border" className="spinnerMargin" size="sm" />
+                                </div>
+                            }
+
                         </Col>
                         <Col sm={10} md={10} lg={10} xs={10} className="">
                             <h5 className="inline">{this.state.titleNew}</h5>
@@ -473,7 +654,7 @@ export default class PassLine extends React.Component {
                                     className="d-inline-block scaleimg"
                                 />
                             </Button>
-                            <Button variant="dark" className="buttonSpace" disabled={true} onClick={() => { if ( !this.state.edit ) this.props.callback.goToPage(this.state.urlNew) }}>
+                            <Button variant="dark" className="buttonSpace" disabled={true} onClick={() => { if ( !this.state.edit ) this.props.callback.goToPage(this.state.urlNew, this.state.id) }}>
                                 <img
                                     src={GoToIcon}
                                     alt=""
@@ -485,24 +666,65 @@ export default class PassLine extends React.Component {
                         </>
                         :
                         <>
-                            <Button variant="dark" className="buttonSpace" onClick={() => { if ( !this.state.edit ) this.props.callback.copyPass(this.state.id) }}>
-                                <img
-                                    src={CopyIcon}
-                                    alt=""
-                                    width="24"
-                                    height="24"
-                                    className="d-inline-block scaleimg"
-                                />
-                            </Button>
-                            <Button variant="dark" className="buttonSpace" onClick={() => { if ( !this.state.edit ) this.props.callback.goToPage(this.state.urlNew) }}>
-                                <img
-                                    src={GoToIcon}
-                                    alt=""
-                                    width="24"
-                                    height="24"
-                                    className="d-inline-block scaleimg"
-                                />
-                            </Button>
+                            <>
+                                {['bottom'].map(placement => (
+                                    <OverlayTrigger
+                                        key={placement}
+                                        placement={placement}
+                                        overlay={
+                                            <Tooltip id={`tooltip-${placement}`}>
+                                                Passwort kopieren
+                                            </Tooltip>
+                                        }
+                                    >
+                                        <Button variant="dark" className="buttonSpace" onClick={() => { if ( !this.state.edit ) this.props.callback.copyPass(this.state.id) }}>
+                                            <img
+                                                src={CopyIcon}
+                                                alt=""
+                                                width="24"
+                                                height="24"
+                                                className="d-inline-block scaleimg"
+                                            />
+                                        </Button>
+                                    </OverlayTrigger>
+                                ))}
+                            </>
+                            <>
+                                {['bottom'].map(placement => (
+                                    <OverlayTrigger
+                                        key={placement}
+                                        placement={placement}
+                                        overlay={
+                                            <Tooltip id={`tooltip-${placement}`}>
+                                                Passwort kopieren und Website öffnen
+                                            </Tooltip>
+                                        }
+                                    >
+                                        { this.state.urlNew.length === 0 ?
+                                            <Button variant="dark" className="buttonSpace" disabled={true} onClick={() => { if ( !this.state.edit && this.state.urlNew.length > 0 )  this.props.callback.goToPage(this.state.urlNew, this.state.id) }}>
+                                                <img
+                                                    src={GoToIcon}
+                                                    alt=""
+                                                    width="24"
+                                                    height="24"
+                                                    className="d-inline-block scaleimg"
+                                                />
+                                            </Button>
+                                            :
+                                            <Button variant="dark" className="buttonSpace" onClick={() => { if ( !this.state.edit )  this.props.callback.goToPage(this.state.urlNew, this.state.id) }}>
+                                                <img
+                                                    src={GoToIcon}
+                                                    alt=""
+                                                    width="24"
+                                                    height="24"
+                                                    className="d-inline-block scaleimg"
+                                                />
+                                            </Button>
+                                        }
+
+                                    </OverlayTrigger>
+                                ))}
+                            </>
                         </>
                     }
                 </div>
@@ -607,7 +829,7 @@ export default class PassLine extends React.Component {
                                         :
                                         <>
                                             <FormControl aria-label="Small" aria-describedby="inputGroup-sizing-sm" disabled={true} value={this.state.urlNew} onChange={this.changeListener}/>
-                                            <Button variant="dark" className="buttonSpaceInline" onClick={() => this.props.callback.copy(this.props.url, dashboardAlerts.showCopyURLAlert)}>
+                                            <Button variant="dark" className="buttonSpaceInline" onClick={() => this.props.callback.copy(this.state.urlNew, dashboardAlerts.showCopyURLAlert)}>
                                                 <img
                                                     src={CopyIcon}
                                                     alt=""
@@ -723,6 +945,7 @@ export default class PassLine extends React.Component {
                     </>
                 </Accordion.Collapse>
                 {this.getPopUpCat()}
+                <GeneratePass callback={this} show={this.state.generatePassShow}/>
             </Card>
         );
     }
