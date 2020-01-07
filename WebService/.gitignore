@@ -63,5 +63,5 @@ yarn-error.log*
 /src/main/resources/templates/
 
 ## WebAssembly ##
-pkg/
+# pkg/
 
