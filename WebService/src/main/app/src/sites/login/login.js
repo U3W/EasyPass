@@ -7,6 +7,7 @@ import Row from "react-bootstrap/Row";
 import Col from "react-bootstrap/Col";
 import Form from "react-bootstrap/Form";
 import Button from "react-bootstrap/Button";
+import history from "../../routing/history";
 
 import dashboardState from "../dashboard/dashboard.saved.state";
 // Strings
@@ -19,11 +20,9 @@ import LoginAuth from "../../authentification/auth.login"
 import Alert from "react-bootstrap/Alert";
 import { connect } from 'react-redux';
 import {login, logout} from "../../action/auth.action";
-import {authConstants} from "../../authentification/auth.const.localstorage";
 import Indicator from "../../network/network.indicator";
-import {saveCat, saveTab} from "../../action/dashboard.action";
-import tabs from "../dashboard/tabs/tab.enum";
-import dashboard from "../dashboard/dashboard";
+
+
 
 //<Row className="justify-content-center">
 class Login extends React.Component {
@@ -46,6 +45,20 @@ class Login extends React.Component {
         this.handleKeyevent = this.handleKeyevent.bind(this);
         this.printError = this.printError.bind(this);
         this.switchToRegister = this.switchToRegister.bind(this);
+    }
+
+
+    componentDidMount() {
+        this.props.worker.addEventListener("message", this.workerCall, true);
+    }
+
+    componentWillUnmount() {
+        this.props.worker.removeEventListener("message", this.workerCall, true);
+    }
+
+    workerCall( e ) {
+        const cmd = e.data[0];
+        const data = e.data[1];
     }
 
     handleChange = (e) => {
@@ -109,7 +122,7 @@ class Login extends React.Component {
             this.props.login(this.state);
 
             if (LoginAuth.getLoggedIn()) {
-                this.props.history.push("/verify");
+                history.push("/verify");
             } else {
                 // Fehlermeldung
                 this.setState({error: true});
@@ -161,7 +174,7 @@ class Login extends React.Component {
     }
 
     switchToRegister() {
-        this.props.history.push("/registration");
+        history.push("/registration");
     }
 
     getInputPassword() {

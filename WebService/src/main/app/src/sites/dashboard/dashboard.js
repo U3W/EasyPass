@@ -634,7 +634,7 @@ class Dashboard extends React.Component {
 
     logoutDash() {
         this.props.logout(this.state);
-        this.props.history.push("/");
+        history.push("/");
     }
 
     saveSettings() {

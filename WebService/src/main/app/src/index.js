@@ -1,12 +1,13 @@
 import React from "react";
 import ReactDOM from "react-dom";
 import {
-    BrowserRouter as Router,
+    Router,
     Switch,
     Redirect,
     Route
 } from "react-router-dom";
 
+import history from './routing/history';
 
 import "./index.css";
 import {NoMatch} from "./sites/errors";
@@ -25,8 +26,7 @@ import Dashboard from "./sites/dashboard/dashboard";
 import VerifyAuth from "./authentification/auth.masterpassword"
 import * as serviceWorker from "./service-worker/sw-handler";
 
-// Load backend with WebAssembly
-const worker = new Worker('worker.js');
+
 
 // Load service worker
 serviceWorker.register();
@@ -41,7 +41,9 @@ class App extends React.Component {
         super(state);
 
         this.state = {
-            isDisconnected: false
+            isDisconnected: false,
+            // Load backend with WebAssembly
+            worker: new Worker('worker.js'),
         };
     }
 
@@ -55,6 +57,7 @@ class App extends React.Component {
         window.removeEventListener('online', this.handleConnectionChange);
         window.removeEventListener('offline', this.handleConnectionChange);
     }
+
 
 
     handleConnectionChange = () => {
@@ -83,10 +86,10 @@ class App extends React.Component {
             return (
                 <div className="App">
                     <Switch>
-                        <Route exact path="/" component={Login} />
-                        <Route exact path="/registration" component={Registration}/>
-                        <ProtectedRoute exact path="/verify" component={Masterpassword} netState="online" type="auth" />
-                        <ProtectedRoute exact path="/dashboard" component={Dashboard} netState="online" type="verify" />
+                        <Route exact path="/" component={() => <Login worker={this.state.worker} />} />
+                        <Route exact path="/registration" component={() => <Registration worker={this.state.worker} />}/>
+                        <ProtectedRoute exact path="/verify" component={() => <Masterpassword worker={this.state.worker}/>} netState="online" type="auth" />
+                        <ProtectedRoute exact path="/dashboard" component={() => <Dashboard worker={this.state.worker}/>} netState="online" type="verify" />
                         <Route path="*" component={NoMatch} />
                     </Switch>
                 </div>
@@ -107,8 +110,8 @@ class App extends React.Component {
                 <div className="App">
                     {redirect}
                     <Switch>
-                        <Route exact path="/verify" component={Masterpassword} />
-                        <ProtectedRoute exact path="/dashboard" component={Dashboard} netState="offline" type="verify"/>
+                        <Route exact path="/verify" component={() => <Masterpassword worker={this.state.worker} />} />
+                        <ProtectedRoute exact path="/dashboard" component={() => <Dashboard worker={this.state.worker}/>} netState="offline" type="verify"/>
                         <Route path="*" component={NoMatch} />
                     </Switch>
                 </div>
@@ -123,4 +126,4 @@ class App extends React.Component {
 }
 // Ins Grundgerüst setzen
 const rootElement = document.getElementById("root");
-ReactDOM.render(<Provider store={store}><Router><App /></Router></Provider>, rootElement);
+ReactDOM.render(<Provider store={store}><Router history={history}><App /></Router></Provider>, rootElement);

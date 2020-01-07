@@ -19,6 +19,8 @@ import Indicator from "../../network/network.indicator";
 import tabs from "../dashboard/tabs/tab.enum";
 import {saveCat, saveTab} from "../../action/dashboard.action";
 import dashboardState from "../dashboard/dashboard.saved.state";
+import history from "../../routing/history";
+import Back from "../../img/masterpassword_V3.1.svg";
 
 class Masterpassword extends React.Component {
 
@@ -128,7 +130,7 @@ class Masterpassword extends React.Component {
 
             if ( VerifyAuth.getVerified() )
             {
-                this.props.history.push("/dashboard");
+                history.push("/dashboard");
             }
             else
             {
@@ -278,11 +280,16 @@ class Masterpassword extends React.Component {
     }
     render() {
         return (
-            <div className="backgroundPicMasterpassword">
+            <div className="">
                 <div className="gradientDivMasterpassword">
                     <Container>
                         <Row className="size-hole-window">
                             <Col xs={12} sm={8} md={6} lg={5} className="center-vert center-horz">
+                                <img
+                                    src={Back}
+                                    alt=""
+                                    className="masterpassBackgound"
+                                />
                                 <Card className="card-login">
                                     <Card.Body>
                                         <Form autoComplete="off">

@@ -24,6 +24,8 @@ import {saveCat, saveTab} from "../../action/dashboard.action";
 import tabs from "../dashboard/tabs/tab.enum";
 import dashboard from "../dashboard/dashboard";
 import ShowIcon from "../../img/icons/password_show_white.svg";
+import HideIcon from "../../img/icons/password_hide_white.svg"
+import history from "../../routing/history";
 
 class Registration extends React.Component {
     constructor(props) {
@@ -33,10 +35,14 @@ class Registration extends React.Component {
             language: dashboardState.getSelectedLanguage(),
 
             newPass: "",
+            newPassShow: false,
             newPassSec: "",
+            newPassSecShow: false,
             newUser: "",
             newMasterpass: "",
+            newMasterpassShow: false,
             newMasterpassSec: "",
+            newMasterpassSecShow: false,
 
             step: 1,
 
@@ -263,7 +269,7 @@ class Registration extends React.Component {
 
                 // ToDo Kall Kaspers method
                 if (true) {
-                    this.props.history.push("/");
+                    history.push("/");
                 } else {
                     // Fehlermeldung
                     this.setState({error: true});
@@ -325,23 +331,60 @@ class Registration extends React.Component {
         }
     }
 
+    setPasswordShow( id ) {
+        switch (id) {
+            // pass
+            case 0:
+                this.setState({newPassShow: !this.state.newPassShow});
+                break;
+            // pass sec
+            case 1:
+                this.setState({newPassSecShow: !this.state.newPassSecShow});
+                break;
+            // masterpass
+            case 2:
+                this.setState({newMasterpassShow: !this.state.newMasterpassShow});
+                break;
+            // masterpass sec
+            case 3:
+                this.setState({newMasterpassSecShow: !this.state.newMasterpassSecShow});
+                break;
+        }
+    }
+
     getInputPassword() {
         if ( this.state.missingPassword || this.state.passNoMatch)
         {
             return (
                 <Form.Group>
-                    <Form.Label className="text-danger">{StringSelector.getString(this.state.language).password}</Form.Label>
+                    <Form.Label className="text-danger" >{StringSelector.getString(this.state.language).password}</Form.Label>
                     <Row className="password-row">
-                        <Form.Control className="is-invalid passInp" type="password" id="newPass" placeholder={StringSelector.getString(this.state.language).passwordPlaceholder} value={this.state.newPass}
-                                      onKeyDown={this.handleKeyevent} onChange={this.handleChange} />
-                        <Button variant="dark" className="buttonInline" onClick={this.setPassword}>
-                            <img
-                                src={ShowIcon}
-                                alt=""
-                                width="18"
-                                height="18"
-                                className="d-inline-block"
-                            />
+                        { this.state.newPassShow ?
+                            <Form.Control className="is-invalid passInp" type="text" id="newPass" placeholder={StringSelector.getString(this.state.language).passwordPlaceholder} value={this.state.newPass}
+                                          onKeyDown={this.handleKeyevent} onChange={this.handleChange} />
+                            :
+                            <Form.Control className="is-invalid passInp" type="password" id="newPass" placeholder={StringSelector.getString(this.state.language).passwordPlaceholder} value={this.state.newPass}
+                                          onKeyDown={this.handleKeyevent} onChange={this.handleChange} />
+                        }
+
+                        <Button variant="dark" className="buttonInline" onClick={() => this.setPasswordShow(0)}>
+                            {this.state.newPassShow ?
+                                <img
+                                    src={HideIcon}
+                                    alt=""
+                                    width="18"
+                                    height="18"
+                                    className="d-inline-block"
+                                />
+                                :
+                                <img
+                                    src={ShowIcon}
+                                    alt=""
+                                    width="18"
+                                    height="18"
+                                    className="d-inline-block"
+                                />
+                            }
                         </Button>
                     </Row>
                 </Form.Group>
@@ -353,16 +396,31 @@ class Registration extends React.Component {
                 <Form.Group>
                     <Form.Label>{StringSelector.getString(this.state.language).password}</Form.Label>
                     <Row className="password-row">
-                        <Form.Control className="passInp" type="password" id="newPass" placeholder={StringSelector.getString(this.state.language).passwordPlaceholder} value={this.state.newPass}
-                                      onKeyDown={this.handleKeyevent} onChange={this.handleChange} />
-                        <Button variant="dark" className="buttonInline" onClick={this.setPassword}>
-                            <img
-                                src={ShowIcon}
-                                alt=""
-                                width="18"
-                                height="18"
-                                className="d-inline-block"
-                            />
+                        {this.state.newPassShow ?
+                            <Form.Control className="passInp" type="text" id="newPass" placeholder={StringSelector.getString(this.state.language).passwordPlaceholder} value={this.state.newPass}
+                                          onKeyDown={this.handleKeyevent} onChange={this.handleChange} />
+                            :
+                            <Form.Control className="passInp" type="password" id="newPass" placeholder={StringSelector.getString(this.state.language).passwordPlaceholder} value={this.state.newPass}
+                                          onKeyDown={this.handleKeyevent} onChange={this.handleChange} />
+                        }
+                        <Button variant="dark" className="buttonInline" onClick={() => this.setPasswordShow(0)}>
+                            {this.state.newPassShow ?
+                                <img
+                                    src={HideIcon}
+                                    alt=""
+                                    width="18"
+                                    height="18"
+                                    className="d-inline-block"
+                                />
+                                :
+                                <img
+                                    src={ShowIcon}
+                                    alt=""
+                                    width="18"
+                                    height="18"
+                                    className="d-inline-block"
+                                />
+                            }
                         </Button>
                     </Row>
                 </Form.Group>
@@ -383,16 +441,31 @@ class Registration extends React.Component {
                 <Form.Group>
                     <Form.Label className="text-danger">Passwort wiederholen</Form.Label>
                     <Row className="password-row">
-                        <Form.Control className="is-invalid passInp" type="password" id="newPassSec" placeholder={StringSelector.getString(this.state.language).passwordPlaceholder} value={this.state.newPassSec}
-                                      onKeyDown={this.handleKeyevent} onChange={this.handleChange} />
-                        <Button variant="dark" className="buttonInline" onClick={this.setPassword}>
-                            <img
-                                src={ShowIcon}
-                                alt=""
-                                width="18"
-                                height="18"
-                                className="d-inline-block"
-                            />
+                        {this.state.newPassSecShow ?
+                            <Form.Control className="is-invalid passInp" type="text" id="newPassSec" placeholder={StringSelector.getString(this.state.language).passwordPlaceholder} value={this.state.newPassSec}
+                                          onKeyDown={this.handleKeyevent} onChange={this.handleChange} />
+                            :
+                            <Form.Control className="is-invalid passInp" type="password" id="newPassSec" placeholder={StringSelector.getString(this.state.language).passwordPlaceholder} value={this.state.newPassSec}
+                                          onKeyDown={this.handleKeyevent} onChange={this.handleChange} />
+                        }
+                        <Button variant="dark" className="buttonInline" onClick={() => this.setPasswordShow(1)}>
+                            {this.state.newPassSecShow ?
+                                <img
+                                    src={HideIcon}
+                                    alt=""
+                                    width="18"
+                                    height="18"
+                                    className="d-inline-block"
+                                />
+                                :
+                                <img
+                                    src={ShowIcon}
+                                    alt=""
+                                    width="18"
+                                    height="18"
+                                    className="d-inline-block"
+                                />
+                            }
                         </Button>
                     </Row>
                     {toAdd}
@@ -405,16 +478,31 @@ class Registration extends React.Component {
                 <Form.Group>
                     <Form.Label>Passwort wiederholen</Form.Label>
                     <Row className="password-row">
-                        <Form.Control className="passInp" type="password" id="newPassSec" placeholder={StringSelector.getString(this.state.language).passwordPlaceholder} value={this.state.newPassSec}
-                                  onKeyDown={this.handleKeyevent} onChange={this.handleChange} />
-                        <Button variant="dark" className="buttonInline" onClick={this.setPassword}>
-                            <img
-                                src={ShowIcon}
-                                alt=""
-                                width="18"
-                                height="18"
-                                className="d-inline-block"
-                            />
+                        { this.state.newPassSecShow ?
+                            <Form.Control className="passInp" type="text" id="newPassSec" placeholder={StringSelector.getString(this.state.language).passwordPlaceholder} value={this.state.newPassSec}
+                                          onKeyDown={this.handleKeyevent} onChange={this.handleChange} />
+                            :
+                            <Form.Control className="passInp" type="password" id="newPassSec" placeholder={StringSelector.getString(this.state.language).passwordPlaceholder} value={this.state.newPassSec}
+                                          onKeyDown={this.handleKeyevent} onChange={this.handleChange} />
+                        }
+                        <Button variant="dark" className="buttonInline" onClick={() => this.setPasswordShow(1)}>
+                            {this.state.newPassSecShow ?
+                                <img
+                                    src={HideIcon}
+                                    alt=""
+                                    width="18"
+                                    height="18"
+                                    className="d-inline-block"
+                                />
+                                :
+                                <img
+                                    src={ShowIcon}
+                                    alt=""
+                                    width="18"
+                                    height="18"
+                                    className="d-inline-block"
+                                />
+                            }
                         </Button>
                   </Row>
                 </Form.Group>
@@ -429,8 +517,34 @@ class Registration extends React.Component {
             return (
                 <Form.Group>
                     <Form.Label className="text-danger">Masterpasswort</Form.Label>
-                    <Form.Control className="is-invalid" type="password" id="newMasterpass" placeholder={StringSelector.getString(this.state.language).passwordPlaceholder} value={this.state.newMasterpass}
-                                  onKeyDown={this.handleKeyevent} onChange={this.handleChange} />
+                    <Row className="password-row">
+                        { this.state.newMasterpassShow ?
+                            <Form.Control className="is-invalid passInp" type="text" id="newMasterpass" placeholder={StringSelector.getString(this.state.language).passwordPlaceholder} value={this.state.newMasterpass}
+                                          onKeyDown={this.handleKeyevent} onChange={this.handleChange} />
+                            :
+                            <Form.Control className="is-invalid passInp" type="password" id="newMasterpass" placeholder={StringSelector.getString(this.state.language).passwordPlaceholder} value={this.state.newMasterpass}
+                                          onKeyDown={this.handleKeyevent} onChange={this.handleChange} />
+                        }
+                        <Button variant="dark" className="buttonInline" onClick={() => this.setPasswordShow(2)}>
+                            {this.state.newMasterpassShow ?
+                                <img
+                                    src={HideIcon}
+                                    alt=""
+                                    width="18"
+                                    height="18"
+                                    className="d-inline-block"
+                                />
+                                :
+                                <img
+                                    src={ShowIcon}
+                                    alt=""
+                                    width="18"
+                                    height="18"
+                                    className="d-inline-block"
+                                />
+                            }
+                        </Button>
+                    </Row>
                 </Form.Group>
             );
         }
@@ -439,8 +553,34 @@ class Registration extends React.Component {
             return (
                 <Form.Group>
                     <Form.Label>Masterpasswort</Form.Label>
-                    <Form.Control type="password" id="newMasterpass" placeholder={StringSelector.getString(this.state.language).passwordPlaceholder} value={this.state.newMasterpass}
-                                  onKeyDown={this.handleKeyevent} onChange={this.handleChange} />
+                    <Row className="password-row">
+                        { this.state.newMasterpassShow ?
+                            <Form.Control className="passInp" type="text" id="newMasterpass" placeholder={StringSelector.getString(this.state.language).passwordPlaceholder} value={this.state.newMasterpass}
+                                          onKeyDown={this.handleKeyevent} onChange={this.handleChange} />
+                            :
+                            <Form.Control className="passInp" type="password" id="newMasterpass" placeholder={StringSelector.getString(this.state.language).passwordPlaceholder} value={this.state.newMasterpass}
+                                          onKeyDown={this.handleKeyevent} onChange={this.handleChange} />
+                        }
+                        <Button variant="dark" className="buttonInline" onClick={() => this.setPasswordShow(2)}>
+                            {this.state.newMasterpassShow ?
+                                <img
+                                    src={HideIcon}
+                                    alt=""
+                                    width="18"
+                                    height="18"
+                                    className="d-inline-block"
+                                />
+                                :
+                                <img
+                                    src={ShowIcon}
+                                    alt=""
+                                    width="18"
+                                    height="18"
+                                    className="d-inline-block"
+                                />
+                            }
+                        </Button>
+                    </Row>
                 </Form.Group>
             );
         }
@@ -467,8 +607,34 @@ class Registration extends React.Component {
             return (
                 <Form.Group>
                     <Form.Label className="text-danger">Masterpasswort wiederholen</Form.Label>
-                    <Form.Control className="is-invalid" type="password" id="newMasterpassSec" placeholder={StringSelector.getString(this.state.language).passwordPlaceholder} value={this.state.newMasterpassSec}
-                                  onKeyDown={this.handleKeyevent} onChange={this.handleChange} />
+                        <Row className="password-row">
+                        { this.state.newMasterpassSecShow ?
+                            <Form.Control className="is-invalid passInp" type="text" id="newMasterpassSec" placeholder={StringSelector.getString(this.state.language).passwordPlaceholder} value={this.state.newMasterpassSec}
+                                          onKeyDown={this.handleKeyevent} onChange={this.handleChange} />
+                            :
+                            <Form.Control className="is-invalid passInp" type="password" id="newMasterpassSec" placeholder={StringSelector.getString(this.state.language).passwordPlaceholder} value={this.state.newMasterpassSec}
+                                          onKeyDown={this.handleKeyevent} onChange={this.handleChange} />
+                        }
+                        <Button variant="dark" className="buttonInline" onClick={() => this.setPasswordShow(3)}>
+                            {this.state.newMasterpassSecShow ?
+                                <img
+                                    src={HideIcon}
+                                    alt=""
+                                    width="18"
+                                    height="18"
+                                    className="d-inline-block"
+                                />
+                                :
+                                <img
+                                    src={ShowIcon}
+                                    alt=""
+                                    width="18"
+                                    height="18"
+                                    className="d-inline-block"
+                                />
+                            }
+                        </Button>
+                    </Row>
                     {toAdd}
                 </Form.Group>
             );
@@ -478,15 +644,41 @@ class Registration extends React.Component {
             return (
                 <Form.Group>
                     <Form.Label>Masterpasswort wiederholen</Form.Label>
-                    <Form.Control type="password" id="newMasterpassSec" placeholder={StringSelector.getString(this.state.language).passwordPlaceholder} value={this.state.newMasterpassSec}
-                                  onKeyDown={this.handleKeyevent} onChange={this.handleChange} />
+                        <Row className="password-row">
+                        { this.state.newMasterpassSecShow ?
+                            <Form.Control className="passInp" type="text" id="newMasterpassSec" placeholder={StringSelector.getString(this.state.language).passwordPlaceholder} value={this.state.newMasterpassSec}
+                                          onKeyDown={this.handleKeyevent} onChange={this.handleChange} />
+                            :
+                            <Form.Control className="passInp" type="password" id="newMasterpassSec" placeholder={StringSelector.getString(this.state.language).passwordPlaceholder} value={this.state.newMasterpassSec}
+                                          onKeyDown={this.handleKeyevent} onChange={this.handleChange} />
+                        }
+                        <Button variant="dark" className="buttonInline" onClick={() => this.setPasswordShow(3)}>
+                            {this.state.newMasterpassSecShow ?
+                                <img
+                                    src={HideIcon}
+                                    alt=""
+                                    width="18"
+                                    height="18"
+                                    className="d-inline-block"
+                                />
+                                :
+                                <img
+                                    src={ShowIcon}
+                                    alt=""
+                                    width="18"
+                                    height="18"
+                                    className="d-inline-block"
+                                />
+                            }
+                        </Button>
+                    </Row>
                 </Form.Group>
             );
         }
     }
 
     exit() {
-        this.props.history.push("/");
+        history.push("/");
     }
 
 
