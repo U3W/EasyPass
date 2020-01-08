@@ -12,14 +12,18 @@ class WorkboxCombinePrecachesPlugin {
 
     constructor(mode, fileName) {
         this.mode = mode;
-        this.fileName = fileName;
+        if (fileName === null) {
+            this.fileName = 'service-worker.js';
+        } else this.fileName = fileName;
     }
+
+    static amount = undefined;
+
+    static counter = 0;
 
     static flag = false;
 
-    static setFlag(state) {
-        this.flag = state;
-    }
+    static cache = [];
 
     static precaches = "";
 
@@ -29,44 +33,60 @@ class WorkboxCombinePrecachesPlugin {
 
     apply(compiler) {
         compiler.hooks.emit.tap('WorkboxSavePrecachePlugin', compilation => {
-            if (this.mode === 'save') {
-                console.log("wow");
-                const content = compilation.assets[this.fileName].source();
-                const precacheImport = content.substring(0, content.search(';')+1);
-                WorkboxCombinePrecachesPlugin.addPrecache(precacheImport);
-                console.log(WorkboxCombinePrecachesPlugin.precaches);
-                WorkboxCombinePrecachesPlugin.setFlag(true)
+            if (WorkboxCombinePrecachesPlugin.amount === undefined) {
+                throw "You need to set the amount of precaches of the WorkboxCombinePrecachesPlugin through " +
+                "`WorkboxCombinePrecachesPlugin.amount = your_amount` before using the plugin.";
             }
-            else if (this.mode === 'combine') {
-                if (this.fileName === null) {
-                    this.fileName = 'service-worker.js';
-                }
-                const serviceWorker = WorkboxCombinePrecachesPlugin.precaches +
-                    compilation.assets[this.fileName].source();
-
-                compilation.assets[this.fileName] = {
-                    source: function() {
-                        return serviceWorker;
-                    },
-                    size: function() {
-                        return serviceWorker.length;
+            else if (this.mode === 'save') {
+                if (WorkboxCombinePrecachesPlugin.counter >= WorkboxCombinePrecachesPlugin.amount) {
+                    throw "When calling the WorkboxCombinePrecachesPlugin on the last precache you need " +
+                    "to use the mode `combine`";
+                } else {
+                    const content = compilation.assets[this.fileName].source();
+                    const precacheImport = content.substring(0, content.search(';')+1);
+                    WorkboxCombinePrecachesPlugin.cache.push(precacheImport);
+                    delete compilation.assets[this.fileName];
+                    WorkboxCombinePrecachesPlugin.counter++;
+                    if (WorkboxCombinePrecachesPlugin.counter + 1 === WorkboxCombinePrecachesPlugin.amount) {
+                        WorkboxCombinePrecachesPlugin.flag = true;
                     }
-                };
+                }
+            } else if (this.mode === 'combine') {
+                if (WorkboxCombinePrecachesPlugin.flag === false) {
+                    this.wait();
+                }
+                if (WorkboxCombinePrecachesPlugin.counter + 1 === WorkboxCombinePrecachesPlugin.amount) {
+                    WorkboxCombinePrecachesPlugin.cache.forEach(item =>
+                        WorkboxCombinePrecachesPlugin.addPrecache(item));
 
-                console.log(compilation.assets[this.fileName].source());
-            }
-            else {
-                this.check();
-                console.log(WorkboxCombinePrecachesPlugin.precaches);
+                    const serviceWorker = WorkboxCombinePrecachesPlugin.precaches +
+                        compilation.assets[this.fileName].source();
+
+                    compilation.assets[this.fileName] = {
+                        source: function() {
+                            return serviceWorker;
+                        },
+                        size: function() {
+                            return serviceWorker.length;
+                        }
+                    };
+
+                } else {
+                    throw "Expected more precaches."
+                }
+            } else {
+                throw 'Unknown mode: ' + this.mode;
             }
         });
     }
 
-    check() {
+    wait() {
+        let i = 0;
         while(!WorkboxCombinePrecachesPlugin.flag) {
-            console.log("1");
+            if (i === 0) console.log("Waiting for precaches...");
+            i++;
+            if (i === 1000000000) i = 0;
         }
-        console.log("2");
     }
 
 }
