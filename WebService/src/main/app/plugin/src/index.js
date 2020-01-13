@@ -8,7 +8,7 @@ const os = require('os');
  * That means, one precache will always be missing. To fix this, the precache import
  * of the worker entry is manually added to the service-worker file at the top.
  */
-class WorkboxCombinePrecachesPlugin {
+class CombineWorkboxPrecachesPlugin {
 
     constructor(mode, fileName) {
         this.mode = mode;
@@ -37,34 +37,34 @@ class WorkboxCombinePrecachesPlugin {
 
     apply(compiler) {
         compiler.hooks.emit.tapAsync('WorkboxSavePrecachePlugin', async (compilation, callback) => {
-            if (WorkboxCombinePrecachesPlugin.amount === undefined) {
+            if (CombineWorkboxPrecachesPlugin.amount === undefined) {
                 throw this.pluginName + "You need to set the amount of precaches of the WorkboxCombinePrecachesPlugin " +
                 "through `WorkboxCombinePrecachesPlugin.amount = your_amount` before using the plugin.";
             }
             else if (this.mode === 'save') {
-                if (WorkboxCombinePrecachesPlugin.counter >= WorkboxCombinePrecachesPlugin.amount) {
+                if (CombineWorkboxPrecachesPlugin.counter >= CombineWorkboxPrecachesPlugin.amount) {
                     throw this.pluginName + "When calling the WorkboxCombinePrecachesPlugin on the last precache you " +
                     "need to use the mode `combine`";
                 } else {
                     const content = compilation.assets[this.fileName].source();
                     const precacheImport = content.substring(0, content.search(';')+1);
-                    WorkboxCombinePrecachesPlugin.cache.push(precacheImport);
+                    CombineWorkboxPrecachesPlugin.cache.push(precacheImport);
                     delete compilation.assets[this.fileName];
-                    WorkboxCombinePrecachesPlugin.counter++;
-                    if (WorkboxCombinePrecachesPlugin.counter + 1 === WorkboxCombinePrecachesPlugin.amount) {
-                        WorkboxCombinePrecachesPlugin.flag = true;
+                    CombineWorkboxPrecachesPlugin.counter++;
+                    if (CombineWorkboxPrecachesPlugin.counter + 1 === CombineWorkboxPrecachesPlugin.amount) {
+                        CombineWorkboxPrecachesPlugin.flag = true;
                     }
                     callback();
                 }
             } else if (this.mode === 'combine') {
-                if (WorkboxCombinePrecachesPlugin.flag === false) {
+                if (CombineWorkboxPrecachesPlugin.flag === false) {
                     await this.wait();
                 }
-                if (WorkboxCombinePrecachesPlugin.counter + 1 === WorkboxCombinePrecachesPlugin.amount) {
-                    WorkboxCombinePrecachesPlugin.cache.forEach(item =>
-                        WorkboxCombinePrecachesPlugin.addPrecache(item));
+                if (CombineWorkboxPrecachesPlugin.counter + 1 === CombineWorkboxPrecachesPlugin.amount) {
+                    CombineWorkboxPrecachesPlugin.cache.forEach(item =>
+                        CombineWorkboxPrecachesPlugin.addPrecache(item));
 
-                    const serviceWorker = WorkboxCombinePrecachesPlugin.precaches +
+                    const serviceWorker = CombineWorkboxPrecachesPlugin.precaches +
                         compilation.assets[this.fileName].source();
 
                     compilation.assets[this.fileName] = {
@@ -94,8 +94,8 @@ class WorkboxCombinePrecachesPlugin {
     async wait() {
         console.log(this.pluginName + "Waiting for precaches...");
         let i = 0;
-        while(!WorkboxCombinePrecachesPlugin.flag) {
-            if (i > WorkboxCombinePrecachesPlugin.timeout) {
+        while(!CombineWorkboxPrecachesPlugin.flag) {
+            if (i > CombineWorkboxPrecachesPlugin.timeout) {
                 throw this.pluginName + "Combining precaches extended timeout"
             }
             await this.sleep(100);
@@ -105,4 +105,4 @@ class WorkboxCombinePrecachesPlugin {
 
 }
 
-module.exports = WorkboxCombinePrecachesPlugin;
+module.exports = CombineWorkboxPrecachesPlugin;

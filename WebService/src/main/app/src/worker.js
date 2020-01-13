@@ -94,7 +94,7 @@ import("../../rust/pkg").then(wasm => {
     };
 
     const login = async (uname, masterkey) => {
-        data = { "uname": uname, "publicKey": "", "privateKey": ""};
+        const data = { "uname": uname, "publicKey": "", "privateKey": ""};
         const respone = await fetch(authUrl + "challenge", {
             method: `POST`,
             headers: {
