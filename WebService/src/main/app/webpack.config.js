@@ -2,8 +2,7 @@ const HtmlWebPackPlugin = require("html-webpack-plugin");
 const CopyWebPackPlugin = require("copy-webpack-plugin");
 const HtmlWebpackExcludeAssetsPlugin = require('html-webpack-exclude-assets-plugin');
 const WorkboxPlugin = require('workbox-webpack-plugin');
-// const WorkboxCombinePrechachesPlugin = require('./webpackPlugins/WorkboxCombinePrecachesPlugin');
-const WorkboxCombinePrechachesPlugin = require('./plugin/lib/index');
+const CombineWorkboxPrecachesPlugin = require('combine-workbox-precaches-plugin');
 const os = require('os');
 const path = require('path');
 const fs = require('fs');
@@ -14,7 +13,7 @@ const Dotenv = require('dotenv-webpack');
 let mode = "production";
 let outputPath = "build";
 let temporaryPrecache = 'tmp.txt';
-WorkboxCombinePrechachesPlugin.amount = 2;
+CombineWorkboxPrecachesPlugin.amount = 2;
 
 module.exports = (args, options) => {
   /**
@@ -90,7 +89,7 @@ module.exports = (args, options) => {
         swSrc: './src/service-worker/service-worker.js',
         include: [/\.wasm$/, /\.html$/, /\.js$/, /\.ico$/, /\.png$/, /\.jpeg$/, /\.json$/]
       }),
-      new WorkboxCombinePrechachesPlugin('combine', null),
+      new CombineWorkboxPrecachesPlugin('combine', null),
       new Dotenv()
     ],
     output: {
@@ -132,7 +131,7 @@ module.exports = (args, options) => {
         swDest: temporaryPrecache,
         include: [/\.wasm$/, /\.html$/, /\.js$/, /\.ico$/, /\.png$/, /\.jpeg$/, /\.json$/]
       }),
-      new WorkboxCombinePrechachesPlugin('save', temporaryPrecache),
+      new CombineWorkboxPrecachesPlugin('save', temporaryPrecache),
       new Dotenv()
      ],
     mode: "production"
