@@ -21,6 +21,7 @@ import Alert from "react-bootstrap/Alert";
 import { connect } from 'react-redux';
 import {login, logout} from "../../action/auth.action";
 import Indicator from "../../network/network.indicator";
+import {dashboardAlerts} from "../dashboard/const/dashboard.enum";
 
 
 
@@ -36,8 +37,16 @@ class Login extends React.Component {
             inpUsername: "",
             error: false,
             missingPassword: false,
-            missingUsername: false
+            missingUsername: false,
+
+            showRegistered: false,
+            alertState: "success",
         };
+
+        console.log(history.location.state);
+        if ( history.location.state !== undefined ) {
+            this.showRegistAlert(history.location.state.succ)
+        }
 
 
         this.handleChange = this.handleChange.bind(this);
@@ -45,6 +54,8 @@ class Login extends React.Component {
         this.handleKeyevent = this.handleKeyevent.bind(this);
         this.printError = this.printError.bind(this);
         this.switchToRegister = this.switchToRegister.bind(this);
+
+        this.printRegistered = this.printRegistered.bind(this);
     }
 
 
@@ -86,6 +97,37 @@ class Login extends React.Component {
         this.setState({
             error: show
         });
+    }
+
+    showRegistAlert( succ ) {
+        this.setState({
+            showRegistered: true,
+            alertState: succ,
+        }, () => {
+            sleep(4000).then(() => {
+                    this.setState({
+                        showRegistered: false,
+                    })
+                }
+            );
+        });
+    }
+
+    printRegistered() {
+        const show = this.state.showRegistered;
+        let succ = StringSelector.getString(this.state.language).registrationAlertSucc;
+        let err = StringSelector.getString(this.state.language).registrationAlertError;
+        return (
+            <Alert show={show} variant={this.state.alertState} className="center-horz error">
+                <p className="center-horz center-vert center-text">
+                    {this.state.alertState === "success" ?
+                        succ
+                        :
+                        err
+                    }
+                </p>
+            </Alert>
+        );
     }
 
     printError() {
@@ -173,8 +215,10 @@ class Login extends React.Component {
         }
     }
 
-    switchToRegister() {
-        history.push("/registration");
+        switchToRegister() {
+        history.push({
+            pathname: "/registration",
+        });
     }
 
     getInputPassword() {
@@ -227,6 +271,7 @@ class Login extends React.Component {
                             </Col>
                             <div className="footer">
                                 {this.printError()}
+                                {this.printRegistered()}
                             </div>
                             <Indicator />
                         </Row>
@@ -249,7 +294,7 @@ const mapDispatchToProps = (dispatch) => {
 };
 
 const mapStateToProps = (state) => {
-    console.log(state);
+    //console.log(state);
     return{
         loggedIn: state.auth.loggedIn
     }

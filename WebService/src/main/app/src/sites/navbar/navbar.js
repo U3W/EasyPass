@@ -43,7 +43,7 @@ class NavbarEP extends React.Component {
 
 
     logoutFunc() {
-        console.log(this.props);
+        //console.log(this.props);
         this.props.callback.logoutDash();
     }
 
@@ -92,7 +92,7 @@ class NavbarEP extends React.Component {
 
 
     returnCatBase ( id, name) {
-        console.log("Render: " + id + ", " + name);
+        //console.log("Render: " + id + ", " + name);
         return (
             <tr key={id}>
                 <td onClick={() => this.changeCat(id)}>
@@ -153,34 +153,31 @@ class NavbarEP extends React.Component {
                         <Card.Body>
                             <Row>
                                 <Col className="noPadding">
-                                    <InputGroup.Prepend className="stickRight">
-                                        <InputGroup.Text>Sprache</InputGroup.Text>
+                                    <InputGroup.Prepend>
+                                        <InputGroup.Text className="fitHoleParent">Sprache</InputGroup.Text>
                                     </InputGroup.Prepend>
                                 </Col>
-                                <Col className="noPadding">
+                                <div className="noPadding">
                                     <div className="float-right">
                                         <ButtonGroup>
                                             { this.props.language === dashboardLanguage.german ?
                                                 <>
-                                                    <Button variant="danger" onClick={() => this.changeLanguageTo(dashboardLanguage.german)}>Deutsch</Button>
+                                                    <Button className="noLeftBorderRadius" variant="danger" onClick={() => this.changeLanguageTo(dashboardLanguage.german)}>Deutsch</Button>
                                                     <Button variant="secondary" onClick={() => this.changeLanguageTo(dashboardLanguage.english)}>English</Button>
                                                 </>
                                                 :
                                                 <>
-                                                    <Button variant="secondary" onClick={() => this.changeLanguageTo(dashboardLanguage.german)}>Deutsch</Button>
+                                                    <Button className="noLeftBorderRadius" variant="secondary" onClick={() => this.changeLanguageTo(dashboardLanguage.german)}>Deutsch</Button>
                                                     <Button variant="danger" onClick={() => this.changeLanguageTo(dashboardLanguage.english)}>English</Button>
                                                 </>
                                             }
                                         </ButtonGroup>
                                     </div>
-                                </Col>
+                                </div>
                             </Row>
                         </Card.Body>
                     </Modal.Body>
                     <Modal.Footer>
-                        <Button variant="secondary" onClick={this.setPopUpDisabled}>
-                            Schließen
-                        </Button>
                         <Button variant="danger" onClick={this.setPopupSave}>
                             Änderungen speichern
                         </Button>

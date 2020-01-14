@@ -471,6 +471,17 @@
     border-radius: 0 !important;
 }
 
+.noLeftBorderRadius {
+    border-bottom-left-radius: 0 !important;
+    border-top-left-radius: 0 !important;
+}
+
+.fitHoleParent {
+    width: 110%;
+    border-top-right-radius: 0 !important;
+    border-bottom-right-radius: 0 !important;
+}
+
 
 /* Mobile dialog */
 /* Old Settings

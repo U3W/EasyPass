@@ -143,36 +143,62 @@ export default class PassLine extends React.Component {
             }
         }
 
+        /*
         this.setState({
             imgNew: new Image().src = this.correctUrl(this.state.urlNew) + "favicon.ico",
-        });
-        new Ping(this.correctUrl(this.state.urlNew)  + "favicon.ico", 400, ( status, e ) => {
-            console.log("Status", status, e);
-            if ( status !== "timeout" ) {
-                this.setState({
-                    imgSucc: true,
-                });
-            }
-            else {
-                this.setState({
-                    imgSucc: false,
-                });
-                new Ping(this.correctUrl(this.state.urlNew), 600, ( status, e ) => {
-                    console.log("Status", status, e);
-                    if ( status !== "timeout" ) {
-                        this.setState({
-                            imgSucc: true,
-                        });
-                    }
-                    else {
-                        this.setState({
-                            imgSucc: true,
-                            imgNew: new Image().src = NotAvailable,
-                        });
-                    }
-                });
-            }
-        });
+        });*/
+        if ( this.state.urlNew.length > 0 ) {
+            new Ping(this.correctUrl(this.state.urlNew)  + "favicon.ico", 400, ( status, e ) => {
+                console.log("Status", status, e);
+                if ( status !== "timeout" ) {
+                    this.setState({
+                        imgSucc: true,
+                        imgNew: new Image().src = this.correctUrl(this.state.urlNew) + "favicon.ico",
+                    });
+                }
+                else {
+                    this.setState({
+                        imgSucc: false,
+                    });
+                    new Ping(this.correctUrl(this.state.urlNew), 800, ( status, e ) => {
+                        if ( status !== "timeout" ) {
+                            this.setState({
+                                imgSucc: true,
+                                imgNew: new Image().src = this.correctUrl(this.state.urlNew) + "favicon.ico",
+                            });
+                        }
+                        else {
+                            this.setState({
+                                imgSucc: true,
+                                imgNew: new Image().src = NotAvailable,
+                            });
+                        }
+                        console.log("Status 2", status, e);
+                        if ( e !== undefined && e.type === "error") {
+                            this.setState({
+                                imgSucc: true,
+                                imgNew: new Image().src = NotAvailable,
+                            });
+                        }
+                    });
+                }
+                if ( e !== undefined && e.type === "error") {
+                    this.setState({
+                        imgSucc: true,
+                        imgNew: new Image().src = NotAvailable,
+                    });
+                }
+            }).onerror = ( function (event) {
+                
+            });
+
+        }
+        else {
+            this.setState({
+                imgSucc: true,
+                imgNew: new Image().src = NotAvailable,
+            });
+        }
 
     }
 
@@ -219,7 +245,7 @@ export default class PassLine extends React.Component {
     changeTagListener (key, value, i, e ) {
         if ( this.state.edit && this.state.tagAdded )
         {
-            console.log("Teest");
+            //console.log("Teest");
             // just tags
             let tagNew = this.state.tagNew;
             if (e.target.id.length > 8 ) {
@@ -301,7 +327,7 @@ export default class PassLine extends React.Component {
      * @param succ (true|false) success
      */
     setEdit( changeTo, succ ) {
-        console.log("ChangeTo", changeTo, this.props.tag);
+        //console.log("ChangeTo", changeTo, this.props.tag);
         if ( changeTo ) {
             this.setState({
                 passwordNew: this.props.callback.getPassword(this.props.id),
@@ -347,7 +373,7 @@ export default class PassLine extends React.Component {
 
     renderTag() {
         let tag = this.state.tagNew; //this.addKeyToTagArray(this.state.tagNew);
-        console.log("TagInRender", tag, this.props.tag);
+        //console.log("TagInRender", tag, this.props.tag);
         let tagCompArray = [];
 
         if ( tag.length === 0 ) {
@@ -377,9 +403,9 @@ export default class PassLine extends React.Component {
         }
         for ( let i = 0; i < tag.length; i++ )
         {
-            console.log("Tag single: ",tag[i], "I: ", i);
+            //console.log("Tag single: ",tag[i], "I: ", i);
             let tagKeys = Object.keys(tag[i]);
-            console.log("key", tagKeys);
+            //console.log("key", tagKeys);
             let but = "";
             if ( this.state.edit && i === tag.length-1) {
                 but = (
@@ -420,7 +446,7 @@ export default class PassLine extends React.Component {
         let key = -1;
         return tagCompArray.map(function (tagComp) {
 
-            console.log("Tag ups", tagComp);
+            //console.log("Tag ups", tagComp);
             key++;
 
             return (
@@ -432,7 +458,7 @@ export default class PassLine extends React.Component {
     }
 
     returnCatBase ( id, name) {
-        console.log("Render Cat: " + id + ", " + name);
+        //console.log("Render Cat: " + id + ", " + name);
         return (
             <tr key={id}>
                 <td onClick={() => this.changePassCat(id)}>
@@ -550,7 +576,7 @@ export default class PassLine extends React.Component {
     render() {
         let password = this.getPassword(this.props.id);
 
-        console.log("Start of render", this.state.urlNew);
+        //console.log("Start of render", this.state.urlNew);
         let url = this.state.urlNew;
 
         let catRender = this.renderCat();

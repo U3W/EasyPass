@@ -29,6 +29,7 @@ export default class EditCategory extends React.Component {
         this.setPopUpCatDisabled = this.setPopUpCatDisabled.bind(this);
 
         this.changeInput = this.changeInput.bind(this);
+        this.editCat = this.editCat.bind(this);
 
         this.resetState = this.resetState.bind(this);
 
@@ -39,7 +40,7 @@ export default class EditCategory extends React.Component {
         this.setState({
             [e.target.id]: e.target.value,
         }, () => { if ( this.state.nameNew.length > 0 ) { this.setState({ missingName: false})} });
-        console.log("Target:", e.target.id);
+        //console.log("Target:", e.target.id);
     };
 
     dismissPopUp() {

@@ -26,7 +26,10 @@ import dashboard from "../dashboard/dashboard";
 import ShowIcon from "../../img/icons/password_show_white.svg";
 import HideIcon from "../../img/icons/password_hide_white.svg"
 import history from "../../routing/history";
-
+import OverlayTrigger from "react-bootstrap/OverlayTrigger";
+import Tooltip from "react-bootstrap/Tooltip";
+import CopyIcon from "../../img/icons/password_copy_white.svg";
+import InfoIcon from "../../img/icons/regist_info.svg"
 class Registration extends React.Component {
     constructor(props) {
         super(props);
@@ -66,6 +69,19 @@ class Registration extends React.Component {
         this.resetError = this.resetError.bind(this);
         this.resetToFirst = this.resetToFirst.bind(this);
         this.exit = this.exit.bind(this);
+    }
+
+    componentDidMount() {
+        this.props.worker.addEventListener("message", this.workerCall, true);
+    }
+
+    componentWillUnmount() {
+        this.props.worker.removeEventListener("message", this.workerCall, true);
+    }
+
+    workerCall( e ) {
+        const cmd = e.data[0];
+        const data = e.data[1];
     }
 
     handleChange = (e) => {
@@ -269,11 +285,20 @@ class Registration extends React.Component {
 
                 // ToDo Kall Kaspers method
                 if (true) {
-                    history.push("/");
+                    history.push({
+                        pathname: "/",
+                        state: {succ: "success"}
+                    });
                 } else {
+                    history.push({
+                        pathname: "/",
+                        state: {succ: "success"}
+                    });
+                    /*
                     // Fehlermeldung
                     this.setState({error: true});
                     this.dismissError();
+                     */
                 }
 
 
@@ -307,13 +332,36 @@ class Registration extends React.Component {
             let toAdd;
             if ( !this.state.missingUsername && this.state.userAlreadyTaken ) {
                 toAdd = (
-                    <a className="text-danger">Username bereits vorhanden!</a>
+                    <a className="text-danger">{StringSelector.getString(this.state.language).registUserAlreadyExist}</a>
                 );
             }
             return (
                 <Form.Group>
-                    <Form.Label className="text-danger">{StringSelector.getString(this.state.language).username}</Form.Label>
-                    <Form.Control className="is-invalid" type="username" id="newUser" placeholder={StringSelector.getString(this.state.language).usernamePlaceholder} value={this.state.newUser}
+                    <Form.Label>
+                        {StringSelector.getString(this.state.language).registUser}
+                        {['right'].map(placement => (
+                            <OverlayTrigger
+                                key={placement}
+                                placement={placement}
+                                overlay={
+                                    <Tooltip id={`tooltip-${placement}`}>
+                                        {StringSelector.getString(this.state.language).registUserInfo}
+                                    </Tooltip>
+                                }
+                            >
+                                <Button variant="dark" className="infoButton round">
+                                    <img
+                                        src={InfoIcon}
+                                        alt=""
+                                        width="14"
+                                        height="14"
+                                        className="d-inline-block"
+                                    />
+                                </Button>
+                            </OverlayTrigger>
+                        ))}
+                    </Form.Label>
+                    <Form.Control className="is-invalid" type="username" id="newUser" placeholder={StringSelector.getString(this.state.language).registUserPlaceholder} value={this.state.newUser}
                                   onKeyDown={this.handleKeyevent} onChange={this.handleChange} />
                     {toAdd}
                 </Form.Group>
@@ -323,8 +371,31 @@ class Registration extends React.Component {
         {
             return (
                 <Form.Group>
-                    <Form.Label>{StringSelector.getString(this.state.language).username}</Form.Label>
-                    <Form.Control type="username" id="newUser" placeholder={StringSelector.getString(this.state.language).usernamePlaceholder} value={this.state.newUser}
+                    <Form.Label>
+                        {StringSelector.getString(this.state.language).registUser}
+                        {['right'].map(placement => (
+                            <OverlayTrigger
+                                key={placement}
+                                placement={placement}
+                                overlay={
+                                    <Tooltip id={`tooltip-${placement}`}>
+                                        {StringSelector.getString(this.state.language).registUserInfo}
+                                    </Tooltip>
+                                }
+                            >
+                                <Button variant="dark" className="infoButton round">
+                                    <img
+                                        src={InfoIcon}
+                                        alt=""
+                                        width="14"
+                                        height="14"
+                                        className="d-inline-block"
+                                    />
+                                </Button>
+                            </OverlayTrigger>
+                        ))}
+                    </Form.Label>
+                    <Form.Control type="username" id="newUser" placeholder={StringSelector.getString(this.state.language).registUserPlaceholder} value={this.state.newUser}
                                   onKeyDown={this.handleKeyevent} onChange={this.handleChange} />
                 </Form.Group>
             );
@@ -357,13 +428,36 @@ class Registration extends React.Component {
         {
             return (
                 <Form.Group>
-                    <Form.Label className="text-danger" >{StringSelector.getString(this.state.language).password}</Form.Label>
+                    <Form.Label className="text-danger" >
+                        {StringSelector.getString(this.state.language).registPass}
+                        {['right'].map(placement => (
+                            <OverlayTrigger
+                                key={placement}
+                                placement={placement}
+                                overlay={
+                                    <Tooltip id={`tooltip-${placement}`}>
+                                        {StringSelector.getString(this.state.language).registPassInfo}
+                                    </Tooltip>
+                                }
+                            >
+                                <Button variant="dark" className="infoButton round">
+                                    <img
+                                        src={InfoIcon}
+                                        alt=""
+                                        width="14"
+                                        height="14"
+                                        className="d-inline-block"
+                                    />
+                                </Button>
+                            </OverlayTrigger>
+                        ))}
+                    </Form.Label>
                     <Row className="password-row">
                         { this.state.newPassShow ?
-                            <Form.Control className="is-invalid passInp" type="text" id="newPass" placeholder={StringSelector.getString(this.state.language).passwordPlaceholder} value={this.state.newPass}
+                            <Form.Control className="is-invalid passInp" type="text" id="newPass" placeholder={StringSelector.getString(this.state.language).registPassPlaceholder} value={this.state.newPass}
                                           onKeyDown={this.handleKeyevent} onChange={this.handleChange} />
                             :
-                            <Form.Control className="is-invalid passInp" type="password" id="newPass" placeholder={StringSelector.getString(this.state.language).passwordPlaceholder} value={this.state.newPass}
+                            <Form.Control className="is-invalid passInp" type="password" id="newPass" placeholder={StringSelector.getString(this.state.language).registPassPlaceholder} value={this.state.newPass}
                                           onKeyDown={this.handleKeyevent} onChange={this.handleChange} />
                         }
 
@@ -394,13 +488,36 @@ class Registration extends React.Component {
         {
             return (
                 <Form.Group>
-                    <Form.Label>{StringSelector.getString(this.state.language).password}</Form.Label>
+                    <Form.Label>
+                        {StringSelector.getString(this.state.language).registPass}
+                        {['right'].map(placement => (
+                            <OverlayTrigger
+                                key={placement}
+                                placement={placement}
+                                overlay={
+                                    <Tooltip id={`tooltip-${placement}`}>
+                                        {StringSelector.getString(this.state.language).registPassInfo}
+                                    </Tooltip>
+                                }
+                            >
+                                <Button variant="dark" className="infoButton round">
+                                    <img
+                                        src={InfoIcon}
+                                        alt=""
+                                        width="14"
+                                        height="14"
+                                        className="d-inline-block"
+                                    />
+                                </Button>
+                            </OverlayTrigger>
+                        ))}
+                    </Form.Label>
                     <Row className="password-row">
                         {this.state.newPassShow ?
-                            <Form.Control className="passInp" type="text" id="newPass" placeholder={StringSelector.getString(this.state.language).passwordPlaceholder} value={this.state.newPass}
+                            <Form.Control className="passInp" type="text" id="newPass" placeholder={StringSelector.getString(this.state.language).registPassPlaceholder} value={this.state.newPass}
                                           onKeyDown={this.handleKeyevent} onChange={this.handleChange} />
                             :
-                            <Form.Control className="passInp" type="password" id="newPass" placeholder={StringSelector.getString(this.state.language).passwordPlaceholder} value={this.state.newPass}
+                            <Form.Control className="passInp" type="password" id="newPass" placeholder={StringSelector.getString(this.state.language).registPassPlaceholder} value={this.state.newPass}
                                           onKeyDown={this.handleKeyevent} onChange={this.handleChange} />
                         }
                         <Button variant="dark" className="buttonInline" onClick={() => this.setPasswordShow(0)}>
@@ -434,18 +551,20 @@ class Registration extends React.Component {
             let toAdd;
             if ( !this.state.missingSecPassword && this.state.passNoMatch) {
                 toAdd = (
-                    <a className="text-danger">Passwörter stimmen nicht überein!</a>
+                    <a className="text-danger">{StringSelector.getString(this.state.language).registPassNotIdent}</a>
                 );
             }
             return (
                 <Form.Group>
-                    <Form.Label className="text-danger">Passwort wiederholen</Form.Label>
+                    <Form.Label className="text-danger">
+                        {StringSelector.getString(this.state.language).registPassSec}
+                    </Form.Label>
                     <Row className="password-row">
                         {this.state.newPassSecShow ?
-                            <Form.Control className="is-invalid passInp" type="text" id="newPassSec" placeholder={StringSelector.getString(this.state.language).passwordPlaceholder} value={this.state.newPassSec}
+                            <Form.Control className="is-invalid passInp" type="text" id="newPassSec" placeholder={StringSelector.getString(this.state.language).registPassSecPlaceholder} value={this.state.newPassSec}
                                           onKeyDown={this.handleKeyevent} onChange={this.handleChange} />
                             :
-                            <Form.Control className="is-invalid passInp" type="password" id="newPassSec" placeholder={StringSelector.getString(this.state.language).passwordPlaceholder} value={this.state.newPassSec}
+                            <Form.Control className="is-invalid passInp" type="password" id="newPassSec" placeholder={StringSelector.getString(this.state.language).registPassSecPlaceholder} value={this.state.newPassSec}
                                           onKeyDown={this.handleKeyevent} onChange={this.handleChange} />
                         }
                         <Button variant="dark" className="buttonInline" onClick={() => this.setPasswordShow(1)}>
@@ -476,13 +595,15 @@ class Registration extends React.Component {
         {
             return (
                 <Form.Group>
-                    <Form.Label>Passwort wiederholen</Form.Label>
+                    <Form.Label>
+                        {StringSelector.getString(this.state.language).registPassSec}
+                    </Form.Label>
                     <Row className="password-row">
                         { this.state.newPassSecShow ?
-                            <Form.Control className="passInp" type="text" id="newPassSec" placeholder={StringSelector.getString(this.state.language).passwordPlaceholder} value={this.state.newPassSec}
+                            <Form.Control className="passInp" type="text" id="newPassSec" placeholder={StringSelector.getString(this.state.language).registPassSecPlaceholder} value={this.state.newPassSec}
                                           onKeyDown={this.handleKeyevent} onChange={this.handleChange} />
                             :
-                            <Form.Control className="passInp" type="password" id="newPassSec" placeholder={StringSelector.getString(this.state.language).passwordPlaceholder} value={this.state.newPassSec}
+                            <Form.Control className="passInp" type="password" id="newPassSec" placeholder={StringSelector.getString(this.state.language).registPassSecPlaceholder} value={this.state.newPassSec}
                                           onKeyDown={this.handleKeyevent} onChange={this.handleChange} />
                         }
                         <Button variant="dark" className="buttonInline" onClick={() => this.setPasswordShow(1)}>
@@ -516,13 +637,36 @@ class Registration extends React.Component {
         {
             return (
                 <Form.Group>
-                    <Form.Label className="text-danger">Masterpasswort</Form.Label>
+                    <Form.Label className="text-danger">
+                        {StringSelector.getString(this.state.language).registMaster}
+                        {['right'].map(placement => (
+                            <OverlayTrigger
+                                key={placement}
+                                placement={placement}
+                                overlay={
+                                    <Tooltip id={`tooltip-${placement}`}>
+                                        {StringSelector.getString(this.state.language).registMasterInfo}
+                                    </Tooltip>
+                                }
+                            >
+                                <Button variant="dark" className="infoButton round">
+                                    <img
+                                        src={InfoIcon}
+                                        alt=""
+                                        width="14"
+                                        height="14"
+                                        className="d-inline-block"
+                                    />
+                                </Button>
+                            </OverlayTrigger>
+                        ))}
+                    </Form.Label>
                     <Row className="password-row">
                         { this.state.newMasterpassShow ?
-                            <Form.Control className="is-invalid passInp" type="text" id="newMasterpass" placeholder={StringSelector.getString(this.state.language).passwordPlaceholder} value={this.state.newMasterpass}
+                            <Form.Control className="is-invalid passInp" type="text" id="newMasterpass" placeholder={StringSelector.getString(this.state.language).registMasterPlaceholder} value={this.state.newMasterpass}
                                           onKeyDown={this.handleKeyevent} onChange={this.handleChange} />
                             :
-                            <Form.Control className="is-invalid passInp" type="password" id="newMasterpass" placeholder={StringSelector.getString(this.state.language).passwordPlaceholder} value={this.state.newMasterpass}
+                            <Form.Control className="is-invalid passInp" type="password" id="newMasterpass" placeholder={StringSelector.getString(this.state.language).registMasterPlaceholder} value={this.state.newMasterpass}
                                           onKeyDown={this.handleKeyevent} onChange={this.handleChange} />
                         }
                         <Button variant="dark" className="buttonInline" onClick={() => this.setPasswordShow(2)}>
@@ -552,13 +696,36 @@ class Registration extends React.Component {
         {
             return (
                 <Form.Group>
-                    <Form.Label>Masterpasswort</Form.Label>
+                    <Form.Label>
+                        {StringSelector.getString(this.state.language).registMaster}
+                        {['right'].map(placement => (
+                            <OverlayTrigger
+                                key={placement}
+                                placement={placement}
+                                overlay={
+                                    <Tooltip id={`tooltip-${placement}`}>
+                                        {StringSelector.getString(this.state.language).registMasterInfo}
+                                    </Tooltip>
+                                }
+                            >
+                                <Button variant="dark" className="infoButton round">
+                                    <img
+                                        src={InfoIcon}
+                                        alt=""
+                                        width="14"
+                                        height="14"
+                                        className="d-inline-block"
+                                    />
+                                </Button>
+                            </OverlayTrigger>
+                        ))}
+                    </Form.Label>
                     <Row className="password-row">
                         { this.state.newMasterpassShow ?
-                            <Form.Control className="passInp" type="text" id="newMasterpass" placeholder={StringSelector.getString(this.state.language).passwordPlaceholder} value={this.state.newMasterpass}
+                            <Form.Control className="passInp" type="text" id="newMasterpass" placeholder={StringSelector.getString(this.state.language).registMasterPlaceholder} value={this.state.newMasterpass}
                                           onKeyDown={this.handleKeyevent} onChange={this.handleChange} />
                             :
-                            <Form.Control className="passInp" type="password" id="newMasterpass" placeholder={StringSelector.getString(this.state.language).passwordPlaceholder} value={this.state.newMasterpass}
+                            <Form.Control className="passInp" type="password" id="newMasterpass" placeholder={StringSelector.getString(this.state.language).registMasterPlaceholder} value={this.state.newMasterpass}
                                           onKeyDown={this.handleKeyevent} onChange={this.handleChange} />
                         }
                         <Button variant="dark" className="buttonInline" onClick={() => this.setPasswordShow(2)}>
@@ -594,25 +761,27 @@ class Registration extends React.Component {
             if ( !this.state.missingSecMasterpassword ) {
                 if ( this.state.masterpassNoMatch) {
                     toAdd = (
-                        <a className="text-danger">Masterpasswörter stimmen nicht überein!</a>
+                        <a className="text-danger">{StringSelector.getString(this.state.language).registMasterNotIdent}</a>
                     );
                 }
                 else if ( this.state.masterpassMatchPass )
                 {
                     toAdd = (
-                        <a className="text-danger">Masterpassworter darf nicht mit dem Passwort übereinstimmen!</a>
+                        <a className="text-danger">{StringSelector.getString(this.state.language).registMasterMatchPass}</a>
                     );
                 }
             }
             return (
                 <Form.Group>
-                    <Form.Label className="text-danger">Masterpasswort wiederholen</Form.Label>
+                    <Form.Label className="text-danger">
+                        {StringSelector.getString(this.state.language).registMasterSec}
+                    </Form.Label>
                         <Row className="password-row">
                         { this.state.newMasterpassSecShow ?
-                            <Form.Control className="is-invalid passInp" type="text" id="newMasterpassSec" placeholder={StringSelector.getString(this.state.language).passwordPlaceholder} value={this.state.newMasterpassSec}
+                            <Form.Control className="is-invalid passInp" type="text" id="newMasterpassSec" placeholder={StringSelector.getString(this.state.language).registMasterSecPlaceholder} value={this.state.newMasterpassSec}
                                           onKeyDown={this.handleKeyevent} onChange={this.handleChange} />
                             :
-                            <Form.Control className="is-invalid passInp" type="password" id="newMasterpassSec" placeholder={StringSelector.getString(this.state.language).passwordPlaceholder} value={this.state.newMasterpassSec}
+                            <Form.Control className="is-invalid passInp" type="password" id="newMasterpassSec" placeholder={StringSelector.getString(this.state.language).registMasterSecPlaceholder} value={this.state.newMasterpassSec}
                                           onKeyDown={this.handleKeyevent} onChange={this.handleChange} />
                         }
                         <Button variant="dark" className="buttonInline" onClick={() => this.setPasswordShow(3)}>
@@ -643,13 +812,15 @@ class Registration extends React.Component {
         {
             return (
                 <Form.Group>
-                    <Form.Label>Masterpasswort wiederholen</Form.Label>
+                    <Form.Label>
+                        {StringSelector.getString(this.state.language).registMasterSec}
+                    </Form.Label>
                         <Row className="password-row">
                         { this.state.newMasterpassSecShow ?
-                            <Form.Control className="passInp" type="text" id="newMasterpassSec" placeholder={StringSelector.getString(this.state.language).passwordPlaceholder} value={this.state.newMasterpassSec}
+                            <Form.Control className="passInp" type="text" id="newMasterpassSec" placeholder={StringSelector.getString(this.state.language).registMasterSecPlaceholder} value={this.state.newMasterpassSec}
                                           onKeyDown={this.handleKeyevent} onChange={this.handleChange} />
                             :
-                            <Form.Control className="passInp" type="password" id="newMasterpassSec" placeholder={StringSelector.getString(this.state.language).passwordPlaceholder} value={this.state.newMasterpassSec}
+                            <Form.Control className="passInp" type="password" id="newMasterpassSec" placeholder={StringSelector.getString(this.state.language).registMasterSecPlaceholder} value={this.state.newMasterpassSec}
                                           onKeyDown={this.handleKeyevent} onChange={this.handleChange} />
                         }
                         <Button variant="dark" className="buttonInline" onClick={() => this.setPasswordShow(3)}>
@@ -679,6 +850,7 @@ class Registration extends React.Component {
 
     exit() {
         history.push("/");
+
     }
 
 
@@ -721,11 +893,16 @@ class Registration extends React.Component {
                                             </Form.Group>
                                             {this.state.step === 2 &&
                                                 <Button variant="danger" onClick={this.resetToFirst}>
-                                                    Vorheriger Schritt
+                                                    {StringSelector.getString(this.state.language).registPrevButton}
                                                 </Button>
                                             }
+
                                             <Button variant="danger" className={"float-right"} onClick={this.handleSubmit}>
-                                                Nächster Schritt
+                                                {this.state.step == 1 ?
+                                                    StringSelector.getString(this.state.language).registNextButton
+                                                    :
+                                                    StringSelector.getString(this.state.language).registButton
+                                                }
                                             </Button>
                                         </Form>
                                     </Card.Body>

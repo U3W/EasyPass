@@ -28,6 +28,9 @@ import Undo from "../../img/icons/password_delete_undo_blue.svg"
 import AddCategory from "./add.cat";
 import EditCategory from "./edit.cat";
 import DeleteCategory from "./delete.cat";
+import history from "../../routing/history"
+
+
 class Dashboard extends React.Component {
 
     constructor(props){
@@ -42,15 +45,17 @@ class Dashboard extends React.Component {
         let tab = dashboardState.getTab();
         if ( tab === tabs.PRIVPASS )
         {
-            console.log("Priv");
+            //console.log("Priv");
             cat = dashboardState.getCatPriv();
         }
         else {
-            console.log("Group");
+            //console.log("Group");
             cat = dashboardState.getCatGroup();
         }
 
         this.state = {
+            // mockpassword
+            mock: new MockPasswords(),
             // language
             language: dashboardState.getSelectedLanguage(), // 0 - Deutsch, 1 - English
 
@@ -111,6 +116,13 @@ class Dashboard extends React.Component {
         this.dismissAddPass = this.dismissAddPass.bind(this);
         this.getPassAddShow = this.getPassAddShow.bind(this);
 
+        // update, delete and so on
+        this.getCats = this.getCats.bind(this);
+        this.getPassword = this.getPassword.bind(this);
+        this.renderLinesSonstige = this.renderLinesSonstige.bind(this);
+        this.renderLines = this.renderLines.bind(this);
+        this.deletePass = this.deletePass.bind(this);
+
 
         // WindowDimensions
         this.updateWindowDimensions = this.updateWindowDimensions.bind(this);
@@ -119,10 +131,18 @@ class Dashboard extends React.Component {
     componentDidMount() {
         this.updateWindowDimensions();
         window.addEventListener('resize', this.updateWindowDimensions);
+        this.props.worker.addEventListener("message", this.workerCall, true);
+
     }
 
     componentWillUnmount() {
         window.removeEventListener('resize', this.updateWindowDimensions);
+        this.props.worker.removeEventListener("message", this.workerCall, true);
+    }
+
+    workerCall( e ) {
+        const cmd = e.data[0];
+        const data = e.data[1];
     }
 
     updateWindowDimensions() {
@@ -140,13 +160,13 @@ class Dashboard extends React.Component {
     renderCat() {
         let cats = this.getCats();
         let selectedCat = this.state.catselected;
-        console.log("Cats:", cats);
-        //console.log("Selected cat: "+ selectedCat);
+        //console.log("Cats:", cats);
+        ////console.log("Selected cat: "+ selectedCat);
         if ( selectedCat === 0 )
         {
             let passwords = this.renderLines(cats);
             let passwordsSonst = this.renderLinesSonstige();
-            console.log("Cats: Pass:", passwordsSonst, passwords);
+            //console.log("Cats: Pass:", passwordsSonst, passwords);
             let final = cats.map(function (cat) {
                 return (
                     <div key={cat.id} >
@@ -203,7 +223,7 @@ class Dashboard extends React.Component {
 
     getPassword( id ) {
         // TODO Mockobjekt
-        return MockPasswords.getPassword(id);
+        return this.state.getPassword(id);
     }
 
 
@@ -220,11 +240,11 @@ class Dashboard extends React.Component {
         let passwords = {};
         let selectedTab = this.state.tabselected;
         //TODO mocking Object
-        let catData = MockPasswords.getCatData(0, selectedTab);
+        let catData = this.state.mock.getCatData(0, selectedTab);
         // add callback to array
         catData = this.addCallback(catData);
         passwords[0] = catData.map(function (singlePass) {
-            console.log("Heyjooo", singlePass.tabID, selectedTab);
+            //console.log("Heyjooo", singlePass.tabID, selectedTab);
             if ( singlePass.tabID === selectedTab  )
             {
                 return (
@@ -236,13 +256,13 @@ class Dashboard extends React.Component {
     }
 
     renderLines(cats) {
-        console.log("RenderLines", cats);
+        //console.log("RenderLines", cats);
         let passwords = {};
         for ( let i = 0; i < cats.length; i++ ) {
             //out += <b>{cats[i].name}</b>
             let catId = cats[i].id;
             //TODO mocking Object
-            let catData = MockPasswords.getCatData(catId, this.state.tabselected);
+            let catData = this.state.mock.getCatData(catId, this.state.tabselected);
             // add callback to array
             catData = this.addCallback(catData);
             passwords[catId] = catData.map(function (singlePass) {
@@ -387,8 +407,8 @@ class Dashboard extends React.Component {
                                 <img
                                     src={Undo}
                                     alt=""
-                                    width="20"
-                                    height="20"
+                                    width="18"
+                                    height="18"
                                     className="d-inline-block"
                                 />
                             </a>
@@ -521,7 +541,7 @@ class Dashboard extends React.Component {
                 this.dismissCopy(dashboardAlerts.showCopyUsernameAlert);
                 break;
             case dashboardAlerts.showCopyURLAlert:
-                console.log("Url aus true");
+                //console.log("Url aus true");
                 this.setState({
                     showCopyURLAlert: true,
                 });
@@ -596,7 +616,7 @@ class Dashboard extends React.Component {
 
 
     handleSearch = (e) => {
-        console.log("Key Down:" + e.target.value);
+        //console.log("Key Down:" + e.target.value);
         this.setState({
             [e.target.id]: e.target.value
         });
@@ -605,11 +625,11 @@ class Dashboard extends React.Component {
 
         filter = input.toUpperCase();
         passwords = document.getElementById("passwords");
-        console.log("Passwords", passwords);
+        //console.log("Passwords", passwords);
         div = passwords.children;
         for (let j = 0; j < div.length; j++) {
             if (div[j].tagName === "DIV") {
-                console.log(div[j]);
+                //console.log(div[j]);
                 let editDiv = div[j].children;
                 for (let i = 0; i < editDiv.length; i++) {
                     if ( editDiv[i].tagName === "DIV" ) {
@@ -675,8 +695,8 @@ class Dashboard extends React.Component {
     }
 
     changeTab( changeTo ) {
-        console.log("Changed to Tab:");
-        console.log(changeTo);
+        //console.log("Changed to Tab:");
+        //console.log(changeTo);
         this.props.saveTab(changeTo);
         this.setState({
                 tabselected: changeTo,
@@ -684,13 +704,13 @@ class Dashboard extends React.Component {
         );
         if ( changeTo === tabs.PRIVPASS )
         {
-            console.log("Priv");
+            //console.log("Priv");
             this.setState({
                 catselected: dashboardState.getCatPriv()
             });
         }
         else {
-            console.log("Group");
+            //console.log("Group");
             this.setState({
                 catselected: dashboardState.getCatGroup()
             });
@@ -699,7 +719,7 @@ class Dashboard extends React.Component {
     }
 
     changeCat( changeTo ) {
-        console.log("Change to: " + changeTo);
+        //console.log("Change to: " + changeTo);
         this.props.saveCat(this.state.tabselected, changeTo);
         this.setState({
             catselected: changeTo
@@ -712,7 +732,7 @@ class Dashboard extends React.Component {
      */
     getCats() {
         //TODO mocking Object
-        return MockPasswords.getCats(this.state.tabselected);
+        return this.state.mock.getCats(this.state.tabselected);
     }
 
     getSelectedCatName() {
@@ -735,14 +755,20 @@ class Dashboard extends React.Component {
         // ToDO call Kacpers method
         this.copy("", dashboardAlerts.showAddedPass, false);
         this.dismissAddPass();
+
+        this.render()
     }
 
     deletePass(id) {
         // ToDO call Kacpers method
+        this.state.mock.deletePass(id);
+        console.log("Passwords new", this.state.mock.getCatData(1,0));
         this.setState({
             currentPassDelete: id,
         });
-        this.showDeletePopUp(dashboardAlerts.showDeletePassAlert, false);
+        this.showDeletePopUp(dashboardAlerts.showDeletePassAlert, true);
+
+        this.render();
     }
 
     stopDelete( which, id ) {

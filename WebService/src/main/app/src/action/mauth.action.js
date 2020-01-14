@@ -1,7 +1,7 @@
 
 export const mlogin = (credentials) => {
     return (dispatch, getState) => {
-        console.log(credentials);
+        //console.log(credentials);
         const {inpMasterpassword, inpKey, inpOption} = credentials;
         // moritz methoden aufruf
         if ( inpMasterpassword === "toast" && inpKey === "toast")

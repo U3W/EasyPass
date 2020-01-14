@@ -46,6 +46,19 @@ class Masterpassword extends React.Component {
         this.handleRadioButtons = this.handleRadioButtons.bind(this);
     }
 
+    componentDidMount() {
+        this.props.worker.addEventListener("message", this.workerCall, true);
+    }
+
+    componentWillUnmount() {
+        this.props.worker.removeEventListener("message", this.workerCall, true);
+    }
+
+    workerCall( e ) {
+        const cmd = e.data[0];
+        const data = e.data[1];
+    }
+
     handleChange = (e) => {
         this.setState({
             [e.target.id]: e.target.value
@@ -367,7 +380,7 @@ const mapDispatchToProps1 = (dispatch) => {
 };
 
 const mapStateToProps1 = (state) => {
-    console.log(state);
+    //console.log(state);
     return{
         verified: state.verify.verified
     }

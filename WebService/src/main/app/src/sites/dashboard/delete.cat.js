@@ -22,6 +22,8 @@ export default class DeleteCategory extends React.Component {
 
         this.handleKeyevent = this.handleKeyevent.bind(this);
 
+        this.dismissPopUp = this.dismissPopUp.bind(this);
+
         this.delCat = this.delCat.bind(this);
     }
 
@@ -40,7 +42,7 @@ export default class DeleteCategory extends React.Component {
         return (
             <tr key={id}>
                 <td>
-                    {name}
+                    <b>{name}</b>
                 </td>
                 <td>
                     {desc}

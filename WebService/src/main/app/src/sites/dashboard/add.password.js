@@ -105,7 +105,7 @@ export default class AddPassword extends React.Component {
         if ( this.state.tagAdded ) {
             // just tags
             let tagNew = this.state.tag;
-            console.log("Thisss", tagNew, "key", key);
+            //console.log("Thisss", tagNew, "key", key);
             if (e.target.id.length > 8) {
                 // tagValue + i
                 if (e.target.id.includes("tagValue")) {

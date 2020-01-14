@@ -105,7 +105,7 @@ class App extends React.Component {
             else {
                 redirect = <Redirect to="/verify"/>
             }
-            console.log("Disconn: " + redirect);
+            //console.log("Disconn: " + redirect);
             return (
                 <div className="App">
                     {redirect}

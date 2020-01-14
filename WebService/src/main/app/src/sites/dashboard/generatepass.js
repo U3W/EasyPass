@@ -86,7 +86,7 @@ export default class GeneratePass extends React.Component {
             let rnum = Math.floor(Math.random() * passwordChars.length);
             randPassword += passwordChars.substring(rnum,rnum+1);
         }
-        console.log("Rand2", randPassword);
+        //console.log("Rand2", randPassword);
         //let randPassword = charArray.map(function(x) { return x[Math.floor(Math.random() * x.length)] });
         this.setState({
             generatedPass: randPassword,
