@@ -71,6 +71,7 @@ export const strings = {
     addCat: "Add category",
     addCatName: "Name",
     addCatDesc: "Description",
+    addCatAdd: "Add",
 
     editCat: "Edit category",
     editCatSelCat: "Select category",

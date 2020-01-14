@@ -44,6 +44,12 @@ class Masterpassword extends React.Component {
         this.handleChange = this.handleChange.bind(this);
         this.handleKeyevent = this.handleKeyevent.bind(this);
         this.handleRadioButtons = this.handleRadioButtons.bind(this);
+
+        /**
+         * Options:
+         * - Webauthn (USB-Token)
+         * - Keyfile
+         */
     }
 
     componentDidMount() {

@@ -87,6 +87,7 @@ export const strings = {
     addCat: "Kategorie hinzufügen",
     addCatName: "Name",
     addCatDesc: "Beschreibung",
+    addCatAdd: "Hinzufügen",
 
     editCat: "Kategorie bearbeiten",
     editCatSelCat: "Kategorie auswählen",

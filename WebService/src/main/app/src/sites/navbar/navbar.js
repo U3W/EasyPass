@@ -17,6 +17,8 @@ import DeleteCat from "../../img/icons/dashboard_deleteCat.svg";
 import ButtonGroup from "react-bootstrap/ButtonGroup";
 import InputGroup from "react-bootstrap/InputGroup";
 import {dashboardAlerts, dashboardLanguage} from "../dashboard/const/dashboard.enum";
+import StringSelector from "../../strings/stings";
+import dashboardState from "../dashboard/dashboard.saved.state";
 
 class NavbarEP extends React.Component {
     constructor(props) {
@@ -39,6 +41,8 @@ class NavbarEP extends React.Component {
 
         this.setPopUpCatDisabled = this.setPopUpCatDisabled.bind(this);
         this.setPopUpCatEnabled = this.setPopUpCatEnabled.bind(this);
+
+
     }
 
 
@@ -154,7 +158,7 @@ class NavbarEP extends React.Component {
                             <Row>
                                 <Col className="noPadding">
                                     <InputGroup.Prepend>
-                                        <InputGroup.Text className="fitHoleParent">Sprache</InputGroup.Text>
+                                        <InputGroup.Text className="fitHoleParent">{StringSelector.getString(this.props.callback.state.language).language}</InputGroup.Text>
                                     </InputGroup.Prepend>
                                 </Col>
                                 <div className="noPadding">
@@ -162,13 +166,13 @@ class NavbarEP extends React.Component {
                                         <ButtonGroup>
                                             { this.props.language === dashboardLanguage.german ?
                                                 <>
-                                                    <Button className="noLeftBorderRadius" variant="danger" onClick={() => this.changeLanguageTo(dashboardLanguage.german)}>Deutsch</Button>
-                                                    <Button variant="secondary" onClick={() => this.changeLanguageTo(dashboardLanguage.english)}>English</Button>
+                                                    <Button className="noLeftBorderRadius" variant="danger" onClick={() => this.changeLanguageTo(dashboardLanguage.german)}>{StringSelector.getString(this.props.callback.state.language).german}</Button>
+                                                    <Button variant="secondary" onClick={() => this.changeLanguageTo(dashboardLanguage.english)}>{StringSelector.getString(this.props.callback.state.language).english}</Button>
                                                 </>
                                                 :
                                                 <>
-                                                    <Button className="noLeftBorderRadius" variant="secondary" onClick={() => this.changeLanguageTo(dashboardLanguage.german)}>Deutsch</Button>
-                                                    <Button variant="danger" onClick={() => this.changeLanguageTo(dashboardLanguage.english)}>English</Button>
+                                                    <Button className="noLeftBorderRadius" variant="secondary" onClick={() => this.changeLanguageTo(dashboardLanguage.german)}>{StringSelector.getString(this.props.callback.state.language).german}</Button>
+                                                    <Button variant="danger" onClick={() => this.changeLanguageTo(dashboardLanguage.english)}>{StringSelector.getString(this.props.callback.state.language).english}</Button>
                                                 </>
                                             }
                                         </ButtonGroup>
@@ -179,7 +183,7 @@ class NavbarEP extends React.Component {
                     </Modal.Body>
                     <Modal.Footer>
                         <Button variant="danger" onClick={this.setPopupSave}>
-                            Änderungen speichern
+                            {StringSelector.getString(this.props.callback.state.language).saveSetting}
                         </Button>
                     </Modal.Footer>
                 </Modal>
@@ -215,11 +219,11 @@ class NavbarEP extends React.Component {
                             </div>
                             <Navbar.Collapse id="basic-navbar-nav" className="search-bar">
                                 <div className="search-bar-size">
-                                    <FormControl id="search" type="text" placeholder="Search" autoComplete="off" className="search" onChange={this.props.callback.handleSearch}/>
+                                    <FormControl id="search" type="text" placeholder={StringSelector.getString(this.props.callback.state.language).searchPlaceholder} autoComplete="off" className="search" onChange={this.props.callback.handleSearch}/>
                                 </div>
                                 <Nav className="mr-auto">
                                     <NavDropdown title={this.props.callback.state.username} onClick={this.setSettingExpanded} className="settingsPopUp dropDown" id="basic-nav-dropdown">
-                                        <NavDropdown.Item onClick={this.setPopUp} >Settings</NavDropdown.Item>
+                                        <NavDropdown.Item onClick={this.setPopUp} >{StringSelector.getString(this.props.callback.state.language).settings}</NavDropdown.Item>
                                     </NavDropdown>
                                 </Nav>
                             </Navbar.Collapse>

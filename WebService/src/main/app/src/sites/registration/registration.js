@@ -35,7 +35,8 @@ class Registration extends React.Component {
         super(props);
 
         this.state = {
-            language: dashboardState.getSelectedLanguage(),
+            // language
+            language: dashboardState.getSelectedLanguage(), // 0 - Deutsch, 1 - English
 
             newPass: "",
             newPassShow: false,
