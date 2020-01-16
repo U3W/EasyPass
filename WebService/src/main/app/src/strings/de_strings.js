@@ -58,6 +58,7 @@ export const strings = {
     registMasterNotIdent: "Masterpasswörter stimmen nicht überein!",
 
 
+    registStep: "Schritt",
     registPrevButton: "Vorhäriger Schritt",
     registNextButton: "Nächster Schritt",
     registButton: "Registrieren",
@@ -88,17 +89,29 @@ export const strings = {
     addCatName: "Name",
     addCatDesc: "Beschreibung",
     addCatAdd: "Hinzufügen",
+    // alerts
+    addCatSucc: "Kategorie hinzugefügt!",
+    addCatErr: "Beim Hinzufügen der Kategorie ist ein Fehler aufgetreten. Bitte versuchen Sie es erneut!",
 
     editCat: "Kategorie bearbeiten",
     editCatSelCat: "Kategorie auswählen",
+    // alerts
+    editCatSucc: "Bearbeitete Kategorie gespeichert!",
+    editCatErr: "Beim Bearbeiten ist ein Fehler aufgetreten. Bitte versuchen Sie es erneut!",
 
     delCat: "Kategorie löschen",
     delCatDel: "Löschen",
+    // alerts
+    delCatSuccSing: "Kategorie gelöscht ",
+    delCatSuccMult: "Kategorien gelöscht ",
+    delCatSucc2: "Rückgängig",
+    delCatErrSing: "Beim Löschen der Kategorie ist ein Fehler aufgetreten. Bitte versuchen Sie es erneut!",
+    delCatErrMult: "Beim Löschen der Kategorien ist ein Fehler aufgetreten. Bitte versuchen Sie es erneut!",
 
     // Navbar Bottom
 
     // Add Password
-    addPas: "Passwort hinzufügen",
+    addPass: "Passwort hinzufügen",
 
     addPassTitle: "Titel",
     addPassUser: "Benutzername",
@@ -120,6 +133,58 @@ export const strings = {
 
     addPassAdd: "Hinzufügen",
 
+    /** Main Window */
+    mainPassGroup: "Gruppen Passwörter",
+    mainPassPriv: "Private Passwörter",
+
+    mainAllCat: "Alle Kategorien",
+
+    mainNotAddedToCat: "Nicht zugeordnet",
+    mainNotAddedToCatInfo: "Hier befinden sich alle Passwörter, die keine Kategorie zugeordnet wurden",
+
+
+    // Pass Line
+
+    lineTitle: "Titel",
+    lineUser: "Benutzername",
+    linePass: "Passwort",
+    lineWebsite: "Website",
+
+    lineTags: "Tags",
+    lineCat: "Kategorie",
+    lineCatNoCat: "Keiner Kategorie zugeordnet",
+
+    // Pass Line alerts
+    lineCopyPass: "Passwort kopieren",
+    lineCopyPassGoTo: "Passwort kopieren und Website öffnen",
+
+    lineEdit: "Dieses Passwort bearbeiten",
+    lineDel: "Dieses Passwort löschen",
+
+    lineEditSave: "Änderungen speichern",
+    lineEditCancle: "Änderungen verwerfen",
+
+    // Pass Line alerts
+    // Copy
+    linePassCopiedSuc: "Passwort wurde in die Zwischenablage kopiert!",
+    linePassCopiedErr: "Beim kopieren des Passworts ist ein Fehler aufgetreten. Bitte versuchen Sie es erneut!",
+    lineUserCopied: "Benutzername wurde in die Zwischenablage kopiert!",
+    lineURLCopied: "URL wurde in die Zwischenablage kopiert!",
+
+
+    // Delete Alert
+    linePassDelSuc: "Passwort wurde gelöscht!",
+    linePassDelSuc2: "Rückgängig",
+
+    linePassDelErr: "Beim Löschen des Passworts ist ein Fehler aufgetreten. Bitte versuchen Sie es erneut!",
+
+    // Edit Alerts <-- Hier!
+    linePassEditSuc: "Bearbeitetes Password gespeichert!",
+    linePassEditErr: "Beim Bearbeiten des Passworts ist ein Fehler aufgetreten. Bitte versuchen Sie es erneut!",
+
+    // Add Alert
+    linePassAddSuc: "Passwort hinzugefügt!",
+    linePassAddErr: "Beim Hinzufügen des Passworts ist ein Fehler aufgetreten. Bitte versuchen Sie es erneut!",
 
 
 };

@@ -29,6 +29,7 @@ import AddCategory from "./add.cat";
 import EditCategory from "./edit.cat";
 import DeleteCategory from "./delete.cat";
 import history from "../../routing/history"
+import StringSelector from "../../strings/stings";
 
 
 class Dashboard extends React.Component {
@@ -185,9 +186,9 @@ class Dashboard extends React.Component {
 
             let notAddedToCat = (
                 <div>
-                    <strong>Nicht zugeordnet</strong>
+                    <strong>{StringSelector.getString(this.state.language).mainNotAddedToCat}</strong>
                     <br/>
-                    Hier befinden sich alle Passwörter, die keine Kategorie zugeordnet wurden
+                    {StringSelector.getString(this.state.language).mainNotAddedToCatInfo}
                     <hr/>
                     {passwordsSonst[0]}
                 </div>
@@ -199,7 +200,7 @@ class Dashboard extends React.Component {
 
             return (
                 <>
-                    <h5>Alle Kategorien</h5>
+                    <h5>{StringSelector.getString(this.state.language).mainAllCat}</h5>
                     <hr/>
                     {final}
                     {notAddedToCat}
@@ -223,7 +224,7 @@ class Dashboard extends React.Component {
 
     getPassword( id ) {
         // TODO Mockobjekt
-        return this.state.getPassword(id);
+        return this.state.mock.getPassword(id);
     }
 
 
@@ -277,8 +278,8 @@ class Dashboard extends React.Component {
 
     printCopy() {
         const show = this.state.showCopyAlert;
-        let succ = "Passwort wurde in die Zwischenablage kopiert!";
-        let err = "Ein Fehler ist aufgetreten. Bitte versuchen Sie es erneut!";
+        let succ = StringSelector.getString(this.state.language).linePassCopiedSuc;
+        let err = StringSelector.getString(this.state.language).linePassCopiedErr;
         return (
             <Alert show={show} variant={this.state.alertState} className="center-horz center-vert error fixed-top-easypass in-front">
                 <p className="center-horz center-vert center-text">
@@ -298,7 +299,7 @@ class Dashboard extends React.Component {
         return (
             <Alert show={show} variant="success" className="center-horz center-vert error fixed-top-easypass in-front">
                 <p className="center-horz center-vert center-text">
-                    URL wurde in die Zwischenablage kopiert!
+                    {StringSelector.getString(this.state.language).lineURLCopied}
                 </p>
             </Alert>
         );
@@ -306,8 +307,8 @@ class Dashboard extends React.Component {
 
     printAddCat() {
         const show = this.state.showAddedCat;
-        let succ = "Kategorie hinzugefügt";
-        let err = "Beim Hinzufügen der Kategorie ist ein Fehler aufgetreten. Bitte versuchen Sie es erneut!";
+        let succ = StringSelector.getString(this.state.language).addCatSucc;
+        let err = StringSelector.getString(this.state.language).addCatErr;
         return (
             <Alert show={show} variant={this.state.alertState} className="center-horz center-vert error fixed-top-easypass in-front">
                 <p className="center-horz center-vert center-text">
@@ -323,8 +324,8 @@ class Dashboard extends React.Component {
 
     printEditCat() {
         const show = this.state.showEditedCat;
-        let succ = "Bearbeitete Kategorie gespeichert";
-        let err = "Beim Bearbeiten ist ein Fehler aufgetreten. Bitte versuchen Sie es erneut!";
+        let succ = StringSelector.getString(this.state.language).editCatSucc;
+        let err = StringSelector.getString(this.state.language).editCatErr;
         return (
             <Alert show={show} variant={this.state.alertState} className="center-horz center-vert error fixed-top-easypass in-front">
                 <p className="center-horz center-vert center-text">
@@ -340,8 +341,8 @@ class Dashboard extends React.Component {
 
     printEditPass() {
         const show = this.state.showEditedPass;
-        let succ = "Bearbeitetes Password gespeichert";
-        let err = "Beim Bearbeiten des Passworts ist ein Fehler aufgetreten. Bitte versuchen Sie es erneut!";
+        let succ = StringSelector.getString(this.state.language).linePassEditSuc;
+        let err = StringSelector.getString(this.state.language).linePassEditErr;
         return (
             <Alert show={show} variant={this.state.alertState} className="center-horz center-vert error fixed-top-easypass in-front">
                 <p className="center-horz center-vert center-text">
@@ -360,8 +361,8 @@ class Dashboard extends React.Component {
         let succ;
         let err;
         if ( this.state.currentCatDelete.length > 1 ) {
-            succ = "Kateogrien gelöscht ";
-            err = "Beim Löschen der Kategorien ist ein Fehler aufgetreten. Bitte versuchen Sie es erneut!";
+            succ = StringSelector.getString(this.state.language).delCatSuccMult;
+            err = StringSelector.getString(this.state.language).delCatErrMult;
         }
         else {
             succ = "Kateogrie gelöscht ";
@@ -374,7 +375,7 @@ class Dashboard extends React.Component {
                         <>
                             {succ}
                             <a className="makeLookLikeLink" onClick={() => this.stopDelete(dashboardAlerts.showDeleteCatAlert, this.state.currentCatDelete)}>
-                                Rückgängig
+                                {StringSelector.getString(this.state.language).delCatSucc2}
                                 <img
                                     src={Undo}
                                     alt=""
@@ -394,8 +395,8 @@ class Dashboard extends React.Component {
 
     printDeletePass() {
         const show = this.state.showDeletePassAlert;
-        let succ = "Password gelöscht ";
-        let err = "Beim Löschen des Passworts ist ein Fehler aufgetreten. Bitte versuchen Sie es erneut!";
+        let succ = StringSelector.getString(this.state.language).linePassDelSuc;
+        let err = StringSelector.getString(this.state.language).linePassDelErr;
         return (
             <Alert show={show} variant={this.state.alertState} className="center-horz center-vert error fixed-top-easypass in-front">
                 <p className="center-horz center-vert center-text">
@@ -403,7 +404,7 @@ class Dashboard extends React.Component {
                         <>
                             {succ}
                             <a className="makeLookLikeLink" onClick={() => this.stopDelete(dashboardAlerts.showDeletePassAlert, this.state.currentPassDelete)}>
-                                Rückgängig
+                                {StringSelector.getString(this.state.language).linePassDelSuc2}
                                 <img
                                     src={Undo}
                                     alt=""
@@ -423,8 +424,8 @@ class Dashboard extends React.Component {
 
     printAddPass() {
         const show = this.state.showAddedPass;
-        let succ = "Passwort hinzugefügt";
-        let err = "Beim Hinzufügen des Passworts ist ein Fehler aufgetreten. Bitte versuchen Sie es erneut!";
+        let succ = StringSelector.getString(this.state.language).linePassAddSuc;
+        let err = StringSelector.getString(this.state.language).linePassAddErr;
         return (
             <Alert show={show} variant={this.state.alertState} className="center-horz center-vert error fixed-top-easypass in-front">
                 <p className="center-horz center-vert center-text">
@@ -443,7 +444,7 @@ class Dashboard extends React.Component {
         return (
             <Alert show={show} variant="success" className="center-horz center-vert error fixed-top-easypass in-front">
                 <p className="center-horz center-vert center-text">
-                    Username wurde in die Zwischenablage kopiert!
+                    {StringSelector.getString(this.state.language).lineUserCopied}
                 </p>
             </Alert>
         );
@@ -591,10 +592,12 @@ class Dashboard extends React.Component {
     }
 
     copyPass(id) {
+        // Todo call Kacpers Method
         let pass = this.getPassword(id);
         // Popup starten
         this.setState({
             showCopyAlert: true,
+            alertState: "success",
         });
         this.dismissCopy("showCopyAlert");
 
@@ -659,6 +662,7 @@ class Dashboard extends React.Component {
 
     saveSettings() {
         this.props.changeLanguage(this.state.language);
+        location.reload();
     }
 
     cancelSettings() {
@@ -925,6 +929,11 @@ class Dashboard extends React.Component {
             indicatorClass += " sidebarClosed";
         }
 
+        let langText = "text";
+        if ( this.state.language === dashboardLanguage.english ) {
+            langText = "textEng";
+        }
+
         return (
             <div className="size-hole-window-hidden-scroll" onClick={this.resetSettingsExpanded}>
                 <NavbarEP callback={this} width={this.state.width} language={this.state.language}/>
@@ -952,8 +961,8 @@ class Dashboard extends React.Component {
                             height="20"
                             className="d-inline-block addIcon"
                         />
-                        <div className="text">
-                            <span>Passwort hinzufügen</span>
+                        <div className={langText}>
+                            <span>{StringSelector.getString(this.state.language).addPass}</span>
                         </div>
                     </Button>
                     <AddPassword callback={this}/>

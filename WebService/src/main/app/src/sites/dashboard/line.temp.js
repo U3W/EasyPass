@@ -29,6 +29,7 @@ import {dashboardAlerts} from "./const/dashboard.enum";
 import GeneratePassIcon from "../../img/icons/generate_password_white.svg";
 import GeneratePass from "./generatepass";
 import Spinner from "react-bootstrap/Spinner";
+import StringSelector from "../../strings/stings";
 
 /**
  * @param id: which element in a list f.e. (must be unique, because with this id the collapsible div will be opened then toggled)
@@ -699,7 +700,7 @@ export default class PassLine extends React.Component {
                                         placement={placement}
                                         overlay={
                                             <Tooltip id={`tooltip-${placement}`}>
-                                                Passwort kopieren
+                                                {StringSelector.getString(this.props.callback.state.language).lineCopyPass}
                                             </Tooltip>
                                         }
                                     >
@@ -722,7 +723,7 @@ export default class PassLine extends React.Component {
                                         placement={placement}
                                         overlay={
                                             <Tooltip id={`tooltip-${placement}`}>
-                                                Passwort kopieren und Website öffnen
+                                                {StringSelector.getString(this.props.callback.state.language).lineCopyPassGoTo}
                                             </Tooltip>
                                         }
                                     >
@@ -761,7 +762,7 @@ export default class PassLine extends React.Component {
                             {this.state.edit === true ? // Title
                                 <InputGroup size="lg">
                                     <InputGroup.Prepend>
-                                        <InputGroup.Text id="inputGroup-sizing-lg">Name</InputGroup.Text>
+                                        <InputGroup.Text id="inputGroup-sizing-lg">{StringSelector.getString(this.props.callback.state.language).lineTitle}</InputGroup.Text>
                                     </InputGroup.Prepend>
                                     <FormControl id="title" aria-label="Large" aria-describedby="inputGroup-sizing-sm" value={this.state.titleNew} onChange={this.changeListener} />
                                 </InputGroup>
@@ -772,7 +773,7 @@ export default class PassLine extends React.Component {
                             <div>
                                 <InputGroup size="sm" className="mb-3">
                                     <InputGroup.Prepend>
-                                        <InputGroup.Text id="inputGroup-sizing-sm">User</InputGroup.Text>
+                                        <InputGroup.Text id="inputGroup-sizing-sm">{StringSelector.getString(this.props.callback.state.language).lineUser}</InputGroup.Text>
                                     </InputGroup.Prepend>
                                     {this.state.edit === true ? // Username
                                         <>
@@ -804,7 +805,7 @@ export default class PassLine extends React.Component {
                                 </InputGroup>
                                 <InputGroup size="sm" className="mb-3">
                                     <InputGroup.Prepend>
-                                        <InputGroup.Text id="inputGroup-sizing-sm">Password</InputGroup.Text>
+                                        <InputGroup.Text id="inputGroup-sizing-sm">{StringSelector.getString(this.props.callback.state.language).linePass}</InputGroup.Text>
                                     </InputGroup.Prepend>
                                     {this.state.edit === true ?
                                         edit
@@ -837,7 +838,7 @@ export default class PassLine extends React.Component {
                                 </InputGroup>
                                 <InputGroup size="sm" className="mb-3">
                                     <InputGroup.Prepend>
-                                        <InputGroup.Text id="inputGroup-sizing-sm">Website (Login)</InputGroup.Text>
+                                        <InputGroup.Text id="inputGroup-sizing-sm">{StringSelector.getString(this.props.callback.state.language).lineWebsite}</InputGroup.Text>
                                     </InputGroup.Prepend>
                                     {this.state.edit === true ? // URL
                                         <>
@@ -868,12 +869,12 @@ export default class PassLine extends React.Component {
                                     }
                                 </InputGroup>
                                 <div>
-                                    <h6>Tags</h6>
+                                    <h6>{StringSelector.getString(this.props.callback.state.language).lineTags}</h6>
                                     {tagRender}
                                 </div>
                                 <br/>
                                 <div>
-                                    <h6>Kategorie</h6>
+                                    <h6>{StringSelector.getString(this.props.callback.state.language).lineTags}</h6>
                                     {catRender}
                                 </div>
                             </div>
@@ -889,11 +890,11 @@ export default class PassLine extends React.Component {
                                                 overlay={
                                                     this.state.edit === true ?
                                                         <Tooltip id={`tooltip-${placement}`}>
-                                                            Änderungen verwerfen
+                                                            {StringSelector.getString(this.props.callback.state.language).lineEditCancle}
                                                         </Tooltip>
                                                         :
                                                         <Tooltip id={`tooltip-${placement}`}>
-                                                            Dieses Passwort bearbeiten
+                                                            {StringSelector.getString(this.props.callback.state.language).lineEdit}
                                                         </Tooltip>
                                                 }
                                             >
@@ -931,11 +932,11 @@ export default class PassLine extends React.Component {
                                                 placement={placement}
                                                 overlay={this.state.edit === true ?
                                                     <Tooltip id={`tooltip-${placement}`}>
-                                                        Änderungen speichern
+                                                        {StringSelector.getString(this.props.callback.state.language).lineEditSave}
                                                     </Tooltip>
                                                     :
                                                     <Tooltip id={`tooltip-${placement}`}>
-                                                        Dieses Passwort löschen
+                                                        {StringSelector.getString(this.props.callback.state.language).lineDel}
                                                     </Tooltip>
                                                 }
                                             >

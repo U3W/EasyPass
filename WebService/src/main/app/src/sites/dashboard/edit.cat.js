@@ -12,7 +12,6 @@ export default class EditCategory extends React.Component {
     constructor(props) {
         super(props);
 
-        console.log("Edit start 1", StringSelector.getString(this.props.callback.state.language).editCatSelCat);
         this.state = {
             id: 0,
             catName: StringSelector.getString(this.props.callback.state.language).editCatSelCat,
@@ -36,11 +35,6 @@ export default class EditCategory extends React.Component {
         this.resetState = this.resetState.bind(this);
 
         this.handleKeyevent = this.handleKeyevent.bind(this);
-
-        console.log("Edit start", StringSelector.getString(this.props.callback.state.language).editCatSelCat);
-        this.setState({
-            catName: StringSelector.getString(this.props.callback.state.language).editCatSelCat,
-        });
     }
 
     changeInput = (e) => {
@@ -115,7 +109,7 @@ export default class EditCategory extends React.Component {
     resetState() {
         this.setState({
             id: 0,
-            catName: "Kategorie auswählen",
+            catName: StringSelector.getString(this.props.callback.state.language).editCatSelCat,
 
             nameNew: "",
             descriptionNew: "",

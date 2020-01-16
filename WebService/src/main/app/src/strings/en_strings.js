@@ -43,6 +43,7 @@ export const strings = {
     registMasterNotIdent: "Masterpasswords do not match!",
 
 
+    registStep: "Step",
     registPrevButton: "Previous step",
     registNextButton: "Next step",
     registButton: "Register",
@@ -72,17 +73,29 @@ export const strings = {
     addCatName: "Name",
     addCatDesc: "Description",
     addCatAdd: "Add",
+    // alerts
+    addCatSucc: "Category added!",
+    addCatErr: "An error occurred while adding the category. Please try again!",
 
     editCat: "Edit category",
     editCatSelCat: "Select category",
+    // alerts
+    editCatSucc: "Edited category saved!",
+    editCatErr: "An error has occurred during editing. Please try again!",
 
     delCat: "Delete category",
     delCatDel: "Delete",
+    // alerts
+    delCatSuccSing: "Category deleted ",
+    delCatSuccMult: "Categories deleted ",
+    delCatSucc2: "undo",
+    delCatErrSing: "An error occurred when deleting the category. Please try again!",
+    delCatErrMult: "An error occurred when deleting the categories. Please try again!",
 
     // Navbar Bottom
 
     // Add Password
-    addPas: "Add password",
+    addPass: "Add password",
 
     addPassTitle: "Title",
     addPassUser: "Username",
@@ -103,4 +116,56 @@ export const strings = {
     addPassCatChange: "Change category",
 
     addPassAdd: "Add",
+
+    /** Main Window */
+    mainPassGroup: "Group passwords",
+    mainPassPriv: "Private passwords",
+
+    mainAllCat: "All categories",
+
+    mainNotAddedToCat: "Not assigned",
+    mainNotAddedToCatInfo: "Here are all passwords that are not assigned to a category",
+
+
+    // Pass Line
+
+    lineTitle: "Title",
+    lineUser: "Username",
+    linePass: "Password",
+    lineWebsite: "Website",
+
+    lineTags: "Tags",
+    lineCat: "Category",
+    lineCatNoCat: "Not assigned to any category",
+
+    // Pass Line alerts
+    lineCopyPass: "Copy password",
+    lineCopyPassGoTo: "Copy password and open website",
+
+    lineEdit: "Edit this password",
+    lineDel: "Delete this password",
+
+    lineEditSave: "Save changes",
+    lineEditCancle: "Discard changes",
+
+    // Pass Line alerts
+    // Copy
+    linePassCopied: "Password was copied to the clipboard!",
+    lineUserCopied: "Username was copied to the clipboard!",
+    lineURLCopied: "URL was copied to the clipboard!",
+
+
+    // Delete Alert
+    linePassDelSuc: "Password has been deleted!",
+    linePassDelSuc2: "Undo",
+
+    linePassDelErr: "An error occurred when deleting the password. Please try again!",
+
+    // Edit Alerts,
+    linePassEditSuc: "Edited password saved!",
+    linePassEditErr: "An error occurred while editing the password. Please try again!",
+
+    // Add Alert
+    linePassAddSuc: "Password added!",
+    linePassAddErr: "An error occurred while adding the password. Please try again!",
 };

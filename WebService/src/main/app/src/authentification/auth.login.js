@@ -7,7 +7,6 @@ class LoginAuth {
     getLoggedIn() {
         return localStorage.getItem(authConstants.loggedIn) === "true";
     }
-
 }
 
 

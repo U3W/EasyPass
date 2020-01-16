@@ -19,9 +19,10 @@ import Logo from "../../img/logo/LogoV2.svg"
 import LoginAuth from "../../authentification/auth.login"
 import Alert from "react-bootstrap/Alert";
 import { connect } from 'react-redux';
-import {login, logout} from "../../action/auth.action";
+import {login, logout, succRegist} from "../../action/auth.action";
 import Indicator from "../../network/network.indicator";
 import {dashboardAlerts} from "../dashboard/const/dashboard.enum";
+import Registration from "../registration/registration";
 
 
 
@@ -39,15 +40,10 @@ class Login extends React.Component {
             missingPassword: false,
             missingUsername: false,
 
+            wantRegister: false,
             showRegistered: false,
             alertState: "success",
         };
-
-        console.log(history.location.state);
-        if ( history.location.state !== undefined ) {
-            this.showRegistAlert(history.location.state.succ)
-        }
-
 
         this.handleChange = this.handleChange.bind(this);
         this.handleSubmit = this.handleSubmit.bind(this);
@@ -215,10 +211,19 @@ class Login extends React.Component {
         }
     }
 
-        switchToRegister() {
-        history.push({
-            pathname: "/registration",
+    switchToRegister( want, succ, exit) {
+        console.log("Exit", want, succ, exit);
+        this.setState({
+            wantRegister: want,
         });
+        if ( !exit ) {
+            if ( !want && succ ) {
+                this.showRegistAlert("success");
+            }
+            else {
+                this.showRegistAlert("danger");
+            }
+        }
     }
 
     getInputPassword() {
@@ -247,37 +252,44 @@ class Login extends React.Component {
 
     render() {
         return (
-            <div className="backgroundPicLogin">
-                <div className="gradientDivLogin">
-                    <Container>
-                        <Row className="size-hole-window">
-                            <Col xs={12} sm={8} md={6} lg={5} className="center-vert center-horz">
-                                <Card className="card-login login">
-                                    <Card.Img variant="top" src={Logo} />
-                                    <Card.Body>
-                                        <Form autoComplete="off">
-                                            {this.getInputUsername()}
-                                            {this.getInputPassword()}
-                                            <Form.Group>
-                                                <Form.Check type="checkbox" id="inpKeepLoggedIn" label={StringSelector.getString(this.state.language).keepLoggedIn} />
-                                                <Nav.Link onClick={this.switchToRegister}>Noch kein Account? Hier registrieren</Nav.Link>
-                                            </Form.Group>
-                                            <Button variant="danger" className={"float-right"} onClick={this.handleSubmit}>
-                                            {StringSelector.getString(this.state.language).loginButton}
-                                            </Button>
-                                        </Form>
-                                    </Card.Body>
-                                </Card>
-                            </Col>
-                            <div className="footer">
-                                {this.printError()}
-                                {this.printRegistered()}
-                            </div>
-                            <Indicator />
-                        </Row>
-                    </Container>
+            <>
+            { this.state.wantRegister ?
+                <Registration callback={this}/>
+                :
+                <div className="backgroundPicLogin">
+                    <div className="gradientDivLogin">
+                        <Container>
+                            <Row className="size-hole-window">
+                                <Col xs={12} sm={8} md={6} lg={5} className="center-vert center-horz">
+                                    <Card className="card-login login">
+                                        <Card.Img variant="top" src={Logo} />
+                                        <Card.Body>
+                                            <Form autoComplete="off">
+                                                {this.getInputUsername()}
+                                                {this.getInputPassword()}
+                                                <Form.Group>
+                                                        <Form.Check type="checkbox" id="inpKeepLoggedIn" label={StringSelector.getString(this.state.language).keepLoggedIn} />
+                                                    <Nav.Link onClick={() => { this.switchToRegister(true, false, true)} }>{StringSelector.getString(this.state.language).registrationButton}</Nav.Link>
+                                                </Form.Group>
+                                                <Button variant="danger" className={"float-right"} onClick={this.handleSubmit}>
+                                                    {StringSelector.getString(this.state.language).loginButton}
+                                                </Button>
+                                            </Form>
+                                        </Card.Body>
+                                    </Card>
+                                </Col>
+                                <div className="footer">
+                                    {this.printError()}
+                                    {this.printRegistered()}
+                                </div>
+                                <Indicator />
+                            </Row>
+                        </Container>
+                    </div>
                 </div>
-            </div>
+            }
+
+            </>
         );
     }
 }

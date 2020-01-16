@@ -131,6 +131,21 @@ body {
     -webkit-transform: translateX(0px);
 }
 
+.fab .textEng {
+    opacity:0;
+    transition-delay: 0s;
+    transition-duration: 0.4s;
+    position: absolute;
+    white-space: nowrap;
+    left: 45px;
+    top: 12px
+}
+.fab:hover .textEng {
+    opacity:1;
+    transform: translateX(0px);
+    -webkit-transform: translateX(0px);
+}
+
 .fab:hover {
     width: 210px;
     border-radius: 25px;
