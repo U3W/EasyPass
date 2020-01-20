@@ -48,7 +48,6 @@ class Masterpassword extends React.Component {
         this.handleSubmit = this.handleSubmit.bind(this);
         this.handleChange = this.handleChange.bind(this);
         this.handleKeyevent = this.handleKeyevent.bind(this);
-        this.handleRadioButtons = this.handleRadioButtons.bind(this);
         this.handleFile = this.handleFile.bind(this);
 
         /**
@@ -147,10 +146,6 @@ class Masterpassword extends React.Component {
                 </p>
             </Alert>
         );
-    }
-
-    handleRadioButtons(event) {
-
     }
 
     submit() {

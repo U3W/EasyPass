@@ -43,6 +43,13 @@
     width: 20px;
 }
 
+.noMarginBottom {
+    margin-bottom: 0;
+}
+
+.rowMargin{
+    margin-top: 15px;
+}
 
 .search {
     width: 100% !important;

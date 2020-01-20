@@ -95,7 +95,16 @@ class Dashboard extends React.Component {
             height: 0,
             // sidebar
             sidebarClosed: dashboardState.getSidebarClosed(),
+
+            // resetPass vars
+            errorShow: false,
+            errorText: "",
+            errorState: "success",
         };
+
+        this.setErrorShow = this.setErrorShow.bind(this);
+        this.setErrorState = this.setErrorState.bind(this);
+        this.setErrorText = this.setErrorText.bind(this);
 
         this.handleSearch = this.handleSearch.bind(this);
         this.setExpanded = this.setExpanded.bind(this);
@@ -273,6 +282,42 @@ class Dashboard extends React.Component {
             })
         }
         return passwords;
+    }
+
+    setErrorShow( to ) {
+        console.log("Aha", to);
+        this.setState({
+            errorShow: to,
+        });
+        sleep(4000).then(() => {
+                this.setState({
+                    errorShow: false,
+                })
+            }
+        );
+    }
+
+    setErrorState( to ) {
+        this.setState({
+            errorState: to,
+        });
+    }
+
+    setErrorText( to ) {
+        this.setState({
+            errorText: to,
+        });
+    }
+
+    printResetPassPopUp() {
+        console.log("Show State", this.state.errorShow);
+        return (
+            <Alert show={this.state.errorShow} variant={this.state.errorState} className="center-horz center-vert error fixed-top-easypass in-front">
+                <p className="center-horz center-vert center-text">
+                    {this.state.errorText}
+                </p>
+            </Alert>
+        );
     }
 
 
@@ -731,6 +776,11 @@ class Dashboard extends React.Component {
 
     }
 
+    resetPass( pass, newPass ) {
+        // ToDo call Moritz / Kacper
+        return true;
+    }
+
     /**
      * @returns [] a list with all the categories created by the user
      */
@@ -970,6 +1020,7 @@ class Dashboard extends React.Component {
                 <AddCategory callback={this}/>
                 <EditCategory callback={this}/>
                 <DeleteCategory callback={this}/>
+                {this.printResetPassPopUp()}
                 {this.printCopy()}
                 {this.printUser()}
                 {this.printURL()}

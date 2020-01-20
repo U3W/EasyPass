@@ -19,6 +19,8 @@ import InputGroup from "react-bootstrap/InputGroup";
 import {dashboardAlerts, dashboardLanguage} from "../dashboard/const/dashboard.enum";
 import StringSelector from "../../strings/stings";
 import dashboardState from "../dashboard/dashboard.saved.state";
+import CopyIcon from "../../img/icons/password_copy_white.svg";
+import ResetPass from "./resetPass";
 
 class NavbarEP extends React.Component {
     constructor(props) {
@@ -27,6 +29,7 @@ class NavbarEP extends React.Component {
         this.state = {
             expanded: false,
             popUpShow: false,
+            changePassPopUpShow: true,
             popUpCatShow: false,
         };
 
@@ -42,8 +45,13 @@ class NavbarEP extends React.Component {
         this.setPopUpCatDisabled = this.setPopUpCatDisabled.bind(this);
         this.setPopUpCatEnabled = this.setPopUpCatEnabled.bind(this);
 
+        this.setChangePopUpDisabled = this.setChangePopUpDisabled.bind(this);
+        this.setChangePopUp = this.setChangePopUp.bind(this);
+
 
     }
+
+
 
 
     logoutFunc() {
@@ -75,6 +83,28 @@ class NavbarEP extends React.Component {
             popUpShow: true,
         });
         this.props.callback.setSettingExpandedFalse();
+    }
+
+    resetPass(pass, newPass) {
+        if ( this.props.callback.resetPass(pass, newPass) ) {
+            this.setChangePopUpDisabled();
+            return true;
+        }
+        else {
+            return false;
+        }
+    }
+
+    setChangePopUpDisabled() {
+        this.setState({
+            changePassPopUpShow: false
+        });
+    }
+
+    setChangePopUp() {
+        this.setState({
+            changePassPopUpShow: true,
+        });
     }
 
     setSettingExpanded() {
@@ -121,14 +151,14 @@ class NavbarEP extends React.Component {
             <>
                 <Modal show={this.state.popUpCatShow} onHide={this.setPopUpCatDisabled} className="ep-modal-dialog">
                     <Modal.Header closeButton>
-                        <Modal.Title>Kategorie auswählen:</Modal.Title>
+                        <Modal.Title>{StringSelector.getString(this.props.callback.state.language).cats + ":"}</Modal.Title>
                     </Modal.Header>
                     <Modal.Body className="ep-modal-body">
                         <Table striped bordered hover className="ep-modal-table">
                             <tbody>
                                 <tr key={0}>
                                     <td onClick={() => this.changeCat(0)}>
-                                        Alle Kateogrien
+                                        {StringSelector.getString(this.props.callback.state.language).catsAllCat}
                                     </td>
                                 </tr>
                                 {finalCats}
@@ -145,13 +175,12 @@ class NavbarEP extends React.Component {
         this.props.callback.changeLanguageTo(to);
     }
 
-
     getPopUp() {
         return (
             <>
                 <Modal show={this.state.popUpShow} onHide={this.setPopUpDisabled} className="ep-modal-dialog">
                     <Modal.Header closeButton>
-                        <Modal.Title>Einstellungen</Modal.Title>
+                        <Modal.Title>{StringSelector.getString(this.props.callback.state.language).settings}</Modal.Title>
                     </Modal.Header>
                     <Modal.Body>
                         <Card.Body>
@@ -176,6 +205,18 @@ class NavbarEP extends React.Component {
                                                 </>
                                             }
                                         </ButtonGroup>
+                                    </div>
+                                </div>
+                            </Row>
+                            <Row className="rowMargin">
+                                <Col className="noPadding">
+                                    <InputGroup.Prepend>
+                                        <InputGroup.Text className="fitHoleParent">Change password</InputGroup.Text>
+                                    </InputGroup.Prepend>
+                                </Col>
+                                <div className="noPadding">
+                                    <div className="float-right">
+                                        <Button variant="danger" className="noLeftBorderRadius" onClick={this.setChangePopUp}>Change</Button>
                                     </div>
                                 </div>
                             </Row>
@@ -265,6 +306,7 @@ class NavbarEP extends React.Component {
                     </div>
                 </div>
                 {this.getPopUp()}
+                <ResetPass callback={this} show={this.state.changePassPopUpShow}/>
             </>
         );
     }
