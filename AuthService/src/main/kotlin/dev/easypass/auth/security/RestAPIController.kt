@@ -1,12 +1,8 @@
 package dev.easypass.auth.security
 
-import dev.easypass.auth.datstore.CouchDBConnectionProvider
 import dev.easypass.auth.datstore.document.User
-import dev.easypass.auth.datstore.exception.EntityAlreadyinDatabaseException
-import dev.easypass.auth.datstore.repository.UserRepository
-import dev.easypass.auth.security.challenge.UserAuthenticationChallenge
-import org.springframework.beans.factory.annotation.Value
-import org.springframework.http.HttpEntity
+import dev.easypass.auth.security.challenge.RequestAuthenticationChallenge
+import dev.easypass.auth.security.challenge.ResponseAuthenticationChallenge
 import org.springframework.web.bind.annotation.*
 import java.util.*
 import javax.servlet.http.HttpServletRequest
@@ -18,8 +14,6 @@ import javax.servlet.http.HttpServletResponse
 @RestController
 @RequestMapping("/auth")
 class RestAPIController(private val challengeAuthenticationProvider: ChallengeAuthenticationProvider, private val properties: Properties) {
-
-    private val authContextPath = properties.getProperty("auth.context-path")
 
     /**
      * A simple redirect to the project website
@@ -36,8 +30,8 @@ class RestAPIController(private val challengeAuthenticationProvider: ChallengeAu
      */
     @PostMapping("/challenge")
     @ResponseBody
-    fun unlockChallenge(request: HttpServletRequest, @RequestBody user: User): UserAuthenticationChallenge {
-        return challengeAuthenticationProvider.addUserChallenge(request.remoteAddr, user.uname)
+    fun unlockChallenge(request: HttpServletRequest, @RequestBody challenge: RequestAuthenticationChallenge): ResponseAuthenticationChallenge {
+        return challengeAuthenticationProvider.addUserChallenge(Pair(request.remoteAddr, challenge.uname), challenge.role)
     }
 
     /**

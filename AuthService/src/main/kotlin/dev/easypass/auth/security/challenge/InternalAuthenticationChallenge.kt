@@ -29,7 +29,7 @@ class InternalAuthenticationChallenge(private val encryptionLibrary: EncryptionL
      * Returns the internal [decryptedChallenge] encrypted by the [pubK]
      * @param pubK: the pubK to encrypt the internal [decryptedChallenge]
      */
-    fun getChallengeEncryptedBypubK(pubK: String): String{
+    fun getChallengeEncryptedByPubK(pubK: String): String{
         return encryptionLibrary.encrypt(decryptedChallenge, pubK)
     }
 
