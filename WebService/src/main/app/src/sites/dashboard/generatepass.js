@@ -134,7 +134,7 @@ export default class GeneratePass extends React.Component {
                                     { this.state.lowerCaseOnly ?
                                         <Form.Check
                                             custom
-                                            checked
+                                            checked={true}
                                             name="smallCaps"
                                             label={StringSelector.getString(this.props.language).addPassGenSmall}
                                             id="smallcapsCheck"
@@ -144,6 +144,7 @@ export default class GeneratePass extends React.Component {
                                         :
                                         <Form.Check
                                             custom
+                                            checked={false}
                                             name="smallCaps"
                                             label={StringSelector.getString(this.props.language).addPassGenSmall}
                                             id="smallcapsCheck"
@@ -159,7 +160,7 @@ export default class GeneratePass extends React.Component {
                                     { this.state.specialChar ?
                                         <Form.Check
                                             custom
-                                            checked
+                                            checked={true}
                                             name="specialChar"
                                             label={StringSelector.getString(this.props.language).addPassGenSpec}
                                             id="specialCheck"
@@ -169,6 +170,7 @@ export default class GeneratePass extends React.Component {
                                         :
                                         <Form.Check
                                             custom
+                                            checked={false}
                                             name="specialChar"
                                             label={StringSelector.getString(this.props.language).addPassGenSpec}
                                             id="specialCheck"
@@ -184,7 +186,7 @@ export default class GeneratePass extends React.Component {
                                     { this.state.numbers ?
                                         <Form.Check
                                             custom
-                                            checked
+                                            checked={true}
                                             name="numbers"
                                             label={StringSelector.getString(this.props.language).addPassGenNum}
                                             id="numberCheck"
@@ -194,6 +196,7 @@ export default class GeneratePass extends React.Component {
                                         :
                                         <Form.Check
                                             custom
+                                            checked={true}
                                             name="numbers"
                                             label={StringSelector.getString(this.props.language).addPassGenNum}
                                             id="numberCheck"
