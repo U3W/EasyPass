@@ -1,6 +1,7 @@
 package dev.easypass.auth.datstore.repository
 
 import dev.easypass.auth.datstore.document.Group
+import dev.easypass.auth.datstore.document.User
 import dev.easypass.auth.datstore.exception.EntityAlreadyinDatabaseException
 import org.ektorp.*
 import org.ektorp.support.CouchDbRepositorySupport
@@ -31,22 +32,30 @@ class GroupRepository(db: CouchDbConnector) : CouchDbRepositorySupport<Group>(Gr
      * @param gname: the name of the group
      */
     @GenerateView
-    fun findByGname(gname: String?): List<Group> {
+    private fun findByGname(gname: String?): List<Group> {
         return queryView("by_gname", gname)
+    }
+
+    /**
+     * returns only the first entry of the [List] of all the entries with the passed [gname], that are stored in the database
+     * @param gname: the name of the user
+     */
+    fun findOneByGname(gname: String?): Group {
+        val listOfUsers = findByGname(gname)
+        if (listOfUsers.isEmpty())
+            throw DocumentNotFoundException("The Group [$gname] is NOT FOUND in the database")
+        if (listOfUsers.size > 1)
+            throw DocumentNotFoundException("The Group [$gname] has MULTIPLE ENTRIES in the database")
+        return listOfUsers[0]
     }
 
     /**
      * This methods overrides the add-method of [CouchDbRepositorySupport], throws an [EntityAlreadyinDatabaseException], when an entity with the same gname as [entity] is already saved in the database
      * @param entity: a group object to save in the database
      */
-    override fun add(entity: Group) = try {
-        if (findByGname(entity.gname).isNotEmpty()) {
-            throw EntityAlreadyinDatabaseException()
-        } else {
-            throw DocumentNotFoundException("Exception is caught later! ")
-        }
-    } catch (e: DocumentNotFoundException) {
+    override fun add(entity: Group) = if (findByGname(entity.gname).isEmpty()) {
         super.add(entity)
+    } else {
+        throw EntityAlreadyinDatabaseException()
     }
-
 }

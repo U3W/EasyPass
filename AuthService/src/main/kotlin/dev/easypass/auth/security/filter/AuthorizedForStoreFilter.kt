@@ -15,7 +15,7 @@ import javax.servlet.http.HttpServletRequest
 import javax.servlet.http.HttpServletResponse
 
 @Component
-class AuthorizedForStoreMatcher: RequestMatcher {
+class AuthorizedForStoreFilter: RequestMatcher {
     override fun matches(request: HttpServletRequest?): Boolean {
         val url = (request as HttpServletRequest).requestURL.toString()
         val ip = (SecurityContextHolder.getContext().authentication.details as WebAuthenticationDetails).remoteAddress

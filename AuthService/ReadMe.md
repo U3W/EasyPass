@@ -3,15 +3,15 @@
 Fill with test users:
 
 ```
-curl -i -X POST -H "Content-Type: application/json" -d "{\"uname\": \"mwustinger\", \"publicKey\": \"M_A_R_T_I_N___P_U_B_L_I_C___K_E_Y\", \"privateKey\": \"M_A_R_T_I_N___P_R_I_V_A_T_E___K_E_Y\"}" http://localhost:7000/register
+curl -i -X POST -H "Content-Type: application/json" -d "{\"uname\": \"mwustinger\", \"pubK\": \"M_A_R_T_I_N___P_U_B_L_I_C___K_E_Y\", \"privK\": \"M_A_R_T_I_N___P_R_I_V_A_T_E___K_E_Y\"}" http://localhost:7000/register
 
-curl -i -X POST -H "Content-Type: application/json" -d "{\"uname\": \"kurbaniec\", \"publicKey\": \"K_A_C_P_E_R___P_U_B_L_I_C___K_E_Y\", \"privateKey\": \"K_A_C_P_E_R___P_R_I_V_A_T_E___K_E_Y\"}" http://localhost:7000/register
+curl -i -X POST -H "Content-Type: application/json" -d "{\"uname\": \"kurbaniec\", \"pubK\": \"K_A_C_P_E_R___P_U_B_L_I_C___K_E_Y\", \"privK\": \"K_A_C_P_E_R___P_R_I_V_A_T_E___K_E_Y\"}" http://localhost:7000/register
     
-    curl -i -X POST -H "Content-Type: application/json" -d "{\"uname\": \"mwelsch\", \"publicKey\": \"M_O_R_I_T_Z___P_U_B_L_I_C___K_E_Y\", \"privateKey\": \"M_O_R_I_T_Z___P_R_I_V_A_T_E___K_E_Y\"}" http://localhost:7000/register
+    curl -i -X POST -H "Content-Type: application/json" -d "{\"uname\": \"mwelsch\", \"pubK\": \"M_O_R_I_T_Z___P_U_B_L_I_C___K_E_Y\", \"privK\": \"M_O_R_I_T_Z___P_R_I_V_A_T_E___K_E_Y\"}" http://localhost:7000/register
     
-    curl -i -X POST -H "Content-Type: application/json" -d "{\"uname\": \"swahl\", \"publicKey\": \"S_E_B___P_U_B_L_I_C___K_E_Y\", \"privateKey\": \"S_E_B___P_R_I_V_A_T_E___K_E_Y\"}" http://localhost:7000/register
+    curl -i -X POST -H "Content-Type: application/json" -d "{\"uname\": \"swahl\", \"pubK\": \"S_E_B___P_U_B_L_I_C___K_E_Y\", \"privK\": \"S_E_B___P_R_I_V_A_T_E___K_E_Y\"}" http://localhost:7000/register
     
-curl -i -X POST -H "Content-Type: application/json" -d "{\"uname\": \"croschger\", \"publicKey\": \"R_O_S_C_H_G_E_R___P_U_B_L_I_C___K_E_Y\", \"privateKey\": \"R_O_S_C_H_G_E_R___P_R_I_V_A_T_E___K_E_Y\"}" http://localhost:7000/auth/register
+curl -i -X POST -H "Content-Type: application/json" -d "{\"uname\": \"croschger"\", \"pubK\": \"R_O_S_C_H_G_E_R___P_U_B_L_I_C___K_E_Y\", \"privK\": \"R_O_S_C_H_G_E_R___P_R_I_V_A_T_E___K_E_Y\"}" http://localhost:7000/auth/register
 
 ```
 
@@ -19,6 +19,8 @@ Authentication Test:
 
 ```
 curl -i --header "Accept:application/json" -X GET -b cookieMwustinger.txt http://localhost:7000/store/mwustinger
+
+curl -i -X POST -H "Content-Type: application/json" -d "{\"uname\": \"mwustinger\", \"pubK\": \"\", \"privK\": \"\"}" http://localhost:7000/auth/challenge
 
 curl -X POST http://localhost:7000/auth/challenge?uname=mwustinger
 

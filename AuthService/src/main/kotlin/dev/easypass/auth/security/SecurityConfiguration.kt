@@ -1,6 +1,5 @@
 package dev.easypass.auth.security
 
-import dev.easypass.auth.security.filter.AuthorizedForStoreMatcher
 import org.springframework.security.config.annotation.web.builders.HttpSecurity
 import org.springframework.context.annotation.Configuration
 import org.springframework.http.HttpMethod

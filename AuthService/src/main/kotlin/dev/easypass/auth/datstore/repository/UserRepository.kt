@@ -31,7 +31,7 @@ class UserRepository(db: CouchDbConnector) : CouchDbRepositorySupport<User>(User
      * @param uname: the name of the uname
      */
     @GenerateView
-    fun findByUname(uname: String?): List<User> {
+    private fun findByUname(uname: String?): List<User> {
         return queryView("by_uname", uname)
     }
 
@@ -52,13 +52,9 @@ class UserRepository(db: CouchDbConnector) : CouchDbRepositorySupport<User>(User
      * This methods overrides the add-method of [CouchDbRepositorySupport], throws an [EntityAlreadyinDatabaseException], when an entity with the same uname as [entity] is already saved in the database
      * @param entity: a user object to save in the database
      */
-    override fun add(entity: User) = try {
-            if (findByUname(entity.uname).isNotEmpty()) {
-                throw EntityAlreadyinDatabaseException()
-            } else {
-                throw DocumentNotFoundException("Exception is caught later! ")
-            }
-        } catch (e: DocumentNotFoundException) {
-            super.add(entity)
-        }
+    override fun add(entity: User) = if (findByUname(entity.uname).isEmpty()) {
+        super.add(entity)
+    } else {
+        throw EntityAlreadyinDatabaseException()
+    }
 }

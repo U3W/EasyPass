@@ -26,11 +26,11 @@ class InternalAuthenticationChallenge(private val encryptionLibrary: EncryptionL
     }
 
     /**
-     * Returns the internal [decryptedChallenge] encrypted by the [publicKey]
-     * @param publicKey: the publicKey to encrypt the internal [decryptedChallenge]
+     * Returns the internal [decryptedChallenge] encrypted by the [pubK]
+     * @param pubK: the pubK to encrypt the internal [decryptedChallenge]
      */
-    fun getChallengeEncryptedByPublicKey(publicKey: String): String{
-        return encryptionLibrary.encrypt(decryptedChallenge, publicKey)
+    fun getChallengeEncryptedBypubK(pubK: String): String{
+        return encryptionLibrary.encrypt(decryptedChallenge, pubK)
     }
 
     fun isActive(): Boolean = Duration.between(timeCreated, LocalDateTime.now()).toMillis()/1000 < properties.getProperty("auth.secondsUntilChallengeTimesOut").toInt()

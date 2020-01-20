@@ -23,10 +23,10 @@ class EncryptionLibrary(private val properties: Properties) {
      */
     fun generateDummyUser(uname: String): User {
         //TODO Ein wirkliches Keypair hinzufügen
-        var publicKey = "D_U_M_M_Y___P_U_B_L_I_C___K_E_Y"
-        var privateKey = "D_U_M_M_Y___P_R_I_V_A_T_E___K_E_Y"
+        var pubK = "D_U_M_M_Y___P_U_B_L_I_C___K_E_Y"
+        var privK = "D_U_M_M_Y___P_R_I_V_A_T_E___K_E_Y"
 
-        return User(uname, publicKey, privateKey)
+        return User(uname, pubK, privK)
     }
 
     /**
