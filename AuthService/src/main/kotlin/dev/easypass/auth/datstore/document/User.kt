@@ -8,5 +8,4 @@ import org.ektorp.support.CouchDbDocument
  * @pubK: the registered public key to create challenges for the user.
  * @privK: a private key encrypted with the masterpaassword of the user.
  */
-class User(val uname: String, val pubK: String, val privK: String) : CouchDbDocument() {
-}
+class User(val uname: String = "Default", val pubK: String = "Default", val privK: String = "Default") : CouchDbDocument()

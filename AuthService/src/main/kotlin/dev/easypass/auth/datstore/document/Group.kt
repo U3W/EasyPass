@@ -10,6 +10,4 @@ import org.ektorp.support.CouchDbDocument
  * @param pubK: the registered public key to create challenges for the group for admin users.
  * @param privK: a private key encrypted with the masterpassword of the group for admin user.
  */
-class Group(val gname: String, val pubK: String, val privK: String, val apubK: String, val aprivK: String) : CouchDbDocument() {
-
-}
+class Group(val gname: String = "Default", val pubK: String = "Default", val privK: String = "Default", val apubK: String = "Default", val aprivK: String = "Default") : CouchDbDocument()

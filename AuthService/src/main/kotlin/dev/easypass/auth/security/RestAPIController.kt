@@ -1,10 +1,13 @@
 package dev.easypass.auth.security
 
+import ch.qos.logback.core.net.SyslogOutputStream
 import dev.easypass.auth.datstore.document.User
 import dev.easypass.auth.security.challenge.RequestAuthenticationChallenge
 import dev.easypass.auth.security.challenge.ResponseAuthenticationChallenge
+import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 import java.util.*
+import javax.servlet.ServletOutputStream
 import javax.servlet.http.HttpServletRequest
 import javax.servlet.http.HttpServletResponse
 
@@ -13,16 +16,7 @@ import javax.servlet.http.HttpServletResponse
  */
 @RestController
 @RequestMapping("/auth")
-class RestAPIController(private val challengeAuthenticationProvider: ChallengeAuthenticationProvider, private val properties: Properties) {
-
-    /**
-     * A simple redirect to the project website
-     * @param response: is used to send the redirect
-     */
-    @GetMapping("/")
-    fun index(response: HttpServletResponse) {
-        response.sendRedirect("https://easypass.dev/")
-    }
+class RestAPIController(private val challengeAuthenticationProvider: ChallengeAuthenticationProvider) {
 
     /**
      * A request to this url creates a challenge for the user
@@ -39,7 +33,7 @@ class RestAPIController(private val challengeAuthenticationProvider: ChallengeAu
      */
     @PostMapping("/register")
     @ResponseBody
-    fun register(@RequestBody user: User): String {
+    fun register(@RequestBody user: User): ResponseEntity<String> {
         return challengeAuthenticationProvider.registerUser(user)
     }
 }
