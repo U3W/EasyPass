@@ -45,7 +45,7 @@ class ChallengeAuthenticationProvider(private val userRepository: UserRepository
     override fun authenticate(authentication: Authentication): Authentication? {
         val key = Pair((authentication.details as WebAuthenticationDetails).remoteAddress, authentication.name)
         val pwd = authentication.credentials.toString()
-
+        println("-------------------${currentChallenges[key]}-------------------------")
         if (currentChallenges[key] == null || !currentChallenges[key]!!.first.isActive()) {
             loginFailed(key)
             throw NoActiveChallengeException()
@@ -56,9 +56,9 @@ class ChallengeAuthenticationProvider(private val userRepository: UserRepository
             loginFailed(key)
             throw BadCredentialsException("Wrong credentials provided")
         } else {
-            loginSucceeded(key)
             val authorities = ArrayList<GrantedAuthority>()
             authorities.add(SimpleGrantedAuthority(currentChallenges[key]!!.second+"_"+key.second))
+            loginSucceeded(key)
             return UsernamePasswordAuthenticationToken(key.second, pwd, authorities)
         }
     }

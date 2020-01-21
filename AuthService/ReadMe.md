@@ -9,13 +9,13 @@ curl -i -X POST -H "Content-Type: application/json" -d "{\"uname\": \"mwustinger
 Authentication Test:
 
 ```
-curl -X POST -H "Content-Type: application/json" -d "{\"uname\": \"mwustinger\", \"role\": \"USER\"}" http://localhost:7000/auth/challenge
+curl -i -X POST -H "Content-Type: application/json" -d "{\"uname\": \"mwustinger\", \"role\": \"USER\"}" http://localhost:7000/auth/challenge
 
-curl -X POST -d username=mwustinger -d password=CHALLENGE -c cookieMwustinger.txt http://localhost:7000/auth/login
+curl -i -X POST -d username=mwustinger -d password=CHALLENGE -c cookieMwustinger.txt http://localhost:7000/auth/login
 
-curl --header "Accept:application/json" -X GET -b cookieMwustinger.txt http://localhost:7000/store/mwustinger
+curl -i --header "Accept:application/json" -X GET -b cookieMwustinger.txt http://localhost:7000/store/mwustinger
 
-curl -X POST -c cookieMwustinger.txt http://localhost:7000/auth/logout
+curl -i -X POST -c cookieMwustinger.txt http://localhost:7000/auth/logout
 
 curl --header "Accept:application/json" -X GET -b cookieMwustinger.txt http://localhost:7000/store/mwustinger
 ```
