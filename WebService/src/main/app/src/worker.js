@@ -1,6 +1,7 @@
 importScripts("modules/pouchdb/dist/pouchdb.min.js");
 importScripts("modules/pouchdb/dist/pouchdb.find.min.js");
 importScripts("modules/easypass-lib/dist/easypass-lib.js");
+importScripts("modules/kdbxweb/kdbxweb.min.js");
 import("../../rust/pkg").then(wasm => {
 
     let worker = null;
@@ -163,9 +164,59 @@ import("../../rust/pkg").then(wasm => {
                 self.postMessage('WORKER STOPPED: ' + data.msg + '. (buttons will no longer work)');
                 self.close(); // Terminates the worker.
                 break;
+            case 'import':
+
+            	self.postMessage(['update', importKDBX(data)]);
             default:
                 self.postMessage('Unknown command: ' + data.msg);
         }
     }, false);
 });
-
+/**
+* param data:
+* following parameters awaited:
+* - data.file: kdbx file
+* - data.keyfile: keyfile, null if none is specified
+* - data.password: password of the kdbx file
+*/
+const importKDBX = (data) => {
+	//reading key file
+	var keyfile = null;
+	if(data.keyfile!=null){
+		var reader = new FileReader();
+	    reader.onload = function(e) { keyfile = e.target.result; };
+	    reader.readAsArrayBuffer(data.keyfile);
+	}
+	
+	//reading kdbx file
+	var result = "";
+	var reader = new FileReader();
+	reader.onload = function(e) {
+		try {
+            var pass = data.password;
+            kdbxweb.Kdbx.load(e.target.result,
+                new kdbxweb.Credentials(kdbxweb.ProtectedValue.fromString(pass), keyfile)).then(function(db) {
+                window.db = db;
+                var output = "HEADER:"  + db.header + "\n META:" + db.meta + "\n";
+                var group = db.getDefaultGroup();
+                group.forEach((entry, group) => {
+                    if(group!=undefined){
+                        group.forEach((entry2,group2) => {
+                            if(entry2!=undefined){
+                                output += "User: " + entry2.fields.UserName+" Password: " +entry2.fields.Password+ " URL: " +entry2.fields.URL+ " Notes: " +entry2.fields.Notes+"\n";
+                            }
+                        });
+                        output += "Group:" + group.name+"\n";
+                    }
+                });
+                result += output;
+            }).catch(function(err) {
+                result += 'error: ' + err;
+            });
+        } catch (e) {
+            result += 'error: ' + e;
+        }
+	};
+	reader.readAsArrayBuffer(data.file);
+	return result;
+};
