@@ -1,6 +1,5 @@
 import React from "react"
-import {Route} from "react-router-dom"
-import {Redirect} from "react-router-dom"
+import {Route, Redirect} from "react-router-dom"
 import LoginAuth from "../authentification/auth.login"
 import VerifyAuth from "../authentification/auth.masterpassword"
 

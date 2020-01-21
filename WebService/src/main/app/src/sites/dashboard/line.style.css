@@ -1,0 +1,196 @@
+.accordion>.card {
+    border: 1px solid rgba(0, 0, 0, 0.125) !important;
+    border-image-source: initial !important;
+    border-image-slice: initial !important;
+    border-image-width: initial !important;
+    border-image-outset: initial !important;
+    border-image-repeat: initial !important;
+    border-radius: 0.25rem !important;
+}
+
+.setButtonsRight {
+    position: absolute;
+    right: 10px;
+    top: 6px;
+    bottom: auto;
+    margin-right: 5px;
+    margin-left: 5px;
+}
+
+.buttonSpace {
+    margin-right: 3px;
+    margin-left: 3px;
+}
+
+
+.no-padding {
+    padding: 0;
+}
+
+.card-header {
+    border-bottom: 0 solid rgba(0,0,0,.125);
+    background-color: #f8f9fa !important;
+}
+
+/* Cat */
+.round-cat {
+    border-top-left-radius: 0.2rem;
+    border-bottom-left-radius: 0.2rem;
+}
+
+.editCat .round-cat {
+    cursor: pointer !important;
+}
+
+.ep-modal-dialog .fixHr {
+    margin-top: 10px;
+    margin-bottom: 0;
+    width: 0;
+}
+
+/* Tag */
+.fixTag {
+    width: 150px !important;
+    align-items: center;
+}
+
+/* Copy button inline */
+.buttonSpaceInline {
+    right: 8px;
+    padding: 1px;
+    font-size: .75rem;
+    height: 31px;
+    width: 33px;
+    border-bottom-left-radius: 0;
+    border-top-left-radius: 0;
+}
+.notRound {
+    border-radius: 0;
+}
+.vertical-button-sep {
+    margin: 0;
+    padding: 0;
+    background-color: #ced4da;
+    height: 31px;
+    width: 1.2px;
+    border: 0;
+}
+
+/* Title */
+@media (min-width: 768px) {
+    .fixUsername {
+        margin-left: 7px;
+    }
+    .fixTitle {
+        display: none;
+    }
+}
+@media (max-width: 768px) {
+    .fixTitle {
+        display: block;
+    }
+    .fixUsername {
+        margin: 0 !important;
+    }
+    .setButtonsRight {
+        top: 15px;
+    }
+
+    .fixLogo {
+        height: 28px;
+        width: 28px;
+        margin-top: 9px;
+    }
+
+    .fixLogoCol {
+        padding-left: 8px;
+        margin-right: 5px;
+    }
+
+    .spinnerMargin {
+        margin-left: 10px;
+    }
+
+}
+
+/* Spinner */
+.spinnerMargin {
+    margin-left: 6px;
+}
+
+/* Footer Buttons */
+.footerContainer {
+    text-align: center;
+}
+.footerButton {
+    right: 8px;
+    padding: 1px;
+    font-size: .75rem;
+    height: 32px;
+    width: 32px;
+}
+.footerButtonImg {
+    margin: auto;
+}
+
+/* The fast way */
+.accordion>.card {
+    border: 1px solid rgba(248, 249, 250, 0.12) !important;
+}
+.pass-card {
+    border: 1px solid rgba(248, 249, 250, 0.12) !important;
+    box-shadow: 2px 2px 20px rgba(0,0,0,0.1);
+    transition: box-shadow 0.3s ease-in-out;
+    overflow: hidden;
+    /*box-shadow: 5px 10px 20px 1px rgba(0, 0, 0, 0.15) !important;*/
+
+    /* Margin */
+    margin-top: 15px;
+    margin-bottom: 15px;
+}
+
+.pass-card .show {
+    border-top: 1px solid rgba(0,0,0,.125);
+    /*-webkit-transition: border-top .35s ease;
+    transition: border-top .35s ease;*/
+}
+.pass-card .collapsing {
+    border-top: 1px solid rgba(0,0,0,.125);
+    /*-webkit-transition: border-top .35s ease;
+    transition: border-top .35s ease;*/
+}
+
+
+.pass-card .inline {
+    display: inline;
+}
+.pass-card .username {
+    vertical-align: bottom;
+    font-size: 1em;
+    margin-left: 7px;
+    color: #707070;
+}
+
+.pass-card .scaleimg {
+    transform: scale(1);
+    transition: transform 0.3s ease-in-out;
+}
+
+
+/* Pre-render the bigger shadow, but hide it */
+.pass-card:after {
+    box-shadow: 5px 10px 20px 1px rgba(0, 0, 0, 0.25);
+    opacity: 0;
+    transition: opacity 0.3s ease-in-out;
+}
+
+/* Transition to showing the bigger shadow on hover */
+.pass-card:hover {
+    box-shadow: 5px 10px 20px 1px rgba(0, 0, 0, 0.25);
+    transition: box-shadow 0.3s ease-in-out;
+}
+
+.pass-card:hover .scaleimg {
+    transform: scale(1.225);
+    transition: transform 0.3s ease-in-out;
+}

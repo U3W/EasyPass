@@ -2,16 +2,17 @@ import React from "react";
 import ReactDOM from "react-dom";
 import {
     BrowserRouter as Router,
-    Switch
+    Switch,
+    Redirect,
+    Route
 } from "react-router-dom";
-import {Redirect} from "react-router-dom";
-import {Route} from "react-router-dom";
 
 
 import "./index.css";
 import {NoMatch} from "./sites/errors";
 import Login from "./sites/login/login";
 import Masterpassword from "./sites/verify/masterpassword";
+import Registration from "./sites/registration/registration";
 import 'bootstrap/dist/css/bootstrap.min.css';
 import {ProtectedRoute} from "./routing/ProtectedRoute"
 import {createStore, applyMiddleware} from "redux";
@@ -21,7 +22,7 @@ import thunk from "redux-thunk";
 import { Offline, Online, Detector } from "react-detect-offline";
 import {handleConnection} from "./network/network.functions";
 import Dashboard from "./sites/dashboard/dashboard";
-import LoginAuth from "./authentification/auth.login"
+import VerifyAuth from "./authentification/auth.masterpassword"
 import * as serviceWorker from "./service-worker/sw-handler";
 
 // Load backend with WebAssembly
@@ -83,6 +84,7 @@ class App extends React.Component {
                 <div className="App">
                     <Switch>
                         <Route exact path="/" component={Login} />
+                        <Route exact path="/registration" component={Registration}/>
                         <ProtectedRoute exact path="/verify" component={Masterpassword} netState="online" type="auth" />
                         <ProtectedRoute exact path="/dashboard" component={Dashboard} netState="online" type="verify" />
                         <Route path="*" component={NoMatch} />
@@ -93,8 +95,11 @@ class App extends React.Component {
         else
         {
             let redirect = <div/>;
-            if (!LoginAuth.getLoggedIn())
+            if (VerifyAuth.getVerified())
             {
+                redirect = <Redirect to="/dashboard"/>
+            }
+            else {
                 redirect = <Redirect to="/verify"/>
             }
             console.log("Disconn: " + redirect);

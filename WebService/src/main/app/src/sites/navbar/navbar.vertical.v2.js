@@ -1,19 +1,65 @@
 import React from "react"
-import {Col} from "react-bootstrap";
+import {Button, Col} from "react-bootstrap";
 import Row from "react-bootstrap/Row";
-import groupPass from "../../img/icons/tab_group_password.svg"
-import privPass from "../../img/icons/tab_password.svg"
-import logoutImg from "../../img/icons/logout.svg";
 import tabs from "../dashboard/tabs/tab.enum";
 import IndicatorBot from "../../network/network.indicator.bottombar";
+import dashboardState from "../dashboard/dashboard.saved.state";
+// Icons
+import AddCat from "../../img/icons/password_add_tag.svg";
+import EditCat from "../../img/icons/password_edit_white.svg";
+import DeleteCat from "../../img/icons/dashboard_deleteCat_white.svg";
+import OpenSidebar from "../../img/icons/sidebar_open.svg";
+import CloseSidebar from "../../img/icons/sidebar_close.svg";
 
 class NavbarVerticalEP2 extends React.Component {
     constructor(props) {
         super(props);
 
         this.state = {
-
+            sidebarClosed: dashboardState.getSidebarClosed(),
+            sidebarFlag: true,
+            // with, height
+            width: 0,
+            height: 0,
         };
+
+        // WindowDimensions
+        this.updateWindowDimensions = this.updateWindowDimensions.bind(this);
+    }
+
+    componentDidMount() {
+        this.updateWindowDimensions();
+        window.addEventListener('resize', this.updateWindowDimensions);
+    }
+
+    componentWillUnmount() {
+        window.removeEventListener('resize', this.updateWindowDimensions);
+    }
+
+    updateWindowDimensions() {
+        if ( this.state.sidebarFlag && window.innerWidth < 680 ) {
+            this.setClose(true);
+            this.setState({
+                sidebarFlag: false,
+            });
+        }
+        else if ( window.innerWidth > 680 ) {
+            if ( !this.state.sidebarFlag )
+            {
+                this.setClose(false);
+                this.setState({
+                    sidebarFlag: true,
+                });
+            }
+        }
+        this.setState({ width: window.innerWidth, height: window.innerHeight });
+    }
+
+    setClose( to ) {
+        this.setState({
+            sidebarClosed: to,
+        });
+        this.props.callback.setSidebarState(to);
     }
 
     /**
@@ -27,28 +73,100 @@ class NavbarVerticalEP2 extends React.Component {
         this.props.callback.changeCat(changeTo);
     }
 
+    returnCatBase ( id, name) {
+        let getActive = "nav-link-kat sec";
+        if ( this.props.callback.state.catselected === id)
+        {
+            getActive = "nav-link-kat sec active";
+        }
 
-    getKat() {
-        // immmer
-        let start = (<li className="d-flex align-items-center text-muted clickable nav-link-click" onClick={() => this.catChange(1)}>
-                        <div className="nav-link-kat">
+        return (
+            <li key={id} className="d-flex align-items-center text-muted clickable nav-link-kat-click" onClick={() => this.catChange(id)}>
+                <div className={getActive}>
+                    {name}
+                </div>
+            </li>
+        );
+    }
+
+
+    getCat() {
+        let getActive = "nav-link-kat fitparentWidth";
+        if ( this.props.callback.state.catselected === 0)
+        {
+            getActive = "nav-link-kat fitparentWidth active";
+        }
+        // always
+        let start = (<li key={0} className="d-flex align-items-center text-muted clickable nav-link-kat-click" onClick={() => this.catChange(0)}>
+                        <div className={getActive}>
                             Alle Kategorien
                         </div>
                     </li>);
-        // einzelne kategorienen --> Aufruf von Kacper
-
-        // Schleife mit onClick={() => this.catChange(i)}> --> i++
+        // single cat.
+        let cats = this.props.callback.getCats();
+        for ( let i = 0; i < cats.length; i++ )
+        {
+            cats[i].idCat = i+1;
+        }
+        // counter for the cats
+        let finalCats = cats.map((item) =>
+            this.returnCatBase(item.idCat, item.name)
+        );
+        // loop with onClick={() => this.catChange(i)}> --> i++
         return (
             <>
                 {start}
-                <li className="d-flex align-items-center text-muted clickable nav-link-click" onClick={() => this.catChange(1)}>
-                    <div className="nav-link-kat sec">
-                        Kategorie
+                {finalCats}
+            </>
+        );
+    }
+
+    getEditCat() {
+        return (
+            <>
+                <li key={0} className="d-flex align-items-center text-muted clickable nav-link-kat-click"
+                    onClick={() => this.props.callback.showAddCat()}>
+                    <div className="nav-link-kat fitparentWidth">
+                        Kategorie hinzufügen
+                        <Button variant="dark" className="catButton round">
+                            <img
+                                src={AddCat}
+                                alt=""
+                                width="10"
+                                height="10"
+                                className="d-inline-block"
+                            />
+                        </Button>
                     </div>
                 </li>
-                <li className="d-flex align-items-center text-muted clickable nav-link-click" onClick={() => this.catChange(2)}>
-                    <div className="nav-link-kat thr">
-                        Unterkategorie
+                <li key={1} className="d-flex align-items-center text-muted clickable nav-link-kat-click"
+                    onClick={() => this.props.callback.showEditCat()}>
+                    <div className="nav-link-kat fitparentWidth">
+                        Kategorie bearbeiten
+                        <Button variant="dark" className="catButton round">
+                            <img
+                                src={EditCat}
+                                alt=""
+                                width="10"
+                                height="10"
+                                className="d-inline-block"
+                            />
+                        </Button>
+                    </div>
+                </li>
+                <li key={2} className="d-flex align-items-center text-muted clickable nav-link-kat-click"
+                    onClick={() => this.props.callback.showDeleteCat()}>
+                    <div className="nav-link-kat fitparentWidth">
+                        Kategorie löschen
+                        <Button variant="dark" className="catButton round">
+                            <img
+                                src={DeleteCat}
+                                alt=""
+                                width="10"
+                                height="10"
+                                className="d-inline-block"
+                            />
+                        </Button>
                     </div>
                 </li>
             </>
@@ -58,10 +176,30 @@ class NavbarVerticalEP2 extends React.Component {
 
     render() {
         const tabselected = this.props.callback.state.tabselected;
+
+        let sidebarToggle = CloseSidebar;
+        let classes = "col-md-3 col-sm-5 col-5 d-none d-sm-block bg-light sidebar animateTransform " + this.props.className;
+        let classesIntern = "sidebar-sticky animateTransformWidth";
+        if ( this.state.sidebarClosed ) {
+            sidebarToggle = OpenSidebar;
+            classes += " sidebarClosed";
+            classesIntern += " sidebarClosedMore";
+        }
         return (
             <>
-                <nav className="col-md-3 col-sm-5 col-5 d-none d-sm-block bg-light sidebar">
-                    <div className="sidebar-sticky">
+                <nav className={classes}>
+                    <button type="button" className="sidebarToggle clickable btn btn-light" onClick={() => this.setClose(!this.state.sidebarClosed)}>
+                        <div>
+                            <img
+                                src={sidebarToggle}
+                                alt=""
+                                width="15"
+                                height="15"
+                                className="sidebarToggleImg d-inline-block"
+                            />
+                        </div>
+                    </button>
+                    <div className={classesIntern}>
                         <ul className="nav flex-column">
                             <h1 className="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-1 mb-1 text-muted">
                                 <span>Menü</span>
@@ -105,9 +243,10 @@ class NavbarVerticalEP2 extends React.Component {
                                 <span>Kategorien</span>
                             </h6>
                             <hr />
-                            {this.getKat()}
+                            {this.getCat()}
+                            <hr />
+                            {this.getEditCat()}
                         </ul>
-
                     </div>
                 </nav>
                 <nav id="navbar-bot" className="bottom navbar fixed-bottom navbar-expand-sm navbar-dark bg-dark">
@@ -139,7 +278,6 @@ class NavbarVerticalEP2 extends React.Component {
                                 </a>
                             </Col>)
                         }
-
                     </Row>
                 </nav>
             </>
