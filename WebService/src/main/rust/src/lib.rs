@@ -9,7 +9,7 @@ use wasm_bindgen_futures::{spawn_local, future_to_promise};
 use wasm_bindgen_futures::JsFuture;
 
 use serde_json::{Value};
-use js_sys::{Promise};
+use js_sys::{Promise, Array, ArrayBuffer};
 use serde::{Deserialize, Serialize};
 use wasm_bindgen::__rt::std::future::Future;
 use wasm_bindgen::__rt::std::rc::Rc;
@@ -25,6 +25,12 @@ static ALLOC: wee_alloc::WeeAlloc = wee_alloc::WeeAlloc::INIT;
 extern {
     #[wasm_bindgen(js_namespace = console)]
     fn log(s: &str);
+
+    #[wasm_bindgen(js_name = postMessage)]
+    fn post_message(message: &JsValue);
+
+    #[wasm_bindgen(js_name = postMessage)]
+    fn post_message_with_transfer(message: &JsValue, transfer: &JsValue);
 }
 
 #[wasm_bindgen]
@@ -63,6 +69,7 @@ impl Worker {
     }
 
     // Error is thrown when remote is not established
+    // TODO rewrite check
     pub fn check(&self) -> Promise {
         let status = self.service_status.clone();
         let local: PouchDB = self.local.clone();
@@ -74,6 +81,10 @@ impl Worker {
         };
         future_to_promise(async move {
             return if status == "online" {
+                let msg = Array::new_with_length(2);
+                msg.set(0, JsValue::from_str(&"kek"));
+                msg.set(1, JsValue::from_str(&"kek"));
+                post_message(&JsValue::from(msg));
                 //log(&format!("{:?}", &JsFuture::from(local.info()).await.unwrap().into_serde::<Info>().unwrap()));
                 //log(&format!("{:?}", &JsFuture::from(local.get_conflicts("4889f782-f945-427a-99f7-1e4b8d32c868")).await.unwrap().into_serde::<Value>().unwrap()));
                 replicate.await

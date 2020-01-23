@@ -30,6 +30,7 @@ import EditCategory from "./edit.cat";
 import DeleteCategory from "./delete.cat";
 import history from "../../routing/history"
 import StringSelector from "../../strings/stings";
+import Entries from "./Entries";
 
 
 class Dashboard extends React.Component {
@@ -56,7 +57,9 @@ class Dashboard extends React.Component {
 
         this.state = {
             // mockpassword
-            mock: new MockPasswords(),
+            mock: new MockPasswords(this.props.worker),
+            // password entries,
+            entries: new Entries(),
             // language
             language: dashboardState.getSelectedLanguage(), // 0 - Deutsch, 1 - English
 
@@ -152,7 +155,14 @@ class Dashboard extends React.Component {
     workerCall( e ) {
         const cmd = e.data[0];
         const data = e.data[1];
+        console.log("WORKERCALL");
+        console.log(cmd);
+        console.log(data);
         switch (cmd) {
+            case 'allEntries':
+                //console.log("all entries");
+                //console.log(data);
+                break;
             case 'savePassword':
                 this.copy("", dashboardAlerts.showAddedPass, data);
                 this.dismissAddPass();

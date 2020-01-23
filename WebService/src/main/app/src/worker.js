@@ -70,8 +70,8 @@ import("../../rust/pkg").then(wasm => {
             try {
                 console.log(JSON.stringify(await worker.check()));
                 //await worker.check();
-                const all = await worker.all_docs();
-                self.postMessage(['all', all.rows]);
+                const all = deletePasswordsInEntries((await worker.all_docs()).rows);
+                self.postMessage(['allEntries', all]);
             } catch (e) {
                 console.log(e);
             }
@@ -190,6 +190,18 @@ import("../../rust/pkg").then(wasm => {
         const ret = await worker.find({"selector": buildSelector(data)});
         return (ret.docs.length !== 0);
     };
+
+    /**
+     * Delete password field in dataset.
+     */
+    const deletePasswordsInEntries = (data) => {
+        const entries = [];
+        data.forEach(e => {
+           delete e.doc.passwd;
+           entries.push(e.doc);
+        });
+        return entries;
+    }
 
 });
 
