@@ -868,6 +868,11 @@ class Dashboard extends React.Component {
         this.dismissDeleteCat()
     }
 
+    generateKeyfile() {
+        // ToDO call Moritz Method
+        console.log("Hier keyfile")
+    }
+
     setSidebarState( to ) {
         this.setState({
             sidebarClosed: to,
@@ -910,6 +915,11 @@ class Dashboard extends React.Component {
         this.setState({
             popUpEditCatShow: false,
         });
+    }
+
+    addUserToGroupAcc( user ) {
+        // ToDo call kacpers Method
+        return true;
     }
 
     showEditCat() {

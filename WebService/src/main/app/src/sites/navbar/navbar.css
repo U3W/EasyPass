@@ -43,6 +43,15 @@
     width: 20px;
 }
 
+.hiddenRow {
+    display: none;
+}
+
+.errorText {
+    color: #dc3545!important;
+    margin: 0;
+}
+
 .noMarginBottom {
     margin-bottom: 0;
 }

@@ -70,6 +70,19 @@ export const strings = {
     language: "Language",
     german: "German",
     english: "English",
+
+    changePass: "Change password",
+    changePassPass: "Password",
+    changePassNew: "New password",
+    changePassNewRep: "Repeat new password",
+    changePassBut: "Change",
+
+    changePassMatch: "The new password must not match the password!",
+    changePassSecNoMatch: "New passwords do not match!",
+
+    changePassAlertErr: "Password does not match the original one!",
+    changePassAlertSucc: "Password changed!",
+
     saveSetting: "Save settings",
 
     // Navbar Left

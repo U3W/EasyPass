@@ -13,6 +13,7 @@ import AddTag from "../../img/icons/password_add_tag.svg";
 import Row from "react-bootstrap/Row";
 import GeneratePass from "./generatepass";
 import StringSelector from "../../strings/stings";
+import tabs from "./tabs/tab.enum";
 
 export default class AddPassword extends React.Component {
 
@@ -27,6 +28,9 @@ export default class AddPassword extends React.Component {
             tagAdded: false,
             tag: [{"":""}],
             catID: 0,
+
+            userGroupAdd: "",
+            userGroupList: [],
             // Popup
             popUpCatShow: false,
             generatePassShow: false,
@@ -92,6 +96,8 @@ export default class AddPassword extends React.Component {
             tagAdded: false,
             tag: [{"":""}],
             catID: 0,
+            userGroupAdd: "",
+            userGroupList: [],
             // Popup
             popUpCatShow: false,
             // errors / fields
@@ -127,6 +133,14 @@ export default class AddPassword extends React.Component {
                         tag: tagNew
                     })
                 }
+            }
+        }
+    }
+
+    addUserToGroupAcc() {
+        if ( this.state.userGroupAdd.length > 0 ) {
+            if ( this.props.callback.addUserToGroupAcc(this.state.userGroupAdd)) {
+
             }
         }
     }
@@ -399,6 +413,29 @@ export default class AddPassword extends React.Component {
                                     </InputGroup.Append>
                                 </InputGroup>
                             </div>
+                            { this.props.callback.state.tabselected === tabs.GROUPPASS &&
+                                <>
+                                    <hr/>
+                                    <h6>Sichtbarkeit</h6>
+                                    <InputGroup size="sm" className="mb-3">
+                                        <InputGroup.Prepend>
+                                            <InputGroup.Text id="inputGroup-sizing-sm">Username</InputGroup.Text>
+                                        </InputGroup.Prepend>
+                                        <FormControl autoComplete="off" id="url" aria-label="Small" aria-describedby="inputGroup-sizing-sm" value={this.state.url} onChange={this.changeInput}/>
+                                        <InputGroup.Append>
+                                            <Button variant="dark" className="buttonSpaceInline" >
+                                                <img
+                                                    src={AddTag}
+                                                    alt=""
+                                                    width="14"
+                                                    height="14"
+                                                    className="d-inline-block"
+                                                />
+                                            </Button>
+                                        </InputGroup.Append>
+                                    </InputGroup>
+                                </>
+                            }
                         </Card.Body>
                     </Modal.Body>
                     <Modal.Footer>
@@ -412,3 +449,6 @@ export default class AddPassword extends React.Component {
     }
 
 }
+
+
+
