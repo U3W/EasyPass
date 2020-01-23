@@ -30,15 +30,12 @@ export default class ResetPass extends React.Component{
             missingNewPassSec: false,
             newPassMatchPass: false,
             newPassNotSec: false,
-
-            errorText: "Penis",
-            errorShow: true,
-            errorState: false,
         };
 
         this.changeListener = this.changeListener.bind(this);
         this.handleKeyevent = this.handleKeyevent.bind(this);
         this.submit = this.submit.bind(this);
+        this.close = this.close.bind(this);
     }
 
     changeListener(e) {
@@ -76,6 +73,13 @@ export default class ResetPass extends React.Component{
 
     submit() {
         let error = false;
+        this.setState({
+            missingPass: false,
+            missingNewPass: false,
+            missingNewPassSec: false,
+            newPassMatchPass: false,
+            newPassNotSec: false,
+        });
 
         if ( this.state.pass.length === 0 ) {
             error = true;
@@ -122,6 +126,20 @@ export default class ResetPass extends React.Component{
                 this.props.callback.props.callback.setErrorState("success");
                 this.props.callback.props.callback.setErrorText("Passwort geändert!");
             }
+            this.setState({
+                pass: "",
+                passShow: false,
+                newPass: "",
+                newPassShow: false,
+                newPassSec: "",
+                newPassSecShow: false,
+
+                missingPass: false,
+                missingNewPass: false,
+                missingNewPassSec: false,
+                newPassMatchPass: false,
+                newPassNotSec: false,
+            });
         }
     }
 
@@ -143,6 +161,24 @@ export default class ResetPass extends React.Component{
         });
     }
 
+    close() {
+        this.setState({
+            pass: "",
+            passShow: false,
+            newPass: "",
+            newPassShow: false,
+            newPassSec: "",
+            newPassSecShow: false,
+
+            missingPass: false,
+            missingNewPass: false,
+            missingNewPassSec: false,
+            newPassMatchPass: false,
+            newPassNotSec: false,
+        });
+        this.props.callback.setChangePopUpDisabled();
+    }
+
     render() {
 
         let passClass = "";
@@ -150,6 +186,7 @@ export default class ResetPass extends React.Component{
         let newPassSecClass = "";
         let errText = "";
         let errorClass = "";
+        let rowClass = "hiddenRow";
 
         if ( this.state.missingPass) {
             passClass = "is-invalid";
@@ -160,26 +197,37 @@ export default class ResetPass extends React.Component{
         if ( this.state.missingNewPassSec ) {
             newPassSecClass = "is-invalid";
         }
-        if ( this.state.newPassMatchPass) {
-            errText = "";
-            errorClass = "";
+        if (!( this.state.missingPass || this.state.missingNewPass || this.state.missingNewPass )) {
+            if ( this.state.newPassNotSec ) {
+                errText = StringSelector.getString(this.props.callback.props.callback.state.language).changePassSecNoMatch;
+                errorClass = "errorText";
+
+                newPassSecClass = "is-invalid";
+                newPassClass = "is-invalid";
+                rowClass = "";
+            }
+            if ( this.state.newPassMatchPass) {
+                errText = "The new password must not match the password!";
+                errorClass = "errorText";
+                passClass = "is-invalid";
+                newPassSecClass = "is-invalid";
+                newPassClass = "is-invalid";
+                rowClass = "";
+            }
         }
-        if ( this.state.newPassNotSec ) {
-            errText = "";
-            errorClass = "";
-        }
+
         return (
             <>
-                <Modal show={this.props.show} onHide={this.props.callback.setChangePopUpDisabled} onKeyDown={this.handleKeyevent} className="ep-modal-dialog">
+                <Modal show={this.props.show} onHide={this.close} onKeyDown={this.handleKeyevent} className="ep-modal-dialog">
                     <Modal.Header closeButton>
-                        <Modal.Title>Change password</Modal.Title>
+                        <Modal.Title>{StringSelector.getString(this.props.callback.props.callback.state.language).changePass}:</Modal.Title>
                     </Modal.Header>
                     <Modal.Body>
                         <Card.Body>
                             <Row>
                                 <InputGroup size="sm" className="">
                                     <InputGroup.Prepend>
-                                        <InputGroup.Text id="inputGroup-sizing-sm">Password</InputGroup.Text>
+                                        <InputGroup.Text id="inputGroup-sizing-sm">{StringSelector.getString(this.props.callback.props.callback.state.language).changePassPass}</InputGroup.Text>
                                     </InputGroup.Prepend>
                                     { this.state.passShow ?
                                         <>
@@ -208,14 +256,13 @@ export default class ResetPass extends React.Component{
                                             </Button>
                                         </>
                                     }
-
                                 </InputGroup>
                             </Row>
                             <hr/>
                             <Row>
                                 <InputGroup size="sm" className="mb-3">
                                     <InputGroup.Prepend>
-                                        <InputGroup.Text id="inputGroup-sizing-sm">New password</InputGroup.Text>
+                                        <InputGroup.Text id="inputGroup-sizing-sm">{StringSelector.getString(this.props.callback.props.callback.state.language).changePassNew}</InputGroup.Text>
                                     </InputGroup.Prepend>
                                     { this.state.newPassShow ?
                                         <>
@@ -250,7 +297,7 @@ export default class ResetPass extends React.Component{
                             <Row>
                                 <InputGroup size="sm" className="mb-3">
                                     <InputGroup.Prepend>
-                                        <InputGroup.Text id="inputGroup-sizing-sm">Repeat new password</InputGroup.Text>
+                                        <InputGroup.Text id="inputGroup-sizing-sm">{StringSelector.getString(this.props.callback.props.callback.state.language).changePassNewRep}</InputGroup.Text>
                                     </InputGroup.Prepend>
                                     { this.state.newPassSecShow ?
                                         <>
@@ -282,11 +329,14 @@ export default class ResetPass extends React.Component{
 
                                 </InputGroup>
                             </Row>
+                            <Row className={rowClass}>
+                                <p className={errorClass}>{errText}</p>
+                            </Row>
                         </Card.Body>
                     </Modal.Body>
                     <Modal.Footer>
                         <Button variant="danger" onClick={this.submit}>
-                            Change
+                            {StringSelector.getString(this.props.callback.props.callback.state.language).changePassBut}
                         </Button>
                     </Modal.Footer>
                 </Modal>

@@ -29,7 +29,7 @@ class NavbarEP extends React.Component {
         this.state = {
             expanded: false,
             popUpShow: false,
-            changePassPopUpShow: true,
+            changePassPopUpShow: false,
             popUpCatShow: false,
         };
 
@@ -48,7 +48,7 @@ class NavbarEP extends React.Component {
         this.setChangePopUpDisabled = this.setChangePopUpDisabled.bind(this);
         this.setChangePopUp = this.setChangePopUp.bind(this);
 
-
+        this.generateKeyFile = this.generateKeyFile.bind(this);
     }
 
 
@@ -175,6 +175,10 @@ class NavbarEP extends React.Component {
         this.props.callback.changeLanguageTo(to);
     }
 
+    generateKeyFile() {
+        this.props.callback.generateKeyfile();
+    }
+
     getPopUp() {
         return (
             <>
@@ -211,12 +215,24 @@ class NavbarEP extends React.Component {
                             <Row className="rowMargin">
                                 <Col className="noPadding">
                                     <InputGroup.Prepend>
-                                        <InputGroup.Text className="fitHoleParent">Change password</InputGroup.Text>
+                                        <InputGroup.Text className="fitHoleParent">{StringSelector.getString(this.props.callback.state.language).changePass}</InputGroup.Text>
                                     </InputGroup.Prepend>
                                 </Col>
                                 <div className="noPadding">
                                     <div className="float-right">
                                         <Button variant="danger" className="noLeftBorderRadius" onClick={this.setChangePopUp}>Change</Button>
+                                    </div>
+                                </div>
+                            </Row>
+                            <Row className="rowMargin">
+                                <Col className="noPadding">
+                                    <InputGroup.Prepend>
+                                        <InputGroup.Text className="fitHoleParent">Generate Keyfile</InputGroup.Text>
+                                    </InputGroup.Prepend>
+                                </Col>
+                                <div className="noPadding">
+                                    <div className="float-right">
+                                        <Button variant="danger" className="noLeftBorderRadius" onClick={this.generateKeyFile}>Generate</Button>
                                     </div>
                                 </div>
                             </Row>

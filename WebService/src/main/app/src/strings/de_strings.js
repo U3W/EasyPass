@@ -85,6 +85,19 @@ export const strings = {
     language: "Sprache",
     german: "Deutsch",
     english: "Englisch",
+
+    changePass: "Passwort ändern",
+    changePassPass: "Passwort",
+    changePassNew: "Neues Passwort",
+    changePassNewRep: "Neue Passwort wiederholen",
+    changePassBut: "Ändern",
+
+    changePassMatch: "Das neue Passwort darf nicht mit Passwort übereinstimmen!",
+    changePassSecNoMatch: "Die neuen Passwörter sitmmen nicht überein!",
+
+    changePassAlertErr: "Passwort stimmt nicht mit dem ursprünglichen überein!",
+    changePassAlertSucc: "Passwort geändert!",
+
     saveSetting: "Änderungen speichern",
 
     // Navbar Left
