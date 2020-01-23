@@ -160,14 +160,17 @@ class Dashboard extends React.Component {
         console.log(data);
         switch (cmd) {
             case 'allEntries':
-                //console.log("all entries");
-                //console.log(data);
+                this.state.entries.loadData(data);
                 break;
-            case 'savePassword':
-                this.copy("", dashboardAlerts.showAddedPass, data);
+            case 'saveEntry':
+                this.copy("", dashboardAlerts.showAddedPass, data.ok);
                 this.dismissAddPass();
                 this.render();
                 break;
+            case 'saveCategory':
+
+                this.copy("", dashboardAlerts.showAddedCat, true);
+                this.dismissAddCat();
         }
     }
 
@@ -822,8 +825,9 @@ class Dashboard extends React.Component {
     }
 
     addPass(user, passwd, url, title, catID, tags) {
-        this.props.worker.postMessage(['savePassword',
-            {user: user, passwd: passwd, url: url, title: title, catID: catID, tags: tags}]);
+        const tabID = this.state.tabselected;
+        this.props.worker.postMessage(['saveEntry',
+            {type: 'entry', user: user, passwd: passwd, url: url, title: title, tags: tags, tabID:tabID, catID: catID, }]);
     }
 
     deletePass(id) {
@@ -861,9 +865,10 @@ class Dashboard extends React.Component {
     }
 
     addCat( name, description) {
-        // ToDO call Kacpers method
-        this.copy("", dashboardAlerts.showAddedCat, true);
-        this.dismissAddCat();
+        // TODO add new category
+        const tabID = this.state.tabselected;
+        this.props.worker.postMessage(['saveCategory',
+            {type: 'cat', name: name, desc: description, tabID: tabID }]);
     }
 
     editCat( id, nameNew, descriptionNew) {

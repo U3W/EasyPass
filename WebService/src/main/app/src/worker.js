@@ -3,7 +3,6 @@ importScripts("modules/pouchdb/dist/pouchdb.find.min.js");
 importScripts("modules/easypass-lib/dist/easypass-lib.js");
 import("../../rust/pkg").then(wasm => {
 
-    console.log("kek2");
 
     let worker = null;
     let remoteInit = false;
@@ -134,11 +133,18 @@ import("../../rust/pkg").then(wasm => {
         const cmd = e.data[0];
         const data = e.data[1];
         switch (cmd) {
-            case 'savePassword':
+            case 'saveEntry':
                 // TODO Worker Decrypt Password
-                await worker.save(data);
-                self.postMessage(['savePassword', await elementExists(data)]);
+                const saveCheck = await worker.save(data);
+                self.postMessage(['saveEntry', await saveEntryResult(saveCheck)]);
                 break;
+            case 'saveCategory':
+                const catCheck = await worker.save(data);
+                self.postMessage(['saveCategory', await saveCatResult(catCheck)]);
+                break;
+
+
+            // TODO Remove legacy Worker API
             case 'update':
                 const updateReturn = await worker.update(data);
                 if (updateReturn.ok === true) {
@@ -170,6 +176,32 @@ import("../../rust/pkg").then(wasm => {
         }
     }, false);
 
+
+
+    const saveEntryResult = async (check) => {
+        if (check.ok) {
+            const entry =
+                (await worker.find({"selector": {"_id": check.id, "_rev": check.rev}})).docs[0];
+            delete entry.passwd;
+            return {
+                ok: true,
+                entry: entry
+            }
+        } else return { ok: false };
+    };
+
+    const saveCatResult = async (check) => {
+        if (check.ok) {
+            const entry =
+                (await worker.find({"selector": {"_id": check.id, "_rev": check.rev}})).docs[0];
+            return {
+                ok: true,
+                entry: entry
+            }
+        } else return { ok: false };
+    };
+
+
     /**
      * Build selector query for PouchDB to verify that data was added.
      */
@@ -183,6 +215,10 @@ import("../../rust/pkg").then(wasm => {
         return selector
     };
 
+    const returnSaved = async (data) => {
+        const success = await elementExists(data);
+    };
+
     /**
      * Checks if element dataset exist in local database.
      */
@@ -191,6 +227,7 @@ import("../../rust/pkg").then(wasm => {
         return (ret.docs.length !== 0);
     };
 
+    // TODO Define WebAssembly API with Field to exclude passwd: https://nolanlawson.github.io/pouchdb-find/
     /**
      * Delete password field in dataset.
      */

@@ -1,13 +1,14 @@
 import tabs from "./tabs/tab.enum";
 import React from "react";
 
-class Entries extends React.Component {
+class Entries{
 
     constructor(props) {
-        super(props);
+        //super(props);
 
         this.state = {
-            entries: []
+            entries: [],
+            categories: []
         };
 
         this.updateEntry = this.updateEntry.bind(this);
@@ -15,7 +16,8 @@ class Entries extends React.Component {
     }
 
 
-    getCatData( cat, tabId ) {
+    getCatData( catID, tabID ) {
+        /**
         let out;
         switch (tabId) {
             case 0:
@@ -45,17 +47,31 @@ class Entries extends React.Component {
                 break;
 
         }
-        return out;
+        return out;*/
+        this.state.entries.filter(ent => ent.catID === catID && ent.tabID === tabID);
     }
 
-    loadentries() {
-
-    }
-
-    addEntry(passwd) {
-        this.setState({
-            entries: this.state.entries.push(passwd)
+    /**
+     * Loads data containing password entries and categories to internal state.
+     */
+    loadData(data) {
+        // Reset all entries and categories
+        this.state = {
+            entries: [],
+            categories: []
+        };
+        // Add element to corresponding type
+        data.forEach(element => {
+            if (element.type==='entry') {
+                this.state.entries.push(element);
+            } else {
+                this.state.categories.push(element);
+            }
         });
+    }
+
+    addEntry(entry) {
+        this.state.entries.push(entry)
     }
 
     updateEntry(id, title, user, url, pass ) {
@@ -63,6 +79,7 @@ class Entries extends React.Component {
     }
 
     getCats(tabselected) {
+        /**
         let out = [];
         switch (tabselected) {
             case tabs.PRIVPASS:
@@ -71,20 +88,26 @@ class Entries extends React.Component {
             case tabs.GROUPPASS:
                 out = [{id:1, name:"EasyPass", desc:"Huiiii"} ];
                 break;
-        }
-        return out;
+         return out;
+        }*/
+        // TODO Test if getCats works
+        return this.state.categories.filter(cat => cat.tabID === tabselected);
+
     }
 
-    getentry(id) {
+    getEntry(id) {
+        /**
         const pass = this.state.pass;
         for ( let i = 0; i < pass.length; i++ ) {
             if ( pass[i].id === id) {
                 return pass[i].pass;
             }
         }
-        return null;
+        return null;*/
+        return this.state.entries.find(ent => ent._id === id);
     }
 
+    /**
     deleteEntry(id) {
         let arr = this.state.sozialMedia;
         for (let i = 0; i < arr.length; i++) {
@@ -92,7 +115,7 @@ class Entries extends React.Component {
                 arr.splice(i,1);
             }
         }
-    }
+    }*/
 
 
 }

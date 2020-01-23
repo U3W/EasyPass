@@ -84,7 +84,8 @@ impl Worker {
                 let msg = Array::new_with_length(2);
                 msg.set(0, JsValue::from_str(&"kek"));
                 msg.set(1, JsValue::from_str(&"kek"));
-                post_message(&JsValue::from(msg));
+                // TODO use this to send results
+                //post_message(&JsValue::from(msg));
                 //log(&format!("{:?}", &JsFuture::from(local.info()).await.unwrap().into_serde::<Info>().unwrap()));
                 //log(&format!("{:?}", &JsFuture::from(local.get_conflicts("4889f782-f945-427a-99f7-1e4b8d32c868")).await.unwrap().into_serde::<Value>().unwrap()));
                 replicate.await
