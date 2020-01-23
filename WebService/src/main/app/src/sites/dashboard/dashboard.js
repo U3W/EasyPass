@@ -28,6 +28,10 @@ import Undo from "../../img/icons/password_delete_undo_blue.svg"
 import AddCategory from "./add.cat";
 import EditCategory from "./edit.cat";
 import DeleteCategory from "./delete.cat";
+import history from "../../routing/history"
+import StringSelector from "../../strings/stings";
+
+
 class Dashboard extends React.Component {
 
     constructor(props){
@@ -42,15 +46,17 @@ class Dashboard extends React.Component {
         let tab = dashboardState.getTab();
         if ( tab === tabs.PRIVPASS )
         {
-            console.log("Priv");
+            //console.log("Priv");
             cat = dashboardState.getCatPriv();
         }
         else {
-            console.log("Group");
+            //console.log("Group");
             cat = dashboardState.getCatGroup();
         }
 
         this.state = {
+            // mockpassword
+            mock: new MockPasswords(),
             // language
             language: dashboardState.getSelectedLanguage(), // 0 - Deutsch, 1 - English
 
@@ -89,7 +95,16 @@ class Dashboard extends React.Component {
             height: 0,
             // sidebar
             sidebarClosed: dashboardState.getSidebarClosed(),
+
+            // resetPass vars
+            errorShow: false,
+            errorText: "",
+            errorState: "success",
         };
+
+        this.setErrorShow = this.setErrorShow.bind(this);
+        this.setErrorState = this.setErrorState.bind(this);
+        this.setErrorText = this.setErrorText.bind(this);
 
         this.handleSearch = this.handleSearch.bind(this);
         this.setExpanded = this.setExpanded.bind(this);
@@ -111,6 +126,13 @@ class Dashboard extends React.Component {
         this.dismissAddPass = this.dismissAddPass.bind(this);
         this.getPassAddShow = this.getPassAddShow.bind(this);
 
+        // update, delete and so on
+        this.getCats = this.getCats.bind(this);
+        this.getPassword = this.getPassword.bind(this);
+        this.renderLinesSonstige = this.renderLinesSonstige.bind(this);
+        this.renderLines = this.renderLines.bind(this);
+        this.deletePass = this.deletePass.bind(this);
+
 
         // WindowDimensions
         this.updateWindowDimensions = this.updateWindowDimensions.bind(this);
@@ -119,10 +141,18 @@ class Dashboard extends React.Component {
     componentDidMount() {
         this.updateWindowDimensions();
         window.addEventListener('resize', this.updateWindowDimensions);
+        this.props.worker.addEventListener("message", this.workerCall, true);
+
     }
 
     componentWillUnmount() {
         window.removeEventListener('resize', this.updateWindowDimensions);
+        this.props.worker.removeEventListener("message", this.workerCall, true);
+    }
+
+    workerCall( e ) {
+        const cmd = e.data[0];
+        const data = e.data[1];
     }
 
     updateWindowDimensions() {
@@ -140,13 +170,13 @@ class Dashboard extends React.Component {
     renderCat() {
         let cats = this.getCats();
         let selectedCat = this.state.catselected;
-        console.log("Cats:", cats);
-        //console.log("Selected cat: "+ selectedCat);
+        //console.log("Cats:", cats);
+        ////console.log("Selected cat: "+ selectedCat);
         if ( selectedCat === 0 )
         {
             let passwords = this.renderLines(cats);
             let passwordsSonst = this.renderLinesSonstige();
-            console.log("Cats: Pass:", passwordsSonst, passwords);
+            //console.log("Cats: Pass:", passwordsSonst, passwords);
             let final = cats.map(function (cat) {
                 return (
                     <div key={cat.id} >
@@ -165,9 +195,9 @@ class Dashboard extends React.Component {
 
             let notAddedToCat = (
                 <div>
-                    <strong>Nicht zugeordnet</strong>
+                    <strong>{StringSelector.getString(this.state.language).mainNotAddedToCat}</strong>
                     <br/>
-                    Hier befinden sich alle Passwörter, die keine Kategorie zugeordnet wurden
+                    {StringSelector.getString(this.state.language).mainNotAddedToCatInfo}
                     <hr/>
                     {passwordsSonst[0]}
                 </div>
@@ -179,7 +209,7 @@ class Dashboard extends React.Component {
 
             return (
                 <>
-                    <h5>Alle Kategorien</h5>
+                    <h5>{StringSelector.getString(this.state.language).mainAllCat}</h5>
                     <hr/>
                     {final}
                     {notAddedToCat}
@@ -203,7 +233,7 @@ class Dashboard extends React.Component {
 
     getPassword( id ) {
         // TODO Mockobjekt
-        return MockPasswords.getPassword(id);
+        return this.state.mock.getPassword(id);
     }
 
 
@@ -220,11 +250,11 @@ class Dashboard extends React.Component {
         let passwords = {};
         let selectedTab = this.state.tabselected;
         //TODO mocking Object
-        let catData = MockPasswords.getCatData(0, selectedTab);
+        let catData = this.state.mock.getCatData(0, selectedTab);
         // add callback to array
         catData = this.addCallback(catData);
         passwords[0] = catData.map(function (singlePass) {
-            console.log("Heyjooo", singlePass.tabID, selectedTab);
+            //console.log("Heyjooo", singlePass.tabID, selectedTab);
             if ( singlePass.tabID === selectedTab  )
             {
                 return (
@@ -236,13 +266,13 @@ class Dashboard extends React.Component {
     }
 
     renderLines(cats) {
-        console.log("RenderLines", cats);
+        //console.log("RenderLines", cats);
         let passwords = {};
         for ( let i = 0; i < cats.length; i++ ) {
             //out += <b>{cats[i].name}</b>
             let catId = cats[i].id;
             //TODO mocking Object
-            let catData = MockPasswords.getCatData(catId, this.state.tabselected);
+            let catData = this.state.mock.getCatData(catId, this.state.tabselected);
             // add callback to array
             catData = this.addCallback(catData);
             passwords[catId] = catData.map(function (singlePass) {
@@ -254,11 +284,47 @@ class Dashboard extends React.Component {
         return passwords;
     }
 
+    setErrorShow( to ) {
+        console.log("Aha", to);
+        this.setState({
+            errorShow: to,
+        });
+        sleep(4000).then(() => {
+                this.setState({
+                    errorShow: false,
+                })
+            }
+        );
+    }
+
+    setErrorState( to ) {
+        this.setState({
+            errorState: to,
+        });
+    }
+
+    setErrorText( to ) {
+        this.setState({
+            errorText: to,
+        });
+    }
+
+    printResetPassPopUp() {
+        console.log("Show State", this.state.errorShow);
+        return (
+            <Alert show={this.state.errorShow} variant={this.state.errorState} className="center-horz center-vert error fixed-top-easypass in-front">
+                <p className="center-horz center-vert center-text">
+                    {this.state.errorText}
+                </p>
+            </Alert>
+        );
+    }
+
 
     printCopy() {
         const show = this.state.showCopyAlert;
-        let succ = "Passwort wurde in die Zwischenablage kopiert!";
-        let err = "Ein Fehler ist aufgetreten. Bitte versuchen Sie es erneut!";
+        let succ = StringSelector.getString(this.state.language).linePassCopiedSuc;
+        let err = StringSelector.getString(this.state.language).linePassCopiedErr;
         return (
             <Alert show={show} variant={this.state.alertState} className="center-horz center-vert error fixed-top-easypass in-front">
                 <p className="center-horz center-vert center-text">
@@ -278,7 +344,7 @@ class Dashboard extends React.Component {
         return (
             <Alert show={show} variant="success" className="center-horz center-vert error fixed-top-easypass in-front">
                 <p className="center-horz center-vert center-text">
-                    URL wurde in die Zwischenablage kopiert!
+                    {StringSelector.getString(this.state.language).lineURLCopied}
                 </p>
             </Alert>
         );
@@ -286,8 +352,8 @@ class Dashboard extends React.Component {
 
     printAddCat() {
         const show = this.state.showAddedCat;
-        let succ = "Kategorie hinzugefügt";
-        let err = "Beim Hinzufügen der Kategorie ist ein Fehler aufgetreten. Bitte versuchen Sie es erneut!";
+        let succ = StringSelector.getString(this.state.language).addCatSucc;
+        let err = StringSelector.getString(this.state.language).addCatErr;
         return (
             <Alert show={show} variant={this.state.alertState} className="center-horz center-vert error fixed-top-easypass in-front">
                 <p className="center-horz center-vert center-text">
@@ -303,8 +369,8 @@ class Dashboard extends React.Component {
 
     printEditCat() {
         const show = this.state.showEditedCat;
-        let succ = "Bearbeitete Kategorie gespeichert";
-        let err = "Beim Bearbeiten ist ein Fehler aufgetreten. Bitte versuchen Sie es erneut!";
+        let succ = StringSelector.getString(this.state.language).editCatSucc;
+        let err = StringSelector.getString(this.state.language).editCatErr;
         return (
             <Alert show={show} variant={this.state.alertState} className="center-horz center-vert error fixed-top-easypass in-front">
                 <p className="center-horz center-vert center-text">
@@ -320,8 +386,8 @@ class Dashboard extends React.Component {
 
     printEditPass() {
         const show = this.state.showEditedPass;
-        let succ = "Bearbeitetes Password gespeichert";
-        let err = "Beim Bearbeiten des Passworts ist ein Fehler aufgetreten. Bitte versuchen Sie es erneut!";
+        let succ = StringSelector.getString(this.state.language).linePassEditSuc;
+        let err = StringSelector.getString(this.state.language).linePassEditErr;
         return (
             <Alert show={show} variant={this.state.alertState} className="center-horz center-vert error fixed-top-easypass in-front">
                 <p className="center-horz center-vert center-text">
@@ -340,8 +406,8 @@ class Dashboard extends React.Component {
         let succ;
         let err;
         if ( this.state.currentCatDelete.length > 1 ) {
-            succ = "Kateogrien gelöscht ";
-            err = "Beim Löschen der Kategorien ist ein Fehler aufgetreten. Bitte versuchen Sie es erneut!";
+            succ = StringSelector.getString(this.state.language).delCatSuccMult;
+            err = StringSelector.getString(this.state.language).delCatErrMult;
         }
         else {
             succ = "Kateogrie gelöscht ";
@@ -354,7 +420,7 @@ class Dashboard extends React.Component {
                         <>
                             {succ}
                             <a className="makeLookLikeLink" onClick={() => this.stopDelete(dashboardAlerts.showDeleteCatAlert, this.state.currentCatDelete)}>
-                                Rückgängig
+                                {StringSelector.getString(this.state.language).delCatSucc2}
                                 <img
                                     src={Undo}
                                     alt=""
@@ -374,8 +440,8 @@ class Dashboard extends React.Component {
 
     printDeletePass() {
         const show = this.state.showDeletePassAlert;
-        let succ = "Password gelöscht ";
-        let err = "Beim Löschen des Passworts ist ein Fehler aufgetreten. Bitte versuchen Sie es erneut!";
+        let succ = StringSelector.getString(this.state.language).linePassDelSuc;
+        let err = StringSelector.getString(this.state.language).linePassDelErr;
         return (
             <Alert show={show} variant={this.state.alertState} className="center-horz center-vert error fixed-top-easypass in-front">
                 <p className="center-horz center-vert center-text">
@@ -383,12 +449,12 @@ class Dashboard extends React.Component {
                         <>
                             {succ}
                             <a className="makeLookLikeLink" onClick={() => this.stopDelete(dashboardAlerts.showDeletePassAlert, this.state.currentPassDelete)}>
-                                Rückgängig
+                                {StringSelector.getString(this.state.language).linePassDelSuc2}
                                 <img
                                     src={Undo}
                                     alt=""
-                                    width="20"
-                                    height="20"
+                                    width="18"
+                                    height="18"
                                     className="d-inline-block"
                                 />
                             </a>
@@ -403,8 +469,8 @@ class Dashboard extends React.Component {
 
     printAddPass() {
         const show = this.state.showAddedPass;
-        let succ = "Passwort hinzugefügt";
-        let err = "Beim Hinzufügen des Passworts ist ein Fehler aufgetreten. Bitte versuchen Sie es erneut!";
+        let succ = StringSelector.getString(this.state.language).linePassAddSuc;
+        let err = StringSelector.getString(this.state.language).linePassAddErr;
         return (
             <Alert show={show} variant={this.state.alertState} className="center-horz center-vert error fixed-top-easypass in-front">
                 <p className="center-horz center-vert center-text">
@@ -423,7 +489,7 @@ class Dashboard extends React.Component {
         return (
             <Alert show={show} variant="success" className="center-horz center-vert error fixed-top-easypass in-front">
                 <p className="center-horz center-vert center-text">
-                    Username wurde in die Zwischenablage kopiert!
+                    {StringSelector.getString(this.state.language).lineUserCopied}
                 </p>
             </Alert>
         );
@@ -521,7 +587,7 @@ class Dashboard extends React.Component {
                 this.dismissCopy(dashboardAlerts.showCopyUsernameAlert);
                 break;
             case dashboardAlerts.showCopyURLAlert:
-                console.log("Url aus true");
+                //console.log("Url aus true");
                 this.setState({
                     showCopyURLAlert: true,
                 });
@@ -571,10 +637,12 @@ class Dashboard extends React.Component {
     }
 
     copyPass(id) {
+        // Todo call Kacpers Method
         let pass = this.getPassword(id);
         // Popup starten
         this.setState({
             showCopyAlert: true,
+            alertState: "success",
         });
         this.dismissCopy("showCopyAlert");
 
@@ -596,7 +664,7 @@ class Dashboard extends React.Component {
 
 
     handleSearch = (e) => {
-        console.log("Key Down:" + e.target.value);
+        //console.log("Key Down:" + e.target.value);
         this.setState({
             [e.target.id]: e.target.value
         });
@@ -605,11 +673,11 @@ class Dashboard extends React.Component {
 
         filter = input.toUpperCase();
         passwords = document.getElementById("passwords");
-        console.log("Passwords", passwords);
+        //console.log("Passwords", passwords);
         div = passwords.children;
         for (let j = 0; j < div.length; j++) {
             if (div[j].tagName === "DIV") {
-                console.log(div[j]);
+                //console.log(div[j]);
                 let editDiv = div[j].children;
                 for (let i = 0; i < editDiv.length; i++) {
                     if ( editDiv[i].tagName === "DIV" ) {
@@ -634,11 +702,12 @@ class Dashboard extends React.Component {
 
     logoutDash() {
         this.props.logout(this.state);
-        this.props.history.push("/");
+        history.push("/");
     }
 
     saveSettings() {
         this.props.changeLanguage(this.state.language);
+        location.reload();
     }
 
     cancelSettings() {
@@ -675,8 +744,8 @@ class Dashboard extends React.Component {
     }
 
     changeTab( changeTo ) {
-        console.log("Changed to Tab:");
-        console.log(changeTo);
+        //console.log("Changed to Tab:");
+        //console.log(changeTo);
         this.props.saveTab(changeTo);
         this.setState({
                 tabselected: changeTo,
@@ -684,13 +753,13 @@ class Dashboard extends React.Component {
         );
         if ( changeTo === tabs.PRIVPASS )
         {
-            console.log("Priv");
+            //console.log("Priv");
             this.setState({
                 catselected: dashboardState.getCatPriv()
             });
         }
         else {
-            console.log("Group");
+            //console.log("Group");
             this.setState({
                 catselected: dashboardState.getCatGroup()
             });
@@ -699,7 +768,7 @@ class Dashboard extends React.Component {
     }
 
     changeCat( changeTo ) {
-        console.log("Change to: " + changeTo);
+        //console.log("Change to: " + changeTo);
         this.props.saveCat(this.state.tabselected, changeTo);
         this.setState({
             catselected: changeTo
@@ -707,12 +776,17 @@ class Dashboard extends React.Component {
 
     }
 
+    resetPass( pass, newPass ) {
+        // ToDo call Moritz / Kacper
+        return true;
+    }
+
     /**
      * @returns [] a list with all the categories created by the user
      */
     getCats() {
         //TODO mocking Object
-        return MockPasswords.getCats(this.state.tabselected);
+        return this.state.mock.getCats(this.state.tabselected);
     }
 
     getSelectedCatName() {
@@ -735,14 +809,20 @@ class Dashboard extends React.Component {
         // ToDO call Kacpers method
         this.copy("", dashboardAlerts.showAddedPass, false);
         this.dismissAddPass();
+
+        this.render()
     }
 
     deletePass(id) {
         // ToDO call Kacpers method
+        this.state.mock.deletePass(id);
+        console.log("Passwords new", this.state.mock.getCatData(1,0));
         this.setState({
             currentPassDelete: id,
         });
-        this.showDeletePopUp(dashboardAlerts.showDeletePassAlert, false);
+        this.showDeletePopUp(dashboardAlerts.showDeletePassAlert, true);
+
+        this.render();
     }
 
     stopDelete( which, id ) {
@@ -899,6 +979,11 @@ class Dashboard extends React.Component {
             indicatorClass += " sidebarClosed";
         }
 
+        let langText = "text";
+        if ( this.state.language === dashboardLanguage.english ) {
+            langText = "textEng";
+        }
+
         return (
             <div className="size-hole-window-hidden-scroll" onClick={this.resetSettingsExpanded}>
                 <NavbarEP callback={this} width={this.state.width} language={this.state.language}/>
@@ -926,8 +1011,8 @@ class Dashboard extends React.Component {
                             height="20"
                             className="d-inline-block addIcon"
                         />
-                        <div className="text">
-                            <span>Passwort hinzufügen</span>
+                        <div className={langText}>
+                            <span>{StringSelector.getString(this.state.language).addPass}</span>
                         </div>
                     </Button>
                     <AddPassword callback={this}/>
@@ -935,6 +1020,7 @@ class Dashboard extends React.Component {
                 <AddCategory callback={this}/>
                 <EditCategory callback={this}/>
                 <DeleteCategory callback={this}/>
+                {this.printResetPassPopUp()}
                 {this.printCopy()}
                 {this.printUser()}
                 {this.printURL()}

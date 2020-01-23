@@ -43,6 +43,13 @@
     width: 20px;
 }
 
+.noMarginBottom {
+    margin-bottom: 0;
+}
+
+.rowMargin{
+    margin-top: 15px;
+}
 
 .search {
     width: 100% !important;
@@ -469,6 +476,17 @@
 .del-modal-table td {
     cursor: pointer;
     border-radius: 0 !important;
+}
+
+.noLeftBorderRadius {
+    border-bottom-left-radius: 0 !important;
+    border-top-left-radius: 0 !important;
+}
+
+.fitHoleParent {
+    width: 110%;
+    border-top-right-radius: 0 !important;
+    border-bottom-right-radius: 0 !important;
 }
 
 

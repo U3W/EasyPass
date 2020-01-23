@@ -7,7 +7,7 @@ const initState = {
 const authReducer = ( state = initState, action) => {
     switch (action.type) {
         case "LOGIN_SUCCESS":
-            console.log("Login success");
+            //console.log("Login success");
             localStorage.setItem(authConstants.loggedIn, "true");
             return {
                 ...state,
@@ -19,7 +19,7 @@ const authReducer = ( state = initState, action) => {
             };
 
         case "LOGOUT_SUCCESS":
-            console.log("LastPart: Logout success");
+            //console.log("LastPart: Logout success");
             localStorage.setItem(authConstants.loggedIn, "false");
             localStorage.setItem(authConstants.verified, "false");
             return {

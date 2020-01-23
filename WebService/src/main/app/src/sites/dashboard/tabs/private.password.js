@@ -3,6 +3,7 @@ import {PassLine} from "../line.temp";
 import Accordion from "react-bootstrap/Accordion";
 import {Container} from "react-bootstrap";
 import MockPasswords from "../MockPasswords";
+import StringSelector from "../../../strings/stings";
 
 class PrivatePassword extends React.Component {
     constructor(props) {
@@ -17,7 +18,7 @@ class PrivatePassword extends React.Component {
         // url zum favcon holen: https://www.google.com/s2/favicons?domain=
         return (
             <>
-                <h1 className="fixHeader">Private Passwörter</h1>
+                <h1 className="fixHeader">{StringSelector.getString(this.props.callback.state.language).mainPassPriv}</h1>
                 <hr/>
                 <Container>
                     <Accordion id="passwords">

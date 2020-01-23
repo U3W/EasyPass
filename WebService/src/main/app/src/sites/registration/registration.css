@@ -44,3 +44,11 @@
     position: relative;
     margin: 0 !important;
 }
+
+.infoButton {
+    margin-left: 5px;
+    padding: 1px;
+    font-size: .4rem;
+    height: 19px;
+    width: 19px;
+}

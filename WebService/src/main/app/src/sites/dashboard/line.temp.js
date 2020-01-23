@@ -29,6 +29,7 @@ import {dashboardAlerts} from "./const/dashboard.enum";
 import GeneratePassIcon from "../../img/icons/generate_password_white.svg";
 import GeneratePass from "./generatepass";
 import Spinner from "react-bootstrap/Spinner";
+import StringSelector from "../../strings/stings";
 
 /**
  * @param id: which element in a list f.e. (must be unique, because with this id the collapsible div will be opened then toggled)
@@ -143,36 +144,62 @@ export default class PassLine extends React.Component {
             }
         }
 
+        /*
         this.setState({
             imgNew: new Image().src = this.correctUrl(this.state.urlNew) + "favicon.ico",
-        });
-        new Ping(this.correctUrl(this.state.urlNew)  + "favicon.ico", 400, ( status, e ) => {
-            console.log("Status", status, e);
-            if ( status !== "timeout" ) {
-                this.setState({
-                    imgSucc: true,
-                });
-            }
-            else {
-                this.setState({
-                    imgSucc: false,
-                });
-                new Ping(this.correctUrl(this.state.urlNew), 600, ( status, e ) => {
-                    console.log("Status", status, e);
-                    if ( status !== "timeout" ) {
-                        this.setState({
-                            imgSucc: true,
-                        });
-                    }
-                    else {
-                        this.setState({
-                            imgSucc: true,
-                            imgNew: new Image().src = NotAvailable,
-                        });
-                    }
-                });
-            }
-        });
+        });*/
+        if ( this.state.urlNew.length > 0 ) {
+            new Ping(this.correctUrl(this.state.urlNew)  + "favicon.ico", 400, ( status, e ) => {
+                console.log("Status", status, e);
+                if ( status !== "timeout" ) {
+                    this.setState({
+                        imgSucc: true,
+                        imgNew: new Image().src = this.correctUrl(this.state.urlNew) + "favicon.ico",
+                    });
+                }
+                else {
+                    this.setState({
+                        imgSucc: false,
+                    });
+                    new Ping(this.correctUrl(this.state.urlNew), 800, ( status, e ) => {
+                        if ( status !== "timeout" ) {
+                            this.setState({
+                                imgSucc: true,
+                                imgNew: new Image().src = this.correctUrl(this.state.urlNew) + "favicon.ico",
+                            });
+                        }
+                        else {
+                            this.setState({
+                                imgSucc: true,
+                                imgNew: new Image().src = NotAvailable,
+                            });
+                        }
+                        console.log("Status 2", status, e);
+                        if ( e !== undefined && e.type === "error") {
+                            this.setState({
+                                imgSucc: true,
+                                imgNew: new Image().src = NotAvailable,
+                            });
+                        }
+                    });
+                }
+                if ( e !== undefined && e.type === "error") {
+                    this.setState({
+                        imgSucc: true,
+                        imgNew: new Image().src = NotAvailable,
+                    });
+                }
+            }).onerror = ( function (event) {
+                
+            });
+
+        }
+        else {
+            this.setState({
+                imgSucc: true,
+                imgNew: new Image().src = NotAvailable,
+            });
+        }
 
     }
 
@@ -219,7 +246,7 @@ export default class PassLine extends React.Component {
     changeTagListener (key, value, i, e ) {
         if ( this.state.edit && this.state.tagAdded )
         {
-            console.log("Teest");
+            //console.log("Teest");
             // just tags
             let tagNew = this.state.tagNew;
             if (e.target.id.length > 8 ) {
@@ -301,7 +328,7 @@ export default class PassLine extends React.Component {
      * @param succ (true|false) success
      */
     setEdit( changeTo, succ ) {
-        console.log("ChangeTo", changeTo, this.props.tag);
+        //console.log("ChangeTo", changeTo, this.props.tag);
         if ( changeTo ) {
             this.setState({
                 passwordNew: this.props.callback.getPassword(this.props.id),
@@ -347,7 +374,7 @@ export default class PassLine extends React.Component {
 
     renderTag() {
         let tag = this.state.tagNew; //this.addKeyToTagArray(this.state.tagNew);
-        console.log("TagInRender", tag, this.props.tag);
+        //console.log("TagInRender", tag, this.props.tag);
         let tagCompArray = [];
 
         if ( tag.length === 0 ) {
@@ -377,9 +404,9 @@ export default class PassLine extends React.Component {
         }
         for ( let i = 0; i < tag.length; i++ )
         {
-            console.log("Tag single: ",tag[i], "I: ", i);
+            //console.log("Tag single: ",tag[i], "I: ", i);
             let tagKeys = Object.keys(tag[i]);
-            console.log("key", tagKeys);
+            //console.log("key", tagKeys);
             let but = "";
             if ( this.state.edit && i === tag.length-1) {
                 but = (
@@ -420,7 +447,7 @@ export default class PassLine extends React.Component {
         let key = -1;
         return tagCompArray.map(function (tagComp) {
 
-            console.log("Tag ups", tagComp);
+            //console.log("Tag ups", tagComp);
             key++;
 
             return (
@@ -432,7 +459,7 @@ export default class PassLine extends React.Component {
     }
 
     returnCatBase ( id, name) {
-        console.log("Render Cat: " + id + ", " + name);
+        //console.log("Render Cat: " + id + ", " + name);
         return (
             <tr key={id}>
                 <td onClick={() => this.changePassCat(id)}>
@@ -550,7 +577,7 @@ export default class PassLine extends React.Component {
     render() {
         let password = this.getPassword(this.props.id);
 
-        console.log("Start of render", this.state.urlNew);
+        //console.log("Start of render", this.state.urlNew);
         let url = this.state.urlNew;
 
         let catRender = this.renderCat();
@@ -673,7 +700,7 @@ export default class PassLine extends React.Component {
                                         placement={placement}
                                         overlay={
                                             <Tooltip id={`tooltip-${placement}`}>
-                                                Passwort kopieren
+                                                {StringSelector.getString(this.props.callback.state.language).lineCopyPass}
                                             </Tooltip>
                                         }
                                     >
@@ -696,7 +723,7 @@ export default class PassLine extends React.Component {
                                         placement={placement}
                                         overlay={
                                             <Tooltip id={`tooltip-${placement}`}>
-                                                Passwort kopieren und Website öffnen
+                                                {StringSelector.getString(this.props.callback.state.language).lineCopyPassGoTo}
                                             </Tooltip>
                                         }
                                     >
@@ -735,7 +762,7 @@ export default class PassLine extends React.Component {
                             {this.state.edit === true ? // Title
                                 <InputGroup size="lg">
                                     <InputGroup.Prepend>
-                                        <InputGroup.Text id="inputGroup-sizing-lg">Name</InputGroup.Text>
+                                        <InputGroup.Text id="inputGroup-sizing-lg">{StringSelector.getString(this.props.callback.state.language).lineTitle}</InputGroup.Text>
                                     </InputGroup.Prepend>
                                     <FormControl id="title" aria-label="Large" aria-describedby="inputGroup-sizing-sm" value={this.state.titleNew} onChange={this.changeListener} />
                                 </InputGroup>
@@ -746,7 +773,7 @@ export default class PassLine extends React.Component {
                             <div>
                                 <InputGroup size="sm" className="mb-3">
                                     <InputGroup.Prepend>
-                                        <InputGroup.Text id="inputGroup-sizing-sm">User</InputGroup.Text>
+                                        <InputGroup.Text id="inputGroup-sizing-sm">{StringSelector.getString(this.props.callback.state.language).lineUser}</InputGroup.Text>
                                     </InputGroup.Prepend>
                                     {this.state.edit === true ? // Username
                                         <>
@@ -778,7 +805,7 @@ export default class PassLine extends React.Component {
                                 </InputGroup>
                                 <InputGroup size="sm" className="mb-3">
                                     <InputGroup.Prepend>
-                                        <InputGroup.Text id="inputGroup-sizing-sm">Password</InputGroup.Text>
+                                        <InputGroup.Text id="inputGroup-sizing-sm">{StringSelector.getString(this.props.callback.state.language).linePass}</InputGroup.Text>
                                     </InputGroup.Prepend>
                                     {this.state.edit === true ?
                                         edit
@@ -811,7 +838,7 @@ export default class PassLine extends React.Component {
                                 </InputGroup>
                                 <InputGroup size="sm" className="mb-3">
                                     <InputGroup.Prepend>
-                                        <InputGroup.Text id="inputGroup-sizing-sm">Website (Login)</InputGroup.Text>
+                                        <InputGroup.Text id="inputGroup-sizing-sm">{StringSelector.getString(this.props.callback.state.language).lineWebsite}</InputGroup.Text>
                                     </InputGroup.Prepend>
                                     {this.state.edit === true ? // URL
                                         <>
@@ -842,12 +869,12 @@ export default class PassLine extends React.Component {
                                     }
                                 </InputGroup>
                                 <div>
-                                    <h6>Tags</h6>
+                                    <h6>{StringSelector.getString(this.props.callback.state.language).lineTags}</h6>
                                     {tagRender}
                                 </div>
                                 <br/>
                                 <div>
-                                    <h6>Kategorie</h6>
+                                    <h6>{StringSelector.getString(this.props.callback.state.language).lineTags}</h6>
                                     {catRender}
                                 </div>
                             </div>
@@ -863,11 +890,11 @@ export default class PassLine extends React.Component {
                                                 overlay={
                                                     this.state.edit === true ?
                                                         <Tooltip id={`tooltip-${placement}`}>
-                                                            Änderungen verwerfen
+                                                            {StringSelector.getString(this.props.callback.state.language).lineEditCancle}
                                                         </Tooltip>
                                                         :
                                                         <Tooltip id={`tooltip-${placement}`}>
-                                                            Dieses Passwort bearbeiten
+                                                            {StringSelector.getString(this.props.callback.state.language).lineEdit}
                                                         </Tooltip>
                                                 }
                                             >
@@ -905,11 +932,11 @@ export default class PassLine extends React.Component {
                                                 placement={placement}
                                                 overlay={this.state.edit === true ?
                                                     <Tooltip id={`tooltip-${placement}`}>
-                                                        Änderungen speichern
+                                                        {StringSelector.getString(this.props.callback.state.language).lineEditSave}
                                                     </Tooltip>
                                                     :
                                                     <Tooltip id={`tooltip-${placement}`}>
-                                                        Dieses Passwort löschen
+                                                        {StringSelector.getString(this.props.callback.state.language).lineDel}
                                                     </Tooltip>
                                                 }
                                             >

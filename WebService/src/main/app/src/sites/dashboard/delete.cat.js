@@ -6,6 +6,7 @@ import Button from "react-bootstrap/Button";
 import {Card} from "react-bootstrap";
 import Table from "react-bootstrap/Table";
 import Form from "react-bootstrap/Form";
+import StringSelector from "../../strings/stings";
 
 export default class DeleteCategory extends React.Component {
 
@@ -21,6 +22,8 @@ export default class DeleteCategory extends React.Component {
         this.resetState = this.resetState.bind(this);
 
         this.handleKeyevent = this.handleKeyevent.bind(this);
+
+        this.dismissPopUp = this.dismissPopUp.bind(this);
 
         this.delCat = this.delCat.bind(this);
     }
@@ -40,7 +43,7 @@ export default class DeleteCategory extends React.Component {
         return (
             <tr key={id}>
                 <td>
-                    {name}
+                    <b>{name}</b>
                 </td>
                 <td>
                     {desc}
@@ -100,15 +103,15 @@ export default class DeleteCategory extends React.Component {
             <>
                 <Modal onKeyDown={this.handleKeyevent} show={this.props.callback.getCatDeleteShow()} onHide={this.dismissPopUp} className="del-modal-dialog addPassPopUp">
                     <Modal.Header closeButton>
-                        <Modal.Title>Kategorie löschen:</Modal.Title>
+                        <Modal.Title>{StringSelector.getString(this.props.callback.state.language).delCat}:</Modal.Title>
                     </Modal.Header>
                     <Modal.Body className="del-modal-body">
                         <Table striped bordered hover className="del-modal-table">
                             <thead>
                             <tr>
-                                <th>Name</th>
-                                <th>Beschreibung</th>
-                                <th>Löschen</th>
+                                <th>{StringSelector.getString(this.props.callback.state.language).addCatName}</th>
+                                <th>{StringSelector.getString(this.props.callback.state.language).addCatDesc}</th>
+                                <th>{StringSelector.getString(this.props.callback.state.language).delCatDel}</th>
                             </tr>
                             </thead>
                             <tbody>
@@ -117,7 +120,7 @@ export default class DeleteCategory extends React.Component {
                         </Table>
                     </Modal.Body>
                     <Modal.Footer>
-                        <Button variant={"danger"} onClick={this.delCat}>Löschen</Button>
+                        <Button variant={"danger"} onClick={this.delCat}>{StringSelector.getString(this.props.callback.state.language).delCatDel}</Button>
                     </Modal.Footer>
                 </Modal>
             </>

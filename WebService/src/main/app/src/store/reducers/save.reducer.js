@@ -7,6 +7,8 @@ import {
 } from "../../action/dashboard.action";
 import {dashboardConst} from "../../sites/dashboard/const/dashboard.enum";
 import tabs from "../../sites/dashboard/tabs/tab.enum";
+import {SAVE_MAUTH_STATE} from "../../action/mauth.action";
+import {masterpasswordConst} from "../../sites/verify/masterpassword.enum";
 
 
 const saveReducer = ( state, action) => {
@@ -30,6 +32,9 @@ const saveReducer = ( state, action) => {
             return {};
         case SAVE_LANGUAGE:
             localStorage.setItem(dashboardConst.languageSelected, JSON.stringify(action.language));
+            return {};
+        case SAVE_MAUTH_STATE:
+            localStorage.setItem(masterpasswordConst.radioSelected, action.twoFactorOpt);
             return {};
         default:
             return {};

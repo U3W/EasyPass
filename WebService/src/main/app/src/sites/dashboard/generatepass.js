@@ -8,6 +8,7 @@ import Row from "react-bootstrap/Row";
 
 // Icons
 import ReloadPass from "../../img/icons/generate_reload_white.svg";
+import StringSelector from "../../strings/stings";
 
 /**
  * The callback needs the following methods:
@@ -86,7 +87,7 @@ export default class GeneratePass extends React.Component {
             let rnum = Math.floor(Math.random() * passwordChars.length);
             randPassword += passwordChars.substring(rnum,rnum+1);
         }
-        console.log("Rand2", randPassword);
+        //console.log("Rand2", randPassword);
         //let randPassword = charArray.map(function(x) { return x[Math.floor(Math.random() * x.length)] });
         this.setState({
             generatedPass: randPassword,
@@ -97,13 +98,13 @@ export default class GeneratePass extends React.Component {
         return (
             <Modal show={this.props.show} onHide={this.props.callback.dismissGeneratePass} className="ep-modal-dialog">
                 <Modal.Header closeButton>
-                    <Modal.Title>Passwort generieren:</Modal.Title>
+                    <Modal.Title>{StringSelector.getString(this.props.language).addPassGen}:</Modal.Title>
                 </Modal.Header>
                 <Modal.Body className="ep-modal-body">
                     <Card.Body>
                         <InputGroup size="sm" className="mb-3 editCat">
                             <InputGroup.Prepend>
-                                <InputGroup.Text>Password</InputGroup.Text>
+                                <InputGroup.Text>{StringSelector.getString(this.props.language).addPassPass}</InputGroup.Text>
                             </InputGroup.Prepend>
                             <FormControl autoComplete="off" aria-label="Small" className="nav-link" role="button" value={this.state.generatedPass} onChange={this.changeGenPass} aria-describedby="inputGroup-sizing-sm"/>
                             <InputGroup.Append>
@@ -120,11 +121,11 @@ export default class GeneratePass extends React.Component {
                         </InputGroup>
                         <InputGroup size="sm" className="mb-3 editCat">
                             <InputGroup.Prepend>
-                                <InputGroup.Text >Password</InputGroup.Text>
+                                <InputGroup.Text>{StringSelector.getString(this.props.language).addPassGenLen}</InputGroup.Text>
                             </InputGroup.Prepend>
-                            <input type="range" className="custom-range nav-link form-control" min="1" max="30" step="1" value={this.state.generatePassLength} onChange={this.changeGenLen} />
+                            <input type="range" className="custom-range nav-link form-control" min="1" max="32" step="1" value={this.state.generatePassLength} onChange={this.changeGenLen} />
                             <InputGroup.Append>
-                                <InputGroup.Text>{this.state.generatePassLength} Zeichen</InputGroup.Text>
+                                <InputGroup.Text>{this.state.generatePassLength} {StringSelector.getString(this.props.language).addPassGenChar}</InputGroup.Text>
                             </InputGroup.Append>
                         </InputGroup>
                         <Row>
@@ -133,9 +134,9 @@ export default class GeneratePass extends React.Component {
                                     { this.state.lowerCaseOnly ?
                                         <Form.Check
                                             custom
-                                            checked
+                                            checked={true}
                                             name="smallCaps"
-                                            label="Nur Kleinbuchstaben"
+                                            label={StringSelector.getString(this.props.language).addPassGenSmall}
                                             id="smallcapsCheck"
                                             className="clickableBox"
                                             onChange={this.changeGenSettings}
@@ -143,8 +144,9 @@ export default class GeneratePass extends React.Component {
                                         :
                                         <Form.Check
                                             custom
+                                            checked={false}
                                             name="smallCaps"
-                                            label="Nur Kleinbuchstaben"
+                                            label={StringSelector.getString(this.props.language).addPassGenSmall}
                                             id="smallcapsCheck"
                                             className="clickableBox"
                                             onChange={this.changeGenSettings}
@@ -158,9 +160,9 @@ export default class GeneratePass extends React.Component {
                                     { this.state.specialChar ?
                                         <Form.Check
                                             custom
-                                            checked
+                                            checked={true}
                                             name="specialChar"
-                                            label="Mit Sonderzeichen"
+                                            label={StringSelector.getString(this.props.language).addPassGenSpec}
                                             id="specialCheck"
                                             className="clickableBox"
                                             onChange={this.changeGenSettings}
@@ -168,8 +170,9 @@ export default class GeneratePass extends React.Component {
                                         :
                                         <Form.Check
                                             custom
+                                            checked={false}
                                             name="specialChar"
-                                            label="Mit Sonderzeichen"
+                                            label={StringSelector.getString(this.props.language).addPassGenSpec}
                                             id="specialCheck"
                                             className="clickableBox"
                                             onChange={this.changeGenSettings}
@@ -183,9 +186,9 @@ export default class GeneratePass extends React.Component {
                                     { this.state.numbers ?
                                         <Form.Check
                                             custom
-                                            checked
+                                            checked={true}
                                             name="numbers"
-                                            label="Mit Nummern"
+                                            label={StringSelector.getString(this.props.language).addPassGenNum}
                                             id="numberCheck"
                                             className="clickableBox"
                                             onChange={this.changeGenSettings}
@@ -193,8 +196,9 @@ export default class GeneratePass extends React.Component {
                                         :
                                         <Form.Check
                                             custom
+                                            checked={true}
                                             name="numbers"
-                                            label="Mit Nummern"
+                                            label={StringSelector.getString(this.props.language).addPassGenNum}
                                             id="numberCheck"
                                             className="clickableBox"
                                             onChange={this.changeGenSettings}
@@ -207,7 +211,7 @@ export default class GeneratePass extends React.Component {
                     </Card.Body>
                 </Modal.Body>
                 <Modal.Footer>
-                    <Button variant={"danger"} onClick={() => this.props.callback.addPassword(this.state.generatedPass)}>Hinzufügen</Button>
+                    <Button variant={"danger"} onClick={() => this.props.callback.addPassword(this.state.generatedPass)}>{StringSelector.getString(this.props.language).addPassGenAdd}</Button>
                 </Modal.Footer>
             </Modal>
         );
