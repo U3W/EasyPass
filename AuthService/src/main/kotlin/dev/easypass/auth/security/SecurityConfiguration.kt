@@ -1,5 +1,6 @@
 package dev.easypass.auth.security
 
+import dev.easypass.auth.security.handler.RestAuthenticationEntryPoint
 import org.springframework.security.config.annotation.web.builders.HttpSecurity
 import org.springframework.context.annotation.Configuration
 import org.springframework.http.HttpMethod
@@ -15,7 +16,7 @@ import org.springframework.security.web.authentication.SimpleUrlAuthenticationFa
  */
 @Configuration
 @EnableWebSecurity
-class SecurityConfiguration(private val authProvider: ChallengeAuthenticationProvider) : WebSecurityConfigurerAdapter() {
+class SecurityConfiguration(private val authProvider: ChallengeAuthenticationProvider, private val restAuthenticationEntryPoint: RestAuthenticationEntryPoint) : WebSecurityConfigurerAdapter() {
 
     /**
      * This method is used to add the [ChallengeAuthenticationProvider] to Spring-Security
@@ -35,6 +36,7 @@ class SecurityConfiguration(private val authProvider: ChallengeAuthenticationPro
         http
                 .csrf().disable()
                 .exceptionHandling()
+                .authenticationEntryPoint(restAuthenticationEntryPoint)
 
                 .and()
                 .authorizeRequests()
@@ -44,7 +46,7 @@ class SecurityConfiguration(private val authProvider: ChallengeAuthenticationPro
 
                 .and()
                 .formLogin()
-                .loginProcessingUrl("/auth/login")
+                .loginPage("/auth/login")
                 .failureHandler(SimpleUrlAuthenticationFailureHandler())
 
                 .and()

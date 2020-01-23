@@ -17,6 +17,6 @@ curl -i --header "Accept:application/json" -X GET -b cookieMwustinger.txt http:/
 
 curl -i -X POST -c cookieMwustinger.txt http://localhost:7000/auth/logout
 
-curl --header "Accept:application/json" -X GET -b cookieMwustinger.txt http://localhost:7000/store/mwustinger
+curl -i --header "Accept:application/json" -X GET -b cookieMwustinger.txt http://localhost:7000/store/mwustinger
 ```
 

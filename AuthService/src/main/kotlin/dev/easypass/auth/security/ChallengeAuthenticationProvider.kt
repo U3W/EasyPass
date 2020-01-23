@@ -45,7 +45,6 @@ class ChallengeAuthenticationProvider(private val userRepository: UserRepository
     override fun authenticate(authentication: Authentication): Authentication? {
         val key = Pair((authentication.details as WebAuthenticationDetails).remoteAddress, authentication.name)
         val pwd = authentication.credentials.toString()
-        println("-------------------${currentChallenges[key]}-------------------------")
         if (currentChallenges[key] == null || !currentChallenges[key]!!.first.isActive()) {
             loginFailed(key)
             throw NoActiveChallengeException()
