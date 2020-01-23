@@ -3,6 +3,8 @@ importScripts("modules/pouchdb/dist/pouchdb.find.min.js");
 importScripts("modules/easypass-lib/dist/easypass-lib.js");
 import("../../rust/pkg").then(wasm => {
 
+    console.log("kek2");
+
     let worker = null;
     let remoteInit = false;
     let authUrl = null;
@@ -65,10 +67,14 @@ import("../../rust/pkg").then(wasm => {
                 console.log("Offline");
                 worker.set_service_status("offline");
             }
-            console.log(JSON.stringify(await worker.check()));
-            //await worker.check();
-            const all = await worker.all_docs();
-            self.postMessage(['all', all.rows]);
+            try {
+                console.log(JSON.stringify(await worker.check()));
+                //await worker.check();
+                const all = await worker.all_docs();
+                self.postMessage(['all', all.rows]);
+            } catch (e) {
+                console.log(e);
+            }
         }, 3000);
     };
 
