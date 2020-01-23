@@ -15,14 +15,15 @@ import javax.servlet.http.HttpServletRequest
 import javax.servlet.http.HttpServletResponse
 
 @Component
-class AuthorizedForStoreFilter: RequestMatcher {
-    override fun matches(request: HttpServletRequest?): Boolean {
+class AuthorizedForStoreFilter(private val properties: Properties): GenericFilterBean() {
+    override fun doFilter(request: ServletRequest?, response: ServletResponse?, chain: FilterChain?) {
         val url = (request as HttpServletRequest).requestURL.toString()
-        val ip = (SecurityContextHolder.getContext().authentication.details as WebAuthenticationDetails).remoteAddress
         val authorities = AuthorityUtils.authorityListToSet(SecurityContextHolder.getContext().authentication.authorities)
-        print(url)
-        print(ip)
-        print(authorities)
-        return true
+        val store = ":${properties.getProperty("server.port")}/store/"
+        if (url.contains(store)){
+            val uname = url.substringAfter(store).split("/")[0]
+            (response as HttpServletResponse).sendError(HttpServletResponse.SC_UNAUTHORIZED, "Unauthorized")
+        }
+        chain?.doFilter(request, response)
     }
 }

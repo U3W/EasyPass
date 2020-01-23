@@ -33,7 +33,12 @@ import kotlin.collections.HashMap
  * @param encryptionLibrary: this class provides the required encryption methods
  */
 @Component
-class ChallengeAuthenticationProvider(private val userRepository: UserRepository, private val groupRepository: GroupRepository, private val connector: CouchDBConnectionProvider, private val encryptionLibrary: EncryptionLibrary, private val properties: Properties) : AuthenticationProvider {
+class ChallengeAuthenticationProvider(private val userRepository: UserRepository,
+                                      private val groupRepository: GroupRepository,
+                                      private val connector: CouchDBConnectionProvider,
+                                      private val encryptionLibrary: EncryptionLibrary,
+                                      private val properties: Properties) : AuthenticationProvider {
+
     private val currentChallenges = HashMap<Pair<String, String>, Pair<InternalAuthenticationChallenge, String>>()
     private var attemptCounter = HashMap<Pair<String, String>, Pair<Int, LocalDateTime>>()
 

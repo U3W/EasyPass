@@ -1,5 +1,6 @@
 package dev.easypass.auth.security
 
+import dev.easypass.auth.security.filter.AuthorizedForStoreFilter
 import dev.easypass.auth.security.handler.RestAuthenticationEntryPoint
 import dev.easypass.auth.security.handler.RestAuthenticationSuccessHandler
 import org.springframework.security.config.annotation.web.builders.HttpSecurity
@@ -9,6 +10,7 @@ import org.springframework.http.HttpStatus
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity
+import org.springframework.security.web.authentication.AnonymousAuthenticationFilter
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationFailureHandler
 import org.springframework.security.web.authentication.logout.HttpStatusReturningLogoutSuccessHandler
 
@@ -19,7 +21,7 @@ import org.springframework.security.web.authentication.logout.HttpStatusReturnin
  */
 @Configuration
 @EnableWebSecurity
-class SecurityConfiguration(private val authProvider: ChallengeAuthenticationProvider, private val restAuthenticationEntryPoint: RestAuthenticationEntryPoint) : WebSecurityConfigurerAdapter() {
+class SecurityConfiguration(private val authProvider: ChallengeAuthenticationProvider, private val authorizedForStoreFilter: AuthorizedForStoreFilter) : WebSecurityConfigurerAdapter() {
 
     /**
      * This method is used to add the [ChallengeAuthenticationProvider] to Spring-Security
@@ -39,7 +41,7 @@ class SecurityConfiguration(private val authProvider: ChallengeAuthenticationPro
         http
                 .csrf().disable()
                 .exceptionHandling()
-                .authenticationEntryPoint(restAuthenticationEntryPoint)
+                .authenticationEntryPoint(RestAuthenticationEntryPoint())
 
                 .and()
                 .authorizeRequests()
@@ -59,5 +61,8 @@ class SecurityConfiguration(private val authProvider: ChallengeAuthenticationPro
                 .logoutSuccessHandler(HttpStatusReturningLogoutSuccessHandler(HttpStatus.OK))
                 .invalidateHttpSession(true)
                 .deleteCookies("JSESSIONID")
+
+                .and()
+                .addFilterAfter(authorizedForStoreFilter, AnonymousAuthenticationFilter::class.java)
     }
 }
