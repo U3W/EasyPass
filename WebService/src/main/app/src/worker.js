@@ -134,16 +134,10 @@ import("../../rust/pkg").then(wasm => {
         const cmd = e.data[0];
         const data = e.data[1];
         switch (cmd) {
-            case 'test':
-                let msg = await worker.process(data.msg);
-                self.postMessage(data.msg + ': ' + msg);
-                break;
-            case 'save':
+            case 'savePassword':
+                // TODO Worker Decrypt Password
                 await worker.save(data);
-                const ret = await worker.find({"selector":{"name": data.name }});
-                const success = (ret !== null && ret !== undefined);
-                // self.postMessage(['save', ret.docs[0]]);
-                self.postMessage(['save', success]);
+                self.postMessage(['savePassword', await elementExists(data)]);
                 break;
             case 'update':
                 const updateReturn = await worker.update(data);
@@ -175,5 +169,28 @@ import("../../rust/pkg").then(wasm => {
                 self.postMessage('Unknown command: ' + data.msg);
         }
     }, false);
+
+    /**
+     * Build selector query for PouchDB to verify that data was added.
+     */
+    const buildSelector = (data) => {
+        let selector = Object();
+        Object.keys(data).forEach(e => {
+            // TODO Worker - BuildSelector support Arrays?
+            if (!Array.isArray(data[e]))
+                selector[e] = data[e];
+        });
+        return selector
+    };
+
+    /**
+     * Checks if element dataset exist in local database.
+     */
+    const elementExists = async (data) => {
+        const ret = await worker.find({"selector": buildSelector(data)});
+        return (ret.docs.length !== 0);
+    };
+
 });
+
 

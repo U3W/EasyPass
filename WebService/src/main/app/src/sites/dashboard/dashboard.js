@@ -153,7 +153,7 @@ class Dashboard extends React.Component {
         const cmd = e.data[0];
         const data = e.data[1];
         switch (cmd) {
-            case 'save':
+            case 'savePassword':
                 this.copy("", dashboardAlerts.showAddedPass, data);
                 this.dismissAddPass();
                 this.render();
@@ -812,8 +812,7 @@ class Dashboard extends React.Component {
     }
 
     addPass(user, passwd, url, title, catID, tags) {
-        // ToDO add Password
-        this.props.worker.postMessage(['save',
+        this.props.worker.postMessage(['savePassword',
             {user: user, passwd: passwd, url: url, title: title, catID: catID, tags: tags}]);
     }
 
