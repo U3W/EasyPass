@@ -1,13 +1,16 @@
 package dev.easypass.auth.security
 
 import dev.easypass.auth.security.handler.RestAuthenticationEntryPoint
+import dev.easypass.auth.security.handler.RestAuthenticationSuccessHandler
 import org.springframework.security.config.annotation.web.builders.HttpSecurity
 import org.springframework.context.annotation.Configuration
 import org.springframework.http.HttpMethod
+import org.springframework.http.HttpStatus
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationFailureHandler
+import org.springframework.security.web.authentication.logout.HttpStatusReturningLogoutSuccessHandler
 
 
 /**
@@ -47,11 +50,13 @@ class SecurityConfiguration(private val authProvider: ChallengeAuthenticationPro
                 .and()
                 .formLogin()
                 .loginPage("/auth/login")
+                .successHandler(RestAuthenticationSuccessHandler())
                 .failureHandler(SimpleUrlAuthenticationFailureHandler())
 
                 .and()
                 .logout()
                 .logoutUrl("/auth/logout")
+                .logoutSuccessHandler(HttpStatusReturningLogoutSuccessHandler(HttpStatus.OK))
                 .invalidateHttpSession(true)
                 .deleteCookies("JSESSIONID")
     }
