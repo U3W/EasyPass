@@ -141,7 +141,9 @@ import("../../rust/pkg").then(wasm => {
             case 'save':
                 await worker.save(data);
                 const ret = await worker.find({"selector":{"name": data.name }});
-                self.postMessage(['save', ret.docs[0]]);
+                const success = (ret !== null && ret !== undefined);
+                // self.postMessage(['save', ret.docs[0]]);
+                self.postMessage(['save', success]);
                 break;
             case 'update':
                 const updateReturn = await worker.update(data);

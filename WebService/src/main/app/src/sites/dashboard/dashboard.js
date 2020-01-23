@@ -125,17 +125,16 @@ class Dashboard extends React.Component {
         this.showAddPass = this.showAddPass.bind(this);
         this.dismissAddPass = this.dismissAddPass.bind(this);
         this.getPassAddShow = this.getPassAddShow.bind(this);
-
         // update, delete and so on
         this.getCats = this.getCats.bind(this);
         this.getPassword = this.getPassword.bind(this);
         this.renderLinesSonstige = this.renderLinesSonstige.bind(this);
         this.renderLines = this.renderLines.bind(this);
         this.deletePass = this.deletePass.bind(this);
-
-
         // WindowDimensions
         this.updateWindowDimensions = this.updateWindowDimensions.bind(this);
+        // Worker
+        this.workerCall = this.workerCall.bind(this);
     }
 
     componentDidMount() {
@@ -153,6 +152,13 @@ class Dashboard extends React.Component {
     workerCall( e ) {
         const cmd = e.data[0];
         const data = e.data[1];
+        switch (cmd) {
+            case 'save':
+                this.copy("", dashboardAlerts.showAddedPass, data);
+                this.dismissAddPass();
+                this.render();
+                break;
+        }
     }
 
     updateWindowDimensions() {
@@ -805,12 +811,10 @@ class Dashboard extends React.Component {
         }
     }
 
-    addPass(user, pass, url, title, catID, tag) {
-        // ToDO call Kacpers method
-        this.copy("", dashboardAlerts.showAddedPass, false);
-        this.dismissAddPass();
-
-        this.render()
+    addPass(user, passwd, url, title, catID, tags) {
+        // ToDO add Password
+        this.props.worker.postMessage(['save',
+            {user: user, passwd: passwd, url: url, title: title, catID: catID, tags: tags}]);
     }
 
     deletePass(id) {
