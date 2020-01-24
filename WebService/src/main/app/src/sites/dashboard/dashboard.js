@@ -34,13 +34,13 @@ import Entries from "./Entries";
 
 
 class Dashboard extends React.Component {
+    _isMounted = false;
 
     constructor(props){
         super(props);
 
         // check storage
         //this.fixStorage();
-
 
         // Status holen
         let cat;
@@ -102,7 +102,7 @@ class Dashboard extends React.Component {
             // resetPass vars
             errorShow: false,
             errorText: "",
-            errorState: "success"
+            errorState: "success",
         };
 
         this.setErrorShow = this.setErrorShow.bind(this);
@@ -149,9 +149,10 @@ class Dashboard extends React.Component {
         this.updateWindowDimensions();
         window.addEventListener('resize', this.updateWindowDimensions);
         //this.props.worker.addEventListener("message", this.workerCall, true);
-        if (!this.props.workerInitialized) {
+        this.props.workerInitialized ?
+            this.props.worker.addEventListener("message", this.workerCall) :
             this.props.worker.addEventListener("message", this.workerInit);
-        }
+        this._isMounted = true;
 
     }
 
@@ -160,6 +161,7 @@ class Dashboard extends React.Component {
         this.props.workerInitialized ?
             this.props.worker.removeEventListener("message", this.workerCall) :
             this.props.worker.removeEventListener("message", this.workerInit);
+        this._isMounted = false;
     }
 
     updateWindowDimensions() {
@@ -198,28 +200,31 @@ class Dashboard extends React.Component {
      * @param e Message received from Web Worker
      */
     workerCall( e ) {
-        console.log(this.state.workerInitialized);
-        console.log('Saved entries: ' + this.state.entries.entries);
-        console.log('Saved categories: ' + this.state.entries.categories);
-        const cmd = e.data[0];
-        const data = e.data[1];
-        console.log("WORKERCALL");
-        console.log(cmd);
-        console.log(data);
-        switch (cmd) {
-            case 'allEntries':
-                console.log("wow");
-                this.state.entries.loadData(data);
-                //this.refresh();
-                break;
-            case 'saveEntry':
-                this.copy("", dashboardAlerts.showAddedPass, data.ok);
-                this.dismissAddPass();
-                break;
-            case 'saveCategory':
-                this.copy("", dashboardAlerts.showAddedCat, true);
-                this.dismissAddCat();
-                break;
+        // TODO @Seb Omit _isMounted more gracefully
+        // isMounted is bad style and should be now used
+        if(this._isMounted) {
+            console.log('Saved entries: ' + this.state.entries.entries);
+            console.log('Saved categories: ' + this.state.entries.categories);
+            const cmd = e.data[0];
+            const data = e.data[1];
+            console.log("WORKERCALL");
+            console.log(cmd);
+            console.log(data);
+            switch (cmd) {
+                case 'allEntries':
+                    //console.log("wow");
+                    this.state.entries.loadData(data);
+                    this.refresh();
+                    break;
+                case 'saveEntry':
+                    this.copy("", dashboardAlerts.showAddedPass, data.ok);
+                    this.dismissAddPass();
+                    break;
+                case 'saveCategory':
+                    this.copy("", dashboardAlerts.showAddedCat, data.ok);
+                    this.dismissAddCat();
+                    break;
+            }
         }
     }
 
