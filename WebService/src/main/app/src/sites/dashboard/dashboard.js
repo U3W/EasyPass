@@ -137,22 +137,59 @@ class Dashboard extends React.Component {
         // WindowDimensions
         this.updateWindowDimensions = this.updateWindowDimensions.bind(this);
         // Worker
+        this.workerInit = this.workerInit.bind(this);
         this.workerCall = this.workerCall.bind(this);
+        // Refresh component
+        this.refresh = this.refresh.bind(this);
     }
 
     componentDidMount() {
         this.updateWindowDimensions();
         window.addEventListener('resize', this.updateWindowDimensions);
-        this.props.worker.addEventListener("message", this.workerCall, true);
+        //this.props.worker.addEventListener("message", this.workerCall, true);
+        this.props.worker.addEventListener("message", this.workerInit);
 
     }
 
     componentWillUnmount() {
         window.removeEventListener('resize', this.updateWindowDimensions);
-        this.props.worker.removeEventListener("message", this.workerCall, true);
+        this.props.worker.removeEventListener("message", this.workerCall);
     }
 
+    updateWindowDimensions() {
+        this.setState({ width: window.innerWidth, height: window.innerHeight });
+    }
+
+    changeLanguageTo( to ) {
+        this.setState({
+            language: to
+        });
+    }
+
+    /**
+     * Updates the whole component.
+     */
+    refresh() {
+        this.setState({});
+    }
+
+
+    workerInit( e ) {
+        const success = e.data === 'initDone';
+        if (success) {
+            this.props.worker.removeEventListener("message", this.workerInit);
+            this.props.worker.addEventListener("message", this.workerCall);
+            this.props.worker.postMessage('initAck');
+        }
+    }
+
+    /**
+     * React to messages send from the Web Worker
+     * @param e Message received from Web Worker
+     */
     workerCall( e ) {
+        console.log('Saved entries: ' + this.state.entries.entries);
+        console.log('Saved categories: ' + this.state.entries.categories);
         const cmd = e.data[0];
         const data = e.data[1];
         console.log("WORKERCALL");
@@ -160,29 +197,19 @@ class Dashboard extends React.Component {
         console.log(data);
         switch (cmd) {
             case 'allEntries':
+                console.log("wow");
                 this.state.entries.loadData(data);
+                this.refresh();
                 break;
             case 'saveEntry':
                 this.copy("", dashboardAlerts.showAddedPass, data.ok);
                 this.dismissAddPass();
-                this.render();
                 break;
             case 'saveCategory':
-
                 this.copy("", dashboardAlerts.showAddedCat, true);
                 this.dismissAddCat();
+                break;
         }
-    }
-
-    updateWindowDimensions() {
-        this.setState({ width: window.innerWidth, height: window.innerHeight });
-    }
-
-
-    changeLanguageTo( to ) {
-        this.setState({
-            language: to
-        });
     }
 
 

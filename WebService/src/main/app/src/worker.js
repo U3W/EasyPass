@@ -27,9 +27,11 @@ import("../../rust/pkg").then(wasm => {
             }
         }
         worker = new wasm.Worker(dbUrl);
+        self.addEventListener('message', clientBound, true);
         self.postMessage('initDone');
-        heartbeat();
     };
+
+    init();
 
     // Sets host for the remote database when app the goes online
     // Only called when the app is started in offline-mode
@@ -50,25 +52,25 @@ import("../../rust/pkg").then(wasm => {
     // Heartbeat function to keep data synced
     const heartbeat = () => {
         setAsyncInterval(async () => {
-            if (navigator.onLine) {
-                // If worker started in offline mode and now goes online
-                // connect to the remote database
-                if (!remoteInit) {
-                    await setRemote();
-                }
-                if (await isReachable('http://localhost:7000')) {
-                    console.log('Online')
-                } else {
-                    console.log("Service Down");
-                }
-                worker.set_service_status("online");
-            } else {
-                console.log("Offline");
-                worker.set_service_status("offline");
-            }
             try {
-                console.log(JSON.stringify(await worker.check()));
-                //await worker.check();
+                if (navigator.onLine) {
+                    // If worker started in offline mode and now goes online
+                    // connect to the remote database
+                    if (!remoteInit) {
+                        await setRemote();
+                    }
+                    if (await isReachable('http://localhost:7000')) {
+                        console.log('Online')
+                    } else {
+                        console.log(Date() + "Service Down");
+                    }
+                    worker.set_service_status("online");
+                } else {
+                    console.log("Offline");
+                    worker.set_service_status("offline");
+                }
+                //console.log(JSON.stringify(await worker.check()));
+                await worker.check();
                 const all = deletePasswordsInEntries((await worker.all_docs()).rows);
                 self.postMessage(['allEntries', all]);
             } catch (e) {
@@ -77,8 +79,130 @@ import("../../rust/pkg").then(wasm => {
         }, 3000);
     };
 
-    init();
+    const clientBound = (e) => {
+        if(e.data === 'initAck') {
+            self.removeEventListener('message', clientBound, true);
+            self.addEventListener('message', clientCall, true);
+            heartbeat();
+        }
+    };
 
+    const clientCall = async (e) => {
+        const cmd = e.data[0];
+        const data = e.data[1];
+        switch (cmd) {
+            case 'saveEntry':
+                // TODO Worker Decrypt Password
+                const saveCheck = await worker.save(data);
+                self.postMessage(['saveEntry', await saveEntryResult(saveCheck)]);
+                break;
+            case 'saveCategory':
+                const catCheck = await worker.save(data);
+                self.postMessage(['saveCategory', await saveCatResult(catCheck)]);
+                break;
+
+
+            // TODO Remove legacy Worker API
+            case 'update':
+                const updateReturn = await worker.update(data);
+                if (updateReturn.ok === true) {
+                    console.log("Update successfull");
+                } else {
+                    console.log("Update NOT successfull");
+                }
+                const newData = await worker.find({"selector":{"_id": data._id}});
+                self.postMessage(['update', newData.docs[0]]);
+                break;
+            case 'remove':
+                const rem = await worker.find(data);
+                const result = await worker.remove(rem.docs[0]);
+                break;
+            case 'find':
+                let query = await worker.find(data);
+                self.postMessage('Found documents: ' + JSON.stringify(query.docs));
+                break;
+            case 'all':
+                const all = await worker.all_docs();
+                self.postMessage(['all', all.rows]);
+                break;
+            case 'stop':
+                self.postMessage('WORKER STOPPED: ' + data.msg + '. (buttons will no longer work)');
+                self.close(); // Terminates the worker.
+                break;
+            default:
+                self.postMessage('Unknown command: ' + data.msg);
+        }
+    };
+
+    const saveEntryResult = async (check) => {
+        if (check.ok) {
+            const entry =
+                (await worker.find({"selector": {"_id": check.id, "_rev": check.rev}})).docs[0];
+            delete entry.passwd;
+            return {
+                ok: true,
+                entry: entry
+            }
+        } else return { ok: false };
+    };
+
+    const saveCatResult = async (check) => {
+        if (check.ok) {
+            const entry =
+                (await worker.find({"selector": {"_id": check.id, "_rev": check.rev}})).docs[0];
+            return {
+                ok: true,
+                entry: entry
+            }
+        } else return { ok: false };
+    };
+
+    /**
+     * Build selector query for PouchDB to verify that data was added.
+     */
+    const buildSelector = (data) => {
+        let selector = Object();
+        Object.keys(data).forEach(e => {
+            // TODO Worker - BuildSelector support Arrays?
+            if (!Array.isArray(data[e]))
+                selector[e] = data[e];
+        });
+        return selector
+    };
+
+    const returnSaved = async (data) => {
+        const success = await elementExists(data);
+    };
+
+    /**
+     * Checks if element dataset exist in local database.
+     */
+    const elementExists = async (data) => {
+        const ret = await worker.find({"selector": buildSelector(data)});
+        return (ret.docs.length !== 0);
+    };
+
+    // TODO Define WebAssembly API with Field to exclude passwd: https://nolanlawson.github.io/pouchdb-find/
+    /**
+     * Delete password field in dataset.
+     */
+    const deletePasswordsInEntries = (data) => {
+        const entries = [];
+        data.forEach(e => {
+           delete e.doc.passwd;
+           entries.push(e.doc);
+        });
+        return entries;
+    }
+
+
+    /**
+     ***********************
+     *
+     * Login & Registration
+     *
+     ***********************
+     */
 
     const registration = async (uname, masterkey) => {
         // TODO Moritz func call
@@ -128,117 +252,6 @@ import("../../rust/pkg").then(wasm => {
 
 
     };
-
-    self.addEventListener('message', async function(e) {
-        const cmd = e.data[0];
-        const data = e.data[1];
-        switch (cmd) {
-            case 'saveEntry':
-                // TODO Worker Decrypt Password
-                const saveCheck = await worker.save(data);
-                self.postMessage(['saveEntry', await saveEntryResult(saveCheck)]);
-                break;
-            case 'saveCategory':
-                const catCheck = await worker.save(data);
-                self.postMessage(['saveCategory', await saveCatResult(catCheck)]);
-                break;
-
-
-            // TODO Remove legacy Worker API
-            case 'update':
-                const updateReturn = await worker.update(data);
-                if (updateReturn.ok === true) {
-                    console.log("Update successfull");
-                } else {
-                    console.log("Update NOT successfull");
-                }
-                const newData = await worker.find({"selector":{"_id": data._id}});
-                self.postMessage(['update', newData.docs[0]]);
-                break;
-            case 'remove':
-                const rem = await worker.find(data);
-                const result = await worker.remove(rem.docs[0]);
-                break;
-            case 'find':
-                let query = await worker.find(data);
-                self.postMessage('Found documents: ' + JSON.stringify(query.docs));
-                break;
-            case 'all':
-                const all = await worker.all_docs();
-                self.postMessage(['all', all.rows]);
-                break;
-            case 'stop':
-                self.postMessage('WORKER STOPPED: ' + data.msg + '. (buttons will no longer work)');
-                self.close(); // Terminates the worker.
-                break;
-            default:
-                self.postMessage('Unknown command: ' + data.msg);
-        }
-    }, false);
-
-
-
-    const saveEntryResult = async (check) => {
-        if (check.ok) {
-            const entry =
-                (await worker.find({"selector": {"_id": check.id, "_rev": check.rev}})).docs[0];
-            delete entry.passwd;
-            return {
-                ok: true,
-                entry: entry
-            }
-        } else return { ok: false };
-    };
-
-    const saveCatResult = async (check) => {
-        if (check.ok) {
-            const entry =
-                (await worker.find({"selector": {"_id": check.id, "_rev": check.rev}})).docs[0];
-            return {
-                ok: true,
-                entry: entry
-            }
-        } else return { ok: false };
-    };
-
-
-    /**
-     * Build selector query for PouchDB to verify that data was added.
-     */
-    const buildSelector = (data) => {
-        let selector = Object();
-        Object.keys(data).forEach(e => {
-            // TODO Worker - BuildSelector support Arrays?
-            if (!Array.isArray(data[e]))
-                selector[e] = data[e];
-        });
-        return selector
-    };
-
-    const returnSaved = async (data) => {
-        const success = await elementExists(data);
-    };
-
-    /**
-     * Checks if element dataset exist in local database.
-     */
-    const elementExists = async (data) => {
-        const ret = await worker.find({"selector": buildSelector(data)});
-        return (ret.docs.length !== 0);
-    };
-
-    // TODO Define WebAssembly API with Field to exclude passwd: https://nolanlawson.github.io/pouchdb-find/
-    /**
-     * Delete password field in dataset.
-     */
-    const deletePasswordsInEntries = (data) => {
-        const entries = [];
-        data.forEach(e => {
-           delete e.doc.passwd;
-           entries.push(e.doc);
-        });
-        return entries;
-    }
 
 });
 

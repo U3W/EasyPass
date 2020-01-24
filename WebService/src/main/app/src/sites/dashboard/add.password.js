@@ -201,7 +201,6 @@ export default class AddPassword extends React.Component {
         });
     }
 
-
     changeCat(id) {
         this.setState({
             catID: id,
