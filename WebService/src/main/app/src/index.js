@@ -50,7 +50,10 @@ class App extends React.Component {
     }
 
     componentDidMount() {
-        this.handleConnectionChange();
+        // TODO Fix HandleConnection
+        //  Function makes always a re-render, even though the state has not changed
+        //  This results in flickering of data in the dashboard!!
+        //this.handleConnectionChange();
         window.addEventListener('online', this.handleConnectionChange);
         window.addEventListener('offline', this.handleConnectionChange);
     }
@@ -61,9 +64,15 @@ class App extends React.Component {
     }
 
     workerIsInitialized() {
+        /*
+        // Triggers unnecessary re-render
         this.setState({
             workerInitialized: true
         });
+        */
+        // TODO @Seb Set workerInitalized without re-rendering?
+        //  This line violates React rules but kinda works...
+        this.state.workerInitialized = true;
     }
 
 
@@ -88,6 +97,8 @@ class App extends React.Component {
     };
 
     getApp() {
+        console.log("Worker state: " + this.state.workerInitialized);
+        console.log("Disconnected: " + this.state.isDisconnected);
         if ( !this.state.isDisconnected )
         {
             return (
@@ -99,10 +110,16 @@ class App extends React.Component {
                             <Masterpassword worker={this.state.worker} workerInitialized={this.state.workerInitialized}
                                 workerIsInitialized={this.workerIsInitialized}/>}
                                 netState="online" type="auth" />
-                        <ProtectedRoute exact path="/dashboard" component={() =>
+                        {/*<ProtectedRoute exact path="/dashboard" component={() =>
                             <Dashboard worker={this.state.worker} workerInitialized={this.state.workerInitialized}
                                 workerIsInitialized={this.workerIsInitialized}/>}
-                                netState="online" type="verify" />
+                                netState="online" type="verify" />*/}
+                        {/*<ProtectedRoute exact path="/dashboard" render={() =>
+                            <h1>Hey</h1>}/>*/}
+                        <ProtectedRoute exact path="/dashboard" component={() =>
+                        <Dashboard worker={this.state.worker} workerInitialized={this.state.workerInitialized}
+                                   workerIsInitialized={this.workerIsInitialized}/>}
+                                         netState="online" type="verify" />
                         <Route path="*" component={NoMatch} />
                     </Switch>
                 </div>

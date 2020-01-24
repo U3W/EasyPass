@@ -148,7 +148,6 @@ class Dashboard extends React.Component {
     componentDidMount() {
         this.updateWindowDimensions();
         window.addEventListener('resize', this.updateWindowDimensions);
-        //this.props.worker.addEventListener("message", this.workerCall, true);
         this.props.workerInitialized ?
             this.props.worker.addEventListener("message", this.workerCall) :
             this.props.worker.addEventListener("message", this.workerInit);
@@ -201,7 +200,7 @@ class Dashboard extends React.Component {
      */
     workerCall( e ) {
         // TODO @Seb Omit _isMounted more gracefully
-        // isMounted is bad style and should be now used
+        //  isMounted is bad style and should be now used
         if(this._isMounted) {
             console.log('Saved entries: ' + this.state.entries.entries);
             console.log('Saved categories: ' + this.state.entries.categories);

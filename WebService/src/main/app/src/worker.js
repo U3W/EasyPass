@@ -7,6 +7,7 @@ import("../../rust/pkg").then(wasm => {
     let worker = null;
     let remoteInit = false;
     let authUrl = null;
+    let clientInitialized= false;
 
     // Initialize Worker
     const init = async () => {
@@ -27,8 +28,12 @@ import("../../rust/pkg").then(wasm => {
             }
         }
         worker = new wasm.Worker(dbUrl);
-        self.addEventListener('message', clientBound, true);
-        self.postMessage('initDone');
+        self.addEventListener('message', clientInit, true);
+        // Send client OK and wait for response in `clientInit` listener
+        while (!clientInitialized) {
+            self.postMessage('initDone');
+            await sleep(500);
+        }
     };
 
     init();
@@ -79,9 +84,10 @@ import("../../rust/pkg").then(wasm => {
         }, 3000);
     };
 
-    const clientBound = (e) => {
+    const clientInit = (e) => {
         if(e.data === 'initAck') {
-            self.removeEventListener('message', clientBound, true);
+            clientInitialized = true;
+            self.removeEventListener('message', clientInit, true);
             self.addEventListener('message', clientCall, true);
             heartbeat();
         }
