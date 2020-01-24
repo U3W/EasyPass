@@ -44,7 +44,9 @@ class App extends React.Component {
             isDisconnected: false,
             // Load backend with WebAssembly
             worker: new Worker('worker.js'),
+            workerInitialized: false
         };
+        this.workerIsInitialized = this.workerIsInitialized.bind(this);
     }
 
     componentDidMount() {
@@ -58,6 +60,11 @@ class App extends React.Component {
         window.removeEventListener('offline', this.handleConnectionChange);
     }
 
+    workerIsInitialized() {
+        this.setState({
+            workerInitialized: true
+        });
+    }
 
 
     handleConnectionChange = () => {
@@ -88,8 +95,14 @@ class App extends React.Component {
                     <Switch>
                         <Route exact path="/" component={() => <Login worker={this.state.worker} />} />
                         <Route exact path="/registration" component={() => <Registration worker={this.state.worker} />}/>
-                        <ProtectedRoute exact path="/verify" component={() => <Masterpassword worker={this.state.worker}/>} netState="online" type="auth" />
-                        <ProtectedRoute exact path="/dashboard" component={() => <Dashboard worker={this.state.worker}/>} netState="online" type="verify" />
+                        <ProtectedRoute exact path="/verify" component={() =>
+                            <Masterpassword worker={this.state.worker} workerInitialized={this.state.workerInitialized}
+                                workerIsInitialized={this.workerIsInitialized}/>}
+                                netState="online" type="auth" />
+                        <ProtectedRoute exact path="/dashboard" component={() =>
+                            <Dashboard worker={this.state.worker} workerInitialized={this.state.workerInitialized}
+                                workerIsInitialized={this.workerIsInitialized}/>}
+                                netState="online" type="verify" />
                         <Route path="*" component={NoMatch} />
                     </Switch>
                 </div>

@@ -102,7 +102,7 @@ class Dashboard extends React.Component {
             // resetPass vars
             errorShow: false,
             errorText: "",
-            errorState: "success",
+            errorState: "success"
         };
 
         this.setErrorShow = this.setErrorShow.bind(this);
@@ -141,19 +141,25 @@ class Dashboard extends React.Component {
         this.workerCall = this.workerCall.bind(this);
         // Refresh component
         this.refresh = this.refresh.bind(this);
+
+        //this.componentDidMount = this.componentDidMount.bind(this);
     }
 
     componentDidMount() {
         this.updateWindowDimensions();
         window.addEventListener('resize', this.updateWindowDimensions);
         //this.props.worker.addEventListener("message", this.workerCall, true);
-        this.props.worker.addEventListener("message", this.workerInit);
+        if (!this.props.workerInitialized) {
+            this.props.worker.addEventListener("message", this.workerInit);
+        }
 
     }
 
     componentWillUnmount() {
         window.removeEventListener('resize', this.updateWindowDimensions);
-        this.props.worker.removeEventListener("message", this.workerCall);
+        this.props.workerInitialized ?
+            this.props.worker.removeEventListener("message", this.workerCall) :
+            this.props.worker.removeEventListener("message", this.workerInit);
     }
 
     updateWindowDimensions() {
@@ -179,6 +185,10 @@ class Dashboard extends React.Component {
         if (success) {
             this.props.worker.removeEventListener("message", this.workerInit);
             this.props.worker.addEventListener("message", this.workerCall);
+            /**this.setState({
+                workerInitialized: true
+            }, () => this.props.worker.postMessage('initAck'));*/
+            this.props.workerIsInitialized();
             this.props.worker.postMessage('initAck');
         }
     }
@@ -188,6 +198,7 @@ class Dashboard extends React.Component {
      * @param e Message received from Web Worker
      */
     workerCall( e ) {
+        console.log(this.state.workerInitialized);
         console.log('Saved entries: ' + this.state.entries.entries);
         console.log('Saved categories: ' + this.state.entries.categories);
         const cmd = e.data[0];
@@ -199,7 +210,7 @@ class Dashboard extends React.Component {
             case 'allEntries':
                 console.log("wow");
                 this.state.entries.loadData(data);
-                this.refresh();
+                //this.refresh();
                 break;
             case 'saveEntry':
                 this.copy("", dashboardAlerts.showAddedPass, data.ok);
