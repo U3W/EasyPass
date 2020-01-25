@@ -31,7 +31,7 @@ import DeleteCategory from "./delete.cat";
 import history from "../../routing/history"
 import StringSelector from "../../strings/stings";
 import Entries from "./Entries";
-
+import * as that from "./dashboard-extended";
 
 class Dashboard extends React.Component {
     _isMounted = false;
@@ -137,15 +137,16 @@ class Dashboard extends React.Component {
         // WindowDimensions
         this.updateWindowDimensions = this.updateWindowDimensions.bind(this);
         // Worker
-        this.workerInit = this.workerInit.bind(this);
-        this.workerCall = this.workerCall.bind(this);
+        this.workerInit = that.workerInit.bind(this);
+        this.workerCall = that.workerCall.bind(this);
         // Refresh component
-        this.refresh = this.refresh.bind(this);
+        this.refresh = that.refresh.bind(this);
 
-        //this.componentDidMount = this.componentDidMount.bind(this);
+        this.baum = that.baum.bind(this);
     }
 
     componentDidMount() {
+        this.baum();
         this.updateWindowDimensions();
         window.addEventListener('resize', this.updateWindowDimensions);
         this.props.workerInitialized ?
@@ -172,61 +173,6 @@ class Dashboard extends React.Component {
             language: to
         });
     }
-
-    /**
-     * Updates the whole component.
-     */
-    refresh() {
-        this.setState({});
-    }
-
-
-    workerInit( e ) {
-        const success = e.data === 'initDone';
-        if (success) {
-            this.props.worker.removeEventListener("message", this.workerInit);
-            this.props.worker.addEventListener("message", this.workerCall);
-            /**this.setState({
-                workerInitialized: true
-            }, () => this.props.worker.postMessage('initAck'));*/
-            this.props.workerIsInitialized();
-            this.props.worker.postMessage('initAck');
-        }
-    }
-
-    /**
-     * React to messages send from the Web Worker
-     * @param e Message received from Web Worker
-     */
-    workerCall( e ) {
-        // TODO @Seb Omit _isMounted more gracefully
-        //  isMounted is bad style and should be now used
-        if(this._isMounted) {
-            console.log('Saved entries: ' + this.state.entries.entries);
-            console.log('Saved categories: ' + this.state.entries.categories);
-            const cmd = e.data[0];
-            const data = e.data[1];
-            console.log("WORKERCALL");
-            console.log(cmd);
-            console.log(data);
-            switch (cmd) {
-                case 'allEntries':
-                    //console.log("wow");
-                    this.state.entries.loadData(data);
-                    this.refresh();
-                    break;
-                case 'saveEntry':
-                    this.copy("", dashboardAlerts.showAddedPass, data.ok);
-                    this.dismissAddPass();
-                    break;
-                case 'saveCategory':
-                    this.copy("", dashboardAlerts.showAddedCat, data.ok);
-                    this.dismissAddCat();
-                    break;
-            }
-        }
-    }
-
 
     renderCat() {
         let cats = this.getCats();
@@ -886,10 +832,10 @@ class Dashboard extends React.Component {
         }
     }
 
-    addPass(user, passwd, url, title, catID, tags) {
+    addPass(user, passwd, url, title, tags, catID) {
         const tabID = this.state.tabselected;
         this.props.worker.postMessage(['saveEntry',
-            {type: 'entry', user: user, passwd: passwd, url: url, title: title, tags: tags, tabID:tabID, catID: catID, }]);
+            {type: 'entry', user: user, passwd: passwd, url: url, title: title, tags: tags, tabID: tabID, catID: catID, }]);
     }
 
     deletePass(id) {
