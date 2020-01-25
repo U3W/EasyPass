@@ -48,7 +48,7 @@ class Entries{
 
         }
         return out;*/
-        this.state.entries.filter(ent => ent.catID === catID && ent.tabID === tabID);
+        return this.state.entries.filter(ent => ent.catID === catID && ent.tabID === tabID);
     }
 
     /**

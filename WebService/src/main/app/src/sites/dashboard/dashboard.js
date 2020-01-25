@@ -179,7 +179,7 @@ class Dashboard extends React.Component {
         let selectedCat = this.state.catselected;
         //console.log("Cats:", cats);
         ////console.log("Selected cat: "+ selectedCat);
-        if ( selectedCat === 0 && cats[0] !== undefined)
+        if ( cats !== undefined && cats[0] !== undefined)
         {
             let passwords = this.renderLines(cats);
             let passwordsSonst = this.renderLinesSonstige();
@@ -273,8 +273,8 @@ class Dashboard extends React.Component {
                 //console.log("Heyjooo", singlePass.tabID, selectedTab);
                 if (singlePass.tabID === selectedTab) {
                     return (
-                        <PassLine key={singlePass.id} tag={singlePass.tag} id={singlePass.id} cat={singlePass.cat}
-                                  title={singlePass.title} user={singlePass.user} pass={singlePass.pass}
+                        <PassLine key={singlePass._id} tag={singlePass.tags} id={singlePass._id} cat={singlePass.catID}
+                                  title={singlePass.title} user={singlePass.user} pass={singlePass.passwd}
                                   url={singlePass.url} callback={singlePass.callback}/>
                     );
                 }
@@ -299,8 +299,8 @@ class Dashboard extends React.Component {
                     catData = this.addCallback(catData);
                     passwords[catId] = catData.map(function (singlePass) {
                         return (
-                            <PassLine key={singlePass.id} tag={singlePass.tag} id={singlePass.id} cat={singlePass.cat}
-                                      title={singlePass.title} user={singlePass.user} pass={singlePass.pass}
+                            <PassLine key={singlePass._id} tag={singlePass.tags} id={singlePass._id} cat={singlePass.catID}
+                                      title={singlePass.title} user={singlePass.user} pass={singlePass.passwd}
                                       url={singlePass.url} callback={singlePass.callback}/>
                         );
                     })
@@ -741,8 +741,6 @@ class Dashboard extends React.Component {
             language: dashboardState.getSelectedLanguage(),
         });
     }
-
-
 
     setExpanded() {
         this.setState({

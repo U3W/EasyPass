@@ -44,6 +44,7 @@ import StringSelector from "../../strings/stings";
 export default class PassLine extends React.Component {
     constructor(props) {
         super(props);
+        console.log("line.temp.js: " + this.props);
 
         this.state = {
             show: false,
