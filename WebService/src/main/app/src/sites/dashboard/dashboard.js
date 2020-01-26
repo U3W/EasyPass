@@ -155,21 +155,26 @@ class Dashboard extends React.Component {
     }
 
     componentDidMount() {
-        this.baum();
         this.updateWindowDimensions();
         window.addEventListener('resize', this.updateWindowDimensions);
-        this.props.workerInitialized ?
+        /**this.props.workerInitialized ?
             this.props.worker.addEventListener("message", this.workerCall) :
-            this.props.worker.addEventListener("message", this.workerInit);
+            this.props.worker.addEventListener("message", this.workerInit);*/
+
+        this.props.worker.addEventListener("message", this.workerCall);
+        this.props.worker.postMessage(['dashboard', undefined]);
         this._isMounted = true;
 
     }
 
     componentWillUnmount() {
         window.removeEventListener('resize', this.updateWindowDimensions);
-        this.props.workerInitialized ?
+        /**this.props.workerInitialized ?
             this.props.worker.removeEventListener("message", this.workerCall) :
-            this.props.worker.removeEventListener("message", this.workerInit);
+            this.props.worker.removeEventListener("message", this.workerInit);*/
+
+        this.props.worker.postMessage(['unregister', undefined]);
+        this.props.worker.removeEventListener("message", this.workerCall);
         this._isMounted = false;
     }
 

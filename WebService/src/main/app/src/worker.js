@@ -7,7 +7,8 @@ import("../../rust/pkg").then(wasm => {
     let worker = null;
     let remoteInit = false;
     let authUrl = null;
-    let clientInitialized= false;
+    let clientInitialized = false;
+    let mode = undefined;
 
     // Initialize Worker
     const init = async () => {
@@ -89,14 +90,48 @@ import("../../rust/pkg").then(wasm => {
             clientInitialized = true;
             self.removeEventListener('message', clientInit, true);
             self.addEventListener('message', clientCall, true);
-            heartbeat();
         }
     };
 
     const clientCall = async (e) => {
         const cmd = e.data[0];
         const data = e.data[1];
+
+        if (mode === undefined) {
+            mode = cmd;
+            if (mode === 'dashboard') {
+                // TODO Toggle heartbeat
+                heartbeat();
+            }
+        } else {
+            switch (mode) {
+                case 'index':
+                    indexCall(cmd, data);
+                    break;
+                case 'dashboard':
+                    dashboardCall(cmd, data);
+                    break;
+            }
+        }
+
+    };
+
+    const indexCall = async (cmd, data) => {
         switch (cmd) {
+            case 'unregister':
+                mode = undefined;
+                break;
+            case 'echo':
+                self.postMessage(['echo', data]);
+                break;
+        }
+    };
+
+    const dashboardCall = async (cmd, data) => {
+        switch (cmd) {
+            case 'unregister':
+                mode = undefined;
+                break;
             case 'savePassword':
                 // TODO Worker Decrypt Password
                 const saveCheck = await worker.save(data);
