@@ -44,7 +44,7 @@ import StringSelector from "../../strings/stings";
 export default class PassLine extends React.Component {
     constructor(props) {
         super(props);
-        console.log("line.temp.js: " + this.props);
+        console.log("line.temp.js: ");
 
         this.state = {
             show: false,
@@ -952,7 +952,9 @@ export default class PassLine extends React.Component {
                                                         />
                                                     </Button>
                                                     :
-                                                    <Button variant="dark" className="footerButton center-horz" onClick={() => this.props.callback.deletePass(this.props.id)}>
+                                                    <Button variant="dark" className="footerButton center-horz"
+                                                        onClick={() =>
+                                                            this.props.callback.deletePass(this.props.id, this.props.rev)}>
                                                         <img
                                                             src={DeleteIcon}
                                                             alt=""

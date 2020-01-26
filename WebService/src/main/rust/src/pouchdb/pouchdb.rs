@@ -76,7 +76,10 @@ extern "C" {
     pub fn find(this: &PouchDB, query: &JsValue) -> Promise;
 
     #[wasm_bindgen(method, js_class = "PouchDB", js_name = remove)]
-    pub fn remove(this: &PouchDB, doc: &JsValue) -> Promise;
+    pub fn remove_with_element(this: &PouchDB, doc: &JsValue) -> Promise;
+
+    #[wasm_bindgen(method, js_class = "PouchDB", js_name = remove)]
+    pub fn remove(this: &PouchDB, doc_id: &JsValue, doc_rev: &JsValue) -> Promise;
 
     #[wasm_bindgen(js_namespace = PouchDB, js_name = replicate)]
     pub fn replicate(source: &PouchDB, target: &PouchDB) -> Promise;

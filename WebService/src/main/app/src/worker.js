@@ -9,6 +9,8 @@ import("../../rust/pkg").then(wasm => {
     let authUrl = null;
     let clientInitialized = false;
     let mode = undefined;
+    let deletedPassword = undefined;
+    let undoPasswordDeletion = false;
 
     // Initialize Worker
     const init = async () => {
@@ -137,6 +139,13 @@ import("../../rust/pkg").then(wasm => {
                 const saveCheck = await worker.save(data);
                 self.postMessage(['savePassword', await saveEntryResult(saveCheck)]);
                 break;
+            case 'deletePassword':
+                deletedPassword = (await worker.find({"selector":{"_id": data._id, "_rev": data._rev}})).docs[0];
+                const delCheck = await worker.remove(data._id, data._rev);
+                setTimeout(undoPasswordDelete, 5000);
+                self.postMessage(['deletePassword', delCheck]);
+                break;
+
             case 'saveCategory':
                 const catCheck = await worker.save(data);
                 self.postMessage(['saveCategory', await saveCatResult(catCheck)]);
@@ -185,6 +194,17 @@ import("../../rust/pkg").then(wasm => {
                 entry: entry
             }
         } else return { ok: false };
+    };
+
+    const undoPasswordDelete = async () => {
+      if (undoPasswordDeletion)  {
+          console.log("Undoing remove!!!");
+          delete deletedPassword._id;
+          delete deletedPassword._rev;
+          await worker.save(deletedPassword);
+            //await worker.save(deletedPassword);
+          deletedPassword = undefined;
+      }
     };
 
     const saveCatResult = async (check) => {

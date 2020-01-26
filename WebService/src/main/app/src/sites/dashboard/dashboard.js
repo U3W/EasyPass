@@ -35,7 +35,6 @@ import * as that from "./dashboard.extended";
 import * as dashboardEntries from "./dashboard.entries";
 
 class Dashboard extends React.Component {
-    _isMounted = false;
 
     constructor(props){
         super(props);
@@ -140,7 +139,10 @@ class Dashboard extends React.Component {
         this.getPassword = this.getPassword.bind(this);
         this.renderLinesSonstige = this.renderLinesSonstige.bind(this);
         this.renderLines = this.renderLines.bind(this);
-        this.deletePass = this.deletePass.bind(this);
+
+        this.addPass = that.addPass.bind(this);
+        this.deletePass = that.deletePass.bind(this);
+
         // WindowDimensions
         this.updateWindowDimensions = this.updateWindowDimensions.bind(this);
         // Worker
@@ -163,8 +165,6 @@ class Dashboard extends React.Component {
 
         this.props.worker.addEventListener("message", this.workerCall);
         this.props.worker.postMessage(['dashboard', undefined]);
-        this._isMounted = true;
-
     }
 
     componentWillUnmount() {
@@ -175,7 +175,6 @@ class Dashboard extends React.Component {
 
         this.props.worker.postMessage(['unregister', undefined]);
         this.props.worker.removeEventListener("message", this.workerCall);
-        this._isMounted = false;
     }
 
     updateWindowDimensions() {
@@ -201,8 +200,9 @@ class Dashboard extends React.Component {
                     catData = this.addCallback(catData);
                     passwords[catId] = catData.map(function (singlePass) {
                         return (
-                            <PassLine key={singlePass._id} tag={singlePass.tags} id={singlePass._id} cat={singlePass.catID}
-                                      title={singlePass.title} user={singlePass.user} pass={singlePass.passwd}
+                            <PassLine key={singlePass._id} tag={singlePass.tags} id={singlePass._id}
+                                      cat={singlePass.catID} rev={singlePass._rev} user={singlePass.user}
+                                      pass={singlePass.passwd} title={singlePass.title}
                                       url={singlePass.url} callback={singlePass.callback}/>
                         );
                     })
@@ -227,8 +227,9 @@ class Dashboard extends React.Component {
 
                 if (singlePass.tabID === selectedTab) {
                     return (
-                        <PassLine key={singlePass._id} tag={singlePass.tags} id={singlePass._id} cat={singlePass.catID}
-                                  title={singlePass.title} user={singlePass.user} pass={singlePass.passwd}
+                        <PassLine key={singlePass._id} tag={singlePass.tags} id={singlePass._id}
+                                  cat={singlePass.catID} rev={singlePass._rev} user={singlePass.user}
+                                  pass={singlePass.passwd} title={singlePass.title}
                                   url={singlePass.url} callback={singlePass.callback}/>
                     );
                 }
@@ -823,24 +824,6 @@ class Dashboard extends React.Component {
                 return cats[i].name;
             }
         }
-    }
-
-    addPass(user, passwd, url, title, tags, catID) {
-        const tabID = this.state.tabselected;
-        this.props.worker.postMessage(['savePassword',
-            {type: 'passwd', user: user, passwd: passwd, url: url, title: title, tags: tags, tabID: tabID, catID: catID, }]);
-    }
-
-    deletePass(id) {
-        // ToDO call Kacpers method
-        this.state.mock.deletePass(id);
-        console.log("Passwords new", this.getCatData(1,0));
-        this.setState({
-            currentPassDelete: id,
-        });
-        this.showDeletePopUp(dashboardAlerts.showDeletePassAlert, true);
-
-        this.render();
     }
 
     stopDelete( which, id ) {

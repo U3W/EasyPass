@@ -124,8 +124,15 @@ impl Worker {
         })
     }
 
-    pub fn remove(&self, data: JsValue) -> Promise {
-        let action = JsFuture::from(self.local.remove(&data));
+    pub fn remove_with_element(&self, data: JsValue) -> Promise {
+        let action = JsFuture::from(self.local.remove_with_element(&data));
+        future_to_promise(async move {
+            action.await
+        })
+    }
+
+    pub fn remove(&self, doc_id: JsValue, doc_rev: JsValue) -> Promise {
+        let action = JsFuture::from(self.local.remove(&doc_id, &doc_rev));
         future_to_promise(async move {
             action.await
         })

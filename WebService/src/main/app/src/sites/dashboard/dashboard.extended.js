@@ -40,28 +40,54 @@ export function workerInit( e ) {
  * @param e Message received from Web Worker
  */
 export function workerCall( e ) {
-    // TODO @Seb Omit _isMounted more gracefully
-    //  isMounted is bad style and should be now used
-    if(this._isMounted) {
-        console.log('Saved entries: ' + this.state.entries.entries);
-        console.log('Saved categories: ' + this.state.entries.categories);
-        const cmd = e.data[0];
-        const data = e.data[1];
-        console.log("WORKERCALL");
-        console.log(cmd);
-        console.log(data);
-        switch (cmd) {
-            case 'allEntries':
-                this.loadEntries(data);
-                break;
-            case 'savePassword':
-                this.copy("", dashboardAlerts.showAddedPass, data.ok);
-                this.dismissAddPass();
-                break;
-            case 'saveCategory':
-                this.copy("", dashboardAlerts.showAddedCat, data.ok);
-                this.dismissAddCat();
-                break;
-        }
+    console.log('Saved entries: ' + this.state.entries.entries);
+    console.log('Saved categories: ' + this.state.entries.categories);
+    const cmd = e.data[0];
+    const data = e.data[1];
+    console.log("WORKERCALL");
+    console.log(cmd);
+    console.log(data);
+    switch (cmd) {
+        case 'allEntries':
+            this.loadEntries(data);
+            break;
+        case 'savePassword':
+            this.copy("", dashboardAlerts.showAddedPass, data.ok);
+            this.dismissAddPass();
+            break;
+        case 'deletePassword':
+            this.showDeletePopUp(dashboardAlerts.showDeletePassAlert, data.ok);
+            break;
+        case 'saveCategory':
+            this.copy("", dashboardAlerts.showAddedCat, data.ok);
+            this.dismissAddCat();
+            break;
     }
+
+}
+
+export function addPass(user, passwd, url, title, tags, catID) {
+    const tabID = this.state.tabselected;
+    this.props.worker.postMessage(['savePassword',
+        {type: 'passwd', user: user, passwd: passwd, url: url, title: title, tags: tags, tabID: tabID, catID: catID, }]);
+}
+
+export function deletePass(id, rev) {
+    console.log("DELETE!!!");
+    console.log(id);
+    console.log(rev);
+    this.props.worker.postMessage(['deletePassword', {_id: id, _rev: rev}]);
+
+
+    // ToDO call Kacpers method
+    /**this.state.mock.deletePass(id);
+
+
+
+    this.setState({
+        currentPassDelete: id,
+    });
+    this.showDeletePopUp(dashboardAlerts.showDeletePassAlert, true);
+
+    this.render();*/
 }
