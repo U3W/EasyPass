@@ -1,7 +1,8 @@
 import {dashboardAlerts} from "./const/dashboard.enum";
 
 /**
- * Functions that add more functionality to the `Dashboard` component.
+ * Extends functionality of the `Dashboard` component.
+ * This class is used specifically for logic operations.
  *
  * In order to use them, then need to be bound in the `Dashboard component`
  * like `this.[someFunc] = [importAlias].[someFunc].bind(this);`.
@@ -51,11 +52,9 @@ export function workerCall( e ) {
         console.log(data);
         switch (cmd) {
             case 'allEntries':
-                //console.log("wow");
-                this.state.entries.loadData(data);
-                this.refresh();
+                this.loadEntries(data);
                 break;
-            case 'saveEntry':
+            case 'savePassword':
                 this.copy("", dashboardAlerts.showAddedPass, data.ok);
                 this.dismissAddPass();
                 break;

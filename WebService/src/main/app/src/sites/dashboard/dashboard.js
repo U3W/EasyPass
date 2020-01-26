@@ -30,8 +30,9 @@ import EditCategory from "./edit.cat";
 import DeleteCategory from "./delete.cat";
 import history from "../../routing/history"
 import StringSelector from "../../strings/stings";
-import Entries from "./Entries";
-import * as that from "./dashboard-extended";
+//import Entries from "./Entries";
+import * as that from "./dashboard.extended";
+import * as dashboardEntries from "./dashboard.entries";
 
 class Dashboard extends React.Component {
     _isMounted = false;
@@ -59,7 +60,13 @@ class Dashboard extends React.Component {
             // mockpassword
             mock: new MockPasswords(this.props.worker),
             // password entries,
-            entries: new Entries(),
+
+            //entries: new Entries(),
+            entries: {
+                passwords: [],
+                categories: []
+            },
+
             // language
             language: dashboardState.getSelectedLanguage(), // 0 - Deutsch, 1 - English
 
@@ -139,10 +146,12 @@ class Dashboard extends React.Component {
         // Worker
         this.workerInit = that.workerInit.bind(this);
         this.workerCall = that.workerCall.bind(this);
-        // Refresh component
-        this.refresh = that.refresh.bind(this);
 
-        this.baum = that.baum.bind(this);
+        // Entry functions
+        this.loadEntries = dashboardEntries.loadEntries.bind(this);
+        this.getCatsFromTab = dashboardEntries.getCatsFromTab.bind(this);
+        this.getCatData = dashboardEntries.getCatData.bind(this);
+
     }
 
     componentDidMount() {
@@ -174,20 +183,69 @@ class Dashboard extends React.Component {
         });
     }
 
+    renderLines(cats) {
+        let passwords = {};
+
+        if (cats[0] !== undefined) {
+            console.log(cats);
+            for (let i = 0; i < cats.length; i++) {
+                let catId = cats[i]._id;
+                let catData = this.getCatData(catId, this.state.tabselected);
+                // add callback to array
+                if (catData !== undefined) {
+                    catData = this.addCallback(catData);
+                    passwords[catId] = catData.map(function (singlePass) {
+                        return (
+                            <PassLine key={singlePass._id} tag={singlePass.tags} id={singlePass._id} cat={singlePass.catID}
+                                      title={singlePass.title} user={singlePass.user} pass={singlePass.passwd}
+                                      url={singlePass.url} callback={singlePass.callback}/>
+                        );
+                    })
+                } else return undefined;
+            }
+            return passwords;
+
+        } else return undefined;
+    }
+
+    renderLinesSonstige() {
+        let passwords = {};
+        let selectedTab = this.state.tabselected;
+        let catData = this.getCatData(0, this.state.tabselected);
+
+        // add callback to array
+        if (catData !== undefined && catData.length > 0) {
+            console.log("why here?");
+            catData = this.addCallback(catData);
+            passwords[0] = catData.map(function (singlePass) {
+                //console.log("Heyjooo", singlePass.tabID, selectedTab);
+
+                if (singlePass.tabID === selectedTab) {
+                    return (
+                        <PassLine key={singlePass._id} tag={singlePass.tags} id={singlePass._id} cat={singlePass.catID}
+                                  title={singlePass.title} user={singlePass.user} pass={singlePass.passwd}
+                                  url={singlePass.url} callback={singlePass.callback}/>
+                    );
+                }
+            });
+            return passwords;
+
+        } else return undefined;
+    }
+
     renderCat() {
         let cats = this.getCats();
-        let selectedCat = this.state.catselected;
-        //console.log("Cats:", cats);
-        ////console.log("Selected cat: "+ selectedCat);
-        if ( cats !== undefined && cats[0] !== undefined)
-        {
-            let passwords = this.renderLines(cats);
-            let passwordsSonst = this.renderLinesSonstige();
 
-            console.log("renderCat: ", passwordsSonst, passwords);
-            let final = cats.map(function (cat) {
+        let passwordsWithCats = this.renderLines(cats);
+        let passwordsWithout = this.renderLinesSonstige();
+
+        let renderWithCats = "";
+        let renderWithout = "";
+
+        if (passwordsWithCats !== undefined) {
+            renderWithCats = cats.map(function (cat) {
                 return (
-                    <div key={cat._id} >
+                    <div key={cat._id}>
                         <strong>{cat.name}</strong>
                         {cat.desc.length === 0 ?
                             ""
@@ -196,48 +254,32 @@ class Dashboard extends React.Component {
                         }
                         {cat.desc}
                         <hr/>
-                        {passwords[cat._id]}
+                        {passwordsWithCats[cat._id]}
                     </div>
-                );
+                )
             });
+        }
 
-            let notAddedToCat = (
+        if (passwordsWithout !== undefined) {
+            renderWithout = (
                 <div>
                     <strong>{StringSelector.getString(this.state.language).mainNotAddedToCat}</strong>
                     <br/>
                     {StringSelector.getString(this.state.language).mainNotAddedToCatInfo}
                     <hr/>
-                    {passwordsSonst[0]}
-                </div>
-            );
-
-            if ( passwordsSonst === "" || passwordsSonst[0].length === 0 ) {
-                notAddedToCat = "";
-            }
-
-            return (
-                <>
-                    <h5>{StringSelector.getString(this.state.language).mainAllCat}</h5>
-                    <hr/>
-                    {final}
-                    {notAddedToCat}
-                </>
-            );
-
-        }
-        else if(cats[0] !== undefined) {
-            let cat = cats[selectedCat-1];
-            let passwords = this.renderLines([cat]);
-            return (
-                <div>
-                    <h5>{cat.name}</h5>
-                    {cat.desc}
-                    <hr/>
-                    {passwords[cat._id]}
+                    {passwordsWithout[0]}
                 </div>
             );
         }
-        else return (<div/>);
+
+        return (
+            <>
+                <h5>{StringSelector.getString(this.state.language).mainAllCat}</h5>
+                <hr/>
+                {renderWithCats}
+                {renderWithout}
+            </>
+        );
     }
 
     getPassword( id ) {
@@ -258,57 +300,7 @@ class Dashboard extends React.Component {
         return catData;
     }
 
-    renderLinesSonstige() {
-        let passwords = {};
-        let selectedTab = this.state.tabselected;
-        //TODO mocking Object renderLinesSonstige
-        //let catData = this.state.mock.getCatData(0, selectedTab);
-        let catData = this.state.entries.getCatData(0, this.state.tabselected);
-        console.log("renderLinesSontiges: " + catData);
-        // add callback to array
-        if (catData !== undefined) {
-            console.log("why here?");
-            catData = this.addCallback(catData);
-            passwords[0] = catData.map(function (singlePass) {
-                //console.log("Heyjooo", singlePass.tabID, selectedTab);
-                if (singlePass.tabID === selectedTab) {
-                    return (
-                        <PassLine key={singlePass._id} tag={singlePass.tags} id={singlePass._id} cat={singlePass.catID}
-                                  title={singlePass.title} user={singlePass.user} pass={singlePass.passwd}
-                                  url={singlePass.url} callback={singlePass.callback}/>
-                    );
-                }
-            });
-            return passwords;
-        } else return "";
-    }
 
-    renderLines(cats) {
-        //console.log("RenderLines", cats);
-        let passwords = {};
-        if (cats[0] !== undefined) {
-            console.log(cats);
-            for (let i = 0; i < cats.length; i++) {
-                //out += <b>{cats[i].name}</b>
-                let catId = cats[i]._id;
-                //TODO mocking Object renbderLines
-                //let catData = this.state.mock.getCatData(catId, this.state.tabselected);
-                let catData = this.state.entries.getCatData(catId, this.state.tabselected);
-                // add callback to array
-                if (catData !== undefined) {
-                    catData = this.addCallback(catData);
-                    passwords[catId] = catData.map(function (singlePass) {
-                        return (
-                            <PassLine key={singlePass._id} tag={singlePass.tags} id={singlePass._id} cat={singlePass.catID}
-                                      title={singlePass.title} user={singlePass.user} pass={singlePass.passwd}
-                                      url={singlePass.url} callback={singlePass.callback}/>
-                        );
-                    })
-                } else return "";
-            }
-            return passwords;
-        } else return "";
-    }
 
     setErrorShow( to ) {
         console.log("Aha", to);
@@ -809,9 +801,7 @@ class Dashboard extends React.Component {
      * @returns [] a list with all the categories created by the user
      */
     getCats() {
-        //TODO mocking Object
-        //return this.state.mock.getCats(this.state.tabselected);
-        return this.state.entries.getCats(this.state.tabselected);
+        return this.getCatsFromTab(this.state.tabselected);
     }
 
     getSelectedCatName() {
@@ -832,14 +822,14 @@ class Dashboard extends React.Component {
 
     addPass(user, passwd, url, title, tags, catID) {
         const tabID = this.state.tabselected;
-        this.props.worker.postMessage(['saveEntry',
-            {type: 'entry', user: user, passwd: passwd, url: url, title: title, tags: tags, tabID: tabID, catID: catID, }]);
+        this.props.worker.postMessage(['savePassword',
+            {type: 'passwd', user: user, passwd: passwd, url: url, title: title, tags: tags, tabID: tabID, catID: catID, }]);
     }
 
     deletePass(id) {
         // ToDO call Kacpers method
         this.state.mock.deletePass(id);
-        console.log("Passwords new", this.state.mock.getCatData(1,0));
+        console.log("Passwords new", this.getCatData(1,0));
         this.setState({
             currentPassDelete: id,
         });

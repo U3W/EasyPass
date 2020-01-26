@@ -97,10 +97,10 @@ import("../../rust/pkg").then(wasm => {
         const cmd = e.data[0];
         const data = e.data[1];
         switch (cmd) {
-            case 'saveEntry':
+            case 'savePassword':
                 // TODO Worker Decrypt Password
                 const saveCheck = await worker.save(data);
-                self.postMessage(['saveEntry', await saveEntryResult(saveCheck)]);
+                self.postMessage(['savePassword', await saveEntryResult(saveCheck)]);
                 break;
             case 'saveCategory':
                 const catCheck = await worker.save(data);
