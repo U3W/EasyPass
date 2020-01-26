@@ -152,7 +152,13 @@ import("../../rust/pkg").then(wasm => {
                 const undoKey = [...deletedPasswords.keys()].find(entry => entry._id === data._id);
                 deletedPasswords.set(undoKey, true);
                 break;
-
+            case 'getPassword':
+                // TODO fix spamming worker calls from client for getPassword ...
+                const encrypted = (await worker.find({"selector":{"_id": data._id, "_rev": data._rev}})).docs[0];
+                // TODO call decryption
+                const decrypted = encrypted;
+                self.postMessage(['getPassword', {_id: decrypted._id, passwd: decrypted.passwd}]);
+                break;
             case 'saveCategory':
                 const catCheck = await worker.save(data);
                 self.postMessage(['saveCategory', await saveCatResult(catCheck)]);

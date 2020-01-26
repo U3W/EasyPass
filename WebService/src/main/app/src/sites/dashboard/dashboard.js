@@ -65,6 +65,8 @@ class Dashboard extends React.Component {
                 passwords: [],
                 categories: []
             },
+            passwordCache: undefined,
+            passwordCacheID: undefined,
 
             // language
             language: dashboardState.getSelectedLanguage(), // 0 - Deutsch, 1 - English
@@ -135,12 +137,15 @@ class Dashboard extends React.Component {
         this.getPassAddShow = this.getPassAddShow.bind(this);
         // update, delete and so on
         this.getCats = this.getCats.bind(this);
-        this.getPassword = this.getPassword.bind(this);
         this.renderLinesSonstige = this.renderLinesSonstige.bind(this);
         this.renderLines = this.renderLines.bind(this);
 
         this.addPass = that.addPass.bind(this);
         this.deletePass = that.deletePass.bind(this);
+        this.getPass = that.getPass.bind(this);
+        this.copyPass = that.copyPass.bind(this);
+        this.resetPassCache = that.resetPassCache.bind(this);
+        this.setPassCacheID = that.setPassCacheID.bind(this);
         this.undoDelete = that.undoDelete.bind(this);
         // WindowDimensions
         this.updateWindowDimensions = this.updateWindowDimensions.bind(this);
@@ -187,14 +192,16 @@ class Dashboard extends React.Component {
                 // add callback to array
                 if (catData !== undefined) {
                     catData = this.addCallback(catData);
-                    passwords[catId] = catData.map(function (singlePass) {
+                    passwords[catId] = catData.map(singlePass => {
                         return (
                             <PassLine key={singlePass._id} tag={singlePass.tags} id={singlePass._id}
                                       cat={singlePass.catID} rev={singlePass._rev} user={singlePass.user}
                                       pass={singlePass.passwd} title={singlePass.title}
-                                      url={singlePass.url} callback={singlePass.callback}/>
+                                      url={singlePass.url} callback={singlePass.callback}
+                                      passwordCache={this.state.passwordCache}
+                                      passwordCacheID={this.state.passwordCacheID}/>
                         );
-                    })
+                    });
                 } else return undefined;
             }
             return passwords;
@@ -211,15 +218,15 @@ class Dashboard extends React.Component {
         if (catData !== undefined && catData.length > 0) {
             console.log("why here?");
             catData = this.addCallback(catData);
-            passwords[0] = catData.map(function (singlePass) {
-                //console.log("Heyjooo", singlePass.tabID, selectedTab);
-
+            passwords[0] = catData.map(singlePass => {
                 if (singlePass.tabID === selectedTab) {
                     return (
                         <PassLine key={singlePass._id} tag={singlePass.tags} id={singlePass._id}
                                   cat={singlePass.catID} rev={singlePass._rev} user={singlePass.user}
                                   pass={singlePass.passwd} title={singlePass.title}
-                                  url={singlePass.url} callback={singlePass.callback}/>
+                                  url={singlePass.url} callback={singlePass.callback}
+                                  passwordCache={this.state.passwordCache}
+                                  passwordCacheID={this.state.passwordCacheID}/>
                     );
                 }
             });
@@ -276,13 +283,6 @@ class Dashboard extends React.Component {
             </>
         );
     }
-
-    getPassword( id ) {
-        // TODO Mockobjekt getPassword
-        //return this.state.mock.getPassword(id);
-        return this.state.entries.getEntry(id);
-    }
-
 
     addCallback( catData ) {
 
@@ -645,20 +645,6 @@ class Dashboard extends React.Component {
         if ( toCopy !== "" ) {
             this.clipboardCopy(toCopy);
         }
-    }
-
-    copyPass(id) {
-        // Todo call Kacpers Method
-        let pass = this.getPassword(id);
-        // Popup starten
-        this.setState({
-            showCopyAlert: true,
-            alertState: "success",
-        });
-        this.dismissCopy("showCopyAlert");
-
-
-        this.clipboardCopy(pass);
     }
 
     goToPage(url, id) {

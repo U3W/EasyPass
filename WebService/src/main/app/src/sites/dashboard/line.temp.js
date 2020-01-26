@@ -31,6 +31,7 @@ import GeneratePass from "./generatepass";
 import Spinner from "react-bootstrap/Spinner";
 import StringSelector from "../../strings/stings";
 
+
 /**
  * @param id: which element in a list f.e. (must be unique, because with this id the collapsible div will be opened then toggled)
  * @param img: a link to the website (f.e. "www.google.com/"). Note that the / at the end is necessary for getting the favicon (Icon on the beginning of the card)
@@ -44,13 +45,13 @@ import StringSelector from "../../strings/stings";
 export default class PassLine extends React.Component {
     constructor(props) {
         super(props);
-        console.log("line.temp.js: ");
 
         this.state = {
             show: false,
             showCopyAlert: false,
             edit: false,
             id: this.props.id,
+            rev: this.props.rev,
             passwordNew: "",
             userNew: this.props.user,
             titleNew: this.props.title,
@@ -61,6 +62,8 @@ export default class PassLine extends React.Component {
             tagNew: this.deepCopyTags(this.props.tag),
             tagAdded: this.setTagAddedRight(this.props.tag),
             popUpCatShow: false,
+
+            passwordLoaded: false,
 
             // generate popup
             generatePassShow: false,
@@ -331,9 +334,12 @@ export default class PassLine extends React.Component {
     setEdit( changeTo, succ ) {
         //console.log("ChangeTo", changeTo, this.props.tag);
         if ( changeTo ) {
+            // TODO test with prop
+            /**
             this.setState({
-                passwordNew: this.props.callback.getPassword(this.props.id),
-            });
+                passwordNew: this.props.callback.getPass(this.props.id),
+            });*/
+            this.props.callback.getPass(this.props.id);
         }
         else {
             if ( !succ ) {
@@ -360,15 +366,16 @@ export default class PassLine extends React.Component {
             show: !this.state.show
         });
     }
+
     setPasswordTo(to) {
         this.setState({
             show: to
         });
     }
 
-    getPassword(id) {
+    getPassword(id, rev) {
         if ( this.state.show ) {
-            return this.props.callback.getPassword(id);
+            return this.props.callback.getPass(id, rev);
         }
     }
 
@@ -576,7 +583,34 @@ export default class PassLine extends React.Component {
     }
 
     render() {
-        let password = this.getPassword(this.props.id);
+        /**
+        let flag = true;
+        if (this.state.id !== this.props.passwordCacheID && this.state.show === true) {
+            flag = false;
+            this.setState({
+                show: false
+            });
+        }*/
+
+        /**if (this.props.passwordCacheID !== undefined && this.props.passwordCacheID !== this.state.id) {
+
+        }*/
+
+        // Request password from worker
+        // If-statement is needed to break recursive render loop
+        if (this.state.id !== this.props.passwordCacheID && this.state.show === true) {
+            this.getPassword(this.state.id, this.state.rev);
+        }
+
+        /**
+        if (this.state.passwordLoaded === false && this.props.passwordCacheID !== this.state.id) {
+            this.getPassword(this.state.id, this.state.rev);
+            this.setState({
+                passwordLoaded: true
+            });
+        }*/
+
+
 
         //console.log("Start of render", this.state.urlNew);
         let url = this.state.urlNew;
@@ -588,7 +622,7 @@ export default class PassLine extends React.Component {
         let noEdit = (
             <>
                 {this.state.show === true ?
-                    <FormControl aria-label="Small" aria-describedby="inputGroup-sizing-sm" type={"text"} disabled={true}  onChange={this.changeListener} value={password}/>
+                    <FormControl aria-label="Small" aria-describedby="inputGroup-sizing-sm" type={"text"} disabled={true}  onChange={this.changeListener} value={this.props.passwordCache}/>
                     :
                     <FormControl aria-label="Small" aria-describedby="inputGroup-sizing-sm" type={"password"} disabled={true}  onChange={this.changeListener} value={"*****"}/>
                 }
@@ -618,7 +652,7 @@ export default class PassLine extends React.Component {
 
         let edit = (
             <>
-                <FormControl id="password" aria-label="Small" type={"text"} aria-describedby="inputGroup-sizing-sm" onChange={this.changeListener} disabled={false} value={this.state.passwordNew}/>
+                <FormControl id="password" aria-label="Small" type={"text"} aria-describedby="inputGroup-sizing-sm" onChange={this.changeListener} disabled={false} value={this.props.passwordCache}/>
                 <Button variant="dark" className="notRound buttonSpaceInline" onClick={() => this.openGeneratePass()}>
                     <img
                         src={GeneratePassIcon}
@@ -643,7 +677,8 @@ export default class PassLine extends React.Component {
         return (
             <Card className="pass-card" name="passCard">
                 <input id="searchInput" type="hidden" value={this.props.title}/>
-                <Accordion.Toggle as={Card.Header} className="clickable center-vert" eventKey={this.props.id} onClick={() => this.setPasswordTo(false)}>
+                <Accordion.Toggle as={Card.Header} className="clickable center-vert" eventKey={this.props.id}
+                  onClick={() => this.setPasswordTo(false)}>
                     <Row>
                         <Col sm={1} md={1} lg={1} xs={1} className="fixLogoCol">
                             { this.state.imgSucc ?
@@ -673,7 +708,8 @@ export default class PassLine extends React.Component {
                 <div className="center-vert setButtonsRight">
                     {this.state.edit === true ? // Copy and GoToWebsite Buttons
                         <>
-                            <Button variant="dark" className="buttonSpace" disabled={true} onClick={() => { if ( !this.state.edit ) this.props.callback.copyPass(this.state.id) }}>
+                            <Button variant="dark" className="buttonSpace" disabled={true}
+                                    onClick={() => { if ( !this.state.edit ) this.props.callback.copyPass() }}>
                                 <img
                                     src={CopyIcon}
                                     alt=""
@@ -682,7 +718,8 @@ export default class PassLine extends React.Component {
                                     className="d-inline-block scaleimg"
                                 />
                             </Button>
-                            <Button variant="dark" className="buttonSpace" disabled={true} onClick={() => { if ( !this.state.edit ) this.props.callback.goToPage(this.state.urlNew, this.state.id) }}>
+                            <Button variant="dark" className="buttonSpace" disabled={true}
+                                    onClick={() => { if ( !this.state.edit ) this.props.callback.goToPage(this.state.urlNew, this.state.id) }}>
                                 <img
                                     src={GoToIcon}
                                     alt=""
@@ -705,7 +742,7 @@ export default class PassLine extends React.Component {
                                             </Tooltip>
                                         }
                                     >
-                                        <Button variant="dark" className="buttonSpace" onClick={() => { if ( !this.state.edit ) this.props.callback.copyPass(this.state.id) }}>
+                                        <Button variant="dark" className="buttonSpace" onClick={() => { if ( !this.state.edit ) this.props.callback.copyPass() }}>
                                             <img
                                                 src={CopyIcon}
                                                 alt=""
@@ -826,7 +863,7 @@ export default class PassLine extends React.Component {
                                             />
                                         </Button>
                                         :
-                                        <Button variant="dark" className="buttonSpaceInline " onClick={() => this.props.callback.copyPass(this.props.id)}>
+                                        <Button variant="dark" className="buttonSpaceInline " onClick={() => this.props.callback.copyPass(this.props.id, this.state.rev)}>
                                             <img
                                                 src={CopyIcon}
                                                 alt=""
@@ -954,7 +991,7 @@ export default class PassLine extends React.Component {
                                                     :
                                                     <Button variant="dark" className="footerButton center-horz"
                                                         onClick={() =>
-                                                            this.props.callback.deletePass(this.props.id, this.props.rev)}>
+                                                            this.props.callback.deletePass(this.state.id, this.state.rev)}>
                                                         <img
                                                             src={DeleteIcon}
                                                             alt=""

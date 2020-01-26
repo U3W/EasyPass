@@ -31,6 +31,13 @@ export function workerCall( e ) {
         case 'deletePassword':
             this.showDeletePopUp(dashboardAlerts.showDeletePassAlert, data.ok);
             break;
+        case 'getPassword':
+            this.setState({
+                passwordCache: data.passwd,
+                passwordCacheID: data._id
+            });
+            console.log("PASSWORD IS " + data);
+            break;
         case 'saveCategory':
             this.copy("", dashboardAlerts.showAddedCat, data.ok);
             this.dismissAddCat();
@@ -59,6 +66,52 @@ export function deletePass(id, rev) {
 }
 
 /**
+ * Returns a password that matches the id.
+ * When no entry is found, undefined will be returned.
+ */
+export function getPass(id, rev) {
+    // TODO Mockobjekt getPassword
+    //return this.state.mock.getPassword(id);
+    //return this.state.entries.getEntry(id);
+    this.props.worker.postMessage(['getPassword', {_id: id, _rev: rev}])
+}
+
+/**
+ * Copies the latest cached password of a password entry to the users clipboard.
+ */
+export async function copyPass() {
+    while (this.state.passwordCache === undefined) {
+        await sleep(50);
+    }
+    console.log("copypass: " + this.state.passwordCache);
+    // Todo call Kacpers Method
+    // Popup starten
+    this.setState({
+        showCopyAlert: true,
+        alertState: "success",
+    });
+    this.dismissCopy("showCopyAlert");
+
+    this.clipboardCopy(this.state.passwordCache);
+}
+
+/**
+ * Resets the password cache.
+ */
+export function resetPassCache() {
+    this.setState({
+        passwordCache: undefined
+    });
+}
+
+export function setPassCacheID(id) {
+    this.setState({
+        passwordCacheID: id
+    });
+}
+
+
+/**
  * Recovers and deleted password or category entry.
  */
 export function undoDelete( which, id ) {
@@ -78,4 +131,11 @@ export function undoDelete( which, id ) {
             });
             break;
     }
+}
+
+/**
+ * Simple sleep function.
+ */
+function sleep (time) {
+    return new Promise((resolve) => setTimeout(resolve, time));
 }
