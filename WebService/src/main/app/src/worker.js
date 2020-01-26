@@ -9,8 +9,8 @@ import("../../rust/pkg").then(wasm => {
     let authUrl = null;
     let clientInitialized = false;
     let mode = undefined;
-    let deletedPassword = undefined;
-    let undoPasswordDeletion = false;
+    let deletedPasswords = new Map();
+    //let undoPasswordDeletion = false;
 
     // Initialize Worker
     const init = async () => {
@@ -140,10 +140,17 @@ import("../../rust/pkg").then(wasm => {
                 self.postMessage(['savePassword', await saveEntryResult(saveCheck)]);
                 break;
             case 'deletePassword':
-                deletedPassword = (await worker.find({"selector":{"_id": data._id, "_rev": data._rev}})).docs[0];
+                const deletedPassword = (await worker.find({"selector":{"_id": data._id, "_rev": data._rev}})).docs[0];
+                deletedPasswords.set(deletedPassword, false);
                 const delCheck = await worker.remove(data._id, data._rev);
-                setTimeout(undoPasswordDelete, 5000);
+                setTimeout(async function() {
+                    undoPasswordDelete(deletedPassword);
+                }, 5000);
                 self.postMessage(['deletePassword', delCheck]);
+                break;
+            case 'undoDeletePassword':
+                const undoKey = [...deletedPasswords.keys()].find(entry => entry._id === data._id);
+                deletedPasswords.set(undoKey, true);
                 break;
 
             case 'saveCategory':
@@ -196,15 +203,16 @@ import("../../rust/pkg").then(wasm => {
         } else return { ok: false };
     };
 
-    const undoPasswordDelete = async () => {
-      if (undoPasswordDeletion)  {
+    const undoPasswordDelete = async (deletedPassword) => {
+      const check = deletedPasswords.get(deletedPassword);
+      if (check)  {
           console.log("Undoing remove!!!");
           delete deletedPassword._id;
           delete deletedPassword._rev;
+          // TODO error handling?
           await worker.save(deletedPassword);
-            //await worker.save(deletedPassword);
-          deletedPassword = undefined;
       }
+      deletedPasswords.delete(deletedPassword);
     };
 
     const saveCatResult = async (check) => {

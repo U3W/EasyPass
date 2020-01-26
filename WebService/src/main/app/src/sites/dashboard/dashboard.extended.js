@@ -8,33 +8,6 @@ import {dashboardAlerts} from "./const/dashboard.enum";
  * like `this.[someFunc] = [importAlias].[someFunc].bind(this);`.
  */
 
-export function baum () {
-    console.log("BAUMI!!!");
-    console.log(this.state);
-}
-
-
-/**
- * Updates the whole component.
- */
-export function refresh() {
-    this.setState({});
-}
-
-
-export function workerInit( e ) {
-    const success = e.data === 'initDone';
-    if (success) {
-        this.props.worker.removeEventListener("message", this.workerInit);
-        this.props.worker.addEventListener("message", this.workerCall);
-        /**this.setState({
-                workerInitialized: true
-            }, () => this.props.worker.postMessage('initAck'));*/
-        this.props.workerIsInitialized();
-        this.props.worker.postMessage('initAck');
-    }
-}
-
 /**
  * React to messages send from the Web Worker
  * @param e Message received from Web Worker
@@ -66,28 +39,43 @@ export function workerCall( e ) {
 
 }
 
+/**
+ * Adds a new password entry.
+ */
 export function addPass(user, passwd, url, title, tags, catID) {
     const tabID = this.state.tabselected;
     this.props.worker.postMessage(['savePassword',
         {type: 'passwd', user: user, passwd: passwd, url: url, title: title, tags: tags, tabID: tabID, catID: catID, }]);
 }
 
+/**
+ * Removes a password entry by id and revision.
+ */
 export function deletePass(id, rev) {
-    console.log("DELETE!!!");
-    console.log(id);
-    console.log(rev);
-    this.props.worker.postMessage(['deletePassword', {_id: id, _rev: rev}]);
-
-
-    // ToDO call Kacpers method
-    /**this.state.mock.deletePass(id);
-
-
-
     this.setState({
         currentPassDelete: id,
     });
-    this.showDeletePopUp(dashboardAlerts.showDeletePassAlert, true);
+    this.props.worker.postMessage(['deletePassword', {_id: id, _rev: rev}]);
+}
 
-    this.render();*/
+/**
+ * Recovers and deleted password or category entry.
+ */
+export function undoDelete( which, id ) {
+    // TODO Enable stop delete
+    switch (which) {
+        case dashboardAlerts.showDeleteCatAlert:
+            // ToDo call Kacpers  with id
+
+            this.setState({
+                showDeleteCatAlert: false,
+            });
+            break;
+        case dashboardAlerts.showDeletePassAlert:
+            this.props.worker.postMessage(['undoDeletePassword', {_id: id}]);
+            this.setState({
+                showDeletePassAlert: false,
+            });
+            break;
+    }
 }

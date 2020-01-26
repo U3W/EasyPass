@@ -125,7 +125,6 @@ class Dashboard extends React.Component {
         this.dismissCopy = this.dismissCopy.bind(this);
         this.saveEdit = this.saveEdit.bind(this);
         this.renderCat = this.renderCat.bind(this);
-        this.stopDelete = this.stopDelete.bind(this);
         this.resetSettingsExpanded = this.resetSettingsExpanded.bind(this);
         // Popups
         this.dismissAddCat = this.dismissAddCat.bind(this);
@@ -142,13 +141,11 @@ class Dashboard extends React.Component {
 
         this.addPass = that.addPass.bind(this);
         this.deletePass = that.deletePass.bind(this);
-
+        this.undoDelete = that.undoDelete.bind(this);
         // WindowDimensions
         this.updateWindowDimensions = this.updateWindowDimensions.bind(this);
         // Worker
-        this.workerInit = that.workerInit.bind(this);
         this.workerCall = that.workerCall.bind(this);
-
         // Entry functions
         this.loadEntries = dashboardEntries.loadEntries.bind(this);
         this.getCatsFromTab = dashboardEntries.getCatsFromTab.bind(this);
@@ -159,20 +156,12 @@ class Dashboard extends React.Component {
     componentDidMount() {
         this.updateWindowDimensions();
         window.addEventListener('resize', this.updateWindowDimensions);
-        /**this.props.workerInitialized ?
-            this.props.worker.addEventListener("message", this.workerCall) :
-            this.props.worker.addEventListener("message", this.workerInit);*/
-
         this.props.worker.addEventListener("message", this.workerCall);
         this.props.worker.postMessage(['dashboard', undefined]);
     }
 
     componentWillUnmount() {
         window.removeEventListener('resize', this.updateWindowDimensions);
-        /**this.props.workerInitialized ?
-            this.props.worker.removeEventListener("message", this.workerCall) :
-            this.props.worker.removeEventListener("message", this.workerInit);*/
-
         this.props.worker.postMessage(['unregister', undefined]);
         this.props.worker.removeEventListener("message", this.workerCall);
     }
@@ -305,8 +294,6 @@ class Dashboard extends React.Component {
 
         return catData;
     }
-
-
 
     setErrorShow( to ) {
         console.log("Aha", to);
@@ -443,7 +430,7 @@ class Dashboard extends React.Component {
                     { this.state.alertState === "success" ?
                         <>
                             {succ}
-                            <a className="makeLookLikeLink" onClick={() => this.stopDelete(dashboardAlerts.showDeleteCatAlert, this.state.currentCatDelete)}>
+                            <a className="makeLookLikeLink" onClick={() => this.undoDelete(dashboardAlerts.showDeleteCatAlert, this.state.currentCatDelete)}>
                                 {StringSelector.getString(this.state.language).delCatSucc2}
                                 <img
                                     src={Undo}
@@ -472,7 +459,7 @@ class Dashboard extends React.Component {
                     { this.state.alertState === "success" ?
                         <>
                             {succ}
-                            <a className="makeLookLikeLink" onClick={() => this.stopDelete(dashboardAlerts.showDeletePassAlert, this.state.currentPassDelete)}>
+                            <a className="makeLookLikeLink" onClick={() => this.undoDelete(dashboardAlerts.showDeletePassAlert, this.state.currentPassDelete)}>
                                 {StringSelector.getString(this.state.language).linePassDelSuc2}
                                 <img
                                     src={Undo}
@@ -826,22 +813,7 @@ class Dashboard extends React.Component {
         }
     }
 
-    stopDelete( which, id ) {
-        switch (which) {
-            case dashboardAlerts.showDeleteCatAlert:
-                // ToDo call Kacpers  with id
-                this.setState({
-                    showDeleteCatAlert: false,
-                });
-                break;
-            case dashboardAlerts.showDeletePassAlert:
-                // ToDo call Kacpers method with id
-                this.setState({
-                    showDeletePassAlert: false,
-                });
-                break;
-        }
-    }
+
 
     saveEdit(id, userNew, passwordNew, urlNew, titleNew, catNew, tagNew) {
         // ToDo call Kacpers method
