@@ -917,7 +917,7 @@ class Dashboard extends React.Component {
         });
     }
 
-    addUserToGroupAcc( user ) {
+    checkIfUserExists( user ) {
         // ToDo call kacpers Method
         return true;
     }
@@ -989,9 +989,9 @@ class Dashboard extends React.Component {
             indicatorClass += " sidebarClosed";
         }
 
-        let langText = "text";
+        let langText = "fab";
         if ( this.state.language === dashboardLanguage.english ) {
-            langText = "textEng";
+            langText = "fabEng";
         }
 
         return (
@@ -1013,7 +1013,7 @@ class Dashboard extends React.Component {
                         <hr/>
                         <IndicatorSide className={indicatorClass} />
                     </Row>
-                    <Button className="fab" variant="danger" onClick={this.showAddPass}>
+                    <Button className={langText} variant="danger" onClick={this.showAddPass}>
                         <img
                             src={AddPass}
                             alt=""
@@ -1021,7 +1021,7 @@ class Dashboard extends React.Component {
                             height="20"
                             className="d-inline-block addIcon"
                         />
-                        <div className={langText}>
+                        <div className="text">
                             <span>{StringSelector.getString(this.state.language).addPass}</span>
                         </div>
                     </Button>

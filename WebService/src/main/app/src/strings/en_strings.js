@@ -140,6 +140,18 @@ export const strings = {
 
     addPassAdd: "Add",
 
+    // Add Pass Group
+    addPassVis: "Password visibility",
+    addPassUserTag: "Add user to group",
+    addPassUserInpPlaceholder: "Enter user name",
+
+    addPassUserVis: "Group members",
+    addPassUserVis2: "Users who have access to the password",
+    addPassUserVisNon: "No users added yet",
+
+    addPassUserAlready: "Username does not exist!",
+    addPassUserNotFound: "User already added!",
+
     /** Main Window */
     mainPassGroup: "Group passwords",
     mainPassPriv: "Private passwords",

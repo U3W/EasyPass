@@ -39,6 +39,7 @@ import StringSelector from "../../strings/stings";
  * @param pass: password
  * @param url: link to the login page
  * @param callback: Link to the dashboard class
+ * @param userGroupList: List with all users that are allowed to see this password. Only nessessary when dealing with group passwords and only shown for the admin (creater) of this password
  * @param rest
  */
 export default class PassLine extends React.Component {
@@ -575,9 +576,14 @@ export default class PassLine extends React.Component {
     }
 
     render() {
-        let password = this.getPassword(this.props.id);
 
-        //console.log("Start of render", this.state.urlNew);
+        let userClass = "";
+        let userComp = "mb-3";
+        if ( this.state.popUpGroupError ) {
+            userClass = "is-invalid text-danger";
+            userComp = "mb-3 errorMargin";
+        }
+
         let url = this.state.urlNew;
 
         let catRender = this.renderCat();
@@ -587,7 +593,7 @@ export default class PassLine extends React.Component {
         let noEdit = (
             <>
                 {this.state.show === true ?
-                    <FormControl aria-label="Small" aria-describedby="inputGroup-sizing-sm" type={"text"} disabled={true}  onChange={this.changeListener} value={password}/>
+                    <FormControl aria-label="Small" aria-describedby="inputGroup-sizing-sm" type={"text"} disabled={true}  onChange={this.changeListener} value={this.getPassword(this.props.id)}/>
                     :
                     <FormControl aria-label="Small" aria-describedby="inputGroup-sizing-sm" type={"password"} disabled={true}  onChange={this.changeListener} value={"*****"}/>
                 }
@@ -874,8 +880,29 @@ export default class PassLine extends React.Component {
                                 </div>
                                 <br/>
                                 <div>
-                                    <h6>{StringSelector.getString(this.props.callback.state.language).lineTags}</h6>
+                                    <h6>{StringSelector.getString(this.props.callback.state.language).lineCat}</h6>
                                     {catRender}
+                                </div>
+                                <div>
+                                    <hr/>
+                                    <h6>Sichtbarkeit</h6>
+                                    <InputGroup size="sm" className={userComp}>
+                                        <InputGroup.Prepend>
+                                            <InputGroup.Text id="inputGroup-sizing-sm">Add User to Group</InputGroup.Text>
+                                        </InputGroup.Prepend>
+                                        <FormControl className={userClass} autoComplete="off" id="userGroupAdd" aria-label="Small" aria-describedby="inputGroup-sizing-sm" value={this.state.userGroupAdd} placeholder={"Enter Username"} onChange={this.changeInput}/>
+                                        <InputGroup.Append>
+                                            <Button variant="dark" onClick={this.addUserToGroupAcc}>
+                                                <img
+                                                    src={AddTag}
+                                                    alt=""
+                                                    width="14"
+                                                    height="14"
+                                                    className="d-inline-block"
+                                                />
+                                            </Button>
+                                        </InputGroup.Append>
+                                    </InputGroup>
                                 </div>
                             </div>
                         </Card.Body>

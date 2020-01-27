@@ -5,11 +5,14 @@ import FormControl from "react-bootstrap/FormControl";
 import InputGroup from "react-bootstrap/InputGroup";
 import {Card, Col, Form} from "react-bootstrap";
 import Button from "react-bootstrap/Button";
+import Alert from "react-bootstrap/Alert";
+
 import "./add.password.css"
 // Icons
 import GeneratePassIcon from "../../img/icons/generate_password_white.svg";
 import ReloadPass from "../../img/icons/generate_reload_white.svg"
 import AddTag from "../../img/icons/password_add_tag.svg";
+import DelUserGroup from "../../img/icons/password_add_remove_urser.svg";
 import Row from "react-bootstrap/Row";
 import GeneratePass from "./generatepass";
 import StringSelector from "../../strings/stings";
@@ -34,11 +37,14 @@ export default class AddPassword extends React.Component {
             // Popup
             popUpCatShow: false,
             generatePassShow: false,
+            popUpGroupError: false,
+            groupErrTyp: 0,
 
             // errors / fields
             missingTitle: false,
             missingUser: false,
             missingPass: false,
+
         };
 
         this.dismissGeneratePass = this.dismissGeneratePass.bind(this);
@@ -59,6 +65,9 @@ export default class AddPassword extends React.Component {
 
         this.handleKeyevent = this.handleKeyevent.bind(this);
         this.addPass = this.addPass.bind(this);
+
+        this.addUserToGroupAcc = this.addUserToGroupAcc.bind(this);
+        this.removeUserFromGroup = this.removeUserFromGroup.bind(this);
     }
 
     dismissGeneratePass() {
@@ -96,10 +105,15 @@ export default class AddPassword extends React.Component {
             tagAdded: false,
             tag: [{"":""}],
             catID: 0,
+
             userGroupAdd: "",
             userGroupList: [],
             // Popup
             popUpCatShow: false,
+            generatePassShow: false,
+            popUpGroupError: false,
+            groupErrTyp: 0,
+
             // errors / fields
             missingTitle: false,
             missingUser: false,
@@ -137,10 +151,44 @@ export default class AddPassword extends React.Component {
         }
     }
 
+    checkIfGroupUserAlrAdded( user ) {
+        for ( let i = 0; i < this.state.userGroupList.length; i++ ) {
+            if ( this.state.userGroupList[i].name === user ) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     addUserToGroupAcc() {
         if ( this.state.userGroupAdd.length > 0 ) {
-            if ( this.props.callback.addUserToGroupAcc(this.state.userGroupAdd)) {
-
+            if ( this.props.callback.checkIfUserExists(this.state.userGroupAdd)) {
+                if ( this.checkIfGroupUserAlrAdded(this.state.userGroupAdd) ) {
+                    this.setState({
+                        popUpGroupError: true,
+                        groupErrTyp: 1,
+                    })
+                }
+                else {
+                    let id = 0;
+                    if ( this.state.userGroupList.length > 0 ) {
+                        id = this.state.userGroupList[this.state.userGroupList.length-1].id++;
+                    }
+                    let arr = this.state.userGroupList;
+                    arr.push({id: id, name: this.state.userGroupAdd });
+                    this.setState({
+                        popUpGroupError: false,
+                        groupErrTyp: 0,
+                        userGroupList: arr,
+                        userGroupAdd: "",
+                    });
+                }
+            }
+            else {
+                this.setState({
+                    popUpGroupError: true,
+                    groupErrTyp: 0,
+                })
             }
         }
     }
@@ -242,7 +290,7 @@ export default class AddPassword extends React.Component {
             <>
                 <Modal show={this.state.popUpCatShow} onHide={this.setPopUpCatDisabled} className="ep-modal-dialog">
                     <Modal.Header closeButton>
-                        <Modal.Title>Kategorie ändern:</Modal.Title>
+                        <Modal.Title>{StringSelector.getString(this.props.callback.state.language).addPassCatChange}:</Modal.Title>
                     </Modal.Header>
                     <Modal.Body className="ep-modal-body">
                         <Table striped bordered hover className="ep-modal-table">
@@ -294,15 +342,111 @@ export default class AddPassword extends React.Component {
             case "password":
                 this.setState({
                    pass: e.target.value,
-                }, () => { if ( this.state.user.length > 0 ) { this.setState({missingPass: false})}});
+                }, () => { if ( this.state.pass.length > 0 ) { this.setState({missingPass: false})}});
                 break;
             case "url":
                 this.setState({
                     url: e.target.value,
                 });
                 break;
+            case "userGroupAdd":
+                this.setState({
+                    userGroupAdd: e.target.value,
+                }, () => { if ( this.state.popUpGroupError && this.state.userGroupAdd.length > 0) { this.setState({popUpGroupError: false})}});
+                break;
         }
     };
+
+    removeUserFromGroup( id ) {
+        let arr = this.state.userGroupList;
+        for ( let i = 0; i < arr.length; i++ ) {
+            if ( arr[i].id === id){
+                arr.splice(i,1);
+            }
+        }
+        this.setState({
+            userGroupList: arr,
+        });
+    }
+
+    activeGroupError( type ) {
+        this.setState({
+            popUpGroupError: true,
+            groupErrTyp: type
+        })
+    }
+
+    getGroupErrorMsg() {
+        if ( this.state.popUpGroupError ) {
+            let err = StringSelector.getString(this.props.callback.state.language).addPassUserNotFound;
+            if ( this.state.groupErrTyp === 1 ) {
+                err = StringSelector.getString(this.props.callback.state.language).addPassUserAlready;
+            }
+            return (
+                <p className="text-danger fixErrorMsg">{err}</p>
+            );
+        }
+    }
+
+    getVisibilityTable() {
+        let key = -1;
+        let elms;
+        if ( this.state.userGroupList.length === 0 ) {
+            elms = StringSelector.getString(this.props.callback.state.language).addPassUserVisNon;
+            return (
+                <>
+                    <div className="visMargin">
+                        <h6 className="noMarginBottom">{StringSelector.getString(this.props.callback.state.language).addPassUserVis}</h6>
+                        <i>{StringSelector.getString(this.props.callback.state.language).addPassUserVis2}</i>
+                    </div>
+                    - {elms}
+                </>
+            );
+        }
+        else {
+            let elmsArray = [];
+            for ( let i = 0; i < this.state.userGroupList.length; i++ ) {
+                const item = this.state.userGroupList[i];
+                elmsArray[i] = (
+                    <td>
+                        {item.name}
+                        <button type="button" className="close userRemove" onClick={() => this.removeUserFromGroup(item.id)}>
+                            <span aria-hidden="true" >×</span>
+                            <span className="sr-only">Close</span>
+                        </button>
+                    </td>
+                );
+            }
+
+            elms = elmsArray.map(function(item) {
+                key++;
+                return (
+                    <tr key={key}>
+                        {item}
+                    </tr>
+                );
+            });
+
+            return (
+                <>
+                    <div className="visMargin">
+                        <h6 className="noMarginBottom">{StringSelector.getString(this.props.callback.state.language).addPassUserVis}</h6>
+                        <i>{StringSelector.getString(this.props.callback.state.language).addPassUserVis2}</i>
+                    </div>
+                    <Card>
+                        <Table striped hover size="sm" className="noMarginBottom">
+                            <tbody>
+                            {elms}
+                            </tbody>
+                        </Table>
+                    </Card>
+                </>
+            );
+        }
+
+
+
+    }
 
     handleKeyevent(event) {
         if (event.keyCode === 13 )
@@ -339,6 +483,12 @@ export default class AddPassword extends React.Component {
 
 
     render() {
+        let userClass = "";
+        let userComp = "mb-3";
+        if ( this.state.popUpGroupError ) {
+            userClass = "is-invalid text-danger";
+            userComp = "mb-3 errorMargin";
+        }
         return (
             <>
                 <Modal onKeyDown={this.handleKeyevent} show={this.props.callback.getPassAddShow()} onHide={this.dismissPopUp} className="ep-modal-dialog addPassPopUp">
@@ -416,14 +566,14 @@ export default class AddPassword extends React.Component {
                             { this.props.callback.state.tabselected === tabs.GROUPPASS &&
                                 <>
                                     <hr/>
-                                    <h6>Sichtbarkeit</h6>
-                                    <InputGroup size="sm" className="mb-3">
+                                    <h6>{StringSelector.getString(this.props.callback.state.language).addPassVis}</h6>
+                                    <InputGroup size="sm" className={userComp}>
                                         <InputGroup.Prepend>
-                                            <InputGroup.Text id="inputGroup-sizing-sm">Username</InputGroup.Text>
+                                            <InputGroup.Text id="inputGroup-sizing-sm">{StringSelector.getString(this.props.callback.state.language).addPassUserTag}</InputGroup.Text>
                                         </InputGroup.Prepend>
-                                        <FormControl autoComplete="off" id="url" aria-label="Small" aria-describedby="inputGroup-sizing-sm" value={this.state.url} onChange={this.changeInput}/>
+                                        <FormControl className={userClass} autoComplete="off" id="userGroupAdd" aria-label="Small" aria-describedby="inputGroup-sizing-sm" value={this.state.userGroupAdd} placeholder={StringSelector.getString(this.props.callback.state.language).addPassUserInpPlaceholder} onChange={this.changeInput}/>
                                         <InputGroup.Append>
-                                            <Button variant="dark" className="buttonSpaceInline" >
+                                            <Button variant="dark" onClick={this.addUserToGroupAcc}>
                                                 <img
                                                     src={AddTag}
                                                     alt=""
@@ -434,6 +584,8 @@ export default class AddPassword extends React.Component {
                                             </Button>
                                         </InputGroup.Append>
                                     </InputGroup>
+                                    {this.getGroupErrorMsg()}
+                                    {this.getVisibilityTable()}
                                 </>
                             }
                         </Card.Body>

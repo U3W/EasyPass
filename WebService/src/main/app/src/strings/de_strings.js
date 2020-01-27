@@ -155,6 +155,18 @@ export const strings = {
 
     addPassAdd: "Hinzufügen",
 
+    // Add Pass Group
+    addPassVis: "Passwort Sichtbarkeit",
+    addPassUserTag: "Nutzer zur Gruppe hinzufügen",
+    addPassUserInpPlaceholder: "Benutzernamen eingeben",
+
+    addPassUserVis: "Gruppenmitglieder",
+    addPassUserVis2: "Nutzer, die Einsicht in das Passwort haben",
+    addPassUserVisNon: "Noch keine Nutzer hinzugefügt",
+
+    addPassUserAlready: "Benutzername existiert nicht!",
+    addPassUserNotFound: "Benutzer bereits hinzugefügt!",
+
     /** Main Window */
     mainPassGroup: "Gruppen Passwörter",
     mainPassPriv: "Private Passwörter",
@@ -207,6 +219,7 @@ export const strings = {
     // Add Alert
     linePassAddSuc: "Passwort hinzugefügt!",
     linePassAddErr: "Beim Hinzufügen des Passworts ist ein Fehler aufgetreten. Bitte versuchen Sie es erneut!",
+
 
 
 };
