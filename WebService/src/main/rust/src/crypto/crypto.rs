@@ -33,12 +33,12 @@ pub fn decrypt(msg: &str, key: &str, iv: &str) -> Result<String, i32> {
     let res : Result<String, i32> = Ok(buffer2);
     return res;
 }
-
-pub fn get_random_iv<'a>() -> String {
+//ma
+pub fn get_random_string<'a>(length: i32) -> String {
     let mut alphabet = "abcdefghijklmnopqrstuvwxyzäöüßABCDEFGHIJKLMNOPQRSTUVWXYZÄÖÜ1234567890!\"#$%&'()*+,-./:;<=>?@[\\]^_`{|}~ ".as_bytes().to_vec();
     let mut rng = rand::thread_rng();
     alphabet.shuffle(&mut rng);
-    let (left, _right) = alphabet.split_at(8);
+    let (left, _right) = alphabet.split_at(length);
     let iv = String::from_utf8(Vec::from(left)).unwrap();
     return iv;
 }
