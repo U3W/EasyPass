@@ -1,5 +1,10 @@
 package dev.easypass.web.controller
 
+import com.netflix.appinfo.InstanceInfo
+import com.netflix.discovery.EurekaClient
+import com.netflix.discovery.shared.Application
+import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.*
 
@@ -12,7 +17,9 @@ import org.springframework.web.bind.annotation.*
 
 @Controller
 class Controller {
-
+    @Qualifier("eurekaClient")
+    @Autowired
+    private val eurekaClient: EurekaClient? = null
 
     @GetMapping(value = ["/{path:^[^.]*\$}"])
     fun app(): String {
@@ -49,6 +56,17 @@ class Controller {
     @CrossOrigin(origins = ["*"])
     fun method(): Map<String, String> {
         return mapOf("db" to "http://localhost:5984/testdb")
+    }
+
+    @RequestMapping(value = ["/database"], method = [RequestMethod.GET], produces = ["application/json"])
+    @ResponseBody
+    @CrossOrigin(origins = ["*"])
+    fun getIPAddress(): Map<String, String> {
+        val serviceID = "auth-service"
+        val application: Application = eurekaClient!!.getApplication(serviceID)
+        val instanceInfo: InstanceInfo = application.instances[0]
+        val url = instanceInfo.homePageUrl
+        return mapOf("db" to "$url/auth/")
     }
 
 }

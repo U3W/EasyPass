@@ -31,6 +31,7 @@ import GeneratePass from "./generatepass";
 import Spinner from "react-bootstrap/Spinner";
 import StringSelector from "../../strings/stings";
 
+
 /**
  * @param id: which element in a list f.e. (must be unique, because with this id the collapsible div will be opened then toggled)
  * @param img: a link to the website (f.e. "www.google.com/"). Note that the / at the end is necessary for getting the favicon (Icon on the beginning of the card)
@@ -39,7 +40,6 @@ import StringSelector from "../../strings/stings";
  * @param pass: password
  * @param url: link to the login page
  * @param callback: Link to the dashboard class
- * @param userGroupList: List with all users that are allowed to see this password. Only nessessary when dealing with group passwords and only shown for the admin (creater) of this password
  * @param rest
  */
 export default class PassLine extends React.Component {
@@ -51,6 +51,7 @@ export default class PassLine extends React.Component {
             showCopyAlert: false,
             edit: false,
             id: this.props.id,
+            rev: this.props.rev,
             passwordNew: "",
             userNew: this.props.user,
             titleNew: this.props.title,
@@ -62,11 +63,7 @@ export default class PassLine extends React.Component {
             tagAdded: this.setTagAddedRight(this.props.tag),
             popUpCatShow: false,
 
-            // Group Visibility
-            userGroupAdd: "",
-            userGroupListNew: this.deepCopyTags(this.props.userGroupList),
-            popUpGroupError: false,
-            groupErrTyp: 0,
+            passwordLoaded: false,
 
             // generate popup
             generatePassShow: false,
@@ -234,14 +231,11 @@ export default class PassLine extends React.Component {
     }
 
     deepCopyTags( tags ) {
-        if ( tags !== undefined ) {
-            let out = [];
-            for ( let i = 0; i < tags.length; i++ ) {
-                out[i] = JSON.parse(JSON.stringify(tags[i]));
-            }
-            return out;
+        let out = [];
+        for ( let i = 0; i < tags.length; i++ ) {
+            out[i] = JSON.parse(JSON.stringify(tags[i]));
         }
-        return undefined;
+        return out;
     }
 
     findTagKeyIndex ( keyComp ) {
@@ -321,10 +315,7 @@ export default class PassLine extends React.Component {
                         urlNew: e.target.value
                     });
                     break;
-                case "userGroupAdd":
-                    this.setState({
-                        userGroupAdd: e.target.value
-                    });
+                case "cat":
                     break;
             }
         }
@@ -343,9 +334,12 @@ export default class PassLine extends React.Component {
     setEdit( changeTo, succ ) {
         //console.log("ChangeTo", changeTo, this.props.tag);
         if ( changeTo ) {
+            // TODO test with prop
+            /**
             this.setState({
-                passwordNew: this.props.callback.getPassword(this.props.id),
-            });
+                passwordNew: this.props.callback.getPass(this.props.id),
+            });*/
+            this.props.callback.getPass(this.props.id);
         }
         else {
             if ( !succ ) {
@@ -372,15 +366,16 @@ export default class PassLine extends React.Component {
             show: !this.state.show
         });
     }
+
     setPasswordTo(to) {
         this.setState({
             show: to
         });
     }
 
-    getPassword(id) {
+    getPassword(id, rev) {
         if ( this.state.show ) {
-            return this.props.callback.getPassword(id);
+            return this.props.callback.getPass(id, rev);
         }
     }
 
@@ -587,105 +582,37 @@ export default class PassLine extends React.Component {
         );
     }
 
-
-    removeUserFromGroup( id ) {
-        if ( this.state.userGroupListNew !== undefined ) {
-            let arr = this.state.userGroupListNew;
-            for ( let i = 0; i < arr.length; i++ ) {
-                if ( arr[i].id === id){
-                    arr.splice(i,1);
-                }
-            }
-            this.setState({
-                userGroupListNew: arr,
-            });
-        }
-    }
-
-
-    getGroupErrorMsg() {
-        if ( this.state.popUpGroupError ) {
-            let err = StringSelector.getString(this.props.callback.state.language).addPassUserNotFound;
-            if ( this.state.groupErrTyp === 1 ) {
-                err = StringSelector.getString(this.props.callback.state.language).addPassUserAlready;
-            }
-            return (
-                <p className="text-danger fixErrorMsg">{err}</p>
-            );
-        }
-    }
-
-    getVisibilityTable() {
-        let key = -1;
-        let elms;
-        if ( this.state.userGroupListNew.length === 0 ) {
-            elms = StringSelector.getString(this.props.callback.state.language).addPassUserVisNon;
-            return (
-                <>
-                    <div className="visMargin">
-                        <h6 className="noMarginBottom">{StringSelector.getString(this.props.callback.state.language).addPassUserVis}</h6>
-                        <i>{StringSelector.getString(this.props.callback.state.language).addPassUserVis2}</i>
-                    </div>
-                    - {elms}
-                </>
-            );
-        }
-        else {
-            let elmsArray = [];
-            for ( let i = 0; i < this.state.userGroupListNew.length; i++ ) {
-                const item = this.state.userGroupListNew[i];
-                if ( this.state.edit ) {
-
-                }
-                elmsArray[i] = (
-                    <td>
-                        {item.name}
-                        { this.state.edit &&
-                            <button type="button" className="close userRemove" onClick={() => this.removeUserFromGroup(item.id)}>
-                                <span aria-hidden="true" >×</span>
-                                <span className="sr-only">Close</span>
-                            </button>
-                        }
-                    </td>
-                );
-            }
-
-            elms = elmsArray.map(function(item) {
-                key++;
-                return (
-                    <tr key={key}>
-                        {item}
-                    </tr>
-                );
-            });
-
-            return (
-                <>
-                    <div className="visMargin">
-                        <h6 className="noMarginBottom">{StringSelector.getString(this.props.callback.state.language).addPassUserVis}</h6>
-                        <i>{StringSelector.getString(this.props.callback.state.language).addPassUserVis2}</i>
-                    </div>
-                    <div className="roundDiv">
-                        <Table striped hover size="sm" className="noMarginBottom roundtable">
-                            <tbody>
-                            {elms}
-                            </tbody>
-                        </Table>
-                    </div>
-                </>
-            );
-        }
-    }
-
     render() {
+        /**
+        let flag = true;
+        if (this.state.id !== this.props.passwordCacheID && this.state.show === true) {
+            flag = false;
+            this.setState({
+                show: false
+            });
+        }*/
 
-        let userClass = "";
-        let userComp = "mb-3";
-        if ( this.state.popUpGroupError ) {
-            userClass = "is-invalid text-danger";
-            userComp = "mb-3 errorMargin";
+        /**if (this.props.passwordCacheID !== undefined && this.props.passwordCacheID !== this.state.id) {
+
+        }*/
+
+        // Request password from worker
+        // If-statement is needed to break recursive render loop
+        if (this.state.id !== this.props.passwordCacheID && this.state.show === true) {
+            this.getPassword(this.state.id, this.state.rev);
         }
 
+        /**
+        if (this.state.passwordLoaded === false && this.props.passwordCacheID !== this.state.id) {
+            this.getPassword(this.state.id, this.state.rev);
+            this.setState({
+                passwordLoaded: true
+            });
+        }*/
+
+
+
+        //console.log("Start of render", this.state.urlNew);
         let url = this.state.urlNew;
 
         let catRender = this.renderCat();
@@ -695,7 +622,7 @@ export default class PassLine extends React.Component {
         let noEdit = (
             <>
                 {this.state.show === true ?
-                    <FormControl aria-label="Small" aria-describedby="inputGroup-sizing-sm" type={"text"} disabled={true}  onChange={this.changeListener} value={this.getPassword(this.props.id)}/>
+                    <FormControl aria-label="Small" aria-describedby="inputGroup-sizing-sm" type={"text"} disabled={true}  onChange={this.changeListener} value={this.props.passwordCache}/>
                     :
                     <FormControl aria-label="Small" aria-describedby="inputGroup-sizing-sm" type={"password"} disabled={true}  onChange={this.changeListener} value={"*****"}/>
                 }
@@ -725,7 +652,7 @@ export default class PassLine extends React.Component {
 
         let edit = (
             <>
-                <FormControl id="password" aria-label="Small" type={"text"} aria-describedby="inputGroup-sizing-sm" onChange={this.changeListener} disabled={false} value={this.state.passwordNew}/>
+                <FormControl id="password" aria-label="Small" type={"text"} aria-describedby="inputGroup-sizing-sm" onChange={this.changeListener} disabled={false} value={this.props.passwordCache}/>
                 <Button variant="dark" className="notRound buttonSpaceInline" onClick={() => this.openGeneratePass()}>
                     <img
                         src={GeneratePassIcon}
@@ -747,50 +674,11 @@ export default class PassLine extends React.Component {
                 </Button>
             </>
         );
-
-        // Sichtbarkeit
-        let visEdit = "";
-        let visNoEdit = "";
-        console.log("Nonono", this.state.titleNew, this.state.userGroupListNew);
-        if ( this.state.userGroupListNew !== undefined ) {
-            visEdit = (
-                <>
-                    <hr/>
-                    <h6>{StringSelector.getString(this.props.callback.state.language).addPassVis}</h6>
-                    <InputGroup size="sm" className={userComp}>
-                        <InputGroup.Prepend>
-                            <InputGroup.Text id="inputGroup-sizing-sm">{StringSelector.getString(this.props.callback.state.language).addPassUserTag}</InputGroup.Text>
-                        </InputGroup.Prepend>
-                        <FormControl className={userClass} autoComplete="off" id="userGroupAdd" aria-label="Small" aria-describedby="inputGroup-sizing-sm" value={this.state.userGroupAdd} placeholder={StringSelector.getString(this.props.callback.state.language).addPassUserInpPlaceholder} onChange={this.changeListener}/>
-                        <InputGroup.Append>
-                            <Button variant="dark" onClick={this.addUserToGroupAcc}>
-                                <img
-                                    src={AddTag}
-                                    alt=""
-                                    width="14"
-                                    height="14"
-                                    className="d-inline-block"
-                                />
-                            </Button>
-                        </InputGroup.Append>
-                    </InputGroup>
-                    {this.getGroupErrorMsg()}
-                    {this.getVisibilityTable()}
-                </>
-            );
-            visNoEdit = (
-                <>
-                    <hr/>
-                    <h6>{StringSelector.getString(this.props.callback.state.language).addPassVis}</h6>
-                    {this.getVisibilityTable()}
-                </>
-            );
-        }
-
         return (
             <Card className="pass-card" name="passCard">
                 <input id="searchInput" type="hidden" value={this.props.title}/>
-                <Accordion.Toggle as={Card.Header} className="clickable center-vert" eventKey={this.props.id} onClick={() => this.setPasswordTo(false)}>
+                <Accordion.Toggle as={Card.Header} className="clickable center-vert" eventKey={this.props.id}
+                  onClick={() => this.setPasswordTo(false)}>
                     <Row>
                         <Col sm={1} md={1} lg={1} xs={1} className="fixLogoCol">
                             { this.state.imgSucc ?
@@ -820,7 +708,8 @@ export default class PassLine extends React.Component {
                 <div className="center-vert setButtonsRight">
                     {this.state.edit === true ? // Copy and GoToWebsite Buttons
                         <>
-                            <Button variant="dark" className="buttonSpace" disabled={true} onClick={() => { if ( !this.state.edit ) this.props.callback.copyPass(this.state.id) }}>
+                            <Button variant="dark" className="buttonSpace" disabled={true}
+                                    onClick={() => { if ( !this.state.edit ) this.props.callback.copyPass() }}>
                                 <img
                                     src={CopyIcon}
                                     alt=""
@@ -829,7 +718,8 @@ export default class PassLine extends React.Component {
                                     className="d-inline-block scaleimg"
                                 />
                             </Button>
-                            <Button variant="dark" className="buttonSpace" disabled={true} onClick={() => { if ( !this.state.edit ) this.props.callback.goToPage(this.state.urlNew, this.state.id) }}>
+                            <Button variant="dark" className="buttonSpace" disabled={true}
+                                    onClick={() => { if ( !this.state.edit ) this.props.callback.goToPage(this.state.urlNew, this.state.id) }}>
                                 <img
                                     src={GoToIcon}
                                     alt=""
@@ -852,7 +742,7 @@ export default class PassLine extends React.Component {
                                             </Tooltip>
                                         }
                                     >
-                                        <Button variant="dark" className="buttonSpace" onClick={() => { if ( !this.state.edit ) this.props.callback.copyPass(this.state.id) }}>
+                                        <Button variant="dark" className="buttonSpace" onClick={() => { if ( !this.state.edit ) this.props.callback.copyPass() }}>
                                             <img
                                                 src={CopyIcon}
                                                 alt=""
@@ -973,7 +863,7 @@ export default class PassLine extends React.Component {
                                             />
                                         </Button>
                                         :
-                                        <Button variant="dark" className="buttonSpaceInline " onClick={() => this.props.callback.copyPass(this.props.id)}>
+                                        <Button variant="dark" className="buttonSpaceInline " onClick={() => this.props.callback.copyPass(this.props.id, this.state.rev)}>
                                             <img
                                                 src={CopyIcon}
                                                 alt=""
@@ -1022,15 +912,8 @@ export default class PassLine extends React.Component {
                                 </div>
                                 <br/>
                                 <div>
-                                    <h6>{StringSelector.getString(this.props.callback.state.language).lineCat}</h6>
+                                    <h6>{StringSelector.getString(this.props.callback.state.language).lineTags}</h6>
                                     {catRender}
-                                </div>
-                                <div>
-                                    { this.state.edit ?
-                                        visEdit
-                                        :
-                                        visNoEdit
-                                    }
                                 </div>
                             </div>
                         </Card.Body>
@@ -1106,7 +989,9 @@ export default class PassLine extends React.Component {
                                                         />
                                                     </Button>
                                                     :
-                                                    <Button variant="dark" className="footerButton center-horz" onClick={() => this.props.callback.deletePass(this.props.id)}>
+                                                    <Button variant="dark" className="footerButton center-horz"
+                                                        onClick={() =>
+                                                            this.props.callback.deletePass(this.state.id, this.state.rev)}>
                                                         <img
                                                             src={DeleteIcon}
                                                             alt=""

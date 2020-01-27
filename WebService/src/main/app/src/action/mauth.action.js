@@ -7,7 +7,9 @@ export const mlogin = (credentials) => {
         //console.log(credentials);
         const {inpMasterpassword, inpFile, inpOption} = credentials;
         // ToDo call morith method
-        if ( inpMasterpassword === "toast" && inpFile != null)
+        // TODO this makes problems with login with webauthn
+        // if ( inpMasterpassword === "toast" && inpFile != null)
+        if ( inpMasterpassword === "toast")
         {
             dispatch({type: "MLOGIN_SUCCESS"})
         }

@@ -249,7 +249,6 @@ export default class AddPassword extends React.Component {
         });
     }
 
-
     changeCat(id) {
         this.setState({
             catID: id,
@@ -283,7 +282,7 @@ export default class AddPassword extends React.Component {
         let cats = this.props.callback.getCats();
 
         let finalCats = cats.map((item) =>
-            this.returnCatBase(item.id, item.name)
+            this.returnCatBase(item._id, item.name)
         );
 
         return (
@@ -317,7 +316,7 @@ export default class AddPassword extends React.Component {
         }
         else {
             for ( let i = 0; i < cats.length; i++ ) {
-                if ( cats[i].id === this.state.catID ) {
+                if ( cats[i]._id === this.state.catID ) {
                     catName = cats[i].name;
                 }
             }
@@ -465,8 +464,10 @@ export default class AddPassword extends React.Component {
     }
 
     addPass() {
+        console.log("add.password.js: catID: " + this.state.catID);
         if ( this.state.user.length > 0 && this.state.title.length > 0 && this.state.pass.length > 0) {
-            this.props.callback.addPass(this.state.user, this.state.pass, this.state.url, this.state.title, this.state.catID, this.state.tag);
+            this.props.callback.addPass(this.state.user, this.state.pass, this.state.url, this.state.title,
+                this.state.tag, this.state.catID);
             this.resetState();
         }
         else {

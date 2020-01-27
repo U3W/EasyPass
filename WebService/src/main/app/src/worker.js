@@ -3,8 +3,14 @@ importScripts("modules/pouchdb/dist/pouchdb.find.min.js");
 importScripts("modules/easypass-lib/dist/easypass-lib.js");
 import("../../rust/pkg").then(wasm => {
 
+
     let worker = null;
     let remoteInit = false;
+    let authUrl = null;
+    let clientInitialized = false;
+    let mode = undefined;
+    let deletedPasswords = new Map();
+    //let undoPasswordDeletion = false;
 
     // Initialize Worker
     const init = async () => {
@@ -15,6 +21,7 @@ import("../../rust/pkg").then(wasm => {
         if (navigator.onLine) {
             try {
                 const url = await fetch("/database");
+                authUrl = url;
                 const response = await url.json();
                 dbUrl = response.db;
                 remoteInit = true;
@@ -24,9 +31,15 @@ import("../../rust/pkg").then(wasm => {
             }
         }
         worker = new wasm.Worker(dbUrl);
-        self.postMessage('initDone');
-        heartbeat();
+        self.addEventListener('message', clientInit, true);
+        // Send client OK and wait for response in `clientInit` listener
+        while (!clientInitialized) {
+            self.postMessage('initDone');
+            await sleep(500);
+        }
     };
+
+    init();
 
     // Sets host for the remote database when app the goes online
     // Only called when the app is started in offline-mode
@@ -47,44 +60,112 @@ import("../../rust/pkg").then(wasm => {
     // Heartbeat function to keep data synced
     const heartbeat = () => {
         setAsyncInterval(async () => {
-            if (navigator.onLine) {
-                // If worker started in offline mode and now goes online
-                // connect to the remote database
-                if (!remoteInit) {
-                    await setRemote();
-                }
-                if (await isReachable('http://localhost:7000')) {
-                    console.log('Online')
+            try {
+                if (navigator.onLine) {
+                    // If worker started in offline mode and now goes online
+                    // connect to the remote database
+                    if (!remoteInit) {
+                        await setRemote();
+                    }
+                    if (await isReachable('http://localhost:7000')) {
+                        console.log('Online')
+                    } else {
+                        console.log(Date() + "Service Down");
+                    }
+                    worker.set_service_status("online");
                 } else {
-                    console.log("Service Down");
+                    console.log("Offline");
+                    worker.set_service_status("offline");
                 }
-                worker.set_service_status("online");
-            } else {
-                console.log("Offline");
-                worker.set_service_status("offline");
+                //console.log(JSON.stringify(await worker.check()));
+                await worker.check();
+                const all = deletePasswordsInEntries((await worker.all_docs()).rows);
+                self.postMessage(['allEntries', all]);
+            } catch (e) {
+                console.log(e);
             }
-            console.log(JSON.stringify(await worker.check()));
-            //await worker.check();
-            const all = await worker.all_docs();
-            self.postMessage(['all', all.rows]);
         }, 3000);
     };
 
-    init();
+    const clientInit = (e) => {
+        if(e.data === 'initAck') {
+            clientInitialized = true;
+            self.removeEventListener('message', clientInit, true);
+            self.addEventListener('message', clientCall, true);
+        }
+    };
 
-    self.addEventListener('message', async function(e) {
+    const clientCall = async (e) => {
         const cmd = e.data[0];
         const data = e.data[1];
+
+        if (mode === undefined) {
+            mode = cmd;
+            if (mode === 'dashboard') {
+                // TODO Toggle heartbeat
+                heartbeat();
+            }
+        } else {
+            switch (mode) {
+                case 'index':
+                    indexCall(cmd, data);
+                    break;
+                case 'dashboard':
+                    dashboardCall(cmd, data);
+                    break;
+            }
+        }
+
+    };
+
+    const indexCall = async (cmd, data) => {
         switch (cmd) {
-            case 'test':
-                let msg = await worker.process(data.msg);
-                self.postMessage(data.msg + ': ' + msg);
+            case 'unregister':
+                mode = undefined;
                 break;
-            case 'save':
-                await worker.save(data);
-                const ret = await worker.find({"selector":{"name": data.name }});
-                self.postMessage(['save', ret.docs[0]]);
+            case 'echo':
+                self.postMessage(['echo', data]);
                 break;
+        }
+    };
+
+    const dashboardCall = async (cmd, data) => {
+        switch (cmd) {
+            case 'unregister':
+                mode = undefined;
+                break;
+            case 'savePassword':
+                // TODO Worker Decrypt Password
+                const saveCheck = await worker.save(data);
+                self.postMessage(['savePassword', await saveEntryResult(saveCheck)]);
+                break;
+            case 'deletePassword':
+                const deletedPassword = (await worker.find({"selector":{"_id": data._id, "_rev": data._rev}})).docs[0];
+                deletedPasswords.set(deletedPassword, false);
+                const delCheck = await worker.remove(data._id, data._rev);
+                setTimeout(async function() {
+                    undoPasswordDelete(deletedPassword);
+                }, 5000);
+                self.postMessage(['deletePassword', delCheck]);
+                break;
+            case 'undoDeletePassword':
+                const undoKey = [...deletedPasswords.keys()].find(entry => entry._id === data._id);
+                deletedPasswords.set(undoKey, true);
+                break;
+            case 'getPassword':
+                // TODO fix spamming worker calls from client for getPassword ...
+                const encrypted = (await worker.find({"selector":{"_id": data._id, "_rev": data._rev}})).docs[0];
+                // TODO call decryption
+                const decrypted = encrypted;
+                self.postMessage(['getPassword', {_id: decrypted._id, passwd: decrypted.passwd}]);
+                break;
+            case 'saveCategory':
+                const catCheck = await worker.save(data);
+                self.postMessage(['saveCategory', await saveCatResult(catCheck)]);
+                break;
+
+
+            // TODO Remove legacy Worker API
             case 'update':
                 const updateReturn = await worker.update(data);
                 if (updateReturn.ok === true) {
@@ -114,6 +195,139 @@ import("../../rust/pkg").then(wasm => {
             default:
                 self.postMessage('Unknown command: ' + data.msg);
         }
-    }, false);
+    };
+
+    const saveEntryResult = async (check) => {
+        if (check.ok) {
+            const entry =
+                (await worker.find({"selector": {"_id": check.id, "_rev": check.rev}})).docs[0];
+            delete entry.passwd;
+            return {
+                ok: true,
+                entry: entry
+            }
+        } else return { ok: false };
+    };
+
+    const undoPasswordDelete = async (deletedPassword) => {
+      const check = deletedPasswords.get(deletedPassword);
+      if (check)  {
+          console.log("Undoing remove!!!");
+          delete deletedPassword._id;
+          delete deletedPassword._rev;
+          // TODO error handling?
+          await worker.save(deletedPassword);
+      }
+      deletedPasswords.delete(deletedPassword);
+    };
+
+    const saveCatResult = async (check) => {
+        if (check.ok) {
+            const entry =
+                (await worker.find({"selector": {"_id": check.id, "_rev": check.rev}})).docs[0];
+            return {
+                ok: true,
+                entry: entry
+            }
+        } else return { ok: false };
+    };
+
+    /**
+     * Build selector query for PouchDB to verify that data was added.
+     */
+    const buildSelector = (data) => {
+        let selector = Object();
+        Object.keys(data).forEach(e => {
+            // TODO Worker - BuildSelector support Arrays?
+            if (!Array.isArray(data[e]))
+                selector[e] = data[e];
+        });
+        return selector
+    };
+
+    const returnSaved = async (data) => {
+        const success = await elementExists(data);
+    };
+
+    /**
+     * Checks if element dataset exist in local database.
+     */
+    const elementExists = async (data) => {
+        const ret = await worker.find({"selector": buildSelector(data)});
+        return (ret.docs.length !== 0);
+    };
+
+    // TODO Define WebAssembly API with Field to exclude passwd: https://nolanlawson.github.io/pouchdb-find/
+    /**
+     * Delete password field in dataset.
+     */
+    const deletePasswordsInEntries = (data) => {
+        const entries = [];
+        data.forEach(e => {
+           delete e.doc.passwd;
+           entries.push(e.doc);
+        });
+        return entries;
+    }
+
+
+    /**
+     ***********************
+     *
+     * Login & Registration
+     *
+     ***********************
+     */
+
+    const registration = async (uname, masterkey) => {
+        // TODO Moritz func call
+        const pubkey = masterkey;
+        const privkey = masterkey;
+        const data = {
+            "uname": uname,
+            "publicKey": pubkey,
+            "privateKey": privkey
+        };
+        const respone = await fetch(authUrl + "register", {
+            method: `POST`,
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(data)
+        });
+    };
+
+    const login = async (uname, masterkey) => {
+        const data = { "uname": uname, "publicKey": "", "privateKey": ""};
+        const respone = await fetch(authUrl + "challenge", {
+            method: `POST`,
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(data)
+        });
+        const result = await respone.json();
+        //
+        // result.encryptedPrivateKey
+        // TODO decrypt private key with masterkey
+        const privkey = "";
+        // result.encryptedChallenge
+        // TODO decrypt challenge with private key
+        // const challenge = result.encryptedChallenge;
+        const decryptedChallenge = 'D_A_S___I_S_T___E_I_N_E___C_H_A_L_L_E_N_G_E';
+
+        // TODO login
+        const response2 = await fetch(authUrl + "login", {
+            method: 'post',
+            headers: new Headers({
+                'Authorization': 'Basic '+btoa(uname + ':' + decryptedChallenge),
+                'Content-Type': 'application/x-www-form-urlencoded'
+            })
+        });
+
+
+    };
+
 });
+
 
