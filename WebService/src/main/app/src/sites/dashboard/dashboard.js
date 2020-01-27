@@ -147,6 +147,8 @@ class Dashboard extends React.Component {
         this.resetPassCache = that.resetPassCache.bind(this);
         this.setPassCacheID = that.setPassCacheID.bind(this);
         this.undoDelete = that.undoDelete.bind(this);
+        this.checkIfUserExists = that.checkIfUserExists.bind(this);
+
         // WindowDimensions
         this.updateWindowDimensions = this.updateWindowDimensions.bind(this);
         // Worker

@@ -134,6 +134,14 @@ export function undoDelete( which, id ) {
 }
 
 /**
+ * Checks if user exists
+ */
+export function checkIfUserExists( user ) {
+    // ToDo call kacpers Method
+    return true;
+}
+
+/**
  * Simple sleep function.
  */
 function sleep (time) {
