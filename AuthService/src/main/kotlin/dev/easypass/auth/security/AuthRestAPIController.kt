@@ -17,7 +17,7 @@ import javax.servlet.http.HttpServletResponse
  */
 @RestController
 @RequestMapping("/auth")
-class RestAPIController(private val challengeAuthenticationProvider: ChallengeAuthenticationProvider) {
+class AuthRestAPIController(private val challengeAuthenticationProvider: ChallengeAuthenticationProvider) {
 
     @PostMapping("/challenge")
     @ResponseBody

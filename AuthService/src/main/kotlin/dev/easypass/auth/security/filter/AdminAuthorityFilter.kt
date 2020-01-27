@@ -17,11 +17,11 @@ import javax.servlet.http.HttpServletRequest
 import javax.servlet.http.HttpServletResponse
 
 @Component
-class AuthorizedForStoreFilter(private val properties: Properties): OncePerRequestFilter() {
+class AdminAuthorityFilter(private val properties: Properties): OncePerRequestFilter() {
     override fun doFilterInternal(request: HttpServletRequest, response: HttpServletResponse, filterChain: FilterChain) {
         val url = request.requestURL.toString()
         val authorities = AuthorityUtils.authorityListToSet(SecurityContextHolder.getContext().authentication.authorities)
-        val store = ":${properties.getProperty("server.port")}/store/"
+        val store = ":${properties.getProperty("server.port")}/admin/"
         val hash = url.substringAfter(store).split("/")[0]
         if (url.contains(store) and authorities.isNotEmpty()) {
             if (!(authorities.contains("USER_$hash") or authorities.contains("GROUP_$hash") or authorities.contains("ADMIN_$hash")))
