@@ -3,7 +3,7 @@
 Fill with test users:
 
 ```
-curl -i -X POST -H "Content-Type: application/json" -d "{\"uname\": \"mwustinger\", \"pubK\": \"PUBKEY\", \"privK\": \"PRIVKEY\"}" http://localhost:7000/auth/register
+curl -i -X POST -H "Content-Type: application/json" -d "{\"uname\": \"mwelsch\", \"pubK\": \"PUBKEY\", \"privK\": \"PRIVKEY\"}" http://localhost:7000/auth/register
 ```
 
 Authentication Test:

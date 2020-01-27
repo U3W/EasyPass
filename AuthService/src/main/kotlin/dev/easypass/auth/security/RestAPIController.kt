@@ -24,7 +24,7 @@ class RestAPIController(private val challengeAuthenticationProvider: ChallengeAu
      */
     @PostMapping("/challenge")
     @ResponseBody
-    fun unlockChallenge(request: HttpServletRequest, @RequestBody challenge: RequestAuthenticationChallenge): ResponseAuthenticationChallenge {
+    fun unlockChallenge(@RequestBody challenge: RequestAuthenticationChallenge, request: HttpServletRequest): ResponseAuthenticationChallenge {
         return challengeAuthenticationProvider.addUserChallenge(Pair(request.remoteAddr, challenge.uname), challenge.role)
     }
 
@@ -33,7 +33,10 @@ class RestAPIController(private val challengeAuthenticationProvider: ChallengeAu
      */
     @PostMapping("/register")
     @ResponseBody
-    fun register(@RequestBody user: User): ResponseEntity<String> {
-        return challengeAuthenticationProvider.registerUser(user)
+    fun register(@RequestBody user: User, response: HttpServletResponse) {
+        if (challengeAuthenticationProvider.registerUser(user))
+            response.status = HttpServletResponse.SC_OK
+        else
+            response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "User was not registered!")
     }
 }

@@ -26,7 +26,7 @@ class AuthorizedForStoreFilter(private val properties: Properties): OncePerReque
         println(url)
         if (url.contains(store) and authorities.isNotEmpty()) {
             if (!(authorities.contains("USER_$hash") or authorities.contains("GROUP_$hash") or authorities.contains("ADMIN_$hash")))
-                response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Unauthorized")
+                response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Unauthorized for this datastore!")
         }
         filterChain.doFilter(request, response)
     }

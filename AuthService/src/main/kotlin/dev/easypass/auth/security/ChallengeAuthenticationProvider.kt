@@ -134,13 +134,13 @@ class ChallengeAuthenticationProvider(private val userRepository: UserRepository
         ResponseAuthenticationChallenge(encryptionLibrary.generateInternalAdministrationChallenge().getChallengeEncryptedByPubK(user.pubK), user.privK)
     }
 
-    fun registerUser(user: User): ResponseEntity<String> {
-        try {
+    fun registerUser(user: User): Boolean {
+        return try {
             userRepository.add(user)
             connector.createCouchDbConnector(user.uname)
+            true
         } catch (ex: EntityAlreadyinDatabaseException) {
-            return ResponseEntity("Unauthorized", HttpStatus.UNAUTHORIZED)
+            false
         }
-        return ResponseEntity("Ok", HttpStatus.OK)
     }
 }
