@@ -23,7 +23,6 @@ class AuthorizedForStoreFilter(private val properties: Properties): OncePerReque
         val authorities = AuthorityUtils.authorityListToSet(SecurityContextHolder.getContext().authentication.authorities)
         val store = ":${properties.getProperty("server.port")}/store/"
         val hash = url.substringAfter(store).split("/")[0]
-        println(url)
         if (url.contains(store) and authorities.isNotEmpty()) {
             if (!(authorities.contains("USER_$hash") or authorities.contains("GROUP_$hash") or authorities.contains("ADMIN_$hash")))
                 response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Unauthorized for this datastore!")

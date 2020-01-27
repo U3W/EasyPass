@@ -1,6 +1,7 @@
 package dev.easypass.auth.security
 
 import dev.easypass.auth.datstore.CouchDBConnectionProvider
+import dev.easypass.auth.datstore.document.Group
 import dev.easypass.auth.datstore.document.User
 import dev.easypass.auth.datstore.exception.EntityAlreadyinDatabaseException
 import dev.easypass.auth.datstore.repository.GroupRepository
@@ -138,6 +139,16 @@ class ChallengeAuthenticationProvider(private val userRepository: UserRepository
         return try {
             userRepository.add(user)
             connector.createCouchDbConnector(user.uname)
+            true
+        } catch (ex: EntityAlreadyinDatabaseException) {
+            false
+        }
+    }
+
+    fun createGroup(group: Group): Boolean {
+        return try {
+            groupRepository.add(group)
+            connector.createCouchDbConnector(group.gname)
             true
         } catch (ex: EntityAlreadyinDatabaseException) {
             false

@@ -1,6 +1,7 @@
 package dev.easypass.auth.security
 
 import ch.qos.logback.core.net.SyslogOutputStream
+import dev.easypass.auth.datstore.document.Group
 import dev.easypass.auth.datstore.document.User
 import dev.easypass.auth.security.challenge.RequestAuthenticationChallenge
 import dev.easypass.auth.security.challenge.ResponseAuthenticationChallenge
@@ -18,14 +19,10 @@ import javax.servlet.http.HttpServletResponse
 @RequestMapping("/auth")
 class RestAPIController(private val challengeAuthenticationProvider: ChallengeAuthenticationProvider) {
 
-    /**
-     * A request to this url creates a challenge for the user
-     * @param uname: the name of the [dev.easypass.auth.datstore.document.User]
-     */
     @PostMapping("/challenge")
     @ResponseBody
     fun unlockChallenge(@RequestBody challenge: RequestAuthenticationChallenge, request: HttpServletRequest): ResponseAuthenticationChallenge {
-        return challengeAuthenticationProvider.addUserChallenge(Pair(request.remoteAddr, challenge.uname), challenge.role)
+        return challengeAuthenticationProvider.addUserChallenge(Pair(request.remoteAddr, challenge.hash), challenge.role)
     }
 
     /**
@@ -38,5 +35,14 @@ class RestAPIController(private val challengeAuthenticationProvider: ChallengeAu
             response.status = HttpServletResponse.SC_OK
         else
             response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "User was not registered!")
+    }
+
+    @PostMapping("/group")
+    @ResponseBody
+    fun createGroup(@RequestBody group: Group, response: HttpServletResponse) {
+        if (challengeAuthenticationProvider.createGroup(group))
+            response.status = HttpServletResponse.SC_OK
+        else
+            response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Group was not created!")
     }
 }

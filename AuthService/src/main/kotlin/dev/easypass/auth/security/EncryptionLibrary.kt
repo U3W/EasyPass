@@ -21,22 +21,22 @@ class EncryptionLibrary(private val properties: Properties) {
     /**
      * Generates an object of the class [User] with random values
      */
-    fun generateDummyUser(uname: String): User {
+    fun generateDummyUser(hash: String): User {
         //TODO Ein wirkliches Keypair hinzufügen
         var pubK = "DUMMY_PUBKEY"
         var privK = "DUMMY_PRIVKEY"
 
-        return User(uname, pubK, privK)
+        return User(hash, pubK, privK)
     }
 
     /**
      * Generates a random [String] challenge
      */
     fun generateAuthenticationChallenge(): String {
-        //TODO Eine wirkliche Challenge Erzeugung einbauen
-        var challenge = "CHALLENGE"
-
-        return challenge
+        val allowedChars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890"
+        return (1..512)
+                .map { allowedChars.random() }
+                .joinToString("")
     }
 
     /**
