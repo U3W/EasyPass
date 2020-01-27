@@ -48,6 +48,7 @@ export default class PassLine extends React.Component {
 
         this.state = {
             show: false,
+            open: false,
             showCopyAlert: false,
             edit: false,
             id: this.props.id,
@@ -67,6 +68,7 @@ export default class PassLine extends React.Component {
 
             // generate popup
             generatePassShow: false,
+
         };
 
         this.dismissGeneratePass = this.dismissGeneratePass.bind(this);
@@ -374,9 +376,9 @@ export default class PassLine extends React.Component {
     }
 
     getPassword(id, rev) {
-        if ( this.state.show ) {
+        //if ( this.state.open ) {
             return this.props.callback.getPass(id, rev);
-        }
+        //}
     }
 
 
@@ -598,8 +600,16 @@ export default class PassLine extends React.Component {
 
         // Request password from worker
         // If-statement is needed to break recursive render loop
-        if (this.state.id !== this.props.passwordCacheID && this.state.show === true) {
+        /**if (this.state.id !== this.props.passwordCacheID && this.state.open === true) {
             this.getPassword(this.state.id, this.state.rev);
+        }*/
+
+
+        if (this.state.id === this.props.passwordCacheID && this.state.passwordLoaded === false) {
+            this.getPassword(this.state.id, this.state.rev);
+            this.setState({
+                passwordLoaded: true
+            });
         }
 
         /**
@@ -675,7 +685,13 @@ export default class PassLine extends React.Component {
             </>
         );
         return (
-            <Card className="pass-card" name="passCard">
+            <Card className="pass-card" name="passCard"
+              onClick={() => {
+                  this.props.callback.setPassCacheID(this.state.id);
+                  this.setState({
+                      passwordLoaded: false
+                  })
+              }}>
                 <input id="searchInput" type="hidden" value={this.props.title}/>
                 <Accordion.Toggle as={Card.Header} className="clickable center-vert" eventKey={this.props.id}
                   onClick={() => this.setPasswordTo(false)}>
@@ -795,7 +811,9 @@ export default class PassLine extends React.Component {
                 </div>
                 <Accordion.Collapse eventKey={this.props.id}>
                     <>
-                        <Card.Body>
+                        <Card.Body onChange={(e) => {
+                            console.log("COLLAPSE: ", e);
+                        }}>
                             <Card.Title>
                             {this.state.edit === true ? // Title
                                 <InputGroup size="lg">
