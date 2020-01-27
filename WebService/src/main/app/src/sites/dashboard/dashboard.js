@@ -254,12 +254,18 @@ class Dashboard extends React.Component {
         // add callback to array
         catData = this.addCallback(catData);
         passwords[0] = catData.map(function (singlePass) {
-            //console.log("Heyjooo", singlePass.tabID, selectedTab);
             if ( singlePass.tabID === selectedTab  )
             {
-                return (
-                    <PassLine key={singlePass.id} tag={singlePass.tag} id={singlePass.id} cat={singlePass.cat} title={singlePass.title} user={singlePass.user} pass={singlePass.pass} url={singlePass.url} callback={singlePass.callback}/>
-                );
+                if ( singlePass.tabID === tabs.GROUPPASS) {
+                    return (
+                        <PassLine key={singlePass.id} tag={singlePass.tag} id={singlePass.id} cat={singlePass.cat} title={singlePass.title} user={singlePass.user} pass={singlePass.pass} url={singlePass.url} userGroupList={[{id: 1, name: "Huan"}]} callback={singlePass.callback}/>
+                    );
+                }
+                else {
+                    return (
+                        <PassLine key={singlePass.id} tag={singlePass.tag} id={singlePass.id} cat={singlePass.cat} title={singlePass.title} user={singlePass.user} pass={singlePass.pass} url={singlePass.url} callback={singlePass.callback}/>
+                    );
+                }
             }
         });
         return passwords;
@@ -276,9 +282,16 @@ class Dashboard extends React.Component {
             // add callback to array
             catData = this.addCallback(catData);
             passwords[catId] = catData.map(function (singlePass) {
-                return (
-                    <PassLine key={singlePass.id} tag={singlePass.tag} id={singlePass.id} cat={singlePass.cat} title={singlePass.title} user={singlePass.user} pass={singlePass.pass} url={singlePass.url} callback={singlePass.callback}/>
-                );
+                if ( singlePass.tabID === tabs.GROUPPASS) {
+                    return (
+                        <PassLine key={singlePass.id} tag={singlePass.tag} id={singlePass.id} cat={singlePass.cat} title={singlePass.title} user={singlePass.user} pass={singlePass.pass} url={singlePass.url} userGroupList={[{id: 1, name: "Huan"}]} callback={singlePass.callback}/>
+                    );
+                }
+                else {
+                    return (
+                        <PassLine key={singlePass.id} tag={singlePass.tag} id={singlePass.id} cat={singlePass.cat} title={singlePass.title} user={singlePass.user} pass={singlePass.pass} url={singlePass.url} callback={singlePass.callback}/>
+                    );
+                }
             })
         }
         return passwords;

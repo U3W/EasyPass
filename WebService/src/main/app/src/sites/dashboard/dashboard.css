@@ -271,3 +271,33 @@ userRemove {
         left: 0;
     }
 }
+
+.roundDiv {
+    border: 1px solid #ced4da;
+    border-radius: 0.25rem;
+    -moz-border-radius:0.25rem;
+    background: #064f30;
+}
+
+.roundtable td {
+    border-top: 0;
+}
+.roundtable tbody tr td {
+    border-radius: 0;
+}
+.roundtable tbody tr:nth-of-type(odd) {
+    background-color: #e9ecef
+}
+.roundtable tbody tr:nth-of-type(even) {
+    background-color: #f1f4f7
+}
+
+
+.topRound {
+    border-top-right-radius: 0.25rem !important;
+    border-top-left-radius: 0.25rem !important;
+}
+.botRound {
+    border-bottom-right-radius: 0.25rem !important;
+    border-bottom-left-radius: 0.25rem !important;
+}

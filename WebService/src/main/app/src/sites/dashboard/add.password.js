@@ -407,8 +407,16 @@ export default class AddPassword extends React.Component {
             let elmsArray = [];
             for ( let i = 0; i < this.state.userGroupList.length; i++ ) {
                 const item = this.state.userGroupList[i];
+                item.name = item.name + " ";
+                let tdClass = "";
+                if ( i === 0 ) {
+                    tdClass += "topRound";
+                }
+                if ( i === this.state.userGroupList.length-1) {
+                    tdClass += " botRound";
+                }
                 elmsArray[i] = (
-                    <td>
+                    <td className={tdClass}>
                         {item.name}
                         <button type="button" className="close userRemove" onClick={() => this.removeUserFromGroup(item.id)}>
                             <span aria-hidden="true" >×</span>
@@ -433,13 +441,13 @@ export default class AddPassword extends React.Component {
                         <h6 className="noMarginBottom">{StringSelector.getString(this.props.callback.state.language).addPassUserVis}</h6>
                         <i>{StringSelector.getString(this.props.callback.state.language).addPassUserVis2}</i>
                     </div>
-                    <Card>
-                        <Table striped hover size="sm" className="noMarginBottom">
+                    <div className="roundDiv">
+                        <Table striped hover size="sm" className="noMarginBottom roundtable">
                             <tbody>
                             {elms}
                             </tbody>
                         </Table>
-                    </Card>
+                    </div>
                 </>
             );
         }

@@ -62,6 +62,12 @@ export default class PassLine extends React.Component {
             tagAdded: this.setTagAddedRight(this.props.tag),
             popUpCatShow: false,
 
+            // Group Visibility
+            userGroupAdd: "",
+            userGroupListNew: this.deepCopyTags(this.props.userGroupList),
+            popUpGroupError: false,
+            groupErrTyp: 0,
+
             // generate popup
             generatePassShow: false,
         };
@@ -228,11 +234,14 @@ export default class PassLine extends React.Component {
     }
 
     deepCopyTags( tags ) {
-        let out = [];
-        for ( let i = 0; i < tags.length; i++ ) {
-            out[i] = JSON.parse(JSON.stringify(tags[i]));
+        if ( tags !== undefined ) {
+            let out = [];
+            for ( let i = 0; i < tags.length; i++ ) {
+                out[i] = JSON.parse(JSON.stringify(tags[i]));
+            }
+            return out;
         }
-        return out;
+        return undefined;
     }
 
     findTagKeyIndex ( keyComp ) {
@@ -312,7 +321,10 @@ export default class PassLine extends React.Component {
                         urlNew: e.target.value
                     });
                     break;
-                case "cat":
+                case "userGroupAdd":
+                    this.setState({
+                        userGroupAdd: e.target.value
+                    });
                     break;
             }
         }
@@ -575,6 +587,96 @@ export default class PassLine extends React.Component {
         );
     }
 
+
+    removeUserFromGroup( id ) {
+        if ( this.state.userGroupListNew !== undefined ) {
+            let arr = this.state.userGroupListNew;
+            for ( let i = 0; i < arr.length; i++ ) {
+                if ( arr[i].id === id){
+                    arr.splice(i,1);
+                }
+            }
+            this.setState({
+                userGroupListNew: arr,
+            });
+        }
+    }
+
+
+    getGroupErrorMsg() {
+        if ( this.state.popUpGroupError ) {
+            let err = StringSelector.getString(this.props.callback.state.language).addPassUserNotFound;
+            if ( this.state.groupErrTyp === 1 ) {
+                err = StringSelector.getString(this.props.callback.state.language).addPassUserAlready;
+            }
+            return (
+                <p className="text-danger fixErrorMsg">{err}</p>
+            );
+        }
+    }
+
+    getVisibilityTable() {
+        let key = -1;
+        let elms;
+        if ( this.state.userGroupListNew.length === 0 ) {
+            elms = StringSelector.getString(this.props.callback.state.language).addPassUserVisNon;
+            return (
+                <>
+                    <div className="visMargin">
+                        <h6 className="noMarginBottom">{StringSelector.getString(this.props.callback.state.language).addPassUserVis}</h6>
+                        <i>{StringSelector.getString(this.props.callback.state.language).addPassUserVis2}</i>
+                    </div>
+                    - {elms}
+                </>
+            );
+        }
+        else {
+            let elmsArray = [];
+            for ( let i = 0; i < this.state.userGroupListNew.length; i++ ) {
+                const item = this.state.userGroupListNew[i];
+                if ( this.state.edit ) {
+
+                }
+                elmsArray[i] = (
+                    <td>
+                        {item.name}
+                        { this.state.edit &&
+                            <button type="button" className="close userRemove" onClick={() => this.removeUserFromGroup(item.id)}>
+                                <span aria-hidden="true" >×</span>
+                                <span className="sr-only">Close</span>
+                            </button>
+                        }
+                    </td>
+                );
+            }
+
+            elms = elmsArray.map(function(item) {
+                key++;
+                return (
+                    <tr key={key}>
+                        {item}
+                    </tr>
+                );
+            });
+
+            return (
+                <>
+                    <div className="visMargin">
+                        <h6 className="noMarginBottom">{StringSelector.getString(this.props.callback.state.language).addPassUserVis}</h6>
+                        <i>{StringSelector.getString(this.props.callback.state.language).addPassUserVis2}</i>
+                    </div>
+                    <div className="roundDiv">
+                        <Table striped hover size="sm" className="noMarginBottom roundtable">
+                            <tbody>
+                            {elms}
+                            </tbody>
+                        </Table>
+                    </div>
+                </>
+            );
+        }
+    }
+
     render() {
 
         let userClass = "";
@@ -645,6 +747,46 @@ export default class PassLine extends React.Component {
                 </Button>
             </>
         );
+
+        // Sichtbarkeit
+        let visEdit = "";
+        let visNoEdit = "";
+        console.log("Nonono", this.state.titleNew, this.state.userGroupListNew);
+        if ( this.state.userGroupListNew !== undefined ) {
+            visEdit = (
+                <>
+                    <hr/>
+                    <h6>{StringSelector.getString(this.props.callback.state.language).addPassVis}</h6>
+                    <InputGroup size="sm" className={userComp}>
+                        <InputGroup.Prepend>
+                            <InputGroup.Text id="inputGroup-sizing-sm">{StringSelector.getString(this.props.callback.state.language).addPassUserTag}</InputGroup.Text>
+                        </InputGroup.Prepend>
+                        <FormControl className={userClass} autoComplete="off" id="userGroupAdd" aria-label="Small" aria-describedby="inputGroup-sizing-sm" value={this.state.userGroupAdd} placeholder={StringSelector.getString(this.props.callback.state.language).addPassUserInpPlaceholder} onChange={this.changeListener}/>
+                        <InputGroup.Append>
+                            <Button variant="dark" onClick={this.addUserToGroupAcc}>
+                                <img
+                                    src={AddTag}
+                                    alt=""
+                                    width="14"
+                                    height="14"
+                                    className="d-inline-block"
+                                />
+                            </Button>
+                        </InputGroup.Append>
+                    </InputGroup>
+                    {this.getGroupErrorMsg()}
+                    {this.getVisibilityTable()}
+                </>
+            );
+            visNoEdit = (
+                <>
+                    <hr/>
+                    <h6>{StringSelector.getString(this.props.callback.state.language).addPassVis}</h6>
+                    {this.getVisibilityTable()}
+                </>
+            );
+        }
+
         return (
             <Card className="pass-card" name="passCard">
                 <input id="searchInput" type="hidden" value={this.props.title}/>
@@ -884,25 +1026,11 @@ export default class PassLine extends React.Component {
                                     {catRender}
                                 </div>
                                 <div>
-                                    <hr/>
-                                    <h6>Sichtbarkeit</h6>
-                                    <InputGroup size="sm" className={userComp}>
-                                        <InputGroup.Prepend>
-                                            <InputGroup.Text id="inputGroup-sizing-sm">Add User to Group</InputGroup.Text>
-                                        </InputGroup.Prepend>
-                                        <FormControl className={userClass} autoComplete="off" id="userGroupAdd" aria-label="Small" aria-describedby="inputGroup-sizing-sm" value={this.state.userGroupAdd} placeholder={"Enter Username"} onChange={this.changeInput}/>
-                                        <InputGroup.Append>
-                                            <Button variant="dark" onClick={this.addUserToGroupAcc}>
-                                                <img
-                                                    src={AddTag}
-                                                    alt=""
-                                                    width="14"
-                                                    height="14"
-                                                    className="d-inline-block"
-                                                />
-                                            </Button>
-                                        </InputGroup.Append>
-                                    </InputGroup>
+                                    { this.state.edit ?
+                                        visEdit
+                                        :
+                                        visNoEdit
+                                    }
                                 </div>
                             </div>
                         </Card.Body>
