@@ -48,7 +48,7 @@ const styles = {
         animationName: Radium.keyframes(bounceInDown, 'bounceInDown')
     },
     logoOut: {
-        animation: 'x 1s',
+        animation: 'x 0.7s',
         animationName: Radium.keyframes(bounceOutDown, 'bounceOutDown')
     }
 
@@ -117,10 +117,10 @@ class App extends React.Component {
                             this.setState({
                                 animationFinished: true,
                             });
-                        }, 1000);
+                        }, 700);
 
                     })
-                }, 2000);
+                }, 1500);
             });
         }
     }
@@ -149,7 +149,7 @@ class App extends React.Component {
         console.log("Worker state: " + this.state.workerInitialized);
         console.log("Disconnected: " + this.state.isDisconnected);
 
-        if ( this.state.animationFinished ) {
+        if ( this.state.animationFinished) {
             return (
                 <div className="App">
                     <Switch>
@@ -202,15 +202,19 @@ class App extends React.Component {
             }
             console.log("Curr", this.state.currentLogoAnimation);
             return (
-                <StyleRoot className="fixHeight">
-                    <div style={styleType}>
-                        <img
-                            src={Logo}
-                            alt=""
-                            className="d-inline-block"
-                        />
-                    </div>
-                </StyleRoot>
+                <div className="fixHeight">
+                    <StyleRoot className="matchParent topPositioning">
+                        <div style={styleType} >
+                            <div>
+                                <img
+                                    src={Logo}
+                                    alt=""
+                                    className="d-inline-block logoAnm"
+                                />
+                            </div>
+                        </div>
+                    </StyleRoot>
+                </div>
             )
         }
 
@@ -226,4 +230,4 @@ function sleep (time) {
 }
 // Ins Grundgerüst setzen
 const rootElement = document.getElementById("root");
-ReactDOM.render(<Provider store={store}><Router history={history}><App /></Router></Provider>, rootElement);
+ReactDOM.render(<Provider store={store}><Router history={history}><App/></Router></Provider>, rootElement);

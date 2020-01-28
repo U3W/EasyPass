@@ -23,6 +23,7 @@ import {login, logout, succRegist} from "../../action/auth.action";
 import Indicator from "../../network/network.indicator";
 import {dashboardAlerts} from "../dashboard/const/dashboard.enum";
 import Registration from "../registration/registration";
+import FadeOutGradient from "../../animation/fadeOutGradient";
 
 
 
@@ -32,6 +33,9 @@ class Login extends React.Component {
         super(props);
 
         this.state = {
+            // for the loading animation
+            loading: undefined,
+
             language: dashboardState.getSelectedLanguage(),
 
             inpPassword: "",
@@ -57,6 +61,12 @@ class Login extends React.Component {
 
     componentDidMount() {
         this.props.worker.addEventListener("message", this.workerCall, true);
+        // end animation thing
+        setTimeout(() => {
+            this.setState({
+                loading: false,
+            });
+        }, 1000)
     }
 
     componentWillUnmount() {
@@ -251,44 +261,47 @@ class Login extends React.Component {
 
 
     render() {
+        console.log("Why?", this.state.loading);
         return (
             <>
-            { this.state.wantRegister ?
-                <Registration callback={this}/>
-                :
-                <div className="backgroundPicLogin">
-                    <div className="gradientDivLogin">
-                        <Container>
-                            <Row className="size-hole-window">
-                                <Col xs={12} sm={8} md={6} lg={5} className="center-vert center-horz">
-                                    <Card className="card-login login">
-                                        <Card.Img variant="top" src={Logo} />
-                                        <Card.Body>
-                                            <Form autoComplete="off">
-                                                {this.getInputUsername()}
-                                                {this.getInputPassword()}
-                                                <Form.Group>
-                                                        <Form.Check type="checkbox" id="inpKeepLoggedIn" label={StringSelector.getString(this.state.language).keepLoggedIn} />
-                                                    <Nav.Link onClick={() => { this.switchToRegister(true, false, true)} }>{StringSelector.getString(this.state.language).registrationButton}</Nav.Link>
-                                                </Form.Group>
-                                                <Button variant="danger" className={"float-right"} onClick={this.handleSubmit}>
-                                                    {StringSelector.getString(this.state.language).loginButton}
-                                                </Button>
-                                            </Form>
-                                        </Card.Body>
-                                    </Card>
-                                </Col>
-                                <div className="footer">
-                                    {this.printError()}
-                                    {this.printRegistered()}
-                                </div>
-                                <Indicator />
-                            </Row>
-                        </Container>
+                { (this.state.loading === undefined ) &&
+                    <FadeOutGradient loading={true}/>
+                }
+                { this.state.wantRegister ?
+                    <Registration callback={this}/>
+                    :
+                    <div className="backgroundPicLogin">
+                        <div className="gradientDivLogin">
+                            <Container>
+                                <Row className="size-hole-window">
+                                    <Col xs={12} sm={8} md={6} lg={5} className="center-vert center-horz">
+                                        <Card className="card-login login">
+                                            <Card.Img variant="top" src={Logo} />
+                                            <Card.Body>
+                                                <Form autoComplete="off">
+                                                    {this.getInputUsername()}
+                                                    {this.getInputPassword()}
+                                                    <Form.Group>
+                                                            <Form.Check type="checkbox" id="inpKeepLoggedIn" label={StringSelector.getString(this.state.language).keepLoggedIn} />
+                                                        <Nav.Link onClick={() => { this.switchToRegister(true, false, true)} }>{StringSelector.getString(this.state.language).registrationButton}</Nav.Link>
+                                                    </Form.Group>
+                                                    <Button variant="danger" className={"float-right"} onClick={this.handleSubmit}>
+                                                        {StringSelector.getString(this.state.language).loginButton}
+                                                    </Button>
+                                                </Form>
+                                            </Card.Body>
+                                        </Card>
+                                    </Col>
+                                    <div className="footer">
+                                        {this.printError()}
+                                        {this.printRegistered()}
+                                    </div>
+                                    <Indicator />
+                                </Row>
+                            </Container>
+                        </div>
                     </div>
-                </div>
-            }
-
+                }
             </>
         );
     }

@@ -33,8 +33,12 @@ import StringSelector from "../../strings/stings";
 //import Entries from "./Entries";
 import * as that from "./dashboard.extended";
 import * as dashboardEntries from "./dashboard.entries";
+import FadeOutGradient from "../../animation/fadeOutGradient";
+
 
 class Dashboard extends React.Component {
+
+
 
     constructor(props){
         super(props);
@@ -56,6 +60,8 @@ class Dashboard extends React.Component {
         }
 
         this.state = {
+            // loading animation
+            loading: undefined,
             // mockpassword
             mock: new MockPasswords(this.props.worker),
             // password entries,
@@ -165,6 +171,12 @@ class Dashboard extends React.Component {
         window.addEventListener('resize', this.updateWindowDimensions);
         this.props.worker.addEventListener("message", this.workerCall);
         this.props.worker.postMessage(['dashboard', undefined]);
+        // end animation thing
+        setTimeout(() => {
+            this.setState({
+                loading: false,
+            });
+        }, 1000)
     }
 
     componentWillUnmount() {
@@ -957,52 +969,57 @@ class Dashboard extends React.Component {
         }
 
         return (
-            <div className="size-hole-window-hidden-scroll" onClick={this.resetSettingsExpanded}>
-                <NavbarEP callback={this} width={this.state.width} language={this.state.language}/>
-                <div className="container-fluid fixScroll">
-                    <Row>
-                        <NavbarVerticalEP2 callback={this} className={sidebarClass} />
-                        { this.state.sidebarClosed ?
-                            <Col className={mainClasses + " fitHole"}>
-                                {this.getTab()}
-                            </Col>
-                            :
-                            <Col md={9} sm={7} xs={7} lg={9} className={mainClasses}>
-                                {this.getTab()}
-                            </Col>
-                        }
+            <>
+                { (this.state.loading === undefined ) &&
+                    <FadeOutGradient loading={true}/>
+                }
+                <div className="size-hole-window-hidden-scroll" onClick={this.resetSettingsExpanded}>
+                    <NavbarEP callback={this} width={this.state.width} language={this.state.language}/>
+                    <div className="container-fluid fixScroll">
+                        <Row>
+                            <NavbarVerticalEP2 callback={this} className={sidebarClass} />
+                            { this.state.sidebarClosed ?
+                                <Col className={mainClasses + " fitHole"}>
+                                    {this.getTab()}
+                                </Col>
+                                :
+                                <Col md={9} sm={7} xs={7} lg={9} className={mainClasses}>
+                                    {this.getTab()}
+                                </Col>
+                            }
 
-                        <hr/>
-                        <IndicatorSide className={indicatorClass} />
-                    </Row>
-                    <Button className="fab" variant="danger" onClick={this.showAddPass}>
-                        <img
-                            src={AddPass}
-                            alt=""
-                            width="20"
-                            height="20"
-                            className="d-inline-block addIcon"
-                        />
-                        <div className={langText}>
-                            <span>{StringSelector.getString(this.state.language).addPass}</span>
-                        </div>
-                    </Button>
-                    <AddPassword callback={this}/>
+                            <hr/>
+                            <IndicatorSide className={indicatorClass} />
+                        </Row>
+                        <Button className="fab" variant="danger" onClick={this.showAddPass}>
+                            <img
+                                src={AddPass}
+                                alt=""
+                                width="20"
+                                height="20"
+                                className="d-inline-block addIcon"
+                            />
+                            <div className={langText}>
+                                <span>{StringSelector.getString(this.state.language).addPass}</span>
+                            </div>
+                        </Button>
+                        <AddPassword callback={this}/>
+                    </div>
+                    <AddCategory callback={this}/>
+                    <EditCategory callback={this}/>
+                    <DeleteCategory callback={this}/>
+                    {this.printResetPassPopUp()}
+                    {this.printCopy()}
+                    {this.printUser()}
+                    {this.printURL()}
+                    {this.printAddPass()}
+                    {this.printEditPass()}
+                    {this.printDeletePass()}
+                    {this.printEditCat()}
+                    {this.printAddCat()}
+                    {this.printDeleteCat()}
                 </div>
-                <AddCategory callback={this}/>
-                <EditCategory callback={this}/>
-                <DeleteCategory callback={this}/>
-                {this.printResetPassPopUp()}
-                {this.printCopy()}
-                {this.printUser()}
-                {this.printURL()}
-                {this.printAddPass()}
-                {this.printEditPass()}
-                {this.printDeletePass()}
-                {this.printEditCat()}
-                {this.printAddCat()}
-                {this.printDeleteCat()}
-            </div>
+            </>
         );
     }
 }

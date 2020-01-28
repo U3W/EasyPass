@@ -12,7 +12,54 @@ code {
     monospace;
 }
 
-
-.fixHeight {
+.hiddenOverflow {
   overflow: hidden;
+}
+.fixHeight {
+  position: absolute;
+  height: 100%;
+  width: 100%;
+  overflow: hidden;
+  background: linear-gradient(to right, rgba(157, 212, 241, 0.7), rgba(157, 212, 241, 0.2));
+  opacity: 1.0;
+}
+.matchParent {
+  height: 100%;
+  width: 100%;
+}
+
+.topPositioning {
+  position: absolute;
+  height: 70%;
+  width: 100%;
+  top: -80px
+}
+
+
+@media (min-height: 400px) {
+  .topPositioning {
+    top: 0px
+  }
+}
+
+@media (min-height: 576px) {
+  .topPositioning {
+    top: 10vh;
+  }
+}
+
+@media (min-height: 768px) {
+  .topPositioning {
+    top: 20vh;
+  }
+}
+
+.logoAnm {
+  display: block;
+  position: relative;
+  overflow: hidden;
+  margin-right: 20%;
+  margin-left: 20%;
+  height: 60%;
+  width: 60%;
 }

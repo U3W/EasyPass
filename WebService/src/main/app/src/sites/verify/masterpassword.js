@@ -22,9 +22,9 @@ import dashboardState from "../dashboard/dashboard.saved.state";
 import history from "../../routing/history";
 import Back from "../../img/masterpassword_V3.1.svg";
 import InputGroup from "react-bootstrap/InputGroup";
-import FormControl from "react-bootstrap/FormControl";
-import CopyIcon from "../../img/icons/password_copy_white.svg";
-import {dashboardAlerts} from "../dashboard/const/dashboard.enum";
+
+import FadeOutGradient from "../../animation/fadeOutGradient";
+
 
 class Masterpassword extends React.Component {
 
@@ -32,6 +32,8 @@ class Masterpassword extends React.Component {
         super(props);
 
         this.state = {
+            // for the animation
+            loading: undefined,
             language: dashboardState.getSelectedLanguage(),
 
             inpMasterpassword: "",
@@ -58,7 +60,14 @@ class Masterpassword extends React.Component {
     }
 
     componentDidMount() {
+        console.log("Why?");
         this.props.worker.addEventListener("message", this.workerCall, true);
+        // end animation thing
+        setTimeout(() => {
+            this.setState(  {
+                loading: false,
+            });
+        },  500)
     }
 
     componentWillUnmount() {
@@ -302,7 +311,6 @@ class Masterpassword extends React.Component {
     }
 
     getRadioButtons(){
-        // TODO darauf achten welche Verfahren überhaupt möglich sind
         return (
             <Container>
                 {['radio'].map(type => (
@@ -333,6 +341,9 @@ class Masterpassword extends React.Component {
     render() {
         return (
             <div className="">
+                { (this.state.loading === undefined ) &&
+                    <FadeOutGradient loading={true}/>
+                }
                 <div className="gradientDivMasterpassword">
                     <Container>
                         <Row className="size-hole-window">
