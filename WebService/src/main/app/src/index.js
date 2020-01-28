@@ -20,28 +20,52 @@ import {createStore, applyMiddleware} from "redux";
 import rootReducer from "./store/reducers/root.reducer";
 import {Provider} from "react-redux"
 import thunk from "redux-thunk";
-import { Offline, Online, Detector } from "react-detect-offline";
-import {handleConnection} from "./network/network.functions";
 import Dashboard from "./sites/dashboard/dashboard";
-import VerifyAuth from "./authentification/auth.masterpassword"
 import * as serviceWorker from "./service-worker/sw-handler";
-import {dashboardAlerts} from "./sites/dashboard/const/dashboard.enum";
+import * as that from "./sites/dashboard/dashboard.extended";
+
+
+import { ReactComponent as LogoComp } from './img/logo/Logo_Single_Big.svg';
+import Logo from './img/logo/Logo_Single_Big.svg'
+import { bounce } from 'react-animations';
+import { bounceInDown } from 'react-animations';
+import { bounceOutDown } from 'react-animations';
+
+import Radium, {StyleRoot} from 'radium';
 
 
 
 // Load service worker
 serviceWorker.register();
 
-// Für Storage
+// For Storage
 const store = createStore(rootReducer, applyMiddleware(thunk));
 
-// Grundapp
+// For the animation
+const styles = {
+    logo: {
+        animation: 'x 1s',
+        animationName: Radium.keyframes(bounceInDown, 'bounceInDown')
+    },
+    logoOut: {
+        animation: 'x 1s',
+        animationName: Radium.keyframes(bounceOutDown, 'bounceOutDown')
+    }
+
+};
+
+// Baseapp
 class App extends React.Component {
 
     constructor(state) {
         super(state);
 
+
+
         this.state = {
+            currLoginAnimation: 0,
+            animationFinished: false,
+            startAnimation: false,
             isDisconnected: false,
             // Load backend with WebAssembly
             worker: new Worker('worker.js'),
@@ -53,8 +77,10 @@ class App extends React.Component {
 
     componentDidMount() {
         // Add listener for Worker
-        if (!this.state.workerInitialized)
+        if (!this.state.workerInitialized) {
             this.state.worker.addEventListener("message", this.workerInit);
+        }
+
 
         // TODO Fix HandleConnection
         //  Function makes always a re-render, even though the state has not changed
@@ -80,7 +106,21 @@ class App extends React.Component {
             this.state.worker.removeEventListener("message", this.workerInit);
             this.state.worker.postMessage('initAck');
             this.setState({
-                workerInitialized: true
+                workerInitialized: true,
+            }, () => {
+                console.log("Test");
+                setTimeout(() => {
+                    this.setState({
+                        currentLogoAnimation: 1,
+                    }, () => {
+                        setTimeout(() => {
+                            this.setState({
+                                animationFinished: true,
+                            });
+                        }, 1000);
+
+                    })
+                }, 2000);
             });
         }
     }
@@ -98,7 +138,7 @@ class App extends React.Component {
                                 return clearInterval(webPing)
                             });
                         }).catch(() => this.setState({ isDisconnected: true }) )
-                }, 2000);
+                }, 1000);
             return;
         }
 
@@ -108,28 +148,31 @@ class App extends React.Component {
     getApp() {
         console.log("Worker state: " + this.state.workerInitialized);
         console.log("Disconnected: " + this.state.isDisconnected);
-        if (this.state.workerInitialized) {
-            if (!this.state.isDisconnected) {
-                return (
-                    <div className="App">
-                        <Switch>
-                            <Route exact path="/" component={() => <Login worker={this.state.worker}/>}/>
-                            <Route exact path="/registration"
-                                   component={() => <Registration worker={this.state.worker}/>}/>
-                            <ProtectedRoute exact path="/verify" component={() =>
-                                <Masterpassword worker={this.state.worker} />} netState="online" type="auth"/>
-                            {/*<ProtectedRoute exact path="/dashboard" component={() =>
+
+        if ( this.state.animationFinished ) {
+            return (
+                <div className="App">
+                    <Switch>
+                        <Route exact path="/" component={() => <Login worker={this.state.worker}/>}/>
+                        <Route exact path="/registration"
+                               component={() => <Registration worker={this.state.worker}/>}/>
+                        <ProtectedRoute exact path="/verify" component={() =>
+                            <Masterpassword worker={this.state.worker} />} netState="online" type="auth"/>
+                        {/*<ProtectedRoute exact path="/dashboard" component={() =>
                             <Dashboard worker={this.state.worker} workerInitialized={this.state.workerInitialized}
                                 workerIsInitialized={this.workerIsInitialized}/>}
                                 netState="online" type="verify" />*/}
-                            {/*<ProtectedRoute exact path="/dashboard" render={() =>
+                        {/*<ProtectedRoute exact path="/dashboard" render={() =>
                             <h1>Hey</h1>}/>*/}
-                            <ProtectedRoute exact path="/dashboard" component={() =>
-                                <Dashboard worker={this.state.worker} />} netState="online" type="verify"/>
-                            <Route path="*" component={NoMatch}/>
-                        </Switch>
-                    </div>
-                );
+                        <ProtectedRoute exact path="/dashboard" component={() =>
+                            <Dashboard worker={this.state.worker} />} netState="online" type="verify"/>
+                        <Route path="*" component={NoMatch}/>
+                    </Switch>
+                </div>
+            );
+            /*
+            if (!this.state.isDisconnected) {
+
             } else {
                 let redirect = <div/>;
                 if (VerifyAuth.getVerified()) {
@@ -150,14 +193,24 @@ class App extends React.Component {
                         </Switch>
                     </div>
                 );
-            }
+            }*/
         } else {
             // TODO @Seb Please make a cool loading page!
+            let styleType = styles.logo;
+            if ( this.state.currentLogoAnimation === 1 ) {
+                styleType = styles.logoOut;
+            }
+            console.log("Curr", this.state.currentLogoAnimation);
             return (
-                <div>
-                    <h1>Loading Worker...</h1>
-                    <h3>Please wait</h3>
-                </div>
+                <StyleRoot className="fixHeight">
+                    <div style={styleType}>
+                        <img
+                            src={Logo}
+                            alt=""
+                            className="d-inline-block"
+                        />
+                    </div>
+                </StyleRoot>
             )
         }
 
@@ -166,6 +219,10 @@ class App extends React.Component {
     render() {
         return this.getApp();
     }
+}
+
+function sleep (time) {
+    return new Promise((resolve) => setTimeout(resolve, time));
 }
 // Ins Grundgerüst setzen
 const rootElement = document.getElementById("root");
