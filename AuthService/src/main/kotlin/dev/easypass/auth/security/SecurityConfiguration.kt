@@ -46,8 +46,9 @@ class SecurityConfiguration(private val authProvider: ChallengeAuthenticationPro
                 .and()
                 .authorizeRequests()
                 .antMatchers(HttpMethod.POST, "/auth/**").permitAll()
-                .antMatchers(HttpMethod.POST,"/admin/**").authenticated()
+                .antMatchers(HttpMethod.POST, "/admin/**").authenticated()
                 .antMatchers("/store/**").authenticated()
+
                 .anyRequest().denyAll()
 
                 .and()

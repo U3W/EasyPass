@@ -40,7 +40,7 @@ class GroupRepository(db: CouchDbConnector) : CouchDbRepositorySupport<Group>(Gr
      * returns only the first entry of the [List] of all the entries with the passed [gname], that are stored in the database
      * @param gname: the name of the user
      */
-    fun findOneByGname(gname: String?): Group {
+    fun findOneByGname(gname: String): Group {
         val listOfUsers = findByGname(gname)
         if (listOfUsers.isEmpty())
             throw DocumentNotFoundException("The Group [$gname] is NOT FOUND in the database")
@@ -57,5 +57,10 @@ class GroupRepository(db: CouchDbConnector) : CouchDbRepositorySupport<Group>(Gr
         super.add(entity)
     } else {
         throw UpdateConflictException()
+    }
+
+    fun removeAllByGname(gname: String) {
+        for (group in findByGname(gname))
+            remove(group)
     }
 }

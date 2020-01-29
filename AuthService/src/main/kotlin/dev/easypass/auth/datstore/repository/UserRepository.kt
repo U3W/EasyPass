@@ -58,4 +58,9 @@ class UserRepository(db: CouchDbConnector) : CouchDbRepositorySupport<User>(User
     } else {
         throw UpdateConflictException()
     }
+
+    fun removeAllByUname(uname: String) {
+        for (user in findByUname(uname))
+            remove(user)
+    }
 }

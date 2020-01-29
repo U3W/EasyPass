@@ -58,7 +58,8 @@ class ChallengeAuthenticationProvider(private val userRepository: UserRepository
             throw BadCredentialsException("Wrong credentials provided")
         } else {
             val authorities = ArrayList<GrantedAuthority>()
-            authorities.add(SimpleGrantedAuthority(currentChallenges[key]!!.second + "_" + key.second))
+            authorities.add(SimpleGrantedAuthority("ROLE_${currentChallenges[key]!!.second}"))
+            authorities.add(SimpleGrantedAuthority("HASH_${key.second}"))
             loginSucceeded(key)
             return UsernamePasswordAuthenticationToken(key.second, pwd, authorities)
         }
@@ -89,7 +90,7 @@ class ChallengeAuthenticationProvider(private val userRepository: UserRepository
         if (attemptCounter[key] != null) {
             if (Duration.between(attemptCounter[key]!!.second, LocalDateTime.now()).toMillis() / 1000 >= properties.getProperty("auth.secondsAfterAttemptsAreReset").toInt())
                 attemptCounter.remove(key)
-            else if (attemptCounter[key]!!.first > properties.getProperty("auth.allowedWrongAttemptsUntilBlock").toInt())
+            else if (attemptCounter[key]!!.first > properties.getProperty("auth.allowedWrongAttempts").toInt())
                 return true
         }
         return false

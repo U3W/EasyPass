@@ -16,13 +16,20 @@ class AuthorityFilter(private val properties: Properties) : OncePerRequestFilter
         val authorities = AuthorityUtils.authorityListToSet(SecurityContextHolder.getContext().authentication.authorities)
         val store = ":${properties.getProperty("server.port")}/store/"
         val admin = ":${properties.getProperty("server.port")}/admin/"
-        val hash = url.substringAfter(store).split("/")[0]
+        println(url)
         if (authorities.isNotEmpty()) {
-            if (url.contains(store) and !(authorities.contains("USER_$hash") or authorities.contains("GROUP_$hash") or authorities.contains("ADMIN_$hash")))
-                response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Unauthorized for this datastore!")
-            if (url.contains(admin) and !(authorities.contains("USER_$hash") or authorities.contains("ADMIN_$hash")))
-                response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Unauthorized, not a admin!")
+            when {
+                url.contains(store) -> {
+                    val hash = url.substringAfter(store).split("/")[0]
+                    if (!authorities.contains("HASH_$hash"))
+                        response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Unauthorized for this datastore!")
+                }
+                url.contains(admin) -> {
+                    if (!(authorities.contains("ROLE_USER") or authorities.contains("ROLE_ADMIN")))
+                        response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Not an admin!")
+                }
+            }
+            filterChain.doFilter(request, response)
         }
-        filterChain.doFilter(request, response)
     }
 }
