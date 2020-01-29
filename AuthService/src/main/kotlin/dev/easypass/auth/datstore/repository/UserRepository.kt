@@ -1,8 +1,9 @@
 package dev.easypass.auth.datstore.repository
 
 import dev.easypass.auth.datstore.document.User
-import dev.easypass.auth.datstore.exception.EntityAlreadyinDatabaseException
-import org.ektorp.*
+import org.ektorp.CouchDbConnector
+import org.ektorp.DocumentNotFoundException
+import org.ektorp.UpdateConflictException
 import org.ektorp.support.CouchDbRepositorySupport
 import org.ektorp.support.GenerateView
 import org.springframework.stereotype.Component
@@ -44,24 +45,17 @@ class UserRepository(db: CouchDbConnector) : CouchDbRepositorySupport<User>(User
         if (listOfUsers.isEmpty())
             throw DocumentNotFoundException("The User [$uname] is NOT FOUND in the database")
         if (listOfUsers.size > 1)
-            throw DocumentNotFoundException("The User [$uname] has MULTIPLE ENTRIES in the database")
+            throw UpdateConflictException()
         return listOfUsers[0]
     }
 
-    fun removeAndPurge(uname: String) {
-        val listOfUsers = findByUname(uname)
-        if (listOfUsers.isNotEmpty()) {
-            remove(findOneByUname(uname))
-        }
-    }
-
     /**
-     * This methods overrides the add-method of [CouchDbRepositorySupport], throws an [EntityAlreadyinDatabaseException], when an entity with the same uname as [entity] is already saved in the database
+     * This methods overrides the add-method of [CouchDbRepositorySupport], throws an [UpdateConflictException], when an entity with the same uname as [entity] is already saved in the database
      * @param entity: a user object to save in the database
      */
     override fun add(entity: User) = if (findByUname(entity.uname).isEmpty()) {
         super.add(entity)
     } else {
-        throw EntityAlreadyinDatabaseException()
+        throw UpdateConflictException()
     }
 }

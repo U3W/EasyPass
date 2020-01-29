@@ -3,13 +3,13 @@ package dev.easypass.auth.security
 import dev.easypass.auth.datstore.CouchDBConnectionProvider
 import dev.easypass.auth.datstore.document.Group
 import dev.easypass.auth.datstore.document.User
-import dev.easypass.auth.datstore.exception.EntityAlreadyinDatabaseException
 import dev.easypass.auth.datstore.repository.GroupRepository
 import dev.easypass.auth.datstore.repository.UserRepository
 import dev.easypass.auth.security.challenge.InternalChallenge
 import dev.easypass.auth.security.challenge.ResponseChallenge
 import dev.easypass.auth.security.exception.NoActiveChallengeException
 import dev.easypass.auth.security.exception.UserIsBlockedException
+import org.ektorp.DbAccessException
 import org.ektorp.DocumentNotFoundException
 import org.springframework.security.authentication.AuthenticationProvider
 import org.springframework.security.authentication.BadCredentialsException
@@ -25,7 +25,6 @@ import java.time.LocalDateTime
 import java.util.*
 import kotlin.collections.HashMap
 
-
 /**
  * Enables the authentication with challenges
  * @param userRepository: provides the required database support to administer [dev.easypass.auth.datstore.document.User] objects
@@ -34,7 +33,6 @@ import kotlin.collections.HashMap
 @Component
 class ChallengeAuthenticationProvider(private val userRepository: UserRepository,
                                       private val groupRepository: GroupRepository,
-                                      private val connector: CouchDBConnectionProvider,
                                       private val encryptionLibrary: EncryptionLibrary,
                                       private val properties: Properties) : AuthenticationProvider {
 
@@ -55,12 +53,12 @@ class ChallengeAuthenticationProvider(private val userRepository: UserRepository
         } else if (isBlocked(key)) {
             loginFailed(key)
             throw UserIsBlockedException()
-        } else if (!currentChallenges[key]!!.first.checkChallenge(pwd)){
+        } else if (!currentChallenges[key]!!.first.checkChallenge(pwd)) {
             loginFailed(key)
             throw BadCredentialsException("Wrong credentials provided")
         } else {
             val authorities = ArrayList<GrantedAuthority>()
-            authorities.add(SimpleGrantedAuthority(currentChallenges[key]!!.second+"_"+key.second))
+            authorities.add(SimpleGrantedAuthority(currentChallenges[key]!!.second + "_" + key.second))
             loginSucceeded(key)
             return UsernamePasswordAuthenticationToken(key.second, pwd, authorities)
         }
@@ -81,15 +79,15 @@ class ChallengeAuthenticationProvider(private val userRepository: UserRepository
 
     fun loginFailed(key: Pair<String, String>) {
         currentChallenges.remove(key)
-        if(attemptCounter[key] == null)
+        if (attemptCounter[key] == null)
             attemptCounter[key] = Pair(1, LocalDateTime.now())
         else
-            attemptCounter[key] = Pair(attemptCounter[key]!!.first+1, LocalDateTime.now())
+            attemptCounter[key] = Pair(attemptCounter[key]!!.first + 1, LocalDateTime.now())
     }
 
     fun isBlocked(key: Pair<String, String>): Boolean {
         if (attemptCounter[key] != null) {
-            if (Duration.between(attemptCounter[key]!!.second, LocalDateTime.now()).toMillis()/1000 >= properties.getProperty("auth.secondsAfterAttemptsAreReset").toInt())
+            if (Duration.between(attemptCounter[key]!!.second, LocalDateTime.now()).toMillis() / 1000 >= properties.getProperty("auth.secondsAfterAttemptsAreReset").toInt())
                 attemptCounter.remove(key)
             else if (attemptCounter[key]!!.first > properties.getProperty("auth.allowedWrongAttemptsUntilBlock").toInt())
                 return true
@@ -128,28 +126,8 @@ class ChallengeAuthenticationProvider(private val userRepository: UserRepository
                 throw DocumentNotFoundException("A Dummy User will be created in the Catch-Block!")
             }
         }
-    } catch (ex: DocumentNotFoundException) {
+    } catch (ex: DbAccessException) {
         val user = encryptionLibrary.generateDummyUser(key.second)
         ResponseChallenge(encryptionLibrary.generateInternalAdministrationChallenge().getChallengeEncryptedByPubK(user.pubK), user.privK)
-    }
-
-    fun registerUser(user: User): Boolean {
-        return try {
-            userRepository.add(user)
-            connector.createCouchDbConnector(user.uname)
-            true
-        } catch (ex: EntityAlreadyinDatabaseException) {
-            false
-        }
-    }
-
-    fun createGroup(group: Group): Boolean {
-        return try {
-            groupRepository.add(group)
-            connector.createCouchDbConnector(group.gname)
-            true
-        } catch (ex: EntityAlreadyinDatabaseException) {
-            false
-        }
     }
 }

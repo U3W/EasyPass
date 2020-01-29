@@ -1,7 +1,7 @@
 package dev.easypass.auth.security
 
-import dev.easypass.auth.security.challenge.InternalChallenge
 import dev.easypass.auth.datstore.document.User
+import dev.easypass.auth.security.challenge.InternalChallenge
 import org.springframework.stereotype.Component
 import java.util.*
 
@@ -33,10 +33,13 @@ class EncryptionLibrary(private val properties: Properties) {
      * Generates a random [String] challenge
      */
     fun generateAuthenticationChallenge(): String {
-        val allowedChars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890"
+        //TODO Richtige Challenge aktivieren
+        /*val allowedChars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890"
         return (1..512)
                 .map { allowedChars.random() }
                 .joinToString("")
+         */
+        return "Challenge"
     }
 
     /**
@@ -44,7 +47,7 @@ class EncryptionLibrary(private val properties: Properties) {
      * @param text: that should be encrypted
      * @param key: to encrypt the [text]
      */
-    fun encrypt(text: String, key: String): String{
+    fun encrypt(text: String, key: String): String {
         //TODO Gescheite Encryption machen
         var encrypted = "ENCRYPTED_${text}_WITH_${key}"
 

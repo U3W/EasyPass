@@ -1,9 +1,9 @@
 package dev.easypass.auth.datstore.repository
 
 import dev.easypass.auth.datstore.document.Group
-import dev.easypass.auth.datstore.document.User
-import dev.easypass.auth.datstore.exception.EntityAlreadyinDatabaseException
-import org.ektorp.*
+import org.ektorp.CouchDbConnector
+import org.ektorp.DocumentNotFoundException
+import org.ektorp.UpdateConflictException
 import org.ektorp.support.CouchDbRepositorySupport
 import org.ektorp.support.GenerateView
 import org.springframework.stereotype.Component
@@ -50,12 +50,12 @@ class GroupRepository(db: CouchDbConnector) : CouchDbRepositorySupport<Group>(Gr
     }
 
     /**
-     * This methods overrides the add-method of [CouchDbRepositorySupport], throws an [EntityAlreadyinDatabaseException], when an entity with the same gname as [entity] is already saved in the database
+     * This methods overrides the add-method of [CouchDbRepositorySupport], throws an [UpdateConflictException], when an entity with the same gname as [entity] is already saved in the database
      * @param entity: a group object to save in the database
      */
     override fun add(entity: Group) = if (findByGname(entity.gname).isEmpty()) {
         super.add(entity)
     } else {
-        throw EntityAlreadyinDatabaseException()
+        throw UpdateConflictException()
     }
 }

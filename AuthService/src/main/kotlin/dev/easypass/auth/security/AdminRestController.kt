@@ -3,10 +3,8 @@ package dev.easypass.auth.security
 import dev.easypass.auth.datstore.CouchDBConnectionProvider
 import dev.easypass.auth.datstore.repository.GroupRepository
 import dev.easypass.auth.datstore.repository.UserRepository
-import dev.easypass.auth.security.challenge.RequestChallenge
-import dev.easypass.auth.security.challenge.ResponseChallenge
+import org.ektorp.DbAccessException
 import org.springframework.web.bind.annotation.*
-import javax.servlet.http.HttpServletRequest
 import javax.servlet.http.HttpServletResponse
 
 /**
@@ -18,7 +16,12 @@ class AdminRestController(private val couchDBConnectionProvider: CouchDBConnecti
 
     @PostMapping("/{hash}/remove")
     @ResponseBody
-    fun unlockChallenge(@PathVariable hash: String, response: HttpServletResponse) {
+    fun unlockChallenge(@PathVariable hash: String, response: HttpServletResponse) = try {
         userRepository.remove(userRepository.findOneByUname(hash))
+        couchDBConnectionProvider.deleteCouchDbDatabase(hash)
+        response.status = HttpServletResponse.SC_OK
+    } catch (ex: Exception) {
+        response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "$hash was NOT successfully deleted!")
     }
+
 }
