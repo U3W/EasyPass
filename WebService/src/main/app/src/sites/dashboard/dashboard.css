@@ -276,7 +276,11 @@ userRemove {
     border: 1px solid #ced4da;
     border-radius: 0.25rem;
     -moz-border-radius:0.25rem;
-    background: #064f30;
+    background-color: #e9ecef
+}
+
+.roundtable {
+    background: transparent !important;
 }
 
 .roundtable td {
@@ -286,21 +290,13 @@ userRemove {
     border-radius: 0;
 }
 .roundtable tbody tr:nth-of-type(odd) {
-    background-color: #e9ecef
+    border-bottom: 1px solid #ced4da;
 }
 .roundtable tbody tr:nth-of-type(even) {
-    background-color: #f1f4f7
+    border-top: 1px solid #ced4da;
+    border-bottom: 1px solid #ced4da;
 }
 
-
-.topRound {
-    border-top-right-radius: 0.25rem !important;
-    border-top-left-radius: 0.25rem !important;
-}
-.botRound {
-    border-bottom-right-radius: 0.25rem !important;
-    border-bottom-left-radius: 0.25rem !important;
-}
 
 .gradientDiv {
     position: absolute;
