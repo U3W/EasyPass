@@ -145,7 +145,6 @@ class Dashboard extends React.Component {
         this.deletePass = that.deletePass.bind(this);
         this.getPass = that.getPass.bind(this);
         this.copyPass = that.copyPass.bind(this);
-        this.setPassCacheID = that.setPassCacheID.bind(this);
         this.resetPass = that.resetPass.bind(this);
         this.undoDelete = that.undoDelete.bind(this);
         // WindowDimensions
@@ -218,7 +217,6 @@ class Dashboard extends React.Component {
 
         // add callback to array
         if (catData !== undefined && catData.length > 0) {
-            console.log("why here?");
             catData = this.addCallback(catData);
             passwords[0] = catData.map(singlePass => {
                 if (singlePass.tabID === selectedTab) {

@@ -100,16 +100,6 @@ export function resetPass() {
     });
 }
 
-export function setPassCacheID(id) {
-    if (this.state.passwordCacheID !== id) {
-        this.setState({
-            passwordCacheID: id,
-            show: false
-        });
-    }
-}
-
-
 /**
  * Recovers and deleted password or category entry.
  */

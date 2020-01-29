@@ -377,7 +377,7 @@ export default class PassLine extends React.Component {
      * If password is already set, the cache is reseted.
      */
     getPassword() {
-        if (this.props.show !== true) {
+        if (this.props.show !== true || this.state.id !== this.props.passwordCacheID) {
             this.props.callback.getPass(this.state.id, this.state.rev);
         } else this.props.callback.resetPass();
     }
@@ -649,8 +649,7 @@ export default class PassLine extends React.Component {
             </>
         );
         return (
-            <Card className="pass-card" name="passCard"
-              onClick={() => {this.props.callback.setPassCacheID(this.state.id);}}>
+            <Card className="pass-card" name="passCard">
                 <input id="searchInput" type="hidden" value={this.props.title}/>
                 <Accordion.Toggle as={Card.Header} className="clickable center-vert" eventKey={this.props.id}>
                     <Row>
@@ -841,7 +840,7 @@ export default class PassLine extends React.Component {
                                             />
                                         </Button>
                                         :
-                                        <Button variant="dark" className="buttonSpaceInline " onClick={() => this.props.callback.copyPass(this.props.id, this.state.rev)}>
+                                        <Button variant="dark" className="buttonSpaceInline " onClick={() => this.props.callback.copyPass(this.state.id, this.state.rev)}>
                                             <img
                                                 src={CopyIcon}
                                                 alt=""
