@@ -12,6 +12,26 @@ import("../../rust/pkg").then(wasm => {
     let deletedPasswords = new Map();
     //let undoPasswordDeletion = false;
 
+
+    const baumi = () => {
+        const b1 = new PouchDB('b1');
+        const b2 = new PouchDB('b2');
+        console.log("PouchDB: " + b1.constructor.name);
+        console.log(b1 instanceof PouchDB);
+
+
+        const syncHandler = b1.sync(b2, {live: true, retry: true});
+
+        console.log("SyncHandler: " + syncHandler.constructor.name);
+        console.log("SyncHandler: " + Object.getPrototypeOf(syncHandler).constructor.name);
+        //console.log("2" + syncHandler.prototype.name);
+        console.log(PouchDB.r);
+
+        b1.post({baum: 1});
+        b1.post({baum: 2});
+        b2.post({kek: 1});
+    };
+
     // Initialize Worker
     const init = async () => {
         let dbUrl = "";
@@ -33,6 +53,20 @@ import("../../rust/pkg").then(wasm => {
         worker = new wasm.Worker(dbUrl);
         self.addEventListener('message', clientInit, true);
         // Send client OK and wait for response in `clientInit` listener
+
+        // TODO rework heartbeat
+        //const baum = worker.kek();
+
+        /**
+        baum.on("change", (change) => {
+            console.log("CHANGE!!!" + change);
+        });
+        baum.on("complete", function (info) {
+            console.log("COMPLETE!!!" + info);
+        });
+        */
+        //console.log(baum);
+
         while (!clientInitialized) {
             self.postMessage('initDone');
             await sleep(500);
@@ -103,6 +137,7 @@ import("../../rust/pkg").then(wasm => {
             mode = cmd;
             if (mode === 'dashboard') {
                 // TODO Toggle heartbeat
+                //  Refactor hearbeat: loop -> listeners
                 heartbeat();
             }
         } else {

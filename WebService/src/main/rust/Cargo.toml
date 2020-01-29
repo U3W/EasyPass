@@ -11,7 +11,7 @@ crate-type = ["cdylib", "rlib"]
 default = ["console_error_panic_hook"]
 
 [dependencies]
-wasm-bindgen = {version = "0.2.54", features = ["serde-serialize"] }
+wasm-bindgen = {version = "0.2.54", features = ["serde-serialize", "nightly"] }
 #wasm-bindgen-futures = {version = "0.3.27", features = ["futures_0_3"] }
 wasm-bindgen-futures = "0.4.4"
 # futures = "0.1.20"

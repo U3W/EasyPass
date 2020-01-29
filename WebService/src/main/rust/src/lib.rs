@@ -11,15 +11,20 @@ use wasm_bindgen_futures::JsFuture;
 use serde_json::{Value};
 use js_sys::{Promise, Array, ArrayBuffer};
 use serde::{Deserialize, Serialize};
+use serde_json::json;
 use wasm_bindgen::__rt::std::future::Future;
 use wasm_bindgen::__rt::std::rc::Rc;
 use wasm_bindgen::__rt::core::cell::RefCell;
 use wasm_bindgen::__rt::std::sync::Arc;
+use wasm_bindgen::JsCast;
 
 
 #[cfg(feature = "wee_alloc")]
 #[global_allocator]
 static ALLOC: wee_alloc::WeeAlloc = wee_alloc::WeeAlloc::INIT;
+
+
+
 
 #[wasm_bindgen]
 extern {
@@ -38,6 +43,7 @@ pub struct Worker {
     local: PouchDB,
     remote: PouchDB,
     service_status: String,
+    closure: Closure<FnMut()>
 }
 
 #[wasm_bindgen]
@@ -56,8 +62,41 @@ impl Worker {
         Worker {
             local: PouchDB::new("Local", &JsValue::from_serde(&settings).unwrap()),
             remote,
-            service_status: String::from("online")
+            service_status: String::from("online"),
+            closure: Closure::new(|| log("hello"))
         }
+    }
+
+    pub fn kek(&self) -> SyncHandler {
+        //hello();
+        log(&"KEEEEEEEEEEEEEEEEEEEEEEEEKKK!!!!!!!");
+        let wut: SyncHandler = self.local.sync_2(&self.remote,
+        JsValue::from_serde(&json!({
+            "live": true,
+            "retry": true
+        })).unwrap());
+
+        /**
+        wut.on("change", &|| {
+            log("Hey, something changed!!!");
+        });
+        wut.on("complete", &|| {
+            log("Hey, something completed!!!");
+        });
+        */
+
+        /**
+        let cb = Closure::wrap(Box::new(|| {
+            log("Wuhuu!");
+        }) as Box<dyn FnMut()>);
+
+        wut.on(&"change", &cb.as_ref().unchecked_ref());
+        wut.on(&"complete", &cb.as_ref().unchecked_ref());*/
+
+        wut.on("change", &self.closure);
+        wut.on("complete", &self.closure);
+
+        wut
     }
 
     pub fn set_remote(&mut self, url: String) {
@@ -161,6 +200,47 @@ impl Worker {
             Ok(JsValue::from(output))
         })
     }
+}
+
+
+#[wasm_bindgen]
+extern "C" {
+    fn setInterval(closure: &Closure<FnMut()>, millis: u32) -> f64;
+    fn cancelInterval(token: f64);
+}
+
+#[wasm_bindgen]
+pub struct Interval {
+    closure: Closure<FnMut()>,
+    token: f64,
+}
+
+impl Interval {
+    pub fn new<F: 'static>(millis: u32, f: F) -> Interval
+        where
+            F: FnMut()
+    {
+        // Construct a new closure.
+        let closure = Closure::new(f);
+
+        // Pass the closuer to JS, to run every n milliseconds.
+        let token = setInterval(&closure, millis);
+
+        Interval { closure, token }
+    }
+}
+
+// When the Interval is destroyed, cancel its `setInterval` timer.
+impl Drop for Interval {
+    fn drop(&mut self) {
+        cancelInterval(self.token);
+    }
+}
+
+// Keep logging "hello" every second until the resulting `Interval` is dropped.
+#[wasm_bindgen]
+pub fn hello() -> Interval {
+    Interval::new(1_000, || log("hello"))
 }
 
 

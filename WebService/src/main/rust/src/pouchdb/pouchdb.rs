@@ -42,6 +42,10 @@ extern "C" {
     #[derive(Clone)]
     #[wasm_bindgen(js_name = PouchDB)]
     pub type PouchDB;
+
+    #[wasm_bindgen(js_name = r)]
+    pub type SyncHandler;
+
     #[wasm_bindgen(constructor, js_class = "PouchDB")]
     pub fn new(db_name: &str, settings: &JsValue) -> PouchDB;
 
@@ -87,6 +91,11 @@ extern "C" {
     #[wasm_bindgen(method, js_class = "PouchDB", js_name = sync)]
     pub fn sync(this: &PouchDB, target: &PouchDB) -> Promise;
 
+    #[wasm_bindgen(method, js_class = "PouchDB", js_name = sync)]
+    pub fn sync_2(this: &PouchDB, target: &PouchDB, options: JsValue) -> SyncHandler;
+
+    #[wasm_bindgen(method, js_class = "PouchDB", js_name = on)]
+    pub fn on (this: &SyncHandler, method: &str, f: &Closure<FnMut()>) -> SyncHandler;
 }
 
 impl PouchDB {
