@@ -34,9 +34,18 @@ export function workerCall( e ) {
         case 'getPassword':
             this.setState({
                 passwordCache: data.passwd,
-                passwordCacheID: data._id
+                passwordCacheID: data._id,
+                show: true
             });
-            console.log("PASSWORD IS " + data);
+            break;
+        case 'getPasswordToClipboard':
+            this.clipboardCopy(data.passwd);
+            this.setState({
+                showCopyAlert: true,
+                alertState: "success",
+            }, () => {
+                this.dismissCopy("showCopyAlert");
+            });
             break;
         case 'saveCategory':
             this.copy("", dashboardAlerts.showAddedCat, data.ok);
@@ -70,44 +79,34 @@ export function deletePass(id, rev) {
  * When no entry is found, undefined will be returned.
  */
 export function getPass(id, rev) {
-    // TODO Mockobjekt getPassword
-    //return this.state.mock.getPassword(id);
-    //return this.state.entries.getEntry(id);
     this.props.worker.postMessage(['getPassword', {_id: id, _rev: rev}])
 }
 
 /**
  * Copies the latest cached password of a password entry to the users clipboard.
  */
-export async function copyPass() {
-    while (this.state.passwordCache === undefined) {
-        await sleep(50);
-    }
-    console.log("copypass: " + this.state.passwordCache);
-    // Todo call Kacpers Method
-    // Popup starten
-    this.setState({
-        showCopyAlert: true,
-        alertState: "success",
-    });
-    this.dismissCopy("showCopyAlert");
-
-    this.clipboardCopy(this.state.passwordCache);
+export function copyPass(id, rev) {
+    this.props.worker.postMessage(['getPasswordToClipboard', {_id: id, _rev: rev}]);
 }
 
 /**
- * Resets the password cache.
+ * Resets everything that has something to do in the password cache.
  */
-export function resetPassCache() {
+export function resetPass() {
     this.setState({
-        passwordCache: undefined
+        passwordCache: undefined,
+        passwordCacheID: undefined,
+        show: false
     });
 }
 
 export function setPassCacheID(id) {
-    this.setState({
-        passwordCacheID: id
-    });
+    if (this.state.passwordCacheID !== id) {
+        this.setState({
+            passwordCacheID: id,
+            show: false
+        });
+    }
 }
 
 

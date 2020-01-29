@@ -67,6 +67,7 @@ class Dashboard extends React.Component {
             },
             passwordCache: undefined,
             passwordCacheID: undefined,
+            show: false,
 
             // language
             language: dashboardState.getSelectedLanguage(), // 0 - Deutsch, 1 - English
@@ -144,8 +145,8 @@ class Dashboard extends React.Component {
         this.deletePass = that.deletePass.bind(this);
         this.getPass = that.getPass.bind(this);
         this.copyPass = that.copyPass.bind(this);
-        this.resetPassCache = that.resetPassCache.bind(this);
         this.setPassCacheID = that.setPassCacheID.bind(this);
+        this.resetPass = that.resetPass.bind(this);
         this.undoDelete = that.undoDelete.bind(this);
         // WindowDimensions
         this.updateWindowDimensions = this.updateWindowDimensions.bind(this);
@@ -199,7 +200,8 @@ class Dashboard extends React.Component {
                                       pass={singlePass.passwd} title={singlePass.title}
                                       url={singlePass.url} callback={singlePass.callback}
                                       passwordCache={this.state.passwordCache}
-                                      passwordCacheID={this.state.passwordCacheID}/>
+                                      passwordCacheID={this.state.passwordCacheID}
+                                      show={this.state.show}/>
                         );
                     });
                 } else return undefined;
@@ -226,7 +228,8 @@ class Dashboard extends React.Component {
                                   pass={singlePass.passwd} title={singlePass.title}
                                   url={singlePass.url} callback={singlePass.callback}
                                   passwordCache={this.state.passwordCache}
-                                  passwordCacheID={this.state.passwordCacheID}/>
+                                  passwordCacheID={this.state.passwordCacheID}
+                                  show={this.state.show}/>
                     );
                 }
             });
