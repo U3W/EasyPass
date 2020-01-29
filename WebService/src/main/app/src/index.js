@@ -103,6 +103,14 @@ const styles = {
     cloud2LeftOut: {
         animation: 'x 1s',
         animationName: Radium.keyframes(fadeOutLeft, 'fadeOutLeft')
+    },
+    cloud5RightIn: {
+        animation: 'x 1s',
+        animationName: Radium.keyframes(fadeInRight, 'fadeInRight')
+    },
+    cloud5LeftOut: {
+        animation: 'x 1s',
+        animationName: Radium.keyframes(fadeOutLeft, 'fadeOutLeft')
     }
 };
 
@@ -207,7 +215,7 @@ class App extends React.Component {
         console.log("Worker state: " + this.state.workerInitialized);
         console.log("Disconnected: " + this.state.isDisconnected);
 
-        if ( this.state.animationFinished && false) {
+        if ( this.state.animationFinished ) {
             return (
                 <div className="App">
                     <Switch>
@@ -235,19 +243,20 @@ class App extends React.Component {
             let styleCloud2 = styles.cloud2RightIn;
             let styleCloud3 = styles.cloud3LeftIn;
             let styleCloud4 = styles.cloud4LeftIn;
-            let styleCloud5;
+            let styleCloud5 = styles.cloud5RightIn;
             if ( this.state.currentLogoAnimation === 1 ) {
                 styleType = styles.logoOut;
                 styleCloud1 = styles.cloud1RightOut;
                 styleCloud2 = styles.cloud2LeftOut;
                 styleCloud3 = styles.cloud3RightOut;
                 styleCloud4 = styles.cloud4RightOut;
+                styleCloud5 = styles.cloud5LeftOut;
             }
             console.log("Curr", this.state.currentLogoAnimation);
             return (
                 <div className="fixHeight">
                     <StyleRoot className="topPositioning">
-                        <div style={styleType} >
+                        <div style={styleType} className="test" >
                             <img
                                 src={Logo}
                                 alt=""
@@ -285,7 +294,7 @@ class App extends React.Component {
                     <StyleRoot className="rightPositioning topPositioning">
                         <div style={styleCloud5}>
                             <img
-                                src={Cloud1}
+                                src={Cloud2}
                                 alt=""
                                 className="cloud5"
                             />
