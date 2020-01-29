@@ -33,12 +33,12 @@ import StringSelector from "../../strings/stings";
 //import Entries from "./Entries";
 import * as that from "./dashboard.extended";
 import * as dashboardEntries from "./dashboard.entries";
-import FadeOutGradient from "../../animation/fadeOutGradient";
+import * as animation from "../../animation/fadeOutGradient"
 
+import FadeOutGradient from "../../animation/fadeOutGradient";
+import indexState from "../../index.saved.state";
 
 class Dashboard extends React.Component {
-
-
 
     constructor(props){
         super(props);
@@ -61,7 +61,7 @@ class Dashboard extends React.Component {
 
         this.state = {
             // loading animation
-            loading: undefined,
+            loading: indexState.getLoadingState(),
             // mockpassword
             mock: new MockPasswords(this.props.worker),
             // password entries,
@@ -119,6 +119,8 @@ class Dashboard extends React.Component {
             errorState: "success",
         };
 
+        this.fadeOutGradient = animation.fadeOutGradient.bind(this);
+
         this.setErrorShow = this.setErrorShow.bind(this);
         this.setErrorState = this.setErrorState.bind(this);
         this.setErrorText = this.setErrorText.bind(this);
@@ -166,6 +168,7 @@ class Dashboard extends React.Component {
 
     }
 
+
     componentDidMount() {
         this.updateWindowDimensions();
         window.addEventListener('resize', this.updateWindowDimensions);
@@ -176,7 +179,7 @@ class Dashboard extends React.Component {
             this.setState({
                 loading: false,
             });
-        }, 1000)
+        }, 500)
     }
 
     componentWillUnmount() {
@@ -968,10 +971,11 @@ class Dashboard extends React.Component {
             langText = "textEng";
         }
 
+        console.log("Why", this.state.loading);
         return (
             <>
                 { (this.state.loading === undefined ) &&
-                    <FadeOutGradient loading={true}/>
+                    this.fadeOutGradient(true)
                 }
                 <div className="size-hole-window-hidden-scroll" onClick={this.resetSettingsExpanded}>
                     <NavbarEP callback={this} width={this.state.width} language={this.state.language}/>

@@ -13,6 +13,9 @@ import dashboardState from "../dashboard/dashboard.saved.state";
 // Strings
 import StringSelector from "../../strings/stings";
 
+// animatoin
+import * as animation from "../../animation/fadeOutGradient"
+
 // Rest
 import {Card, Nav} from "react-bootstrap";
 import Logo from "../../img/logo/LogoV2.svg"
@@ -24,6 +27,7 @@ import Indicator from "../../network/network.indicator";
 import {dashboardAlerts} from "../dashboard/const/dashboard.enum";
 import Registration from "../registration/registration";
 import FadeOutGradient from "../../animation/fadeOutGradient";
+import indexState from "../../index.saved.state";
 
 
 
@@ -34,7 +38,7 @@ class Login extends React.Component {
 
         this.state = {
             // for the loading animation
-            loading: undefined,
+            loading: indexState.getLoadingState(),
 
             language: dashboardState.getSelectedLanguage(),
 
@@ -48,6 +52,8 @@ class Login extends React.Component {
             showRegistered: false,
             alertState: "success",
         };
+
+        this.fadeOutGradient = animation.fadeOutGradient.bind(this);
 
         this.handleChange = this.handleChange.bind(this);
         this.handleSubmit = this.handleSubmit.bind(this);
@@ -66,7 +72,7 @@ class Login extends React.Component {
             this.setState({
                 loading: false,
             });
-        }, 1000)
+        }, 500)
     }
 
     componentWillUnmount() {
@@ -261,11 +267,10 @@ class Login extends React.Component {
 
 
     render() {
-        console.log("Why?", this.state.loading);
         return (
             <>
                 { (this.state.loading === undefined ) &&
-                    <FadeOutGradient loading={true}/>
+                    this.fadeOutGradient(true)
                 }
                 { this.state.wantRegister ?
                     <Registration callback={this}/>

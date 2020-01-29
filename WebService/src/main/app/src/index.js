@@ -27,11 +27,24 @@ import * as that from "./sites/dashboard/dashboard.extended";
 
 import { ReactComponent as LogoComp } from './img/logo/Logo_Single_Big.svg';
 import Logo from './img/logo/Logo_Single_Big.svg'
-import { bounce } from 'react-animations';
-import { bounceInDown } from 'react-animations';
-import { bounceOutDown } from 'react-animations';
+import Cloud1 from './img/logo/Cloud1.svg'
+import Cloud2 from './img/logo/Cloud2.svg'
+import Cloud3 from './img/logo/Cloud3.svg'
+import Cloud4 from './img/logo/Cloud4.svg'
+import {
+    bounceInDown,
+    bounceOutDown,
+    fadeOut,
+    fadeIn,
+    fadeInLeft,
+    fadeInRight,
+    fadeOutLeft,
+    fadeOutRight,
+} from 'react-animations';
 
 import Radium, {StyleRoot} from 'radium';
+import dashboardState from "./sites/dashboard/dashboard.saved.state";
+import indexState from "./index.saved.state";
 
 
 
@@ -50,8 +63,47 @@ const styles = {
     logoOut: {
         animation: 'x 0.7s',
         animationName: Radium.keyframes(bounceOutDown, 'bounceOutDown')
+    },
+    cloudsOut: {
+        animation: 'x 0.7s',
+        animationName: Radium.keyframes(fadeOut, 'fadeOut')
+    },
+    cloudsIn: {
+        animation: 'x 1.2s',
+        animationName: Radium.keyframes(fadeIn, 'fadeIn')
+    },
+    cloud1LeftIn: {
+        animation: 'x 1s',
+        animationName: Radium.keyframes(fadeInLeft, 'fadeInLeft')
+    },
+    cloud1RightOut: {
+        animation: 'x 1s',
+        animationName: Radium.keyframes(fadeOutRight, 'fadeOutRight')
+    },
+    cloud3LeftIn: {
+        animation: 'x 1.2s',
+        animationName: Radium.keyframes(fadeInLeft, 'fadeInLeft')
+    },
+    cloud4LeftIn: {
+        animation: 'x 1.05s',
+        animationName: Radium.keyframes(fadeInLeft, 'fadeInLeft')
+    },
+    cloud4RightOut: {
+        animation: 'x 1s',
+        animationName: Radium.keyframes(fadeOutRight, 'fadeOutRight')
+    },
+    cloud3RightOut: {
+        animation: 'x 0.7s',
+        animationName: Radium.keyframes(fadeOutRight, 'fadeOutRight')
+    },
+    cloud2RightIn: {
+        animation: 'x 1s',
+        animationName: Radium.keyframes(fadeInRight, 'fadeInRight')
+    },
+    cloud2LeftOut: {
+        animation: 'x 1s',
+        animationName: Radium.keyframes(fadeOutLeft, 'fadeOutLeft')
     }
-
 };
 
 // Baseapp
@@ -79,6 +131,7 @@ class App extends React.Component {
         // Add listener for Worker
         if (!this.state.workerInitialized) {
             this.state.worker.addEventListener("message", this.workerInit);
+            indexState.setLoadingState(true);
         }
 
 
@@ -93,8 +146,10 @@ class App extends React.Component {
     componentWillUnmount() {
         // Remove Worker listener
         this.state.worker.postMessage(['unregister', undefined]);
-        if (!this.state.workerInitialized)
+        if (!this.state.workerInitialized) {
             this.state.worker.removeEventListener("message", this.workerInit);
+            indexState.setLoadingState(true);
+        }
 
         // window.removeEventListener('online', this.handleConnectionChange);
         // window.removeEventListener('offline', this.handleConnectionChange);
@@ -108,7 +163,10 @@ class App extends React.Component {
             this.setState({
                 workerInitialized: true,
             }, () => {
-                console.log("Test");
+                // save to localstorage
+                setTimeout(() => {
+                    indexState.setLoadingState(false);
+                }, 2500);
                 setTimeout(() => {
                     this.setState({
                         currentLogoAnimation: 1,
@@ -117,7 +175,7 @@ class App extends React.Component {
                             this.setState({
                                 animationFinished: true,
                             });
-                        }, 700);
+                        }, 650);
 
                     })
                 }, 1500);
@@ -149,7 +207,7 @@ class App extends React.Component {
         console.log("Worker state: " + this.state.workerInitialized);
         console.log("Disconnected: " + this.state.isDisconnected);
 
-        if ( this.state.animationFinished) {
+        if ( this.state.animationFinished && false) {
             return (
                 <div className="App">
                     <Switch>
@@ -170,48 +228,76 @@ class App extends React.Component {
                     </Switch>
                 </div>
             );
-            /*
-            if (!this.state.isDisconnected) {
-
-            } else {
-                let redirect = <div/>;
-                if (VerifyAuth.getVerified()) {
-                    redirect = <Redirect to="/dashboard"/>
-                } else {
-                    redirect = <Redirect to="/verify"/>
-                }
-                //console.log("Disconn: " + redirect);
-                return (
-                    <div className="App">
-                        {redirect}
-                        <Switch>
-                            <Route exact path="/verify" component={() => <Masterpassword worker={this.state.worker}/>}/>
-                            <ProtectedRoute exact path="/dashboard"
-                                            component={() => <Dashboard worker={this.state.worker}/>} netState="offline"
-                                            type="verify"/>
-                            <Route path="*" component={NoMatch}/>
-                        </Switch>
-                    </div>
-                );
-            }*/
         } else {
             // TODO @Seb Please make a cool loading page!
             let styleType = styles.logo;
+            let styleCloud1 = styles.cloud1LeftIn;
+            let styleCloud2 = styles.cloud2RightIn;
+            let styleCloud3 = styles.cloud3LeftIn;
+            let styleCloud4 = styles.cloud4LeftIn;
+            let styleCloud5;
             if ( this.state.currentLogoAnimation === 1 ) {
                 styleType = styles.logoOut;
+                styleCloud1 = styles.cloud1RightOut;
+                styleCloud2 = styles.cloud2LeftOut;
+                styleCloud3 = styles.cloud3RightOut;
+                styleCloud4 = styles.cloud4RightOut;
             }
             console.log("Curr", this.state.currentLogoAnimation);
             return (
                 <div className="fixHeight">
-                    <StyleRoot className="matchParent topPositioning">
+                    <StyleRoot className="topPositioning">
                         <div style={styleType} >
-                            <div>
-                                <img
-                                    src={Logo}
-                                    alt=""
-                                    className="d-inline-block logoAnm"
-                                />
-                            </div>
+                            <img
+                                src={Logo}
+                                alt=""
+                                className="logoAnm"
+                            />
+                        </div>
+                    </StyleRoot>
+                    <StyleRoot className="leftPositioning topPositioning">
+                        <div style={styleCloud1}>
+                            <img
+                                src={Cloud1}
+                                alt=""
+                                className="cloud1"
+                            />
+                        </div>
+                    </StyleRoot>
+                    <StyleRoot className="rightPositioning topPositioning">
+                        <div style={styleCloud2}>
+                            <img
+                                src={Cloud2}
+                                alt=""
+                                className="cloud2"
+                            />
+                        </div>
+                    </StyleRoot>
+                    <StyleRoot className="leftPositioning topPositioning onTop">
+                        <div style={styleCloud3}>
+                            <img
+                                src={Cloud3}
+                                alt=""
+                                className="cloud3"
+                            />
+                        </div>
+                    </StyleRoot>
+                    <StyleRoot className="rightPositioning topPositioning">
+                        <div style={styleCloud5}>
+                            <img
+                                src={Cloud1}
+                                alt=""
+                                className="cloud5"
+                            />
+                        </div>
+                    </StyleRoot>
+                    <StyleRoot className="leftPositioning topPositioning">
+                        <div style={styleCloud4}>
+                            <img
+                                src={Cloud4}
+                                alt=""
+                                className="cloud4"
+                            />
                         </div>
                     </StyleRoot>
                 </div>

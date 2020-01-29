@@ -30,7 +30,6 @@ import OverlayTrigger from "react-bootstrap/OverlayTrigger";
 import Tooltip from "react-bootstrap/Tooltip";
 import CopyIcon from "../../img/icons/password_copy_white.svg";
 import InfoIcon from "../../img/icons/regist_info.svg"
-import FadeOutGradient from "../../animation/fadeOutGradient";
 class Registration extends React.Component {
     constructor(props) {
         super(props);

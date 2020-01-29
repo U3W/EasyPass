@@ -23,8 +23,8 @@ import history from "../../routing/history";
 import Back from "../../img/masterpassword_V3.1.svg";
 import InputGroup from "react-bootstrap/InputGroup";
 
-import FadeOutGradient from "../../animation/fadeOutGradient";
-
+import * as animation from "../../animation/fadeOutGradient"
+import indexState from "../../index.saved.state";
 
 class Masterpassword extends React.Component {
 
@@ -33,7 +33,7 @@ class Masterpassword extends React.Component {
 
         this.state = {
             // for the animation
-            loading: undefined,
+            loading: indexState.getLoadingState(),
             language: dashboardState.getSelectedLanguage(),
 
             inpMasterpassword: "",
@@ -47,6 +47,7 @@ class Masterpassword extends React.Component {
             missingFile: false,
         };
 
+        this.fadeOutGradient = animation.fadeOutGradient.bind(this);
         this.handleSubmit = this.handleSubmit.bind(this);
         this.handleChange = this.handleChange.bind(this);
         this.handleKeyevent = this.handleKeyevent.bind(this);
@@ -60,7 +61,6 @@ class Masterpassword extends React.Component {
     }
 
     componentDidMount() {
-        console.log("Why?");
         this.props.worker.addEventListener("message", this.workerCall, true);
         // end animation thing
         setTimeout(() => {
@@ -207,10 +207,6 @@ class Masterpassword extends React.Component {
                 inpFile: "",
             })
         }
-        else
-        {
-            this.render()
-        }
     }
 
     dismissError() {
@@ -318,18 +314,18 @@ class Masterpassword extends React.Component {
                         <Row>
                             <Col sm={12}>
                                 { this.state.inpRadio === "authn" ?
-                                    <Form.Check onChange={() => this.setRadioState("authn")} inline label={StringSelector.getString(this.state.language).masterpass2FAWebauthn} type={type} id={`inline-${type}-1`} name="RadGroup" checked={true} />
+                                    <Form.Check onChange={() => this.setRadioState("authn")} inline label={StringSelector.getString(this.state.language).masterpass2FAWebauthn} type={type} id={`inline-${type}-1`} checked={true} />
                                     :
-                                    <Form.Check onChange={() => this.setRadioState("authn")} inline label={StringSelector.getString(this.state.language).masterpass2FAWebauthn} type={type} id={`inline-${type}-1`} name="RadGroup" checked={false}/>
+                                    <Form.Check onChange={() => this.setRadioState("authn")} inline label={StringSelector.getString(this.state.language).masterpass2FAWebauthn} type={type} id={`inline-${type}-1`} checked={false}/>
                                 }
                             </Col>
                         </Row>
                         <Row>
                             <Col sm={12}>
                                 { this.state.inpRadio === "file" ?
-                                    <Form.Check onChange={() => this.setRadioState("file")} inline label={StringSelector.getString(this.state.language).masterpass2FAFile} type={type} id={`inline-${type}-3`} name="RadGroup" checked={true} />
+                                    <Form.Check onChange={() => this.setRadioState("file")} inline label={StringSelector.getString(this.state.language).masterpass2FAFile} type={type} id={`inline-${type}-3`} checked={true} />
                                     :
-                                    <Form.Check onChange={() => this.setRadioState("file")} inline label={StringSelector.getString(this.state.language).masterpass2FAFile} type={type} id={`inline-${type}-3`} name="RadGroup" checked={false} />
+                                    <Form.Check onChange={() => this.setRadioState("file")} inline label={StringSelector.getString(this.state.language).masterpass2FAFile} type={type} id={`inline-${type}-3`} checked={false} />
                                 }
                             </Col>
                         </Row>
@@ -342,7 +338,7 @@ class Masterpassword extends React.Component {
         return (
             <div className="">
                 { (this.state.loading === undefined ) &&
-                    <FadeOutGradient loading={true}/>
+                    this.fadeOutGradient(true)
                 }
                 <div className="gradientDivMasterpassword">
                     <Container>
@@ -355,18 +351,16 @@ class Masterpassword extends React.Component {
                                 />
                                 <Card className="card-login">
                                     <Card.Body>
-                                        <Form autoComplete="off">
+                                        <div>
                                             {this.getInputMasterpassword()}
-                                            <Form.Group>
-                                                <Row>
-                                                    <Col sm={12}>
-                                                        <Form.Label>
-                                                            {StringSelector.getString(this.state.language).masterpass2FA}
-                                                        </Form.Label>
-                                                    </Col>
-                                                </Row>
-                                                {this.getRadioButtons()}
-                                            </Form.Group>
+                                            <Row>
+                                                <Col sm={12}>
+                                                    <Form.Label>
+                                                        {StringSelector.getString(this.state.language).masterpass2FA}
+                                                    </Form.Label>
+                                                </Col>
+                                            </Row>
+                                            {this.getRadioButtons()}
 
                                             {this.getInputAuthn()}
                                             {this.getInputFile()}
@@ -378,7 +372,7 @@ class Masterpassword extends React.Component {
                                                     </Button>
                                                 </Col>
                                             </Row>
-                                        </Form>
+                                        </div>
 
                                     </Card.Body>
                                 </Card>

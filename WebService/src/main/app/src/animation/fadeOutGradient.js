@@ -11,18 +11,14 @@ const styles = {
 /**
  * @param loading: When false, the animation is triggered
  */
-export default class FadeOutGradient extends React.Component {
-    render() {
-        if ( !this.props.loading ) {
-            return (
-                <StyleRoot className="matchParent">
-                    <div className="gradientDivWhite" style={styles.start}/>
-                    <div className="gradientDiv" style={styles.start}/>
-                    <div className="gradientDiv" style={styles.start}/>
-                </StyleRoot>
-            );
-        }
-        return "";
+export function fadeOutGradient( loading ) {
+    if ( !this.props.loading ) {
+        return (
+            <StyleRoot className="matchParent">
+                <div className="gradientDivWhite" style={styles.start}/>
+                <div className="gradientDiv" style={styles.start}/>
+                <div className="gradientDiv" style={styles.start}/>
+            </StyleRoot>
+        );
     }
-
 }
