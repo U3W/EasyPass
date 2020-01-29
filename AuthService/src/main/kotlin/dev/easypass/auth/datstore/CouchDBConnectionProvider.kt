@@ -21,7 +21,20 @@ class CouchDBConnectionProvider(private val properties: Properties) {
     @Bean
     @Primary
     fun UserDatabaseConnector(): CouchDbConnector {
-        return createCouchDbConnector(properties.getProperty("couchDB.userDatabase"))
+        return createCouchDbConnector(properties.getProperty("couchDb.userDatabase"))
+    }
+
+    fun createCouchDbInstance (): StdCouchDbInstance {
+        val url = properties.getProperty("couchDb.url")
+        val uname = properties.getProperty("couchDb.username")
+        val pwd = properties.getProperty("couchDb.password")
+        val httpClient = StdHttpClient.Builder()
+                .url(url)
+                .username(uname)
+                .password(pwd)
+                .build()
+
+        return StdCouchDbInstance(httpClient)
     }
 
     /**
@@ -30,16 +43,10 @@ class CouchDBConnectionProvider(private val properties: Properties) {
      * @return an instance of the class [CouchDbConnector]
      */
     fun createCouchDbConnector (dbname: String): CouchDbConnector {
-        val url = properties.getProperty("couchDB.url")
-        val uname = properties.getProperty("couchDB.username")
-        val pwd = properties.getProperty("couchDB.password")
-        val httpClient = StdHttpClient.Builder()
-                .url(url)
-                .username(uname)
-                .password(pwd)
-                .build()
-
-        val dbInstance = StdCouchDbInstance(httpClient)
-        return dbInstance.createConnector(dbname, true)
+        return createCouchDbInstance().createConnector(dbname, true)
+    }
+    
+    fun deleteCouchDbDatabase (dbname: String) {
+        createCouchDbInstance().deleteDatabase(dbname)
     }
 }

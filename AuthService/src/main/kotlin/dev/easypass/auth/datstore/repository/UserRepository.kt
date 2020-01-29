@@ -39,13 +39,20 @@ class UserRepository(db: CouchDbConnector) : CouchDbRepositorySupport<User>(User
      * returns only the first entry of the [List] of all the entries with the passed [uname], that are stored in the database
      * @param uname: the name of the user
      */
-    fun findOneByUname(uname: String?): User {
+    fun findOneByUname(uname: String): User {
         val listOfUsers = findByUname(uname)
         if (listOfUsers.isEmpty())
             throw DocumentNotFoundException("The User [$uname] is NOT FOUND in the database")
         if (listOfUsers.size > 1)
             throw DocumentNotFoundException("The User [$uname] has MULTIPLE ENTRIES in the database")
         return listOfUsers[0]
+    }
+
+    fun removeAndPurge(uname: String) {
+        val listOfUsers = findByUname(uname)
+        if (listOfUsers.isNotEmpty()) {
+            remove(findOneByUname(uname))
+        }
     }
 
     /**
