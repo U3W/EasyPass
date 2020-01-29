@@ -1,14 +1,10 @@
 package dev.easypass.auth.security
 
-import ch.qos.logback.core.net.SyslogOutputStream
 import dev.easypass.auth.datstore.document.Group
 import dev.easypass.auth.datstore.document.User
-import dev.easypass.auth.security.challenge.RequestAuthenticationChallenge
-import dev.easypass.auth.security.challenge.ResponseAuthenticationChallenge
-import org.springframework.http.ResponseEntity
+import dev.easypass.auth.security.challenge.RequestChallenge
+import dev.easypass.auth.security.challenge.ResponseChallenge
 import org.springframework.web.bind.annotation.*
-import java.util.*
-import javax.servlet.ServletOutputStream
 import javax.servlet.http.HttpServletRequest
 import javax.servlet.http.HttpServletResponse
 
@@ -17,11 +13,11 @@ import javax.servlet.http.HttpServletResponse
  */
 @RestController
 @RequestMapping("/auth")
-class AuthRestAPIController(private val challengeAuthenticationProvider: ChallengeAuthenticationProvider) {
+class AuthRestController(private val challengeAuthenticationProvider: ChallengeAuthenticationProvider) {
 
     @PostMapping("/challenge")
     @ResponseBody
-    fun unlockChallenge(@RequestBody challenge: RequestAuthenticationChallenge, request: HttpServletRequest): ResponseAuthenticationChallenge {
+    fun unlockChallenge(@RequestBody challenge: RequestChallenge, request: HttpServletRequest): ResponseChallenge {
         return challengeAuthenticationProvider.addUserChallenge(Pair(request.remoteAddr, challenge.hash), challenge.role)
     }
 

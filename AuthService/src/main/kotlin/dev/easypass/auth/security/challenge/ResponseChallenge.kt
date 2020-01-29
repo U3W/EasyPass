@@ -5,4 +5,4 @@ package dev.easypass.auth.security.challenge
  * @param encryptedChallenge: the challenge the user has to solve
  * @param encryptedprivK: the private key the user can decrypt with his masterpassword to solve the challenge
  */
-class ResponseAuthenticationChallenge(val enChallenge: String, val enPrivK: String)
+class ResponseChallenge(val enChallenge: String, val enPrivK: String)

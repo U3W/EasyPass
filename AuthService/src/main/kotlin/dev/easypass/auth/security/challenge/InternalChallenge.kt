@@ -10,7 +10,7 @@ import java.util.*
  * @param encryptionLibrary: this class provides the required encryption methods
  * @param properties: the application.properties as java bean
  */
-class InternalAuthenticationChallenge(private val encryptionLibrary: EncryptionLibrary, private val properties: Properties) {
+class InternalChallenge(private val encryptionLibrary: EncryptionLibrary, private val properties: Properties) {
     private val decryptedChallenge: String = encryptionLibrary.generateAuthenticationChallenge()
     private val timeCreated: LocalDateTime = LocalDateTime.now()
 

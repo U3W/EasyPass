@@ -1,6 +1,6 @@
 package dev.easypass.auth.security
 
-import dev.easypass.auth.security.filter.StoreAuthorityFilter
+import dev.easypass.auth.security.filter.AuthorityFilter
 import dev.easypass.auth.security.handler.RestAuthenticationEntryPoint
 import dev.easypass.auth.security.handler.RestAuthenticationSuccessHandler
 import org.springframework.security.config.annotation.web.builders.HttpSecurity
@@ -21,7 +21,7 @@ import org.springframework.security.web.authentication.logout.HttpStatusReturnin
  */
 @Configuration
 @EnableWebSecurity
-class SecurityConfiguration(private val authProvider: ChallengeAuthenticationProvider, private val storeAuthorityFilter: StoreAuthorityFilter) : WebSecurityConfigurerAdapter() {
+class SecurityConfiguration(private val authProvider: ChallengeAuthenticationProvider, private val authorityFilter: AuthorityFilter) : WebSecurityConfigurerAdapter() {
 
     /**
      * This method is used to add the [ChallengeAuthenticationProvider] to Spring-Security
@@ -64,6 +64,6 @@ class SecurityConfiguration(private val authProvider: ChallengeAuthenticationPro
                 .deleteCookies("JSESSIONID")
 
                 .and()
-                .addFilterAfter(storeAuthorityFilter, AnonymousAuthenticationFilter::class.java)
+                .addFilterAfter(authorityFilter, AnonymousAuthenticationFilter::class.java)
     }
 }

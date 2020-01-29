@@ -1,6 +1,6 @@
 package dev.easypass.auth.security
 
-import dev.easypass.auth.security.challenge.InternalAuthenticationChallenge
+import dev.easypass.auth.security.challenge.InternalChallenge
 import dev.easypass.auth.datstore.document.User
 import org.springframework.stereotype.Component
 import java.util.*
@@ -12,10 +12,10 @@ import java.util.*
 @Component
 class EncryptionLibrary(private val properties: Properties) {
     /**
-     * Generates an object of the class [InternalAuthenticationChallenge]
+     * Generates an object of the class [InternalChallenge]
      */
-    fun generateInternalAdministrationChallenge(): InternalAuthenticationChallenge {
-        return InternalAuthenticationChallenge(this, properties)
+    fun generateInternalAdministrationChallenge(): InternalChallenge {
+        return InternalChallenge(this, properties)
     }
 
     /**
