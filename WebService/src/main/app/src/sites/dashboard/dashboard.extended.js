@@ -25,6 +25,7 @@ export function workerCall( e ) {
             break;
         case 'updatePassword':
             this.copy("", dashboardAlerts.showEditedPass, true);
+            this.resetPass();
             break;
         case 'deletePassword':
             this.showDeletePopUp(dashboardAlerts.showDeletePassAlert, data.ok);
