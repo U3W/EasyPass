@@ -82,44 +82,59 @@ impl Worker {
         let sync_handler: SyncHandler
             = self.private.local.lock().unwrap().sync(&self.private.remote.as_ref().unwrap());
 
-        let copy = Arc::clone(&self.service_status);
-        let copy2 = Arc::clone(&self.service_status);
-        let mydb = Arc::clone(&self.private.local);
-
-        let closure = Closure::new(move |val: JsValue| {
+        let service_status = Arc::clone(&self.service_status);
+        let private_db = Arc::clone(&self.private.local);
+        let change_closure = Closure::new(move |val: JsValue| {
             log(&format!("Change {:?}", &val));
-            log(&format!("Change!! {}", &copy.lock().unwrap()));
-            let action
-                = JsFuture::from(mydb.lock().unwrap().all_docs_without_passwords());
+            log(&format!("Change!! {}", &service_status.lock().unwrap()));
+            /**let action
+                = JsFuture::from(private_db.lock().unwrap().all_docs_without_passwords());
             future_to_promise(async move {
                 let result = action.await;
                 let msg = Array::new_with_length(2);
                 msg.set(0, JsValue::from_str("allEntries"));
+                // TODO error handling
                 msg.set(1, result.unwrap());
                 post_message(&msg);
-                log("Kawai!");
                 Ok(JsValue::undefined())
-            });
-        });
-        let closure2 = Closure::new(move |val: JsValue| {
-            log(&format!("Error {:?}", &val));
-            log(&format!("Error!! {}", &copy2.lock().unwrap()));
+            });*/
+            Worker::all_docs_without_passwords(&private_db.lock().unwrap());
         });
 
-        sync_handler.on_change(&closure);
-        sync_handler.on_error(&closure2);
+        let service_status = Arc::clone(&self.service_status);
+        let error_closure = Closure::new(move |val: JsValue| {
+            log(&format!("Error {:?}", &val));
+            log(&format!("Error!! {}", &service_status.lock().unwrap()));
+        });
+
+        sync_handler.on_change(&change_closure);
+        sync_handler.on_error(&error_closure);
 
         let sync = Sync {
             sync_handler,
-            change: closure,
-            error: closure2
+            change: change_closure,
+            error: error_closure
         };
 
         self.private.sync = Some(sync);
+
+        Worker::all_docs_without_passwords(&self.private.local.lock().unwrap());
+    }
+
+    fn all_docs_without_passwords(db: &PouchDB) -> Promise {
+        let action = JsFuture::from(db.all_docs_without_passwords());
+        future_to_promise(async move {
+            let result = action.await;
+            let msg = Array::new_with_length(2);
+            msg.set(0, JsValue::from_str("allEntries"));
+            // TODO error handling
+            msg.set(1, result.unwrap());
+            post_message(&msg);
+            Ok(JsValue::undefined())
+        })
     }
 
     pub fn save(&self, data: JsValue) -> Promise {
-        //log(&format!("Saved: {:?}", &data.into_serde::<Value>().unwrap()));
         let db = self.private.local.lock().unwrap();
         let action = JsFuture::from(db.post(&data));
         future_to_promise(async move {

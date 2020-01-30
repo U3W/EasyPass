@@ -13,13 +13,8 @@ import {dashboardAlerts} from "./const/dashboard.enum";
  * @param e Message received from Web Worker
  */
 export function workerCall( e ) {
-    console.log('Saved entries: ' + this.state.entries.entries);
-    console.log('Saved categories: ' + this.state.entries.categories);
     const cmd = e.data[0];
     const data = e.data[1];
-    console.log("WORKERCALL");
-    console.log(cmd);
-    console.log(data);
     switch (cmd) {
         case 'allEntries':
             this.loadEntries(data);

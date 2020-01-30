@@ -306,7 +306,7 @@ import("../../rust/pkg").then(wasm => {
            entries.push(e.doc);
         });
         return entries;
-    }
+    };
 
 
     /**
