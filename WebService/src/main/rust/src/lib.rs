@@ -38,10 +38,20 @@ extern {
 
 #[wasm_bindgen]
 pub struct Worker {
+    private: Connection,
+    service_status: Arc<Mutex<String>>
+}
+
+pub struct Connection {
     local: PouchDB,
     remote: Option<PouchDB>,
-    service_status: Arc<Mutex<String>>,
-    closure: Closure<dyn FnMut(JsValue)>
+    sync: Option<Sync>
+}
+
+pub struct Sync {
+    sync_handler: SyncHandler,
+    change: Closure<dyn FnMut(JsValue)>,
+    error: Closure<dyn FnMut(JsValue)>
 }
 
 #[wasm_bindgen]
@@ -57,187 +67,92 @@ impl Worker {
         } else {
             Some(PouchDB::new_with_name(&url))
         };
-        Worker {
+
+        let private = Connection {
             local: PouchDB::new("Local", &JsValue::from_serde(&settings).unwrap()),
             remote,
-            service_status: Arc::new(Mutex::new(String::from("online"))),
-            closure: Closure::new(|val: JsValue| {
+            sync: None
+        };
+        /**
+        closure: Closure::new(|val: JsValue| {
                 log(&format!("hello {:?}", &val));
             })
+            */
+        Worker {
+            private,
+            service_status: Arc::new(Mutex::new(String::from("online"))),
         }
     }
 
-    pub fn kek(&mut self) -> SyncHandler {
-
+    pub fn heartbeat(&mut self) {
+        let sync_handler: SyncHandler = self.private.local.sync(&self.private.remote.as_ref().unwrap());
 
         let copy = Arc::clone(&self.service_status);
-          //  self.service_status.lock().unwrap()
-        self.closure = Closure::new(move |val: JsValue| {
-            log(&format!("hello2 {:?}", &val));
-            log(&format!("hello2-status! {}", &copy.lock().unwrap()));
+        let copy2 = Arc::clone(&self.service_status);
+        //  self.service_status.lock().unwrap()
+        let closure = Closure::new(move |val: JsValue| {
+            log(&format!("Change {:?}", &val));
+            log(&format!("Change! {}", &copy.lock().unwrap()));
+        });
+        let closure2 = Closure::new(move |val: JsValue| {
+            log(&format!("Error {:?}", &val));
+            log(&format!("Error! {}", &copy2.lock().unwrap()));
         });
 
-        //hello();
-        log(&"KEEEEEEEEEEEEEEEEEEEEEEEEKKK!!!!!!!");
+        sync_handler.on_change(&closure);
+        sync_handler.on_error(&closure);
 
-        // TODO check if option is None
-        let wut: SyncHandler = self.local.sync_2(&self.remote.as_ref().unwrap(),
-        JsValue::from_serde(&json!({
-            "live": true,
-            "retry": true
-        })).unwrap());
-
-        wut.on("change", &self.closure);
-        wut.on("complete", &self.closure);
-
-        wut
-    }
-
-    pub fn set_remote(&mut self, url: String) {
-        self.remote = Some(PouchDB::new_with_name(&url));
-    }
-
-    pub fn set_service_status(&mut self, new_service_status: String) {
-        //self.service_status = service_status;
-        let mut service_status = self.service_status.lock().unwrap();
-        *service_status = new_service_status;
-    }
-
-    // Error is thrown when remote is not established
-    // TODO rewrite check
-    pub fn check(&self) -> Promise {
-        //let status = self.service_status.clone().lock().unwrap();
-        let status = Arc::clone(&self.service_status);
-        let local: PouchDB = self.local.clone();
-        let replicate = if *status.lock().unwrap() == "online" {
-            JsFuture::from(local.sync(&self.remote.as_ref().unwrap()))
-        } else {
-            //JsFuture::from(PouchDB::replicate(&self.local, &self.remote))
-            JsFuture::from(Promise::resolve(&JsValue::undefined()))
+        let sync = Sync {
+            sync_handler,
+            change: closure,
+            error: closure2
         };
-        future_to_promise(async move {
-            return if *status.lock().unwrap() == "online" {
-                let msg = Array::new_with_length(2);
-                msg.set(0, JsValue::from_str(&"kek"));
-                msg.set(1, JsValue::from_str(&"kek"));
-                // TODO use this to send results
-                //post_message(&JsValue::from(msg));
-                //log(&format!("{:?}", &JsFuture::from(local.info()).await.unwrap().into_serde::<Info>().unwrap()));
-                //log(&format!("{:?}", &JsFuture::from(local.get_conflicts("4889f782-f945-427a-99f7-1e4b8d32c868")).await.unwrap().into_serde::<Value>().unwrap()));
-                replicate.await
-            } else {
-                replicate.await
-            }
-        })
+
+        self.private.sync = Some(sync);
     }
 
     pub fn save(&self, data: JsValue) -> Promise {
         //log(&format!("Saved: {:?}", &data.into_serde::<Value>().unwrap()));
-        let action = JsFuture::from(self.local.post(&data));
+        let action = JsFuture::from(self.private.local.post(&data));
         future_to_promise(async move {
             action.await
         })
     }
 
     pub fn update(&self, data: JsValue) -> Promise {
-        let action = JsFuture::from(self.local.put(&data));
+        let action = JsFuture::from(self.private.local.put(&data));
         future_to_promise(async move {
             action.await
         })
     }
 
     pub fn find(&self, data: JsValue) -> Promise {
-        let action = JsFuture::from(self.local.find(&data));
+        let action = JsFuture::from(self.private.local.find(&data));
         future_to_promise(async move {
             action.await
         })
     }
 
     pub fn all_docs(&self) -> Promise {
-        let action = JsFuture::from(self.local.all_docs_included());
+        let action = JsFuture::from(self.private.local.all_docs_included());
         future_to_promise(async move {
             action.await
         })
     }
 
     pub fn remove_with_element(&self, data: JsValue) -> Promise {
-        let action = JsFuture::from(self.local.remove_with_element(&data));
+        let action = JsFuture::from(self.private.local.remove_with_element(&data));
         future_to_promise(async move {
             action.await
         })
     }
 
     pub fn remove(&self, doc_id: JsValue, doc_rev: JsValue) -> Promise {
-        let action = JsFuture::from(self.local.remove(&doc_id, &doc_rev));
+        let action = JsFuture::from(self.private.local.remove(&doc_id, &doc_rev));
         future_to_promise(async move {
             action.await
         })
     }
-
-    pub fn process(&self, command: String) -> Promise {
-        let info = JsFuture::from(self.local.info());
-        let adapter = self.local.adapter();
-
-        future_to_promise(async move {
-            let output = match command.as_str() {
-                "adapter" => adapter,
-                "info" => {
-                    match info.await {
-                        Ok(resolved) => {
-                            match resolved.into_serde::<Info>() {
-                                Ok(val) => format!("{:?}", &val),
-                                Err(_) => "Deserialize error".to_string(),
-                            }
-                        },
-                        Err(_) => "Promise error".to_string(),
-                    }
-                }
-                _ => String::from("Unknown command")
-            };
-            Ok(JsValue::from(output))
-        })
-    }
-}
-
-
-#[wasm_bindgen]
-extern "C" {
-    fn setInterval(closure: &Closure<FnMut()>, millis: u32) -> f64;
-    fn cancelInterval(token: f64);
-}
-
-#[wasm_bindgen]
-pub struct Interval {
-    closure: Closure<FnMut()>,
-    token: f64,
-}
-
-impl Interval {
-    pub fn new<F: 'static>(millis: u32, f: F) -> Interval
-        where
-            F: FnMut()
-    {
-        // Construct a new closure.
-        let closure = Closure::new(f);
-
-        // Pass the closuer to JS, to run every n milliseconds.
-        let token = setInterval(&closure, millis);
-
-        Interval { closure, token }
-    }
-}
-
-// When the Interval is destroyed, cancel its `setInterval` timer.
-impl Drop for Interval {
-    fn drop(&mut self) {
-        cancelInterval(self.token);
-    }
-}
-
-// Keep logging "hello" every second until the resulting `Interval` is dropped.
-#[wasm_bindgen]
-pub fn hello() -> Interval {
-    Interval::new(1_000, || log("hello"))
 }
 
 

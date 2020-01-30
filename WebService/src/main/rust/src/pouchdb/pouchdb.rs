@@ -3,6 +3,7 @@ use js_sys::{Promise};
 use serde::{Deserialize, Serialize};
 use wasm_bindgen_futures::{JsFuture, future_to_promise};
 use serde_json::Value;
+use serde_json::json;
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct Info {
@@ -89,10 +90,10 @@ extern "C" {
     pub fn replicate(source: &PouchDB, target: &PouchDB) -> Promise;
 
     #[wasm_bindgen(method, js_class = "PouchDB", js_name = sync)]
-    pub fn sync(this: &PouchDB, target: &PouchDB) -> Promise;
+    pub fn sync_once(this: &PouchDB, target: &PouchDB) -> Promise;
 
     #[wasm_bindgen(method, js_class = "PouchDB", js_name = sync)]
-    pub fn sync_2(this: &PouchDB, target: &PouchDB, options: JsValue) -> SyncHandler;
+    pub fn sync_with_options(this: &PouchDB, target: &PouchDB, options: JsValue) -> SyncHandler;
 
     #[wasm_bindgen(method, js_class = "PouchDB", js_name = on)]
     pub fn on (this: &SyncHandler, method: &str, f: &Closure<dyn FnMut(JsValue)>) -> SyncHandler;
@@ -107,5 +108,23 @@ impl PouchDB {
     pub fn all_docs_included(&self) -> Promise {
         let option: Value = serde_json::from_str(r#"{"include_docs": true}"#).unwrap();
         self.all_docs_with_options(&JsValue::from_serde(&option).unwrap())
+    }
+
+    pub fn sync(&self, target: &PouchDB) -> SyncHandler {
+        self.sync_with_options(&target,
+           JsValue::from_serde(&json!({
+            "live": true,
+            "retry": true
+        })).unwrap())
+    }
+}
+
+impl SyncHandler {
+    pub fn on_change(&self, f: &Closure<dyn FnMut(JsValue)>) -> SyncHandler {
+        self.on("change", f)
+    }
+
+    pub fn on_error(&self, f: &Closure<dyn FnMut(JsValue)>) -> SyncHandler {
+        self.on("error", f)
     }
 }

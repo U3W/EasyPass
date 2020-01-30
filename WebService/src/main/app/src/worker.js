@@ -55,7 +55,7 @@ import("../../rust/pkg").then(wasm => {
         // Send client OK and wait for response in `clientInit` listener
 
         // TODO rework heartbeat
-        const baum = worker.kek();
+        //const baum = worker.kek();
 
         /**
         baum.on("change", (change) => {
@@ -139,6 +139,7 @@ import("../../rust/pkg").then(wasm => {
                 // TODO Toggle heartbeat
                 //  Refactor hearbeat: loop -> listeners
                 //heartbeat();
+                worker.heartbeat();
             }
         } else {
             switch (mode) {
