@@ -36,6 +36,12 @@ export function workerCall( e ) {
                 show: true
             });
             break;
+        case 'getPasswordForUpdate':
+            this.setState({
+                passwordCache: data.passwd,
+                passwordCacheID: data._id
+            });
+            break;
         case 'getPasswordToClipboard':
             this.clipboardCopy(data.passwd);
             this.setState({
@@ -67,6 +73,7 @@ export function addPass(user, passwd, url, title, tags, catID) {
  */
 export function saveEdit(id, rev, userNew, passwdNew, urlNew, titleNew, tagsNew, catNew) {
     const tabID = this.state.tabselected;
+    console.log("saveEdit " + id + ":" + rev);
     this.props.worker.postMessage(['updatePassword',
         {_id: id, _rev: rev, type: 'passwd',
             user: userNew, passwd: passwdNew, url: urlNew, title: titleNew, tags: tagsNew, tabID: tabID, catID: catNew,  }]);
@@ -88,6 +95,15 @@ export function deletePass(id, rev) {
  */
 export function getPass(id, rev) {
     this.props.worker.postMessage(['getPassword', {_id: id, _rev: rev}])
+}
+
+/**
+ * Returns a password that matches the id.
+ * When no entry is found, undefined will be returned.
+ * Difference to `getPass`: show will no be set to true.
+ */
+export function getPassForUpdate(id, rev) {
+    this.props.worker.postMessage(['getPasswordForUpdate', {_id: id, _rev: rev}])
 }
 
 /**

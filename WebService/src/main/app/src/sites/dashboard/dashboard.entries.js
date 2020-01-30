@@ -82,7 +82,7 @@ function comparePassword(that, other) {
     return !!(that.type === other.type && that.user === other.user &&
         that.url === other.url && that.title === other.title &&
         that.tabID === that.tabID && that.catID === other.catID &&
-        that._id === other._id && that._rev && other._rev);
+        that._id === other._id && that._rev === other._rev);
 }
 
 /**

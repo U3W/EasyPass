@@ -144,6 +144,7 @@ class Dashboard extends React.Component {
         this.addPass = that.addPass.bind(this);
         this.deletePass = that.deletePass.bind(this);
         this.getPass = that.getPass.bind(this);
+        this.getPassForUpdate = that.getPassForUpdate.bind(this);
         this.copyPass = that.copyPass.bind(this);
         this.resetPass = that.resetPass.bind(this);
         this.undoDelete = that.undoDelete.bind(this);
@@ -194,7 +195,7 @@ class Dashboard extends React.Component {
                     catData = this.addCallback(catData);
                     passwords[catId] = catData.map(singlePass => {
                         return (
-                            <PassLine key={singlePass._id} tag={singlePass.tags} id={singlePass._id}
+                            <PassLine key={singlePass._id+singlePass._rev} tag={singlePass.tags} id={singlePass._id}
                                       cat={singlePass.catID} rev={singlePass._rev} user={singlePass.user}
                                       pass={singlePass.passwd} title={singlePass.title}
                                       url={singlePass.url} callback={singlePass.callback}
@@ -221,7 +222,7 @@ class Dashboard extends React.Component {
             passwords[0] = catData.map(singlePass => {
                 if (singlePass.tabID === selectedTab) {
                     return (
-                        <PassLine key={singlePass._id} tag={singlePass.tags} id={singlePass._id}
+                        <PassLine key={singlePass._id+singlePass._rev} tag={singlePass.tags} id={singlePass._id}
                                   cat={singlePass.catID} rev={singlePass._rev} user={singlePass.user}
                                   pass={singlePass.passwd} title={singlePass.title}
                                   url={singlePass.url} callback={singlePass.callback}

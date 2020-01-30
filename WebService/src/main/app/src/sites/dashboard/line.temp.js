@@ -50,9 +50,10 @@ export default class PassLine extends React.Component {
             open: false,
             showCopyAlert: false,
             edit: false,
+            editRequest: false,
             id: this.props.id,
             rev: this.props.rev,
-            passwordNew: "",
+            passwordNew: undefined,
             userNew: this.props.user,
             titleNew: this.props.title,
             imgSucc: false,
@@ -205,6 +206,12 @@ export default class PassLine extends React.Component {
 
     }
 
+    componentDidUpdate(prevProps, prevState, snapshot) {
+        if (this.state.editRequest === true && this.props.passwordCache !== undefined) {
+            this.setEdit(true, false);
+        }
+    }
+
     dismissGeneratePass() {
         this.setState({
             generatePassShow: false,
@@ -327,7 +334,7 @@ export default class PassLine extends React.Component {
     }
 
     /**
-     * Before calling setEdit, when saving the edited state, saveEdit needs to be called first
+     * Before calling saveEdit, when saving the edited state, setEdit needs to be called first
      * @param changeTo (true|false)
      * @param succ (true|false) success
      */
@@ -339,12 +346,27 @@ export default class PassLine extends React.Component {
             this.setState({
                 passwordNew: this.props.callback.getPass(this.props.id),
             });*/
-            this.props.callback.getPass(this.props.id);
+            if (this.state.passwordNew === undefined) {
+                if (this.props.passwordCache !== undefined) {
+                    this.setState({
+                        passwordNew: this.props.passwordCache,
+                        editRequest: false,
+                        edit: changeTo
+                    });
+                } else {
+                    this.setState({
+                        editRequest: true
+                    });
+                    this.props.callback.getPassForUpdate(this.props.id, this.state.rev);
+                }
+            }
+
         }
         else {
             if ( !succ ) {
                 this.setState({
-                    passwordNew: "",
+                    passwordNew: undefined,
+                    editRequest: false,
                     userNew: this.props.user,
                     titleNew: this.props.title,
                     urlNew: this.props.url,
@@ -354,11 +376,17 @@ export default class PassLine extends React.Component {
                     tagNew: this.deepCopyTags(this.props.tag),
                 });
             }
+            this.setState({
+                edit: changeTo
+            })
         }
-        this.setState({
-            edit: changeTo,
-            show: changeTo,
-        })
+        /**
+        if (this.state.passwordNew !== undefined) {
+            this.setState({
+                edit: changeTo,
+                show: changeTo,
+            })
+        }*/
     }
 
     setPassword() {
@@ -588,6 +616,7 @@ export default class PassLine extends React.Component {
     }
 
     render() {
+
         //console.log("Start of render", this.state.urlNew);
         let url = this.state.urlNew;
 
@@ -628,7 +657,7 @@ export default class PassLine extends React.Component {
 
         let edit = (
             <>
-                <FormControl id="password" aria-label="Small" type={"text"} aria-describedby="inputGroup-sizing-sm" onChange={this.changeListener} disabled={false} value={this.props.passwordCache}/>
+                <FormControl id="password" aria-label="Small" type={"text"} aria-describedby="inputGroup-sizing-sm" onChange={this.changeListener} disabled={false} value={this.state.passwordNew}/>
                 <Button variant="dark" className="notRound buttonSpaceInline" onClick={() => this.openGeneratePass()}>
                     <img
                         src={GeneratePassIcon}
