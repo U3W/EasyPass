@@ -24,8 +24,6 @@ use wasm_bindgen::JsCast;
 static ALLOC: wee_alloc::WeeAlloc = wee_alloc::WeeAlloc::INIT;
 
 
-
-
 #[wasm_bindgen]
 extern {
     #[wasm_bindgen(js_namespace = console)]
@@ -41,7 +39,7 @@ extern {
 #[wasm_bindgen]
 pub struct Worker {
     local: PouchDB,
-    remote: PouchDB,
+    remote: Option<PouchDB>,
     service_status: Arc<Mutex<String>>,
     closure: Closure<dyn FnMut(JsValue)>
 }
@@ -55,9 +53,9 @@ impl Worker {
         log(&format!("Length: {}", url.len()));
         let remote = if url.len() == 0 {
             let temporary = Temporary { adapter: "idb".to_string(), skip_setup: true };
-            PouchDB::new("Temporary", &JsValue::from_serde(&temporary).unwrap())
+            Some(PouchDB::new("Temporary", &JsValue::from_serde(&temporary).unwrap()))
         } else {
-            PouchDB::new_with_name(&url)
+            Some(PouchDB::new_with_name(&url))
         };
         Worker {
             local: PouchDB::new("Local", &JsValue::from_serde(&settings).unwrap()),
@@ -76,12 +74,14 @@ impl Worker {
           //  self.service_status.lock().unwrap()
         self.closure = Closure::new(move |val: JsValue| {
             log(&format!("hello2 {:?}", &val));
-            log(&format!("hello2-status {}", &copy.lock().unwrap()));
+            log(&format!("hello2-status! {}", &copy.lock().unwrap()));
         });
 
         //hello();
         log(&"KEEEEEEEEEEEEEEEEEEEEEEEEKKK!!!!!!!");
-        let wut: SyncHandler = self.local.sync_2(&self.remote,
+
+        // TODO check if option is None
+        let wut: SyncHandler = self.local.sync_2(&self.remote.as_ref().unwrap(),
         JsValue::from_serde(&json!({
             "live": true,
             "retry": true
@@ -94,7 +94,7 @@ impl Worker {
     }
 
     pub fn set_remote(&mut self, url: String) {
-        self.remote = PouchDB::new_with_name(&url);
+        self.remote = Some(PouchDB::new_with_name(&url));
     }
 
     pub fn set_service_status(&mut self, new_service_status: String) {
@@ -110,7 +110,7 @@ impl Worker {
         let status = Arc::clone(&self.service_status);
         let local: PouchDB = self.local.clone();
         let replicate = if *status.lock().unwrap() == "online" {
-            JsFuture::from(local.sync(&self.remote))
+            JsFuture::from(local.sync(&self.remote.as_ref().unwrap()))
         } else {
             //JsFuture::from(PouchDB::replicate(&self.local, &self.remote))
             JsFuture::from(Promise::resolve(&JsValue::undefined()))
