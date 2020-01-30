@@ -15,7 +15,7 @@ use serde_json::json;
 use wasm_bindgen::__rt::std::future::Future;
 use wasm_bindgen::__rt::std::rc::Rc;
 use wasm_bindgen::__rt::core::cell::RefCell;
-use wasm_bindgen::__rt::std::sync::Arc;
+use wasm_bindgen::__rt::std::sync::{Arc, Mutex};
 use wasm_bindgen::JsCast;
 
 
@@ -42,8 +42,8 @@ extern {
 pub struct Worker {
     local: PouchDB,
     remote: PouchDB,
-    service_status: String,
-    closure: Closure<FnMut()>
+    service_status: Arc<Mutex<String>>,
+    closure: Closure<dyn FnMut(JsValue)>
 }
 
 #[wasm_bindgen]
@@ -62,12 +62,23 @@ impl Worker {
         Worker {
             local: PouchDB::new("Local", &JsValue::from_serde(&settings).unwrap()),
             remote,
-            service_status: String::from("online"),
-            closure: Closure::new(|| log("hello"))
+            service_status: Arc::new(Mutex::new(String::from("online"))),
+            closure: Closure::new(|val: JsValue| {
+                log(&format!("hello {:?}", &val));
+            })
         }
     }
 
-    pub fn kek(&self) -> SyncHandler {
+    pub fn kek(&mut self) -> SyncHandler {
+
+
+        let copy = Arc::clone(&self.service_status);
+          //  self.service_status.lock().unwrap()
+        self.closure = Closure::new(move |val: JsValue| {
+            log(&format!("hello2 {:?}", &val));
+            log(&format!("hello2-status {}", &copy.lock().unwrap()));
+        });
+
         //hello();
         log(&"KEEEEEEEEEEEEEEEEEEEEEEEEKKK!!!!!!!");
         let wut: SyncHandler = self.local.sync_2(&self.remote,
@@ -75,23 +86,6 @@ impl Worker {
             "live": true,
             "retry": true
         })).unwrap());
-
-        /**
-        wut.on("change", &|| {
-            log("Hey, something changed!!!");
-        });
-        wut.on("complete", &|| {
-            log("Hey, something completed!!!");
-        });
-        */
-
-        /**
-        let cb = Closure::wrap(Box::new(|| {
-            log("Wuhuu!");
-        }) as Box<dyn FnMut()>);
-
-        wut.on(&"change", &cb.as_ref().unchecked_ref());
-        wut.on(&"complete", &cb.as_ref().unchecked_ref());*/
 
         wut.on("change", &self.closure);
         wut.on("complete", &self.closure);
@@ -103,23 +97,26 @@ impl Worker {
         self.remote = PouchDB::new_with_name(&url);
     }
 
-    pub fn set_service_status(&mut self, service_status: String) {
-        self.service_status = service_status;
+    pub fn set_service_status(&mut self, new_service_status: String) {
+        //self.service_status = service_status;
+        let mut service_status = self.service_status.lock().unwrap();
+        *service_status = new_service_status;
     }
 
     // Error is thrown when remote is not established
     // TODO rewrite check
     pub fn check(&self) -> Promise {
-        let status = self.service_status.clone();
+        //let status = self.service_status.clone().lock().unwrap();
+        let status = Arc::clone(&self.service_status);
         let local: PouchDB = self.local.clone();
-        let replicate = if status == "online" {
+        let replicate = if *status.lock().unwrap() == "online" {
             JsFuture::from(local.sync(&self.remote))
         } else {
             //JsFuture::from(PouchDB::replicate(&self.local, &self.remote))
             JsFuture::from(Promise::resolve(&JsValue::undefined()))
         };
         future_to_promise(async move {
-            return if status == "online" {
+            return if *status.lock().unwrap() == "online" {
                 let msg = Array::new_with_length(2);
                 msg.set(0, JsValue::from_str(&"kek"));
                 msg.set(1, JsValue::from_str(&"kek"));

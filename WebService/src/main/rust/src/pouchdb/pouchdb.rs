@@ -95,7 +95,7 @@ extern "C" {
     pub fn sync_2(this: &PouchDB, target: &PouchDB, options: JsValue) -> SyncHandler;
 
     #[wasm_bindgen(method, js_class = "PouchDB", js_name = on)]
-    pub fn on (this: &SyncHandler, method: &str, f: &Closure<FnMut()>) -> SyncHandler;
+    pub fn on (this: &SyncHandler, method: &str, f: &Closure<dyn FnMut(JsValue)>) -> SyncHandler;
 }
 
 impl PouchDB {
