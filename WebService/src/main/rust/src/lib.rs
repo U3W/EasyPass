@@ -43,7 +43,7 @@ pub struct Worker {
 }
 
 pub struct Connection {
-    local: PouchDB,
+    local: Arc<Mutex<PouchDB>>,
     remote: Option<PouchDB>,
     sync: Option<Sync>
 }
@@ -67,17 +67,11 @@ impl Worker {
         } else {
             Some(PouchDB::new_with_name(&url))
         };
-
         let private = Connection {
-            local: PouchDB::new("Local", &JsValue::from_serde(&settings).unwrap()),
+            local: Arc::new(Mutex::new(PouchDB::new("Local", &JsValue::from_serde(&settings).unwrap()))),
             remote,
             sync: None
         };
-        /**
-        closure: Closure::new(|val: JsValue| {
-                log(&format!("hello {:?}", &val));
-            })
-            */
         Worker {
             private,
             service_status: Arc::new(Mutex::new(String::from("online"))),
@@ -85,22 +79,35 @@ impl Worker {
     }
 
     pub fn heartbeat(&mut self) {
-        let sync_handler: SyncHandler = self.private.local.sync(&self.private.remote.as_ref().unwrap());
+        let sync_handler: SyncHandler
+            = self.private.local.lock().unwrap().sync(&self.private.remote.as_ref().unwrap());
 
         let copy = Arc::clone(&self.service_status);
         let copy2 = Arc::clone(&self.service_status);
-        //  self.service_status.lock().unwrap()
+        let mydb = Arc::clone(&self.private.local);
+
         let closure = Closure::new(move |val: JsValue| {
             log(&format!("Change {:?}", &val));
-            log(&format!("Change! {}", &copy.lock().unwrap()));
+            log(&format!("Change!! {}", &copy.lock().unwrap()));
+            let action
+                = JsFuture::from(mydb.lock().unwrap().all_docs_without_passwords());
+            future_to_promise(async move {
+                let result = action.await;
+                let msg = Array::new_with_length(2);
+                msg.set(0, JsValue::from_str("allEntries"));
+                msg.set(1, result.unwrap());
+                post_message(&msg);
+                log("Kawai!");
+                Ok(JsValue::undefined())
+            });
         });
         let closure2 = Closure::new(move |val: JsValue| {
             log(&format!("Error {:?}", &val));
-            log(&format!("Error! {}", &copy2.lock().unwrap()));
+            log(&format!("Error!! {}", &copy2.lock().unwrap()));
         });
 
         sync_handler.on_change(&closure);
-        sync_handler.on_error(&closure);
+        sync_handler.on_error(&closure2);
 
         let sync = Sync {
             sync_handler,
@@ -113,42 +120,48 @@ impl Worker {
 
     pub fn save(&self, data: JsValue) -> Promise {
         //log(&format!("Saved: {:?}", &data.into_serde::<Value>().unwrap()));
-        let action = JsFuture::from(self.private.local.post(&data));
+        let db = self.private.local.lock().unwrap();
+        let action = JsFuture::from(db.post(&data));
         future_to_promise(async move {
             action.await
         })
     }
 
     pub fn update(&self, data: JsValue) -> Promise {
-        let action = JsFuture::from(self.private.local.put(&data));
+        let db = self.private.local.lock().unwrap();
+        let action = JsFuture::from(db.put(&data));
         future_to_promise(async move {
             action.await
         })
     }
 
     pub fn find(&self, data: JsValue) -> Promise {
-        let action = JsFuture::from(self.private.local.find(&data));
+        let db = self.private.local.lock().unwrap();
+        let action = JsFuture::from(db.find(&data));
         future_to_promise(async move {
             action.await
         })
     }
 
     pub fn all_docs(&self) -> Promise {
-        let action = JsFuture::from(self.private.local.all_docs_included());
+        let db = self.private.local.lock().unwrap();
+        let action = JsFuture::from(db.all_docs_included());
         future_to_promise(async move {
             action.await
         })
     }
 
     pub fn remove_with_element(&self, data: JsValue) -> Promise {
-        let action = JsFuture::from(self.private.local.remove_with_element(&data));
+        let db = self.private.local.lock().unwrap();
+        let action = JsFuture::from(db.remove_with_element(&data));
         future_to_promise(async move {
             action.await
         })
     }
 
     pub fn remove(&self, doc_id: JsValue, doc_rev: JsValue) -> Promise {
-        let action = JsFuture::from(self.private.local.remove(&doc_id, &doc_rev));
+        let db = self.private.local.lock().unwrap();
+        let action = JsFuture::from(db.remove(&doc_id, &doc_rev));
         future_to_promise(async move {
             action.await
         })

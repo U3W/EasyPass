@@ -40,6 +40,9 @@ pub struct Auth {
 
 #[wasm_bindgen]
 extern "C" {
+    #[wasm_bindgen(js_namespace = console)]
+    fn log(s: &str);
+
     #[derive(Clone)]
     #[wasm_bindgen(js_name = PouchDB)]
     pub type PouchDB;
@@ -108,6 +111,36 @@ impl PouchDB {
     pub fn all_docs_included(&self) -> Promise {
         let option: Value = serde_json::from_str(r#"{"include_docs": true}"#).unwrap();
         self.all_docs_with_options(&JsValue::from_serde(&option).unwrap())
+    }
+
+    pub fn all_docs_without_passwords(&self) -> Promise {
+        // TODO all docs without password -> update field names
+        let action = JsFuture::from(self.find(
+            &JsValue::from_serde(&json!({
+                "selector": {},
+                "fields": [
+                    "_id", "_rev", "type", "user", "url", "title", "tags", "tabID", "catID",
+                    "name", "desc"
+                ],
+        })).unwrap()));
+        future_to_promise(async move {
+            match action.await {
+                Ok(resolved) => {
+                    match resolved.into_serde::<Value>() {
+                        Ok(val) => {
+                            log(&format!("all_docs_without_passwords: {:?}", &val["docs"]));
+                            Ok(JsValue::from_serde(&val["docs"]).unwrap())
+                        },
+                        Err(_) => {
+                            Err(JsValue::undefined())
+                        }
+                    }
+                },
+                Err(_) => {
+                    Err(JsValue::undefined())
+                }
+            }
+        })
     }
 
     pub fn sync(&self, target: &PouchDB) -> SyncHandler {
