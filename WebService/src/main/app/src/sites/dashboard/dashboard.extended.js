@@ -23,6 +23,9 @@ export function workerCall( e ) {
             this.copy("", dashboardAlerts.showAddedPass, data.ok);
             this.dismissAddPass();
             break;
+        case 'updatePassword':
+            this.copy("", dashboardAlerts.showEditedPass, true);
+            break;
         case 'deletePassword':
             this.showDeletePopUp(dashboardAlerts.showDeletePassAlert, data.ok);
             break;
@@ -57,6 +60,16 @@ export function addPass(user, passwd, url, title, tags, catID) {
     const tabID = this.state.tabselected;
     this.props.worker.postMessage(['savePassword',
         {type: 'passwd', user: user, passwd: passwd, url: url, title: title, tags: tags, tabID: tabID, catID: catID, }]);
+}
+
+/**
+ * Updates a password entry.
+ */
+export function saveEdit(id, rev, userNew, passwdNew, urlNew, titleNew, tagsNew, catNew) {
+    const tabID = this.state.tabselected;
+    this.props.worker.postMessage(['updatePassword',
+        {_id: id, _rev: rev, type: 'passwd',
+            user: userNew, passwd: passwdNew, url: urlNew, title: titleNew, tags: tagsNew, tabID: tabID, catID: catNew,  }]);
 }
 
 /**

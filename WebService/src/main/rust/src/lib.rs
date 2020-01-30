@@ -56,6 +56,9 @@ pub struct Sync {
 
 #[wasm_bindgen]
 impl Worker {
+
+    /// Creates a new Worker that manages databases.
+    /// This includes live syncing and methods for CRUD-operations.
     #[wasm_bindgen(constructor)]
     pub fn new(url: String) -> Worker {
         utils::set_panic_hook();
@@ -68,7 +71,8 @@ impl Worker {
             Some(PouchDB::new_with_name(&url))
         };
         let private = Connection {
-            local: Arc::new(Mutex::new(PouchDB::new("Local", &JsValue::from_serde(&settings).unwrap()))),
+            local: Arc::new(Mutex::new(
+                PouchDB::new("Local", &JsValue::from_serde(&settings).unwrap()))),
             remote,
             sync: None
         };
@@ -78,6 +82,7 @@ impl Worker {
         }
     }
 
+    /// Starts live replication for private password entries.
     pub fn heartbeat(&mut self) {
         let sync_handler: SyncHandler
             = self.private.local.lock().unwrap().sync(&self.private.remote.as_ref().unwrap());
@@ -87,17 +92,6 @@ impl Worker {
         let change_closure = Closure::new(move |val: JsValue| {
             log(&format!("Change {:?}", &val));
             log(&format!("Change!! {}", &service_status.lock().unwrap()));
-            /**let action
-                = JsFuture::from(private_db.lock().unwrap().all_docs_without_passwords());
-            future_to_promise(async move {
-                let result = action.await;
-                let msg = Array::new_with_length(2);
-                msg.set(0, JsValue::from_str("allEntries"));
-                // TODO error handling
-                msg.set(1, result.unwrap());
-                post_message(&msg);
-                Ok(JsValue::undefined())
-            });*/
             Worker::all_docs_without_passwords(&private_db.lock().unwrap());
         });
 
@@ -121,6 +115,14 @@ impl Worker {
         Worker::all_docs_without_passwords(&self.private.local.lock().unwrap());
     }
 
+    fn build_and_post_message(cmd: &str, data: JsValue) {
+        let msg = Array::new_with_length(2);
+        msg.set(0, JsValue::from_str(cmd));
+        // TODO error handling
+        msg.set(1, data);
+        post_message(&msg);
+    }
+
     fn all_docs_without_passwords(db: &PouchDB) -> Promise {
         let action = JsFuture::from(db.all_docs_without_passwords());
         future_to_promise(async move {
@@ -135,10 +137,13 @@ impl Worker {
     }
 
     pub fn save(&self, data: JsValue) -> Promise {
-        let db = self.private.local.lock().unwrap();
-        let action = JsFuture::from(db.post(&data));
+        // TODO Worker Decrypt Password
+        let private_db = Arc::clone(&self.private.local);
+        let action = JsFuture::from(private_db.lock().unwrap().post(&data));
         future_to_promise(async move {
-            action.await
+            let result = action.await;
+            Worker::build_and_post_message("savePassword", result.unwrap());
+            Ok(JsValue::from(true))
         })
     }
 
@@ -146,7 +151,9 @@ impl Worker {
         let db = self.private.local.lock().unwrap();
         let action = JsFuture::from(db.put(&data));
         future_to_promise(async move {
-            action.await
+            let result = action.await;
+            Worker::build_and_post_message("updatePassword", result.unwrap());
+            Ok(JsValue::from(true))
         })
     }
 

@@ -10,27 +10,6 @@ import("../../rust/pkg").then(wasm => {
     let clientInitialized = false;
     let mode = undefined;
     let deletedPasswords = new Map();
-    //let undoPasswordDeletion = false;
-
-
-    const baumi = () => {
-        const b1 = new PouchDB('b1');
-        const b2 = new PouchDB('b2');
-        console.log("PouchDB: " + b1.constructor.name);
-        console.log(b1 instanceof PouchDB);
-
-
-        const syncHandler = b1.sync(b2, {live: true, retry: true});
-
-        console.log("SyncHandler: " + syncHandler.constructor.name);
-        console.log("SyncHandler: " + Object.getPrototypeOf(syncHandler).constructor.name);
-        //console.log("2" + syncHandler.prototype.name);
-        console.log(PouchDB.r);
-
-        b1.post({baum: 1});
-        b1.post({baum: 2});
-        b2.post({kek: 1});
-    };
 
     // Initialize Worker
     const init = async () => {
@@ -52,21 +31,8 @@ import("../../rust/pkg").then(wasm => {
         }
         worker = new wasm.Worker(dbUrl);
         self.addEventListener('message', clientInit, true);
+
         // Send client OK and wait for response in `clientInit` listener
-
-        // TODO rework heartbeat
-        //const baum = worker.kek();
-
-        /**
-        baum.on("change", (change) => {
-            console.log("CHANGE!!!" + change);
-        });
-        baum.on("complete", function (info) {
-            console.log("COMPLETE!!!" + info);
-        });
-        */
-        //console.log(baum);
-
         while (!clientInitialized) {
             self.postMessage('initDone');
             await sleep(500);
@@ -166,14 +132,18 @@ import("../../rust/pkg").then(wasm => {
     };
 
     const dashboardCall = async (cmd, data) => {
+        // TODO do postMessage in WebAssembly not js
         switch (cmd) {
             case 'unregister':
                 mode = undefined;
                 break;
             case 'savePassword':
-                // TODO Worker Decrypt Password
-                const saveCheck = await worker.save(data);
-                self.postMessage(['savePassword', await saveEntryResult(saveCheck)]);
+                //const saveResult = await worker.save(data);
+                //self.postMessage(['savePassword', saveResult]);
+                await worker.save(data);
+                break;
+            case 'updatePassword':
+                await worker.update(data);
                 break;
             case 'deletePassword':
                 const deletedPassword = (await worker.find({"selector":{"_id": data._id, "_rev": data._rev}})).docs[0];
@@ -199,7 +169,7 @@ import("../../rust/pkg").then(wasm => {
                 break;
             case 'saveCategory':
                 const catCheck = await worker.save(data);
-                self.postMessage(['saveCategory', await saveCatResult(catCheck)]);
+                self.postMessage(['saveCategory', catCheck]);
                 break;
 
 
@@ -235,39 +205,15 @@ import("../../rust/pkg").then(wasm => {
         }
     };
 
-    const saveEntryResult = async (check) => {
-        if (check.ok) {
-            const entry =
-                (await worker.find({"selector": {"_id": check.id, "_rev": check.rev}})).docs[0];
-            delete entry.passwd;
-            return {
-                ok: true,
-                entry: entry
-            }
-        } else return { ok: false };
-    };
-
     const undoPasswordDelete = async (deletedPassword) => {
       const check = deletedPasswords.get(deletedPassword);
       if (check)  {
-          console.log("Undoing remove!!!");
           delete deletedPassword._id;
           delete deletedPassword._rev;
           // TODO error handling?
           await worker.save(deletedPassword);
       }
       deletedPasswords.delete(deletedPassword);
-    };
-
-    const saveCatResult = async (check) => {
-        if (check.ok) {
-            const entry =
-                (await worker.find({"selector": {"_id": check.id, "_rev": check.rev}})).docs[0];
-            return {
-                ok: true,
-                entry: entry
-            }
-        } else return { ok: false };
     };
 
     /**
@@ -281,10 +227,6 @@ import("../../rust/pkg").then(wasm => {
                 selector[e] = data[e];
         });
         return selector
-    };
-
-    const returnSaved = async (data) => {
-        const success = await elementExists(data);
     };
 
     /**

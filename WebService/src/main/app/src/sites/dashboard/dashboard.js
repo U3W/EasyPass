@@ -126,7 +126,7 @@ class Dashboard extends React.Component {
         this.changeCat = this.changeCat.bind(this);
         this.changeTab = this.changeTab.bind(this);
         this.dismissCopy = this.dismissCopy.bind(this);
-        this.saveEdit = this.saveEdit.bind(this);
+        this.saveEdit = that.saveEdit.bind(this);
         this.renderCat = this.renderCat.bind(this);
         this.resetSettingsExpanded = this.resetSettingsExpanded.bind(this);
         // Popups
@@ -798,13 +798,6 @@ class Dashboard extends React.Component {
                 return cats[i].name;
             }
         }
-    }
-
-
-
-    saveEdit(id, userNew, passwordNew, urlNew, titleNew, catNew, tagNew) {
-        // ToDo call Kacpers method
-        this.copy("", dashboardAlerts.showEditedPass, true);
     }
 
     addCat( name, description) {
