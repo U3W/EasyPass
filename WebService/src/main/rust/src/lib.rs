@@ -3,6 +3,8 @@
 mod utils;
 
 use wasm_bindgen::prelude::*;
+mod easypass;
+use easypass::easypass::*;
 mod pouchdb;
 use pouchdb::pouchdb::*;
 use wasm_bindgen_futures::{spawn_local, future_to_promise};
@@ -40,7 +42,8 @@ extern {
 #[wasm_bindgen]
 pub struct Worker {
     private: Connection,
-    service_status: Arc<Mutex<String>>
+    service_status: Arc<Mutex<String>>,
+    category_cache: Arc<Mutex<Vec<RecoverCategory>>>
 }
 
 pub struct Connection {
@@ -80,6 +83,7 @@ impl Worker {
         Worker {
             private,
             service_status: Arc::new(Mutex::new(String::from("online"))),
+            category_cache: Arc::new(Mutex::new(Vec::new()))
         }
     }
 
@@ -180,21 +184,50 @@ impl Worker {
     }
 
     pub fn delete_categories(&self, data: Array) -> Promise {
+        // Bind private database and cache for deleted password entries
         let private_db = Arc::clone(&self.private.local);
-        let mut entries: Vec<Value> = data.into_serde().unwrap();
-        let query = Array::new_with_length(entries.len() as u32);
-        for (i, entry) in entries.iter_mut().enumerate() {
-            log("Entry:");
-            log(&format!("{}", entry["_id"]));
-            log(&format!("{}", entry["_rev"]));
-            entry["_deleted"] = Bool(true);
-            log(&format!("{}", entry["_deleted"]));
-            query.set(i as u32, JsValue::from_serde(&entry).unwrap());
-        }
-        log("hi");
-        log(&format!("{:?}", &query));
-        let action = JsFuture::from(private_db.lock().unwrap().bulk_docs(&query));
+        let mut cache = Arc::clone(&self.category_cache);
+        // Parse received categories as vec
+        let mut categories: Vec<Value> = data.into_serde().unwrap();
+        // This variable will be used to store the categories that need to be delted
+        let query = Array::new_with_length(categories.len() as u32);
+        // Move values to promise, allows usage of async
         future_to_promise(async move {
+            // Enumerate over received categories
+            for (i, cat) in categories.iter_mut().enumerate() {
+                // Add "_deleted" tag for later bulk operation that deletes this category
+                cat["_deleted"] = Bool(true);
+                // Get full category entry, is needed for proper undo of deletion
+                let backup_raw
+                    = JsFuture::from(private_db.lock().unwrap()
+                        .get(cat["_id"].as_str().unwrap())).await.unwrap();
+                let backup = Category::new(&backup_raw);
+                // Get password entries associated with this category
+                let entries_raw
+                    = JsFuture::from(private_db.lock().unwrap()
+                    .all_entries_from_category(cat["_id"].as_str().unwrap())).await.unwrap();
+                // TODO proper error handling
+                if !entries_raw.is_undefined() {
+                    // Push ids and revisions of password entries to a vec with tuples
+                    let entries_parsed = Array::from(&entries_raw);
+                    let mut entries: Vec<(String, String)> = Vec::new();
+                    for entry in entries_parsed.iter() {
+                        let entry = entry.into_serde::<Value>().unwrap();
+                        entries.push((
+                            String::from(entry["_id"].as_str().unwrap()),
+                            String::from(entry["_rev"].as_str().unwrap())));
+                    }
+                    // Add full category entry and associated entries to category cache
+                    cache.lock().unwrap().push(RecoverCategory::new(backup, entries));
+                } else {
+                    log("Something went wrong...");
+                }
+                // Category entry to deletion query
+                query.set(i as u32, JsValue::from_serde(&cat).unwrap());
+
+            }
+            // Delete categories and post result
+            let action = JsFuture::from(private_db.lock().unwrap().bulk_docs(&query));
             let result = action.await;
             Worker::build_and_post_message("deleteCategories", result.unwrap());
             Ok(JsValue::from(true))

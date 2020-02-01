@@ -146,6 +146,37 @@ impl PouchDB {
         })
     }
 
+    pub fn all_entries_from_category(&self, id: &str) -> Promise {
+        let action = JsFuture::from(self.find(
+            &JsValue::from_serde(&json!({
+                "selector": {
+                    "type": "passwd",
+                    "catID": id,
+                },
+                "fields": [
+                    "_id", "_rev"
+                ],
+        })).unwrap()));
+
+        future_to_promise(async move {
+            match action.await {
+                Ok(resolved) => {
+                    match resolved.into_serde::<Value>() {
+                        Ok(val) => {
+                            Ok(JsValue::from_serde(&val["docs"]).unwrap())
+                        },
+                        Err(_) => {
+                            Err(JsValue::undefined())
+                        }
+                    }
+                },
+                Err(_) => {
+                    Err(JsValue::undefined())
+                }
+            }
+        })
+    }
+
     pub fn sync(&self, target: &PouchDB) -> SyncHandler {
         self.sync_with_options(&target,
            JsValue::from_serde(&json!({
