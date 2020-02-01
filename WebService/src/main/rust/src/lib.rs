@@ -211,11 +211,16 @@ impl Worker {
                     // Push ids and revisions of password entries to a vec with tuples
                     let entries_parsed = Array::from(&entries_raw);
                     let mut entries: Vec<(String, String)> = Vec::new();
-                    for entry in entries_parsed.iter() {
-                        let entry = entry.into_serde::<Value>().unwrap();
-                        entries.push((
-                            String::from(entry["_id"].as_str().unwrap()),
-                            String::from(entry["_rev"].as_str().unwrap())));
+
+                    if entries_parsed.length() != 0 {
+                        JsFuture::from(private_db.lock().unwrap()
+                            .reset_category_in_entries(&entries_raw)).await;
+                        for entry in entries_parsed.iter() {
+                            let entry = entry.into_serde::<Value>().unwrap();
+                            entries.push((
+                                String::from(entry["_id"].as_str().unwrap()),
+                                String::from(entry["_rev"].as_str().unwrap())));
+                        }
                     }
                     // Add full category entry and associated entries to category cache
                     cache.lock().unwrap().push(RecoverCategory::new(backup, entries));

@@ -152,10 +152,7 @@ impl PouchDB {
                 "selector": {
                     "type": "passwd",
                     "catID": id,
-                },
-                "fields": [
-                    "_id", "_rev"
-                ],
+                }
         })).unwrap()));
 
         future_to_promise(async move {
@@ -176,6 +173,23 @@ impl PouchDB {
             }
         })
     }
+
+    pub fn reset_category_in_entries(&self, entries: &JsValue) -> Promise {
+        // Parse entries into array and later vec
+        let mut entries_parsed = entries.into_serde::<Value>().unwrap();
+        let mut entries_vec = entries_parsed.as_array_mut().unwrap();
+        // Set id for category to default value on every entry
+        for entry in &mut *entries_vec {
+            entry["catID"] = Value::from(0);
+        }
+        // Build query and perform update
+        let query = JsValue::from_serde(&entries_vec).unwrap();
+        let action = JsFuture::from(self.bulk_docs(&query));
+        future_to_promise(async move {
+            action.await
+        })
+    }
+
 
     pub fn sync(&self, target: &PouchDB) -> SyncHandler {
         self.sync_with_options(&target,
