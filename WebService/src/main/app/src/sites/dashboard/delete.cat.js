@@ -29,17 +29,20 @@ export default class DeleteCategory extends React.Component {
     }
 
 
-    setCatDel( id ) {
+    setCatDel( id, rev) {
+
+
         let catDelIds = this.state.catDelIds;
-        if ( catDelIds.indexOf(id) === -1 ) {
-            catDelIds.push(id);
+        if ( catDelIds.map((e) => {return e.id;}).indexOf(id) === -1 ) {
+            catDelIds.push({id: id, rev: rev});
         }
         else {
-            catDelIds.splice(catDelIds.indexOf(id), 1);
+            //catDelIds.splice(catDelIds.indexOf([id, rev]), 1);
+            catDelIds.splice(catDelIds.map((e) => {return e.id;}).indexOf(id), 1);
         }
     };
 
-    returnCatBase ( id, name, desc) {
+    returnCatBase ( id, rev, name, desc) {
         return (
             <tr key={id}>
                 <td>
@@ -57,7 +60,7 @@ export default class DeleteCategory extends React.Component {
                                 label=""
                                 type={type}
                                 id={`custom-inline-${type}-${id}`}
-                                onClick={() =>this.setCatDel(id)}
+                                onClick={() =>this.setCatDel(id, rev)}
                             />
                         </div>
                     ))}
@@ -88,14 +91,14 @@ export default class DeleteCategory extends React.Component {
         if (event.keyCode === 13 )
         {
             // Enter
-            this.editCat()
+            this.delCat()
         }
     }
 
 
     render() {
         let finalCats = this.props.callback.getCats().map((item) =>
-            this.returnCatBase(item.id, item.name, item.desc)
+            this.returnCatBase(item._id, item._rev, item.name, item.desc)
         );
 
 

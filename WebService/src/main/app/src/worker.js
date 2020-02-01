@@ -140,10 +140,10 @@ import("../../rust/pkg").then(wasm => {
             case 'savePassword':
                 //const saveResult = await worker.save(data);
                 //self.postMessage(['savePassword', saveResult]);
-                await worker.save(data);
+                await worker.save_password(data);
                 break;
             case 'updatePassword':
-                await worker.update(data);
+                await worker.update_password(data);
                 break;
             case 'deletePassword':
                 const deletedPassword = (await worker.find({"selector":{"_id": data._id, "_rev": data._rev}})).docs[0];
@@ -167,8 +167,10 @@ import("../../rust/pkg").then(wasm => {
                 self.postMessage([cmd, {_id: decrypted._id, passwd: decrypted.passwd}]);
                 break;
             case 'saveCategory':
-                const catCheck = await worker.save(data);
-                self.postMessage(['saveCategory', catCheck]);
+                await worker.save_category(data);
+                break;
+            case 'updateCategory':
+                await worker.update_category(data);
                 break;
 
 

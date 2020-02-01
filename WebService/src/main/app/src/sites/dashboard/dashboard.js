@@ -140,7 +140,6 @@ class Dashboard extends React.Component {
         this.getCats = this.getCats.bind(this);
         this.renderLinesSonstige = this.renderLinesSonstige.bind(this);
         this.renderLines = this.renderLines.bind(this);
-
         this.addPass = that.addPass.bind(this);
         this.deletePass = that.deletePass.bind(this);
         this.getPass = that.getPass.bind(this);
@@ -771,11 +770,6 @@ class Dashboard extends React.Component {
             catselected: changeTo
         });
 
-    }
-
-    resetPass( pass, newPass ) {
-        // ToDo call Moritz / Kacper
-        return true;
     }
 
     /**

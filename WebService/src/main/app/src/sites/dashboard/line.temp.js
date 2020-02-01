@@ -339,13 +339,7 @@ export default class PassLine extends React.Component {
      * @param succ (true|false) success
      */
     setEdit( changeTo, succ ) {
-        //console.log("ChangeTo", changeTo, this.props.tag);
         if ( changeTo ) {
-            // TODO test with prop
-            /**
-            this.setState({
-                passwordNew: this.props.callback.getPass(this.props.id),
-            });*/
             if (this.state.passwordNew === undefined) {
                 if (this.props.passwordCache !== undefined) {
                     this.setState({
@@ -360,7 +354,6 @@ export default class PassLine extends React.Component {
                     this.props.callback.getPassForUpdate(this.props.id, this.state.rev);
                 }
             }
-
         }
         else {
             if ( !succ ) {
@@ -380,13 +373,6 @@ export default class PassLine extends React.Component {
                 edit: changeTo
             })
         }
-        /**
-        if (this.state.passwordNew !== undefined) {
-            this.setState({
-                edit: changeTo,
-                show: changeTo,
-            })
-        }*/
     }
 
     setPassword() {

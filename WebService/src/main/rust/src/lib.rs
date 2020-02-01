@@ -136,7 +136,7 @@ impl Worker {
         })
     }
 
-    pub fn save(&self, data: JsValue) -> Promise {
+    pub fn save_password(&self, data: JsValue) -> Promise {
         // TODO Worker Decrypt Password
         let private_db = Arc::clone(&self.private.local);
         let action = JsFuture::from(private_db.lock().unwrap().post(&data));
@@ -147,12 +147,33 @@ impl Worker {
         })
     }
 
-    pub fn update(&self, data: JsValue) -> Promise {
+    pub fn update_password(&self, data: JsValue) -> Promise {
         let db = self.private.local.lock().unwrap();
         let action = JsFuture::from(db.put(&data));
         future_to_promise(async move {
             let result = action.await;
             Worker::build_and_post_message("updatePassword", result.unwrap());
+            Ok(JsValue::from(true))
+        })
+    }
+
+    pub fn save_category(&self, data: JsValue) -> Promise {
+        // TODO Worker Decrypt Password
+        let private_db = Arc::clone(&self.private.local);
+        let action = JsFuture::from(private_db.lock().unwrap().post(&data));
+        future_to_promise(async move {
+            let result = action.await;
+            Worker::build_and_post_message("saveCategory", result.unwrap());
+            Ok(JsValue::from(true))
+        })
+    }
+
+    pub fn update_category(&self, data: JsValue) -> Promise {
+        let db = self.private.local.lock().unwrap();
+        let action = JsFuture::from(db.put(&data));
+        future_to_promise(async move {
+            let result = action.await;
+            Worker::build_and_post_message("updateCategory", result.unwrap());
             Ok(JsValue::from(true))
         })
     }
