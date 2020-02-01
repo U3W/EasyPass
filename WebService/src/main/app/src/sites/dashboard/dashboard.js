@@ -147,6 +147,10 @@ class Dashboard extends React.Component {
         this.copyPass = that.copyPass.bind(this);
         this.resetPass = that.resetPass.bind(this);
         this.undoDelete = that.undoDelete.bind(this);
+
+        this.addCat = that.addCat.bind(this);
+        this.updateCat = that.updateCat.bind(this);
+        this.deleteCats = that.deleteCats.bind(this);
         // WindowDimensions
         this.updateWindowDimensions = this.updateWindowDimensions.bind(this);
         // Worker
@@ -793,28 +797,6 @@ class Dashboard extends React.Component {
                 return cats[i].name;
             }
         }
-    }
-
-    addCat( name, description) {
-        // TODO add new category
-        const tabID = this.state.tabselected;
-        this.props.worker.postMessage(['saveCategory',
-            {type: 'cat', name: name, desc: description, tabID: tabID }]);
-    }
-
-    editCat( id, nameNew, descriptionNew) {
-        // ToDo call Kacpers method
-        this.copy("", dashboardAlerts.showEditedCat, false);
-        this.dismissEditCat();
-    }
-
-    deleteCat(id) {
-        // ToDo call Kacpers method
-        this.setState({
-            currentCatDelete: id,
-        });
-        this.showDeletePopUp(dashboardAlerts.showDeleteCatAlert, true);
-        this.dismissDeleteCat()
     }
 
     generateKeyfile() {

@@ -172,6 +172,9 @@ import("../../rust/pkg").then(wasm => {
             case 'updateCategory':
                 await worker.update_category(data);
                 break;
+            case 'deleteCategories':
+                await worker.delete_categories(data);
+                break;
 
 
             // TODO Remove legacy Worker API

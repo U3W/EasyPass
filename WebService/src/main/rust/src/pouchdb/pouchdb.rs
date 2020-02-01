@@ -68,6 +68,9 @@ extern "C" {
     #[wasm_bindgen(method, js_class = "PouchDB", js_name = post)]
     pub fn post(this: &PouchDB, data: &JsValue) -> Promise;
 
+    #[wasm_bindgen(method, js_class = "PouchDB", js_name = bulkDocs)]
+    pub fn bulk_docs(this: &PouchDB, data: &JsValue) -> Promise;
+
     #[wasm_bindgen(method, js_class = "PouchDB", js_name = get)]
     pub fn get(this: &PouchDB, doc_id: &str) -> Promise;
 

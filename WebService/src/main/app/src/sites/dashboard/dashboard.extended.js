@@ -56,6 +56,22 @@ export function workerCall( e ) {
             this.copy("", dashboardAlerts.showAddedCat, data.ok);
             this.dismissAddCat();
             break;
+        case 'deleteCategories':
+            // ToDo call Kacpers method
+            /**
+            this.setState({
+                currentCatDelete: id,
+            });*/
+            let success = true;
+            for (let i = 0; i < data.length; i++) {
+                if (data[i].ok === false) {
+                    success = false;
+                    break;
+                }
+            }
+            this.showDeletePopUp(dashboardAlerts.showDeleteCatAlert, success);
+            this.dismissDeleteCat();
+            break;
     }
 
 }
@@ -128,7 +144,7 @@ export function resetPass() {
 /**
  * Recovers and deleted password or category entry.
  */
-export function undoDelete( which, id ) {
+export function undoDelete(which, id) {
     // TODO Enable stop delete
     switch (which) {
         case dashboardAlerts.showDeleteCatAlert:
@@ -145,6 +161,32 @@ export function undoDelete( which, id ) {
             });
             break;
     }
+}
+
+/**
+ * Adds a new category entry.
+ */
+export function addCat(name, description) {
+    // TODO add new category
+    const tabID = this.state.tabselected;
+    this.props.worker.postMessage(['saveCategory',
+        {type: 'cat', name: name, desc: description, tabID: tabID }]);
+}
+
+/**
+ * Updates a category entry.
+ */
+export function updateCat( id, nameNew, descriptionNew) {
+    // ToDo call Kacpers method
+    this.copy("", dashboardAlerts.showEditedCat, false);
+    this.dismissEditCat();
+}
+
+/**
+ * Removes multiple categories that are passed as an array of ids and revisions.
+ */
+export function deleteCats(entries) {
+    this.props.worker.postMessage(['deleteCategories', entries]);
 }
 
 /**

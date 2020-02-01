@@ -17,6 +17,7 @@ use wasm_bindgen::__rt::std::rc::Rc;
 use wasm_bindgen::__rt::core::cell::RefCell;
 use wasm_bindgen::__rt::std::sync::{Arc, Mutex};
 use wasm_bindgen::JsCast;
+use serde_json::value::Value::Bool;
 
 
 #[cfg(feature = "wee_alloc")]
@@ -174,6 +175,28 @@ impl Worker {
         future_to_promise(async move {
             let result = action.await;
             Worker::build_and_post_message("updateCategory", result.unwrap());
+            Ok(JsValue::from(true))
+        })
+    }
+
+    pub fn delete_categories(&self, data: Array) -> Promise {
+        let private_db = Arc::clone(&self.private.local);
+        let mut entries: Vec<Value> = data.into_serde().unwrap();
+        let query = Array::new_with_length(entries.len() as u32);
+        for (i, entry) in entries.iter_mut().enumerate() {
+            log("Entry:");
+            log(&format!("{}", entry["_id"]));
+            log(&format!("{}", entry["_rev"]));
+            entry["_deleted"] = Bool(true);
+            log(&format!("{}", entry["_deleted"]));
+            query.set(i as u32, JsValue::from_serde(&entry).unwrap());
+        }
+        log("hi");
+        log(&format!("{:?}", &query));
+        let action = JsFuture::from(private_db.lock().unwrap().bulk_docs(&query));
+        future_to_promise(async move {
+            let result = action.await;
+            Worker::build_and_post_message("deleteCategories", result.unwrap());
             Ok(JsValue::from(true))
         })
     }

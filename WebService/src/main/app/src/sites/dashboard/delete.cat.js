@@ -33,12 +33,12 @@ export default class DeleteCategory extends React.Component {
 
 
         let catDelIds = this.state.catDelIds;
-        if ( catDelIds.map((e) => {return e.id;}).indexOf(id) === -1 ) {
-            catDelIds.push({id: id, rev: rev});
+        if ( catDelIds.map((e) => {return e._id;}).indexOf(id) === -1 ) {
+            catDelIds.push({_id: id, _rev: rev});
         }
         else {
             //catDelIds.splice(catDelIds.indexOf([id, rev]), 1);
-            catDelIds.splice(catDelIds.map((e) => {return e.id;}).indexOf(id), 1);
+            catDelIds.splice(catDelIds.map((e) => {return e._id;}).indexOf(id), 1);
         }
     };
 
@@ -78,7 +78,7 @@ export default class DeleteCategory extends React.Component {
     }
 
     delCat() {
-        this.props.callback.deleteCat(this.state.catDelIds);
+        this.props.callback.deleteCats(this.state.catDelIds);
         this.resetState();
     }
 
