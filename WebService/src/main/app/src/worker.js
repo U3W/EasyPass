@@ -175,6 +175,9 @@ import("../../rust/pkg").then(wasm => {
             case 'deleteCategories':
                 await worker.delete_categories(data);
                 break;
+            case 'undoDeleteCategories':
+                await worker.undo_delete_categories();
+                break;
 
 
             // TODO Remove legacy Worker API
@@ -215,7 +218,7 @@ import("../../rust/pkg").then(wasm => {
           delete deletedPassword._id;
           delete deletedPassword._rev;
           // TODO error handling?
-          await worker.save(deletedPassword);
+          await worker.save_password(deletedPassword);
       }
       deletedPasswords.delete(deletedPassword);
     };

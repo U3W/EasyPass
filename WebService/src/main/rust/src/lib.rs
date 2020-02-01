@@ -210,16 +210,16 @@ impl Worker {
                 if !entries_raw.is_undefined() {
                     // Push ids and revisions of password entries to a vec with tuples
                     let entries_parsed = Array::from(&entries_raw);
-                    let mut entries: Vec<(String, String)> = Vec::new();
-
+                    let mut entries: Vec<String> = Vec::new();
+                    // If there are any entries
                     if entries_parsed.length() != 0 {
+                        // Update all their category ids
                         JsFuture::from(private_db.lock().unwrap()
                             .reset_category_in_entries(&entries_raw)).await;
+                        // Save them as backup
                         for entry in entries_parsed.iter() {
                             let entry = entry.into_serde::<Value>().unwrap();
-                            entries.push((
-                                String::from(entry["_id"].as_str().unwrap()),
-                                String::from(entry["_rev"].as_str().unwrap())));
+                            entries.push(String::from(entry["_id"].as_str().unwrap()));
                         }
                     }
                     // Add full category entry and associated entries to category cache
@@ -235,6 +235,41 @@ impl Worker {
             let action = JsFuture::from(private_db.lock().unwrap().bulk_docs(&query));
             let result = action.await;
             Worker::build_and_post_message("deleteCategories", result.unwrap());
+            Ok(JsValue::from(true))
+        })
+    }
+
+    pub fn undo_delete_categories(&self) -> Promise {
+        // Bind private database and cache for deleted password entries
+        let private_db = Arc::clone(&self.private.local);
+        let mut cache = Arc::clone(&self.category_cache);
+        log("MOi");
+        future_to_promise(async move {
+            if cache.lock().unwrap().len() > 0 {
+                for recovery in cache.lock().unwrap().iter_mut() {
+                    let insert = recovery.get_category_as_json();
+                    let result =
+                        JsFuture::from(private_db.lock().unwrap().post(&insert)).await.unwrap();
+                    let result = result.into_serde::<Value>().unwrap();
+                    log(&format!("RESULT: {:?}", &result));
+                    let new_id = result["id"].as_str().unwrap();
+                    let entries = recovery.get_entries();
+                    /**JsFuture::from(
+                        private_db.lock().unwrap()
+                        .reset_entries_from_deleted_category(new_id, entries)).await;*/
+                    let result: Vec<Value> = Vec::new();
+                    for entry in entries {
+                        let result = JsFuture::from(private_db.lock().unwrap().get(&entry)).await.unwrap();
+                        let mut result = result.into_serde::<Value>().unwrap();
+                        // Check if document exists and if their not mapped to new category
+                        if result["_id"].is_string() && result["catID"].as_str().unwrap() == "0"{
+                            result["catID"] = Value::String(String::from(new_id));
+                            JsFuture::from(private_db.lock().unwrap().put(&JsValue::from_serde(&result).unwrap())).await;
+                        }
+                    }
+                }
+                cache.lock().unwrap().clear();
+            }
             Ok(JsValue::from(true))
         })
     }

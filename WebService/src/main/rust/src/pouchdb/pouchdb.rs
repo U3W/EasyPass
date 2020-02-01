@@ -174,6 +174,7 @@ impl PouchDB {
         })
     }
 
+    /// Resets the category id in all entries to the default value.
     pub fn reset_category_in_entries(&self, entries: &JsValue) -> Promise {
         // Parse entries into array and later vec
         let mut entries_parsed = entries.into_serde::<Value>().unwrap();
@@ -189,6 +190,23 @@ impl PouchDB {
             action.await
         })
     }
+
+    /**
+    pub fn reset_entries_from_deleted_category(&self, cat_id: String, entries: Vec<String>) -> Promise {
+        future_to_promise(async move {
+            let result: Vec<Value> = Vec::new();
+            for entry in entries {
+                let result = JsFuture::from(self.get(&entry)).await.unwrap();
+                let mut result = result.into_serde::<Value>().unwrap();
+                // Check if document exists and if their not mapped to new category
+                if result["_id"].is_string() && result["catID"].as_str().unwrap() == "0"{
+                    result["catID"] = Value::String(cat_id);
+                    JsFuture::from(self.put(&JsValue::from_serde(&result).unwrap())).await;
+                }
+            }
+            Ok(JsValue::from(true))
+        })
+    }*/
 
 
     pub fn sync(&self, target: &PouchDB) -> SyncHandler {

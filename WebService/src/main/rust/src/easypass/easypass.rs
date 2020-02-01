@@ -1,5 +1,6 @@
 use wasm_bindgen::JsValue;
-use serde_json::Value;
+use serde_json::{Value, Map};
+use serde_json::json;
 
 #[derive(Debug)]
 pub struct Category {
@@ -17,19 +18,38 @@ impl Category {
             tab_id: parsed["tabID"].as_u64().unwrap()
         }
     }
+
+    pub fn as_json(&self) -> JsValue {
+        JsValue::from_serde(&json!({
+            "type": "cat",
+            "name": self.name,
+            "desc": self.desc,
+            "tabID": self.tab_id
+        })).unwrap()
+    }
 }
 
 #[derive(Debug)]
 pub struct RecoverCategory {
     category: Category,
-    entries: Vec<(String, String)>
+    entries: Vec<String>
 }
 
 impl RecoverCategory {
-    pub fn new(category: Category, entries: Vec<(String, String)>) -> RecoverCategory {
+    pub fn new(category: Category, entries: Vec<String>) -> RecoverCategory {
         RecoverCategory {
             category,
             entries
         }
+    }
+
+    /// Returns the saved category as JsValue
+    pub fn get_category_as_json(&self) -> JsValue {
+        self.category.as_json()
+    }
+
+    /// Returns a vec containing all saved entries.
+    pub fn get_entries(&self) -> Vec<String> {
+        self.entries.to_owned()
     }
 }

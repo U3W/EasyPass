@@ -149,7 +149,7 @@ export function undoDelete(which, id) {
     switch (which) {
         case dashboardAlerts.showDeleteCatAlert:
             // ToDo call Kacpers  with id
-
+            this.props.worker.postMessage(['undoDeleteCategories', undefined]);
             this.setState({
                 showDeleteCatAlert: false,
             });
