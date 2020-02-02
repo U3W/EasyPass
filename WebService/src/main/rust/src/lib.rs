@@ -96,22 +96,6 @@ impl Worker {
         let private_db = Arc::clone(&self.private.local);
         let change_closure = Closure::new(move |val: JsValue| {
             log("Before Change");
-            //log(&format!("Change {:?}", &val));
-            //log(&format!("Change!! {}", &service_status.lock().unwrap()));
-            //Worker::all_docs_without_passwords(&private_db.lock().unwrap());
-
-            //let db = private_db.lock().unwrap_or_else(PoisonError::into_inner);
-            // Worker::all_docs_without_passwords(&db);
-
-            /**let lock = private_db.lock();
-            match lock {
-                Ok(db) => {
-                    Worker::all_docs_without_passwords(&db);
-                },
-                Err(_) => {
-                    log("Ressource temporarily unavailable");
-                }
-            }*/
             Worker::all_docs_without_passwords(&private_db);
             log("After Change");
         });
@@ -211,12 +195,9 @@ impl Worker {
         future_to_promise(async move {
             // Enumerate over received categories
             for (i, cat) in categories.iter_mut().enumerate() {
-                /**let db
-                    = private_db.lock().unwrap_or_else(PoisonError::into_inner);*/
                 let mut cache
                     = cache.lock().unwrap_or_else(PoisonError::into_inner);
                 log(&format!("Baum {}", &i));
-
                 // Add "_deleted" tag for later bulk operation that deletes this category
                 cat["_deleted"] = Bool(true);
                 // Get full category entry, is needed for proper undo of deletion
@@ -226,9 +207,8 @@ impl Worker {
                 let backup = Category::new(&backup_raw);
                 // Get password entries associated with this category
                 let entries_raw
-                    = JsFuture::from(
-                    private_db.all_entries_from_category(cat["_id"].as_str().unwrap())).await.unwrap();
-                log(&format!("Entries raw {:?}", &entries_raw));
+                    = JsFuture::from(private_db.
+                        all_entries_from_category(cat["_id"].as_str().unwrap())).await.unwrap();
                 // TODO proper error handling
                 if !entries_raw.is_undefined() {
                     // Push ids and revisions of password entries to a vec with tuples
@@ -237,22 +217,16 @@ impl Worker {
                     // If there are any entries
                     if entries_parsed.length() != 0 {
                         // Update all their category ids
-                        log("DADA");
                         let _ = JsFuture::from(private_db
                             .reset_category_in_entries(&entries_raw)).await.unwrap();
                         // Save them as backup
-                        log("ADADAD");
                         for entry in entries_parsed.iter() {
                             let entry = entry.into_serde::<Value>().unwrap();
                             entries.push(String::from(entry["_id"].as_str().unwrap()));
                         }
-                        log("HÄ");
                     }
                     // Add full category entry and associated entries to category cache
-                    log("1");
-                    //cache.lock().unwrap().push(RecoverCategory::new(backup, entries));
                     cache.push(RecoverCategory::new(backup, entries));
-                    log("2");
                 } else {
                     log("Something went wrong...");
                 }
@@ -261,8 +235,6 @@ impl Worker {
 
             }
             // Delete categories and post result
-            //let db = &private_db.lock().unwrap_or_else(PoisonError::into_inner);
-
             let action = JsFuture::from(private_db.bulk_docs(&query));
             let result = action.await;
             Worker::build_and_post_message("deleteCategories", result.unwrap());
@@ -274,31 +246,34 @@ impl Worker {
         // Bind private database and cache for deleted password entries
         let private_db = Arc::clone(&self.private.local);
         let mut cache = Arc::clone(&self.category_cache);
-        log("MOi");
         future_to_promise(async move {
+            // If there any categories to recover
             if cache.lock().unwrap().len() > 0 {
+                // Iterate over every backup
                 for recovery in cache.lock().unwrap().iter_mut() {
+                    // Save category again
                     let insert = recovery.get_category_as_json();
                     let result =
                         JsFuture::from(private_db.post(&insert)).await.unwrap();
                     let result = result.into_serde::<Value>().unwrap();
-                    log(&format!("RESULT: {:?}", &result));
+                    // Get the new id of the category
                     let new_id = result["id"].as_str().unwrap();
+                    // Get password entries that were previously mapped to this category
                     let entries = recovery.get_entries();
-                    /**JsFuture::from(
-                        private_db.lock().unwrap()
-                        .reset_entries_from_deleted_category(new_id, entries)).await;*/
-                    let result: Vec<Value> = Vec::new();
+                    // If they are not mapped to a new category already, map them to
+                    // the recovered one
                     for entry in entries {
                         let result = JsFuture::from(private_db.get(&entry)).await.unwrap();
                         let mut result = result.into_serde::<Value>().unwrap();
                         // Check if document exists and if their not mapped to new category
                         if result["_id"].is_string() && result["catID"].as_str().unwrap() == "0"{
                             result["catID"] = Value::String(String::from(new_id));
-                            JsFuture::from(private_db.put(&JsValue::from_serde(&result).unwrap())).await;
+                            let _ = JsFuture::from(private_db.
+                                put(&JsValue::from_serde(&result).unwrap())).await;
                         }
                     }
                 }
+                // Clear backup data of deleted entries
                 cache.lock().unwrap().clear();
             }
             Ok(JsValue::from(true))
