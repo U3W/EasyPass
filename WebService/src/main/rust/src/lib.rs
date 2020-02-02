@@ -5,6 +5,7 @@ mod utils;
 use wasm_bindgen::prelude::*;
 mod easypass;
 use easypass::easypass::*;
+use easypass::timeout::*;
 mod pouchdb;
 use pouchdb::pouchdb::*;
 use wasm_bindgen_futures::{spawn_local, future_to_promise};
@@ -43,7 +44,8 @@ extern {
 pub struct Worker {
     private: Connection,
     service_status: Arc<Mutex<String>>,
-    category_cache: Arc<Mutex<Vec<RecoverCategory>>>
+    category_cache: Arc<Mutex<Vec<RecoverCategory>>>,
+    category_clear: Arc<Mutex<Option<Timeout>>>
 }
 
 pub struct Connection {
@@ -83,7 +85,8 @@ impl Worker {
         Worker {
             private,
             service_status: Arc::new(Mutex::new(String::from("online"))),
-            category_cache: Arc::new(Mutex::new(Vec::new()))
+            category_cache: Arc::new(Mutex::new(Vec::new())),
+            category_clear: Arc::new(Mutex::new(None))
         }
     }
 
@@ -187,6 +190,7 @@ impl Worker {
         // Bind private database and cache for deleted password entries
         let private_db = Arc::clone(&self.private.local);
         let mut cache = Arc::clone(&self.category_cache);
+        let mut clear = Arc::clone(&self.category_clear);
         // Parse received categories as vec
         let mut categories: Vec<Value> = data.into_serde().unwrap();
         // This variable will be used to store the categories that need to be delted
@@ -232,12 +236,19 @@ impl Worker {
                 }
                 // Category entry to deletion query
                 query.set(i as u32, JsValue::from_serde(&cat).unwrap());
-
             }
             // Delete categories and post result
             let action = JsFuture::from(private_db.bulk_docs(&query));
             let result = action.await;
             Worker::build_and_post_message("deleteCategories", result.unwrap());
+            // Delete category cache after a timeout
+            let mut clear
+                = clear.lock().unwrap_or_else(PoisonError::into_inner);
+            *clear = Some(Timeout::new(move || {
+                let mut cache
+                    = cache.lock().unwrap_or_else(PoisonError::into_inner);
+                cache.clear();
+            }, 7500));
             Ok(JsValue::from(true))
         })
     }

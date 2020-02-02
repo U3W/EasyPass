@@ -56,3 +56,21 @@ const clearAsyncInterval = (intervalIndex) => {
         asyncIntervals[intervalIndex] = false;
     }
 };
+
+/**
+ * Custom setTimeout for Web Worker scope.
+ * Used in WebAssembly code.
+ */
+const setTimeoutWorker = (f, m) => {
+    return self.setTimeout(f, m);
+};
+
+/**
+ * Custom clearTimeout for Web Worker scope.
+ * Used in WebAssembly code.
+ */
+const clearTimeoutWorker = (id) => {
+    return self.clearTimeout(id);
+};
+
+

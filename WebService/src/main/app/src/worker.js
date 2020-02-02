@@ -11,8 +11,11 @@ import("../../rust/pkg").then(wasm => {
     let mode = undefined;
     let deletedPasswords = new Map();
 
+
+
     // Initialize Worker
     const init = async () => {
+
         let dbUrl = "";
         // Create connection to remote database if online
         // When offline, the remote setup will be done when a connection
@@ -314,6 +317,8 @@ import("../../rust/pkg").then(wasm => {
 
 
     };
+
+
 
 });
 
