@@ -47,7 +47,7 @@ pub struct Worker {
 }
 
 pub struct Connection {
-    local: Arc<Mutex<PouchDB>>,
+    local: Arc<PouchDB>,
     remote: Option<PouchDB>,
     sync: Option<Sync>
 }
@@ -75,8 +75,8 @@ impl Worker {
             Some(PouchDB::new_with_name(&url))
         };
         let private = Connection {
-            local: Arc::new(Mutex::new(
-                PouchDB::new("Local", &JsValue::from_serde(&settings).unwrap()))),
+            local:
+                Arc::new(PouchDB::new("Local", &JsValue::from_serde(&settings).unwrap())),
             remote,
             sync: None
         };
@@ -90,7 +90,7 @@ impl Worker {
     /// Starts live replication for private password entries.
     pub fn heartbeat(&mut self) {
         let sync_handler: SyncHandler
-            = self.private.local.lock().unwrap().sync(&self.private.remote.as_ref().unwrap());
+            = self.private.local.sync(&self.private.remote.as_ref().unwrap());
 
         let service_status = Arc::clone(&self.service_status);
         let private_db = Arc::clone(&self.private.local);
@@ -103,7 +103,7 @@ impl Worker {
             //let db = private_db.lock().unwrap_or_else(PoisonError::into_inner);
             // Worker::all_docs_without_passwords(&db);
 
-            let lock = private_db.lock();
+            /**let lock = private_db.lock();
             match lock {
                 Ok(db) => {
                     Worker::all_docs_without_passwords(&db);
@@ -111,7 +111,8 @@ impl Worker {
                 Err(_) => {
                     log("Ressource temporarily unavailable");
                 }
-            }
+            }*/
+            Worker::all_docs_without_passwords(&private_db);
             log("After Change");
         });
 
@@ -132,7 +133,7 @@ impl Worker {
 
         self.private.sync = Some(sync);
 
-        Worker::all_docs_without_passwords(&self.private.local.lock().unwrap());
+        Worker::all_docs_without_passwords(&self.private.local);
     }
 
     fn build_and_post_message(cmd: &str, data: JsValue) {
@@ -159,7 +160,7 @@ impl Worker {
     pub fn save_password(&self, data: JsValue) -> Promise {
         // TODO Worker Decrypt Password
         let private_db = Arc::clone(&self.private.local);
-        let action = JsFuture::from(private_db.lock().unwrap().post(&data));
+        let action = JsFuture::from(private_db.post(&data));
         future_to_promise(async move {
             let result = action.await;
             Worker::build_and_post_message("savePassword", result.unwrap());
@@ -168,8 +169,8 @@ impl Worker {
     }
 
     pub fn update_password(&self, data: JsValue) -> Promise {
-        let db = self.private.local.lock().unwrap();
-        let action = JsFuture::from(db.put(&data));
+        let private_db = Arc::clone(&self.private.local);
+        let action = JsFuture::from(private_db.put(&data));
         future_to_promise(async move {
             let result = action.await;
             Worker::build_and_post_message("updatePassword", result.unwrap());
@@ -180,7 +181,7 @@ impl Worker {
     pub fn save_category(&self, data: JsValue) -> Promise {
         // TODO Worker Decrypt Password
         let private_db = Arc::clone(&self.private.local);
-        let action = JsFuture::from(private_db.lock().unwrap().post(&data));
+        let action = JsFuture::from(private_db.post(&data));
         future_to_promise(async move {
             let result = action.await;
             Worker::build_and_post_message("saveCategory", result.unwrap());
@@ -189,8 +190,8 @@ impl Worker {
     }
 
     pub fn update_category(&self, data: JsValue) -> Promise {
-        let db = self.private.local.lock().unwrap();
-        let action = JsFuture::from(db.put(&data));
+        let private_db = Arc::clone(&self.private.local);
+        let action = JsFuture::from(private_db.put(&data));
         future_to_promise(async move {
             let result = action.await;
             Worker::build_and_post_message("updateCategory", result.unwrap());
@@ -210,8 +211,8 @@ impl Worker {
         future_to_promise(async move {
             // Enumerate over received categories
             for (i, cat) in categories.iter_mut().enumerate() {
-                let db
-                    = private_db.lock().unwrap_or_else(PoisonError::into_inner);
+                /**let db
+                    = private_db.lock().unwrap_or_else(PoisonError::into_inner);*/
                 let mut cache
                     = cache.lock().unwrap_or_else(PoisonError::into_inner);
                 log(&format!("Baum {}", &i));
@@ -220,13 +221,13 @@ impl Worker {
                 cat["_deleted"] = Bool(true);
                 // Get full category entry, is needed for proper undo of deletion
                 let backup_raw
-                    = JsFuture::from(db.get(cat["_id"].as_str().unwrap())).await.unwrap();
+                    = JsFuture::from(private_db.get(cat["_id"].as_str().unwrap())).await.unwrap();
                 log(&format!("Backup raw {:?}", &backup_raw));
                 let backup = Category::new(&backup_raw);
                 // Get password entries associated with this category
                 let entries_raw
                     = JsFuture::from(
-                    db.all_entries_from_category(cat["_id"].as_str().unwrap())).await.unwrap();
+                    private_db.all_entries_from_category(cat["_id"].as_str().unwrap())).await.unwrap();
                 log(&format!("Entries raw {:?}", &entries_raw));
                 // TODO proper error handling
                 if !entries_raw.is_undefined() {
@@ -237,7 +238,7 @@ impl Worker {
                     if entries_parsed.length() != 0 {
                         // Update all their category ids
                         log("DADA");
-                        let _ = JsFuture::from(db
+                        let _ = JsFuture::from(private_db
                             .reset_category_in_entries(&entries_raw)).await.unwrap();
                         // Save them as backup
                         log("ADADAD");
@@ -260,8 +261,9 @@ impl Worker {
 
             }
             // Delete categories and post result
-            let db = &private_db.lock().unwrap_or_else(PoisonError::into_inner);
-            let action = JsFuture::from(db.bulk_docs(&query));
+            //let db = &private_db.lock().unwrap_or_else(PoisonError::into_inner);
+
+            let action = JsFuture::from(private_db.bulk_docs(&query));
             let result = action.await;
             Worker::build_and_post_message("deleteCategories", result.unwrap());
             Ok(JsValue::from(true))
@@ -278,7 +280,7 @@ impl Worker {
                 for recovery in cache.lock().unwrap().iter_mut() {
                     let insert = recovery.get_category_as_json();
                     let result =
-                        JsFuture::from(private_db.lock().unwrap().post(&insert)).await.unwrap();
+                        JsFuture::from(private_db.post(&insert)).await.unwrap();
                     let result = result.into_serde::<Value>().unwrap();
                     log(&format!("RESULT: {:?}", &result));
                     let new_id = result["id"].as_str().unwrap();
@@ -288,12 +290,12 @@ impl Worker {
                         .reset_entries_from_deleted_category(new_id, entries)).await;*/
                     let result: Vec<Value> = Vec::new();
                     for entry in entries {
-                        let result = JsFuture::from(private_db.lock().unwrap().get(&entry)).await.unwrap();
+                        let result = JsFuture::from(private_db.get(&entry)).await.unwrap();
                         let mut result = result.into_serde::<Value>().unwrap();
                         // Check if document exists and if their not mapped to new category
                         if result["_id"].is_string() && result["catID"].as_str().unwrap() == "0"{
                             result["catID"] = Value::String(String::from(new_id));
-                            JsFuture::from(private_db.lock().unwrap().put(&JsValue::from_serde(&result).unwrap())).await;
+                            JsFuture::from(private_db.put(&JsValue::from_serde(&result).unwrap())).await;
                         }
                     }
                 }
@@ -304,32 +306,32 @@ impl Worker {
     }
 
     pub fn find(&self, data: JsValue) -> Promise {
-        let db = self.private.local.lock().unwrap();
-        let action = JsFuture::from(db.find(&data));
+        let private_db = Arc::clone(&self.private.local);
+        let action = JsFuture::from(private_db.find(&data));
         future_to_promise(async move {
             action.await
         })
     }
 
     pub fn all_docs(&self) -> Promise {
-        let db = self.private.local.lock().unwrap();
-        let action = JsFuture::from(db.all_docs_included());
+        let private_db = Arc::clone(&self.private.local);
+        let action = JsFuture::from(private_db.all_docs_included());
         future_to_promise(async move {
             action.await
         })
     }
 
     pub fn remove_with_element(&self, data: JsValue) -> Promise {
-        let db = self.private.local.lock().unwrap();
-        let action = JsFuture::from(db.remove_with_element(&data));
+        let private_db = Arc::clone(&self.private.local);
+        let action = JsFuture::from(private_db.remove_with_element(&data));
         future_to_promise(async move {
             action.await
         })
     }
 
     pub fn remove(&self, doc_id: JsValue, doc_rev: JsValue) -> Promise {
-        let db = self.private.local.lock().unwrap();
-        let action = JsFuture::from(db.remove(&doc_id, &doc_rev));
+        let private_db = Arc::clone(&self.private.local);
+        let action = JsFuture::from(private_db.remove(&doc_id, &doc_rev));
         future_to_promise(async move {
             action.await
         })
