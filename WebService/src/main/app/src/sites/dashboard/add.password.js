@@ -27,7 +27,7 @@ export default class AddPassword extends React.Component {
             url: "",
             tagAdded: false,
             tag: [{"":""}],
-            catID: 0,
+            catID: "0",
 
             userGroupAdd: "",
             userGroupList: [],
@@ -95,7 +95,7 @@ export default class AddPassword extends React.Component {
             url: "",
             tagAdded: false,
             tag: [{"":""}],
-            catID: 0,
+            catID: "0",
             userGroupAdd: "",
             userGroupList: [],
             // Popup
@@ -263,7 +263,7 @@ export default class AddPassword extends React.Component {
     getCatName() {
         let cats = this.props.callback.getCats();
         let catName;
-        if ( this.state.catID === 0 ) {
+        if ( this.state.catID === "0" ) {
             return StringSelector.getString(this.props.callback.state.language).addPassCatNoCat
         }
         else {

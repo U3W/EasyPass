@@ -217,7 +217,7 @@ class Dashboard extends React.Component {
     renderLinesSonstige() {
         let passwords = {};
         let selectedTab = this.state.tabselected;
-        let catData = this.getCatData(0, this.state.tabselected);
+        let catData = this.getCatData("0", this.state.tabselected);
 
         // add callback to array
         if (catData !== undefined && catData.length > 0) {

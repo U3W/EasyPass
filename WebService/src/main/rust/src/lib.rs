@@ -17,7 +17,7 @@ use serde_json::json;
 use wasm_bindgen::__rt::std::future::Future;
 use wasm_bindgen::__rt::std::rc::Rc;
 use wasm_bindgen::__rt::core::cell::RefCell;
-use wasm_bindgen::__rt::std::sync::{Arc, Mutex};
+use wasm_bindgen::__rt::std::sync::{Arc, Mutex, PoisonError};
 use wasm_bindgen::JsCast;
 use serde_json::value::Value::Bool;
 
@@ -95,9 +95,24 @@ impl Worker {
         let service_status = Arc::clone(&self.service_status);
         let private_db = Arc::clone(&self.private.local);
         let change_closure = Closure::new(move |val: JsValue| {
-            log(&format!("Change {:?}", &val));
-            log(&format!("Change!! {}", &service_status.lock().unwrap()));
-            Worker::all_docs_without_passwords(&private_db.lock().unwrap());
+            log("Before Change");
+            //log(&format!("Change {:?}", &val));
+            //log(&format!("Change!! {}", &service_status.lock().unwrap()));
+            //Worker::all_docs_without_passwords(&private_db.lock().unwrap());
+
+            //let db = private_db.lock().unwrap_or_else(PoisonError::into_inner);
+            // Worker::all_docs_without_passwords(&db);
+
+            let lock = private_db.lock();
+            match lock {
+                Ok(db) => {
+                    Worker::all_docs_without_passwords(&db);
+                },
+                Err(_) => {
+                    log("Ressource temporarily unavailable");
+                }
+            }
+            log("After Change");
         });
 
         let service_status = Arc::clone(&self.service_status);
@@ -195,17 +210,24 @@ impl Worker {
         future_to_promise(async move {
             // Enumerate over received categories
             for (i, cat) in categories.iter_mut().enumerate() {
+                let db
+                    = private_db.lock().unwrap_or_else(PoisonError::into_inner);
+                let mut cache
+                    = cache.lock().unwrap_or_else(PoisonError::into_inner);
+                log(&format!("Baum {}", &i));
+
                 // Add "_deleted" tag for later bulk operation that deletes this category
                 cat["_deleted"] = Bool(true);
                 // Get full category entry, is needed for proper undo of deletion
                 let backup_raw
-                    = JsFuture::from(private_db.lock().unwrap()
-                        .get(cat["_id"].as_str().unwrap())).await.unwrap();
+                    = JsFuture::from(db.get(cat["_id"].as_str().unwrap())).await.unwrap();
+                log(&format!("Backup raw {:?}", &backup_raw));
                 let backup = Category::new(&backup_raw);
                 // Get password entries associated with this category
                 let entries_raw
-                    = JsFuture::from(private_db.lock().unwrap()
-                    .all_entries_from_category(cat["_id"].as_str().unwrap())).await.unwrap();
+                    = JsFuture::from(
+                    db.all_entries_from_category(cat["_id"].as_str().unwrap())).await.unwrap();
+                log(&format!("Entries raw {:?}", &entries_raw));
                 // TODO proper error handling
                 if !entries_raw.is_undefined() {
                     // Push ids and revisions of password entries to a vec with tuples
@@ -214,16 +236,22 @@ impl Worker {
                     // If there are any entries
                     if entries_parsed.length() != 0 {
                         // Update all their category ids
-                        JsFuture::from(private_db.lock().unwrap()
-                            .reset_category_in_entries(&entries_raw)).await;
+                        log("DADA");
+                        let _ = JsFuture::from(db
+                            .reset_category_in_entries(&entries_raw)).await.unwrap();
                         // Save them as backup
+                        log("ADADAD");
                         for entry in entries_parsed.iter() {
                             let entry = entry.into_serde::<Value>().unwrap();
                             entries.push(String::from(entry["_id"].as_str().unwrap()));
                         }
+                        log("HÄ");
                     }
                     // Add full category entry and associated entries to category cache
-                    cache.lock().unwrap().push(RecoverCategory::new(backup, entries));
+                    log("1");
+                    //cache.lock().unwrap().push(RecoverCategory::new(backup, entries));
+                    cache.push(RecoverCategory::new(backup, entries));
+                    log("2");
                 } else {
                     log("Something went wrong...");
                 }
@@ -232,7 +260,8 @@ impl Worker {
 
             }
             // Delete categories and post result
-            let action = JsFuture::from(private_db.lock().unwrap().bulk_docs(&query));
+            let db = &private_db.lock().unwrap_or_else(PoisonError::into_inner);
+            let action = JsFuture::from(db.bulk_docs(&query));
             let result = action.await;
             Worker::build_and_post_message("deleteCategories", result.unwrap());
             Ok(JsValue::from(true))

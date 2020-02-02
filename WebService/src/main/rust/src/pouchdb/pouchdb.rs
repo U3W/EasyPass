@@ -131,7 +131,7 @@ impl PouchDB {
                 Ok(resolved) => {
                     match resolved.into_serde::<Value>() {
                         Ok(val) => {
-                            log(&format!("all_docs_without_passwords: {:?}", &val["docs"]));
+                            //log(&format!("all_docs_without_passwords: {:?}", &val["docs"]));
                             Ok(JsValue::from_serde(&val["docs"]).unwrap())
                         },
                         Err(_) => {
@@ -176,15 +176,17 @@ impl PouchDB {
 
     /// Resets the category id in all entries to the default value.
     pub fn reset_category_in_entries(&self, entries: &JsValue) -> Promise {
+        log("MOI");
         // Parse entries into array and later vec
         let mut entries_parsed = entries.into_serde::<Value>().unwrap();
         let mut entries_vec = entries_parsed.as_array_mut().unwrap();
         // Set id for category to default value on every entry
         for entry in &mut *entries_vec {
-            entry["catID"] = Value::from(0);
+            entry["catID"] = Value::String(String::from("0"));
         }
         // Build query and perform update
         let query = JsValue::from_serde(&entries_vec).unwrap();
+        log(&format!("Query {:?}", &query));
         let action = JsFuture::from(self.bulk_docs(&query));
         future_to_promise(async move {
             action.await

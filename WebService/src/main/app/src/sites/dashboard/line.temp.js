@@ -551,7 +551,7 @@ export default class PassLine extends React.Component {
         let catName;
 
         // keiner Kategorie zugeordnet
-        if ( this.state.catIdNew === 0 ) {
+        if ( this.state.catIdNew === "0" ) {
             catName = "Keiner Kategorie zugeordnet";
         }
         else {
