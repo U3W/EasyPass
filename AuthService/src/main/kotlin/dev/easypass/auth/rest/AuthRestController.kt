@@ -1,15 +1,16 @@
 package dev.easypass.auth.rest
 
 import dev.easypass.auth.datstore.CouchDBConnectionProvider
-import dev.easypass.auth.datstore.document.Group
 import dev.easypass.auth.datstore.document.User
-import dev.easypass.auth.datstore.repository.GroupRepository
 import dev.easypass.auth.datstore.repository.UserRepository
 import dev.easypass.auth.security.ChallengeAuthenticationProvider
 import dev.easypass.auth.security.challenge.RequestChallenge
 import dev.easypass.auth.security.challenge.ResponseChallenge
 import org.ektorp.DbAccessException
-import org.springframework.web.bind.annotation.*
+import org.springframework.web.bind.annotation.PostMapping
+import org.springframework.web.bind.annotation.RequestBody
+import org.springframework.web.bind.annotation.RequestMapping
+import org.springframework.web.bind.annotation.RestController
 import javax.servlet.http.HttpServletRequest
 import javax.servlet.http.HttpServletResponse
 

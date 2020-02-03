@@ -1,6 +1,7 @@
 package dev.easypass.auth.security
 
-import dev.easypass.auth.security.filter.AuthorityFilter
+import dev.easypass.auth.security.filter.AdminFilter
+import dev.easypass.auth.security.filter.StoreFilter
 import dev.easypass.auth.security.handler.RestAuthenticationEntryPoint
 import dev.easypass.auth.security.handler.RestAuthenticationSuccessHandler
 import org.springframework.context.annotation.Configuration
@@ -21,7 +22,9 @@ import org.springframework.security.web.authentication.logout.HttpStatusReturnin
  */
 @Configuration
 @EnableWebSecurity
-class SecurityConfiguration(private val authProvider: ChallengeAuthenticationProvider, private val authorityFilter: AuthorityFilter) : WebSecurityConfigurerAdapter() {
+class SecurityConfiguration(private val authProvider: ChallengeAuthenticationProvider,
+                            private val adminFilter: AdminFilter,
+                            private val storeFilter: StoreFilter) : WebSecurityConfigurerAdapter() {
 
     /**
      * This method is used to add the [ChallengeAuthenticationProvider] to Spring-Security
@@ -44,14 +47,6 @@ class SecurityConfiguration(private val authProvider: ChallengeAuthenticationPro
                 .authenticationEntryPoint(RestAuthenticationEntryPoint())
 
                 .and()
-                .authorizeRequests()
-                .antMatchers(HttpMethod.POST, "/auth/**").permitAll()
-                .antMatchers(HttpMethod.POST, "/admin/**").authenticated()
-                .antMatchers("/store/**").authenticated()
-
-                .anyRequest().denyAll()
-
-                .and()
                 .formLogin()
                 .loginPage("/auth/login")
                 .successHandler(RestAuthenticationSuccessHandler())
@@ -65,6 +60,16 @@ class SecurityConfiguration(private val authProvider: ChallengeAuthenticationPro
                 .deleteCookies("JSESSIONID")
 
                 .and()
-                .addFilterAfter(authorityFilter, AnonymousAuthenticationFilter::class.java)
+                .authorizeRequests()
+                .antMatchers(HttpMethod.POST, "/auth/**").permitAll()
+                .antMatchers(HttpMethod.POST, "/admin/**").authenticated()
+                .antMatchers("/store/**").authenticated()
+
+                .anyRequest().denyAll()
+
+                .and()
+                .addFilterBefore(adminFilter, AnonymousAuthenticationFilter::class.java)
+                .addFilterBefore(storeFilter, AnonymousAuthenticationFilter::class.java)
+
     }
 }

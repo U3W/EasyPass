@@ -1,8 +1,5 @@
 package dev.easypass.auth.security
 
-import dev.easypass.auth.datstore.CouchDBConnectionProvider
-import dev.easypass.auth.datstore.document.Group
-import dev.easypass.auth.datstore.document.User
 import dev.easypass.auth.datstore.repository.GroupRepository
 import dev.easypass.auth.datstore.repository.UserRepository
 import dev.easypass.auth.security.challenge.InternalChallenge

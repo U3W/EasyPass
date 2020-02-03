@@ -5,9 +5,12 @@ import dev.easypass.auth.datstore.document.Group
 import dev.easypass.auth.datstore.repository.GroupRepository
 import dev.easypass.auth.datstore.repository.UserRepository
 import org.ektorp.DbAccessException
+import org.springframework.security.core.Authentication
 import org.springframework.security.core.authority.AuthorityUtils
-import org.springframework.security.core.context.SecurityContextHolder
-import org.springframework.web.bind.annotation.*
+import org.springframework.web.bind.annotation.PostMapping
+import org.springframework.web.bind.annotation.RequestBody
+import org.springframework.web.bind.annotation.RequestMapping
+import org.springframework.web.bind.annotation.RestController
 import javax.servlet.http.HttpServletRequest
 import javax.servlet.http.HttpServletResponse
 
@@ -19,8 +22,9 @@ import javax.servlet.http.HttpServletResponse
 class AdminRestController(private val couchDBConnectionProvider: CouchDBConnectionProvider, private val userRepository: UserRepository, private val groupRepository: GroupRepository) {
 
     @PostMapping("/remove")
-    fun removeGroup(request: HttpServletRequest, response: HttpServletResponse) {
-        val authorities = AuthorityUtils.authorityListToSet(SecurityContextHolder.getContext().authentication.authorities)
+    fun removeGroup(request: HttpServletRequest, response: HttpServletResponse, authentication: Authentication) {
+        val authorities = AuthorityUtils.authorityListToSet(authentication.authorities)
+        println("Rest $authorities ${request.requestURL}")
         for (auth in authorities) {
             val hash = auth.toString().substringAfter("HASH_")
             if (hash != auth) {
@@ -40,6 +44,6 @@ class AdminRestController(private val couchDBConnectionProvider: CouchDBConnecti
         couchDBConnectionProvider.createCouchDbConnector(group.gname)
         response.status = HttpServletResponse.SC_OK
     } catch (ex: DbAccessException) {
-        response.sendError(HttpServletResponse.SC_FORBIDDEN, "${group.gname} was not created!")
+        response.status = HttpServletResponse.SC_FORBIDDEN
     }
 }
