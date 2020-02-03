@@ -1,24 +1,15 @@
 package dev.easypass.auth.security
 
-import dev.easypass.auth.datstore.repository.GroupRepository
-import dev.easypass.auth.datstore.repository.UserRepository
-import dev.easypass.auth.security.challenge.InternalChallenge
-import dev.easypass.auth.security.challenge.ResponseChallenge
-import dev.easypass.auth.security.exception.NoActiveChallengeException
-import dev.easypass.auth.security.exception.UserIsBlockedException
-import org.ektorp.DbAccessException
-import org.ektorp.DocumentNotFoundException
-import org.springframework.security.authentication.AuthenticationProvider
-import org.springframework.security.authentication.BadCredentialsException
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
-import org.springframework.security.core.Authentication
-import org.springframework.security.core.AuthenticationException
-import org.springframework.security.core.GrantedAuthority
-import org.springframework.security.core.authority.SimpleGrantedAuthority
-import org.springframework.security.web.authentication.WebAuthenticationDetails
-import org.springframework.stereotype.Component
-import java.time.Duration
-import java.time.LocalDateTime
+import dev.easypass.auth.datstore.repository.*
+import dev.easypass.auth.security.challenge.*
+import dev.easypass.auth.security.exception.*
+import org.ektorp.*
+import org.springframework.security.authentication.*
+import org.springframework.security.core.*
+import org.springframework.security.core.authority.*
+import org.springframework.security.web.authentication.*
+import org.springframework.stereotype.*
+import java.time.*
 import java.util.*
 import kotlin.collections.HashMap
 
@@ -32,7 +23,6 @@ class ChallengeAuthenticationProvider(private val userRepository: UserRepository
                                       private val groupRepository: GroupRepository,
                                       private val encryptionLibrary: EncryptionLibrary,
                                       private val properties: Properties) : AuthenticationProvider {
-
     private val currentChallenges = HashMap<Pair<String, String>, Pair<InternalChallenge, String>>()
     private var attemptCounter = HashMap<Pair<String, String>, Pair<Int, LocalDateTime>>()
 
@@ -105,7 +95,7 @@ class ChallengeAuthenticationProvider(private val userRepository: UserRepository
                 currentChallenges.remove(key)
         }
         when (role) {
-            "USER" -> {
+            "USER"  -> {
                 val user = userRepository.findOneByUname(key.second)
                 currentChallenges[key] = Pair(encryptionLibrary.generateInternalAdministrationChallenge(), role)
                 ResponseChallenge(currentChallenges[key]!!.first.getChallengeEncryptedByPubK(user.pubK), user.privK)
@@ -120,7 +110,7 @@ class ChallengeAuthenticationProvider(private val userRepository: UserRepository
                 currentChallenges[key] = Pair(encryptionLibrary.generateInternalAdministrationChallenge(), role)
                 ResponseChallenge(currentChallenges[key]!!.first.getChallengeEncryptedByPubK(group.apubK), group.aprivK)
             }
-            else -> {
+            else    -> {
                 throw DocumentNotFoundException("A Dummy User will be created in the Catch-Block!")
             }
         }

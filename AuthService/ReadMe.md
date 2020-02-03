@@ -11,14 +11,14 @@ curl -i -X POST -d username=mwustinger -d password=Challenge -c cookieUser.txt h
 
 curl -i -X GET -H "Accept:application/json" -b cookieUser.txt http://localhost:7000/store/mwustinger
 
-curl -i -X POST -b cookieUser.txt http://localhost:7000/admin/remove
+curl -i -X POST -b cookieUser.txt http://localhost:7000/user/remove
 
 ```
 
 Test for Group:
 
 ```
-curl -i -X POST -H "Content-Type: application/json" -d "{\"gname\": \"family\", \"pubK\": \"PUBKEY\", \"privK\": \"PRIVKEY\", \"apubK\": \"APUBKEY\", \"aprivK\": \"APRIVKEY\"}" -b cookieUser.txt http://localhost:7000/admin/createGroup
+curl -i -X POST -H "Content-Type: application/json" -d "{\"gname\": \"family\", \"pubK\": \"PUBKEY\", \"privK\": \"PRIVKEY\", \"apubK\": \"APUBKEY\", \"aprivK\": \"APRIVKEY\"}" -b cookieUser.txt http://localhost:7000/user/createGroup
 
 curl -i -X POST -H "Content-Type: application/json" -d "{\"hash\": \"family\", \"role\": \"GROUP\"}" http://localhost:7000/auth/challenge
 
@@ -26,7 +26,7 @@ curl -i -X POST -d username=family -d password=Challenge -c cookieGroup.txt http
 
 curl -i -X GET -H "Accept:application/json" -b cookieGroup.txt http://localhost:7000/store/family
 
-curl -i -X POST -b cookieGroup.txt http://localhost:7000/admin/remove
+curl -i -X POST -b cookieGroup.txt http://localhost:7000/group/remove
 
 
 

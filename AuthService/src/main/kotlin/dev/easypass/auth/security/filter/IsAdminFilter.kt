@@ -1,22 +1,20 @@
 package dev.easypass.auth.security.filter
 
-import org.springframework.security.core.authority.AuthorityUtils
-import org.springframework.security.core.context.SecurityContextHolder
-import org.springframework.stereotype.Component
-import org.springframework.web.filter.OncePerRequestFilter
-import java.util.*
-import javax.servlet.FilterChain
-import javax.servlet.http.HttpServletRequest
-import javax.servlet.http.HttpServletResponse
+import org.springframework.security.core.authority.*
+import org.springframework.security.core.context.*
+import org.springframework.stereotype.*
+import org.springframework.web.filter.*
+import javax.servlet.*
+import javax.servlet.http.*
 
 @Component
-class AdminFilter(private val properties: Properties) : OncePerRequestFilter() {
+class IsAdminFilter : OncePerRequestFilter() {
     override fun doFilterInternal(request: HttpServletRequest, response: HttpServletResponse, filterChain: FilterChain) {
         val authentication = SecurityContextHolder.getContext().authentication
         val authorities = AuthorityUtils.authorityListToSet(authentication.authorities)
         println("Admin $authorities ${request.requestURL}")
-        if (!(authorities.contains("ROLE_USER") or authorities.contains("ROLE_ADMIN")))
-            response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Not an admin!")
+        if (!(authorities.contains("ROLE_ADMIN")))
+            response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "This task is only available for admins.")
         else
             filterChain.doFilter(request, response)
 

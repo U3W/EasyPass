@@ -1,6 +1,6 @@
 package dev.easypass.auth.datstore.document
 
-import org.ektorp.support.CouchDbDocument
+import org.ektorp.support.*
 
 /**
  * A [CouchDbDocument] subclass which allows to persist users in the database.

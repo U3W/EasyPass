@@ -1,12 +1,9 @@
 package dev.easypass.auth.datstore.repository
 
-import dev.easypass.auth.datstore.document.Group
-import org.ektorp.CouchDbConnector
-import org.ektorp.DocumentNotFoundException
-import org.ektorp.UpdateConflictException
-import org.ektorp.support.CouchDbRepositorySupport
-import org.ektorp.support.GenerateView
-import org.springframework.stereotype.Component
+import dev.easypass.auth.datstore.document.*
+import org.ektorp.*
+import org.ektorp.support.*
+import org.springframework.stereotype.*
 
 /**
  * Provides Ektorp Repository Support for the class [Group]

@@ -1,11 +1,10 @@
 package dev.easypass.auth.datstore
 
-import org.ektorp.CouchDbConnector
-import org.ektorp.http.StdHttpClient
-import org.ektorp.impl.StdCouchDbInstance
-import org.springframework.context.annotation.Bean
-import org.springframework.context.annotation.Primary
-import org.springframework.stereotype.Component
+import org.ektorp.*
+import org.ektorp.http.*
+import org.ektorp.impl.*
+import org.springframework.context.annotation.*
+import org.springframework.stereotype.*
 import java.util.*
 
 /**
@@ -14,7 +13,6 @@ import java.util.*
  */
 @Component
 class CouchDBConnectionProvider(private val properties: Properties) {
-
     /**
      * The bean which provides the connection to the [dev.easypass.auth.datstore.document.User] database
      */

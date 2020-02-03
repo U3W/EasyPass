@@ -8,21 +8,21 @@ import javax.servlet.*
 import javax.servlet.http.*
 
 @Component
-class StoreFilter : OncePerRequestFilter() {
+class IsUserFilter : OncePerRequestFilter() {
     override fun doFilterInternal(request: HttpServletRequest, response: HttpServletResponse, filterChain: FilterChain) {
         val authentication = SecurityContextHolder.getContext().authentication
         val authorities = AuthorityUtils.authorityListToSet(authentication.authorities)
-        println("Store $authorities ${request.requestURL}")
-        val hash = request.servletPath.substringAfter("/store/").split("/")[0]
-        if (!authorities.contains("HASH_$hash"))
-            response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Unauthorized for this datastore!")
+        println("User $authorities ${request.requestURL}")
+        if (!(authorities.contains("ROLE_USER")))
+            response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "This task is only available for users.")
         else
             filterChain.doFilter(request, response)
+
     }
 
     override fun shouldNotFilter(request: HttpServletRequest): Boolean {
         val path = request.servletPath
-        println("Store $path ${request.requestURL}")
-        return !path.startsWith("/store/")
+        println("User $path ${request.requestURL}")
+        return !path.startsWith("/user/")
     }
 }

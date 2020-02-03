@@ -1,18 +1,13 @@
 package dev.easypass.auth.rest
 
-import dev.easypass.auth.datstore.CouchDBConnectionProvider
-import dev.easypass.auth.datstore.document.User
-import dev.easypass.auth.datstore.repository.UserRepository
-import dev.easypass.auth.security.ChallengeAuthenticationProvider
-import dev.easypass.auth.security.challenge.RequestChallenge
-import dev.easypass.auth.security.challenge.ResponseChallenge
-import org.ektorp.DbAccessException
-import org.springframework.web.bind.annotation.PostMapping
-import org.springframework.web.bind.annotation.RequestBody
-import org.springframework.web.bind.annotation.RequestMapping
-import org.springframework.web.bind.annotation.RestController
-import javax.servlet.http.HttpServletRequest
-import javax.servlet.http.HttpServletResponse
+import dev.easypass.auth.datstore.*
+import dev.easypass.auth.datstore.document.*
+import dev.easypass.auth.datstore.repository.*
+import dev.easypass.auth.security.*
+import dev.easypass.auth.security.challenge.*
+import org.ektorp.*
+import org.springframework.web.bind.annotation.*
+import javax.servlet.http.*
 
 /**
  * This [RestController] provides the Rest-Api for the user authentication
@@ -22,7 +17,6 @@ import javax.servlet.http.HttpServletResponse
 class AuthRestController(private val challengeAuthenticationProvider: ChallengeAuthenticationProvider,
                          private val couchDBConnectionProvider: CouchDBConnectionProvider,
                          private val userRepository: UserRepository) {
-
     @PostMapping("/challenge")
     fun unlockChallenge(@RequestBody challenge: RequestChallenge, request: HttpServletRequest): ResponseChallenge {
         return challengeAuthenticationProvider.addUserChallenge(Pair(request.remoteAddr, challenge.hash), challenge.role)

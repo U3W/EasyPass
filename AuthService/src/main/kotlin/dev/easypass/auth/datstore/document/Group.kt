@@ -1,13 +1,13 @@
 package dev.easypass.auth.datstore.document
 
-import org.ektorp.support.CouchDbDocument
+import org.ektorp.support.*
 
 /**
- * A [CouchDbDocument] subclass which allows to persist groups in the database.
+ * A [CouchDbDocument] subclass which allows the persistion groups in the database.
  * @param gname: the name of the group.
- * @param pubK: the registered public key to create challenges for the group for regular users.
- * @param privK: a private key encrypted with the masterpassword of the group for regular users.
- * @param pubK: the registered public key to create challenges for the group for admin users.
- * @param privK: a private key encrypted with the masterpassword of the group for admin user.
+ * @param pubK: the registered public key to create challenges used for the authentication of a regular user.
+ * @param privK: a private key encrypted with the masterpassword used for the authentication of a regular user.
+ * @param apubK: the registered public key to create challenges used for the authentication of an admin user.
+ * @param aprivK: a private key encrypted with the masterpassword used for the authentication of an admin user.
  */
 class Group(val gname: String = "Default", val pubK: String = "Default", val privK: String = "Default", val apubK: String = "Default", val aprivK: String = "Default") : CouchDbDocument()

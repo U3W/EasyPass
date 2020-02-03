@@ -1,19 +1,15 @@
 package dev.easypass.auth.security.handler
 
-import org.springframework.security.core.Authentication
-import org.springframework.security.web.authentication.SimpleUrlAuthenticationSuccessHandler
-import org.springframework.security.web.savedrequest.HttpSessionRequestCache
-import org.springframework.security.web.savedrequest.RequestCache
-import org.springframework.security.web.savedrequest.SavedRequest
-import org.springframework.util.StringUtils
-import java.io.IOException
-import javax.servlet.ServletException
-import javax.servlet.http.HttpServletRequest
-import javax.servlet.http.HttpServletResponse
+import org.springframework.security.core.*
+import org.springframework.security.web.authentication.*
+import org.springframework.security.web.savedrequest.*
+import org.springframework.util.*
+import java.io.*
+import javax.servlet.*
+import javax.servlet.http.*
 
 
 class RestAuthenticationSuccessHandler : SimpleUrlAuthenticationSuccessHandler() {
-
     private var requestCache: RequestCache = HttpSessionRequestCache()
 
     @Throws(ServletException::class, IOException::class)
@@ -35,9 +31,5 @@ class RestAuthenticationSuccessHandler : SimpleUrlAuthenticationSuccessHandler()
             return
         }
         clearAuthenticationAttributes(request)
-    }
-
-    fun setRequestCache(requestCache: RequestCache) {
-        this.requestCache = requestCache
     }
 }

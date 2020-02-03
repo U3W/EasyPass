@@ -1,19 +1,14 @@
 package dev.easypass.auth.security
 
-import dev.easypass.auth.security.filter.AdminFilter
-import dev.easypass.auth.security.filter.StoreFilter
-import dev.easypass.auth.security.handler.RestAuthenticationEntryPoint
-import dev.easypass.auth.security.handler.RestAuthenticationSuccessHandler
-import org.springframework.context.annotation.Configuration
-import org.springframework.http.HttpMethod
-import org.springframework.http.HttpStatus
-import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder
-import org.springframework.security.config.annotation.web.builders.HttpSecurity
-import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity
-import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter
-import org.springframework.security.web.authentication.AnonymousAuthenticationFilter
-import org.springframework.security.web.authentication.SimpleUrlAuthenticationFailureHandler
-import org.springframework.security.web.authentication.logout.HttpStatusReturningLogoutSuccessHandler
+import dev.easypass.auth.security.filter.*
+import dev.easypass.auth.security.handler.*
+import org.springframework.context.annotation.*
+import org.springframework.http.*
+import org.springframework.security.config.annotation.authentication.builders.*
+import org.springframework.security.config.annotation.web.builders.*
+import org.springframework.security.config.annotation.web.configuration.*
+import org.springframework.security.web.authentication.*
+import org.springframework.security.web.authentication.logout.*
 
 
 /**
@@ -23,9 +18,8 @@ import org.springframework.security.web.authentication.logout.HttpStatusReturnin
 @Configuration
 @EnableWebSecurity
 class SecurityConfiguration(private val authProvider: ChallengeAuthenticationProvider,
-                            private val adminFilter: AdminFilter,
+                            private val isAdminFilter: IsAdminFilter,
                             private val storeFilter: StoreFilter) : WebSecurityConfigurerAdapter() {
-
     /**
      * This method is used to add the [ChallengeAuthenticationProvider] to Spring-Security
      * @param auth: the [AuthenticationManagerBuilder] were the [ChallengeAuthenticationProvider] is set
@@ -45,30 +39,25 @@ class SecurityConfiguration(private val authProvider: ChallengeAuthenticationPro
                 .csrf().disable()
                 .exceptionHandling()
                 .authenticationEntryPoint(RestAuthenticationEntryPoint())
-
                 .and()
                 .formLogin()
                 .loginPage("/auth/login")
                 .successHandler(RestAuthenticationSuccessHandler())
                 .failureHandler(SimpleUrlAuthenticationFailureHandler())
-
                 .and()
                 .logout()
                 .logoutUrl("/auth/logout")
                 .logoutSuccessHandler(HttpStatusReturningLogoutSuccessHandler(HttpStatus.OK))
                 .invalidateHttpSession(true)
                 .deleteCookies("JSESSIONID")
-
                 .and()
                 .authorizeRequests()
                 .antMatchers(HttpMethod.POST, "/auth/**").permitAll()
                 .antMatchers(HttpMethod.POST, "/admin/**").authenticated()
                 .antMatchers("/store/**").authenticated()
-
                 .anyRequest().denyAll()
-
                 .and()
-                .addFilterBefore(adminFilter, AnonymousAuthenticationFilter::class.java)
+                .addFilterBefore(isAdminFilter, AnonymousAuthenticationFilter::class.java)
                 .addFilterBefore(storeFilter, AnonymousAuthenticationFilter::class.java)
 
     }
