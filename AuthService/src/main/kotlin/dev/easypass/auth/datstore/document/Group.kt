@@ -3,7 +3,7 @@ package dev.easypass.auth.datstore.document
 import org.ektorp.support.*
 
 /**
- * A [CouchDbDocument] subclass which allows the persistion groups in the database.
+ * A [CouchDbDocument] subclass which allows the persistence of groups in the database.
  * @param gname: the name of the group.
  * @param pubK: the registered public key to create challenges used for the authentication of a regular user.
  * @param privK: a private key encrypted with the masterpassword used for the authentication of a regular user.

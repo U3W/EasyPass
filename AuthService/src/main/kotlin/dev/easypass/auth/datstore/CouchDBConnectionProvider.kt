@@ -8,13 +8,13 @@ import org.springframework.stereotype.*
 import java.util.*
 
 /**
- * Contains a bean, which provides a [CouchDbConnector] to the user-database, specified in the file application.properties
+ * Contains a bean, which
  * @param properties: the application.properties as java bean
  */
 @Component
 class CouchDBConnectionProvider(private val properties: Properties) {
     /**
-     * The bean which provides the connection to the [dev.easypass.auth.datstore.document.User] database
+     * Provides a [CouchDbConnector] to the database where the [User] and [Group] objects are saved
      */
     @Bean
     @Primary
@@ -22,6 +22,9 @@ class CouchDBConnectionProvider(private val properties: Properties) {
         return createCouchDbConnector(properties.getProperty("couchDb.userDatabase"))
     }
 
+    /**
+     * Provides the [StdCouchDbInstance] described in the application.properties
+     */
     fun createCouchDbInstance(): StdCouchDbInstance {
         val url = properties.getProperty("couchDb.url")
         val uname = properties.getProperty("couchDb.username")
@@ -36,7 +39,7 @@ class CouchDBConnectionProvider(private val properties: Properties) {
     }
 
     /**
-     * Connects to a CouchDB-Database
+     * Provides a [CouchDbConnector] to a CouchDB-Database
      * @param dbname: the name of the database
      * @return an instance of the class [CouchDbConnector]
      */
@@ -44,6 +47,10 @@ class CouchDBConnectionProvider(private val properties: Properties) {
         return createCouchDbInstance().createConnector(dbname, true)
     }
 
+    /**
+     * Deletes a database in CouchDB, specified by the [dbname]
+     * @param dbname: the name of the database
+     */
     fun deleteCouchDbDatabase(dbname: String) {
         createCouchDbInstance().deleteDatabase(dbname)
     }
