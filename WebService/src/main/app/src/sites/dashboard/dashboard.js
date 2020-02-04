@@ -145,6 +145,7 @@ class Dashboard extends React.Component {
         this.getPass = that.getPass.bind(this);
         this.getPassForUpdate = that.getPassForUpdate.bind(this);
         this.copyPass = that.copyPass.bind(this);
+        this.goToPage = that.goToPage.bind(this);
         this.resetPass = that.resetPass.bind(this);
         this.undoDelete = that.undoDelete.bind(this);
 
@@ -651,19 +652,6 @@ class Dashboard extends React.Component {
             this.clipboardCopy(toCopy);
         }
     }
-
-    goToPage(url, id) {
-        function correctUrl(url) {
-            let out = url;
-            if (!( url.includes("https://") || url.includes("https://") )) {
-                out = "https://" + url;
-            }
-            return out;
-        }
-        this.copyPass(id);
-        window.open(correctUrl(url), "_blank");
-    }
-
 
     handleSearch = (e) => {
         //console.log("Key Down:" + e.target.value);

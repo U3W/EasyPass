@@ -710,7 +710,8 @@ export default class PassLine extends React.Component {
                                 />
                             </Button>
                             <Button variant="dark" className="buttonSpace" disabled={true}
-                                    onClick={() => { if ( !this.state.edit ) this.props.callback.goToPage(this.state.urlNew, this.state.id) }}>
+                                    onClick={() => { if ( !this.state.edit )
+                                        this.props.callback.goToPage(this.state.urlNew, this.state.id, this.state.rev) }}>
                                 <img
                                     src={GoToIcon}
                                     alt=""

@@ -164,10 +164,13 @@ import("../../rust/pkg").then(wasm => {
             case 'getPassword':
             case 'getPasswordForUpdate':
             case 'getPasswordToClipboard':
+            case 'getPasswordAndRedirect':
                 const encrypted = (await worker.find({"selector":{"_id": data._id, "_rev": data._rev}})).docs[0];
                 // TODO call decryption
                 const decrypted = encrypted;
-                self.postMessage([cmd, {_id: decrypted._id, passwd: decrypted.passwd}]);
+                if (cmd === 'getPasswordAndRedirect') {
+                    self.postMessage([cmd, {_id: decrypted._id, passwd: decrypted.passwd, url: data.url}]);
+                } else self.postMessage([cmd, {_id: decrypted._id, passwd: decrypted.passwd}]);
                 break;
             case 'saveCategory':
                 await worker.save_category(data);

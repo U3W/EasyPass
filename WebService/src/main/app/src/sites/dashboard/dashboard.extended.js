@@ -52,6 +52,18 @@ export function workerCall( e ) {
                 this.dismissCopy("showCopyAlert");
             });
             break;
+        case 'getPasswordAndRedirect':
+            this.clipboardCopy(data.passwd);
+            const url = data.url;
+            function correctUrl(url) {
+                let out = url;
+                if (!( url.includes("https://") || url.includes("https://") )) {
+                    out = "https://" + url;
+                }
+                return out;
+            }
+            window.open(correctUrl(url), "_blank");
+            break;
         case 'saveCategory':
             this.copy("", dashboardAlerts.showAddedCat, data.ok);
             this.dismissAddCat();
@@ -129,6 +141,10 @@ export function getPassForUpdate(id, rev) {
  */
 export function copyPass(id, rev) {
     this.props.worker.postMessage(['getPasswordToClipboard', {_id: id, _rev: rev}]);
+}
+
+export function goToPage(url, id, rev) {
+    this.props.worker.postMessage(['getPasswordAndRedirect', {_id: id, _rev: rev, url: url}]);
 }
 
 /**
