@@ -520,7 +520,7 @@ export default class PassLine extends React.Component {
         let cats = this.props.callback.getCats();
 
         let finalCats = cats.map((item) =>
-            this.returnCatBase(item.id, item.name)
+            this.returnCatBase(item._id, item.name)
         );
 
         return (
@@ -534,7 +534,7 @@ export default class PassLine extends React.Component {
                             <tbody>
                                 {finalCats}
                                 <tr>
-                                    <td onClick={() => this.changePassCat(0)}>
+                                    <td onClick={() => this.changePassCat("0")}>
                                         Keiner Kategorie zuordnen
                                     </td>
                                 </tr>

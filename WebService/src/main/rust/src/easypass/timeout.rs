@@ -4,11 +4,11 @@ use wasm_bindgen::prelude::*;
 extern "C" {
     /// setTimeoutWorker is equal to setTimeout but uses "self" instead of this
     /// for the scope, which is needed in Web Workers.
-    /// Code can be found under "modules/easypass-lib".
+    /// Code can be found under "src/main/app/modules/easypass-lib".
     fn setTimeoutWorker(closure: &Closure<dyn FnMut()>, millis: i32) -> i32;
     /// clearTimeoutWorker is equal to clearTimeout but uses "self" instead of this
     /// for the scope, which is needed in Web Workers.
-    /// Code can be found under "modules/easypass-lib".
+    /// Code can be found under "src/main/app/modules/easypass-lib".
     fn clearTimeoutWorker(token: i32);
 
     #[wasm_bindgen(js_namespace = console)]

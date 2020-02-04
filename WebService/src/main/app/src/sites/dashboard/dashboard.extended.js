@@ -91,6 +91,7 @@ export function addPass(user, passwd, url, title, tags, catID) {
 export function saveEdit(id, rev, userNew, passwdNew, urlNew, titleNew, tagsNew, catNew) {
     const tabID = this.state.tabselected;
     console.log("saveEdit " + id + ":" + rev);
+    console.log("saveEdit " + catNew);
     this.props.worker.postMessage(['updatePassword',
         {_id: id, _rev: rev, type: 'passwd',
             user: userNew, passwd: passwdNew, url: urlNew, title: titleNew, tags: tagsNew, tabID: tabID, catID: catNew,  }]);
