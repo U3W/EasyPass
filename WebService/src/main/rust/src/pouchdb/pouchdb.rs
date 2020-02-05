@@ -50,6 +50,9 @@ extern "C" {
     #[wasm_bindgen(js_name = r)]
     pub type SyncHandler;
 
+    #[wasm_bindgen(js_name = Fe)]
+    pub type ChangesFeed;
+
     #[wasm_bindgen(constructor, js_class = "PouchDB")]
     pub fn new(db_name: &str, settings: &JsValue) -> PouchDB;
 
@@ -98,11 +101,17 @@ extern "C" {
     #[wasm_bindgen(method, js_class = "PouchDB", js_name = sync)]
     pub fn sync_once(this: &PouchDB, target: &PouchDB) -> Promise;
 
+    #[wasm_bindgen(method, js_class = "PouchDB", js_name = changes)]
+    pub fn changes_with_options(this: &PouchDB, options: JsValue) -> ChangesFeed;
+
+    #[wasm_bindgen(method, js_class = "PouchDB", js_name = on)]
+    pub fn on(this: &ChangesFeed, method: &str, f: &Closure<dyn FnMut(JsValue)>) -> ChangesFeed;
+
     #[wasm_bindgen(method, js_class = "PouchDB", js_name = sync)]
     pub fn sync_with_options(this: &PouchDB, target: &PouchDB, options: JsValue) -> SyncHandler;
 
     #[wasm_bindgen(method, js_class = "PouchDB", js_name = on)]
-    pub fn on (this: &SyncHandler, method: &str, f: &Closure<dyn FnMut(JsValue)>) -> SyncHandler;
+    pub fn on_sync(this: &SyncHandler, method: &str, f: &Closure<dyn FnMut(JsValue)>) -> SyncHandler;
 }
 
 impl PouchDB {
@@ -116,6 +125,7 @@ impl PouchDB {
         self.all_docs_with_options(&JsValue::from_serde(&option).unwrap())
     }
 
+    /// Returns all documents (password- and category-entries) without the "passwd" field.
     pub fn all_docs_without_passwords(&self) -> Promise {
         // TODO all docs without password -> update field names
         let action = JsFuture::from(self.find(
@@ -146,6 +156,7 @@ impl PouchDB {
         })
     }
 
+    /// Returns all password entries from a given category that is identified by an id.
     pub fn all_entries_from_category(&self, id: &str) -> Promise {
         let action = JsFuture::from(self.find(
             &JsValue::from_serde(&json!({
@@ -176,7 +187,6 @@ impl PouchDB {
 
     /// Resets the category id in all entries to the default value.
     pub fn reset_category_in_entries(&self, entries: &JsValue) -> Promise {
-        log("MOI");
         // Parse entries into array and later vec
         let mut entries_parsed = entries.into_serde::<Value>().unwrap();
         let mut entries_vec = entries_parsed.as_array_mut().unwrap();
@@ -186,7 +196,6 @@ impl PouchDB {
         }
         // Build query and perform update
         let query = JsValue::from_serde(&entries_vec).unwrap();
-        log(&format!("Query {:?}", &query));
         let action = JsFuture::from(self.bulk_docs(&query));
         future_to_promise(async move {
             action.await
@@ -194,6 +203,7 @@ impl PouchDB {
     }
 
     /**
+    // TODO remove?
     pub fn reset_entries_from_deleted_category(&self, cat_id: String, entries: Vec<String>) -> Promise {
         future_to_promise(async move {
             let result: Vec<Value> = Vec::new();
@@ -210,6 +220,14 @@ impl PouchDB {
         })
     }*/
 
+    pub fn changes(&self) -> ChangesFeed {
+        self.changes_with_options(
+            JsValue::from_serde(&json!({
+             "live": true,
+             "since": "now"
+            })).unwrap()
+        )
+    }
 
     pub fn sync(&self, target: &PouchDB) -> SyncHandler {
         self.sync_with_options(&target,
@@ -220,12 +238,22 @@ impl PouchDB {
     }
 }
 
-impl SyncHandler {
-    pub fn on_change(&self, f: &Closure<dyn FnMut(JsValue)>) -> SyncHandler {
+impl ChangesFeed {
+    pub fn on_change(&self, f: &Closure<dyn FnMut(JsValue)>) -> ChangesFeed {
         self.on("change", f)
     }
 
-    pub fn on_error(&self, f: &Closure<dyn FnMut(JsValue)>) -> SyncHandler {
+    pub fn on_error(&self, f: &Closure<dyn FnMut(JsValue)>) -> ChangesFeed {
         self.on("error", f)
+    }
+}
+
+impl SyncHandler {
+    pub fn on_change(&self, f: &Closure<dyn FnMut(JsValue)>) -> SyncHandler {
+        self.on_sync("change", f)
+    }
+
+    pub fn on_error(&self, f: &Closure<dyn FnMut(JsValue)>) -> SyncHandler {
+        self.on_sync("error", f)
     }
 }

@@ -56,7 +56,14 @@ pub struct Worker {
 pub struct Connection {
     local: Arc<PouchDB>,
     remote: Option<PouchDB>,
+    changes: Changes,
     sync: Option<Sync>
+}
+
+pub struct Changes {
+    changes_feed: ChangesFeed,
+    change: Closure<dyn FnMut(JsValue)>,
+    error: Closure<dyn FnMut(JsValue)>
 }
 
 pub struct Sync {
@@ -72,21 +79,49 @@ impl Worker {
     /// This includes live syncing and methods for CRUD-operations.
     #[wasm_bindgen(constructor)]
     pub fn new(url: String) -> Worker {
+        // Setup panic hook for better warnings
         utils::set_panic_hook();
+        // Setup new local database for private password entries
         let settings = Settings { adapter: "idb".to_string() };
-        log(&format!("Length: {}", url.len()));
+        let local
+            = Arc::new(PouchDB::new("Local", &JsValue::from_serde(&settings).unwrap()));
+        // Setup new remote database for private password entries
         let remote = if url.len() == 0 {
             let temporary = Temporary { adapter: "idb".to_string(), skip_setup: true };
             Some(PouchDB::new("Temporary", &JsValue::from_serde(&temporary).unwrap()))
         } else {
             Some(PouchDB::new_with_name(&url))
         };
+        // Setup changes feed for database of private entries
+        let changes_feed = local.changes();
+        // Define functionality on database update
+        // Send all documents to ui on change
+        let local_copy = Arc::clone(&local);
+        let change = Closure::new(move |val: JsValue| {
+            log("We have a change!");
+            Worker::all_docs_without_passwords(&local_copy);
+        });
+        // Define functionality on database error
+        let error = Closure::new(move |val: JsValue| {
+            log("EEEEEEEEEEEERRRRRRRRROOOOOOOOOOORRRRRRRRR!");
+        });
+        // Bind on change functions
+        changes_feed.on_change(&change);
+        changes_feed.on_error(&error);
+        // Create struct that holds everything relevant to changes
+        let changes = Changes {
+            changes_feed,
+            change,
+            error
+        };
+        // Create struct that holds everything relevant to database of private entries
         let private = Connection {
-            local:
-                Arc::new(PouchDB::new("Local", &JsValue::from_serde(&settings).unwrap())),
+            local,
             remote,
+            changes,
             sync: None
         };
+        // Create worker
         Worker {
             private,
             service_status: Arc::new(Mutex::new(String::from("online"))),
@@ -103,9 +138,8 @@ impl Worker {
         let service_status = Arc::clone(&self.service_status);
         let private_db = Arc::clone(&self.private.local);
         let change_closure = Closure::new(move |val: JsValue| {
-            log("Before Change");
-            Worker::all_docs_without_passwords(&private_db);
-            log("After Change");
+            log("Sync Change!");
+            // Worker::all_docs_without_passwords(&private_db);
         });
 
         let service_status = Arc::clone(&self.service_status);
@@ -210,13 +244,11 @@ impl Worker {
             for (i, cat) in categories.iter_mut().enumerate() {
                 let mut cache
                     = cache.lock().unwrap_or_else(PoisonError::into_inner);
-                log(&format!("Baum {}", &i));
                 // Add "_deleted" tag for later bulk operation that deletes this category
                 cat["_deleted"] = Bool(true);
                 // Get full category entry, is needed for proper undo of deletion
                 let backup_raw
                     = JsFuture::from(private_db.get(cat["_id"].as_str().unwrap())).await.unwrap();
-                log(&format!("Backup raw {:?}", &backup_raw));
                 let backup = Category::new(&backup_raw);
                 // Get password entries associated with this category
                 let entries_raw
@@ -277,8 +309,6 @@ impl Worker {
                     // Fixes: "cannot move out of `this_clear_ids`, a captured variable in an
                     // `FnMut` closure" error
                     let mut clear_ids = clear_ids.to_vec();
-                    log(&format!("Clear IDS: {:?}", &clear_ids));
-                    log(&format!("Status cache: {:?}", &cache));
                     // Lock and get backup data
                     let mut cache
                         = cache.lock().unwrap_or_else(PoisonError::into_inner);
@@ -288,10 +318,8 @@ impl Worker {
                             cache.remove(&category);
                         }
                     }
-                    log(&format!("Status cache: {:?}", &cache));
                     // Remove this routine
                     clear.remove(&this_closure_id);
-                    log(&format!("clear size: {}", &clear.len()));
                 }, 7500));
             Ok(JsValue::from(true))
         })
@@ -308,7 +336,8 @@ impl Worker {
             // Iterate over received categories that should be recovered
             for category in categories {
                 // Lock and get full backup data
-                let mut cache = cache.lock().unwrap_or_else(PoisonError::into_inner);
+                let mut cache
+                    = cache.lock().unwrap_or_else(PoisonError::into_inner);
                 // Get id of entry to recover
                 let cat_id = String::from(category["_id"].as_str().unwrap());
                 // Check if cache still contains this category entry
@@ -330,7 +359,7 @@ impl Worker {
                         let result = JsFuture::from(private_db.get(&entry)).await.unwrap();
                         let mut result = result.into_serde::<Value>().unwrap();
                         // Check if document exists and if their not mapped to new category
-                        if result["_id"].is_string() && result["catID"].as_str().unwrap() == "0"{
+                        if result["_id"].is_string() && result["catID"].as_str().unwrap() == "0" {
                             result["catID"] = Value::String(String::from(new_id));
                             let _ = JsFuture::from(private_db.
                                 put(&JsValue::from_serde(&result).unwrap())).await;
