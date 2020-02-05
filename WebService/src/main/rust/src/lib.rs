@@ -86,9 +86,9 @@ impl Worker {
         let local
             = Arc::new(PouchDB::new("Local", &JsValue::from_serde(&settings).unwrap()));
         // Setup new remote database for private password entries
+        // If offline, do not create remote connection
         let remote = if url.len() == 0 {
-            let temporary = Temporary { adapter: "idb".to_string(), skip_setup: true };
-            Some(PouchDB::new("Temporary", &JsValue::from_serde(&temporary).unwrap()))
+            None
         } else {
             Some(PouchDB::new_with_name(&url))
         };
@@ -132,33 +132,37 @@ impl Worker {
 
     /// Starts live replication for private password entries.
     pub fn heartbeat(&mut self) {
-        let sync_handler: SyncHandler
-            = self.private.local.sync(&self.private.remote.as_ref().unwrap());
-
-        let service_status = Arc::clone(&self.service_status);
-        let private_db = Arc::clone(&self.private.local);
-        let change_closure = Closure::new(move |val: JsValue| {
-            log("Sync Change!");
-            // Worker::all_docs_without_passwords(&private_db);
-        });
-
-        let service_status = Arc::clone(&self.service_status);
-        let error_closure = Closure::new(move |val: JsValue| {
-            log(&format!("Error {:?}", &val));
-            log(&format!("Error!! {}", &service_status.lock().unwrap()));
-        });
-
-        sync_handler.on_change(&change_closure);
-        sync_handler.on_error(&error_closure);
-
-        let sync = Sync {
-            sync_handler,
-            change: change_closure,
-            error: error_closure
-        };
-
-        self.private.sync = Some(sync);
-
+        // Establish remote connection and sync only when online
+        if self.private.remote.is_some() {
+            // Get Sync Handler
+            let sync_handler: SyncHandler
+                = self.private.local.sync(&self.private.remote.as_ref().unwrap());
+            // Define functionality on change when syncing
+            let service_status = Arc::clone(&self.service_status);
+            let private_db = Arc::clone(&self.private.local);
+            let change_closure = Closure::new(move |val: JsValue| {
+                log("Sync Change!");
+                // Worker::all_docs_without_passwords(&private_db);
+            });
+            // Define functionality on error when syncing
+            let service_status = Arc::clone(&self.service_status);
+            let error_closure = Closure::new(move |val: JsValue| {
+                log(&format!("Error {:?}", &val));
+                log(&format!("Error!! {}", &service_status.lock().unwrap()));
+            });
+            // Bind on change functions
+            sync_handler.on_change(&change_closure);
+            sync_handler.on_error(&error_closure);
+            // Create struct that holds everything relevant to syncing
+            let sync = Sync {
+                sync_handler,
+                change: change_closure,
+                error: error_closure
+            };
+            // And add it to the Worker
+            self.private.sync = Some(sync);
+        }
+        // Fetch all current docs and send result to UI
         Worker::all_docs_without_passwords(&self.private.local);
     }
 

@@ -49,3 +49,6 @@ wasm-bindgen-test = "0.2"
 # Tell `rustc` to optimize for small code size.
 # TODO opt for speeeeed
 opt-level = "s"
+
+# TODO remove when issue is resolved
+wasm-opt = false
