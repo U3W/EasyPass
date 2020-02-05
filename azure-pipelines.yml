@@ -21,7 +21,7 @@ jobs:
       inputs:
         gradleWrapperFile: '$(Build.SourcesDirectory)/WebService/gradlew'
         workingDirectory: '$(Build.SourcesDirectory)/WebService'
-        tasks: 'wasmBuild'
+        tasks: 'wasmFix wasmBuild'
         publishJUnitResults: false
         javaHomeOption: 'JDKVersion'
         sonarQubeRunAnalysis: false
