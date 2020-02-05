@@ -182,7 +182,7 @@ import("../../rust/pkg").then(wasm => {
                 await worker.delete_categories(data);
                 break;
             case 'undoDeleteCategories':
-                await worker.undo_delete_categories();
+                await worker.undo_delete_categories(data);
                 break;
 
 

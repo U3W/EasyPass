@@ -166,7 +166,8 @@ export function undoDelete(which, id) {
     switch (which) {
         case dashboardAlerts.showDeleteCatAlert:
             // ToDo call Kacpers  with id
-            this.props.worker.postMessage(['undoDeleteCategories', undefined]);
+            console.log("undo delete: ", id);
+            this.props.worker.postMessage(['undoDeleteCategories', id]);
             this.setState({
                 showDeleteCatAlert: false,
             });
@@ -203,6 +204,9 @@ export function updateCat( id, nameNew, descriptionNew) {
  * Removes multiple categories that are passed as an array of ids and revisions.
  */
 export function deleteCats(entries) {
+    this.setState({
+        currentCatDelete: entries,
+    });
     this.props.worker.postMessage(['deleteCategories', entries]);
 }
 

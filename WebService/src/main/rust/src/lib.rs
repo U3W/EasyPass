@@ -21,6 +21,11 @@ use wasm_bindgen::__rt::core::cell::RefCell;
 use wasm_bindgen::__rt::std::sync::{Arc, Mutex, PoisonError};
 use wasm_bindgen::JsCast;
 use serde_json::value::Value::Bool;
+use wasm_bindgen::__rt::std::collections::HashMap;
+
+extern crate rand;
+
+use rand::Rng;
 
 
 #[cfg(feature = "wee_alloc")]
@@ -44,8 +49,8 @@ extern {
 pub struct Worker {
     private: Connection,
     service_status: Arc<Mutex<String>>,
-    category_cache: Arc<Mutex<Vec<RecoverCategory>>>,
-    category_clear: Arc<Mutex<Option<Timeout>>>
+    category_cache: Arc<Mutex<HashMap<String, RecoverCategory>>>,
+    category_clear: Arc<Mutex<HashMap<u16, Timeout>>>
 }
 
 pub struct Connection {
@@ -85,8 +90,8 @@ impl Worker {
         Worker {
             private,
             service_status: Arc::new(Mutex::new(String::from("online"))),
-            category_cache: Arc::new(Mutex::new(Vec::new())),
-            category_clear: Arc::new(Mutex::new(None))
+            category_cache: Arc::new(Mutex::new(HashMap::new())),
+            category_clear: Arc::new(Mutex::new(HashMap::new()))
         }
     }
 
@@ -186,17 +191,21 @@ impl Worker {
         })
     }
 
-    pub fn delete_categories(&self, data: Array) -> Promise {
+    pub fn delete_categories(&self, categories: Array) -> Promise {
         // Bind private database and cache for deleted password entries
         let private_db = Arc::clone(&self.private.local);
         let mut cache = Arc::clone(&self.category_cache);
+        // Cache is needed two times (in- and outside of closure)
         let mut clear = Arc::clone(&self.category_clear);
+        let mut this_clear = Arc::clone(&self.category_clear);
         // Parse received categories as vec
-        let mut categories: Vec<Value> = data.into_serde().unwrap();
+        let mut categories: Vec<Value> = categories.into_serde().unwrap();
         // This variable will be used to store the categories that need to be delted
         let query = Array::new_with_length(categories.len() as u32);
         // Move values to promise, allows usage of async
         future_to_promise(async move {
+            // Stores received category ids that need to be deleted later on
+            let mut clear_ids = Vec::new();
             // Enumerate over received categories
             for (i, cat) in categories.iter_mut().enumerate() {
                 let mut cache
@@ -230,7 +239,11 @@ impl Worker {
                         }
                     }
                     // Add full category entry and associated entries to category cache
-                    cache.push(RecoverCategory::new(backup, entries));
+                    clear_ids.push(String::from(cat["_id"].as_str().unwrap()));
+                    cache.insert(
+                        String::from(cat["_id"].as_str().unwrap()),
+                        RecoverCategory::new(backup, entries)
+                    );
                 } else {
                     log("Something went wrong...");
                 }
@@ -241,27 +254,67 @@ impl Worker {
             let action = JsFuture::from(private_db.bulk_docs(&query));
             let result = action.await;
             Worker::build_and_post_message("deleteCategories", result.unwrap());
+
             // Delete category cache after a timeout
+            // Get hashmap which stores deletion routines (closures)
             let mut clear
                 = clear.lock().unwrap_or_else(PoisonError::into_inner);
-            *clear = Some(Timeout::new(move || {
-                let mut cache
-                    = cache.lock().unwrap_or_else(PoisonError::into_inner);
-                cache.clear();
-            }, 7500));
+            // Generate id for new routine
+            let mut rng = rand::thread_rng();
+            let mut closure_id: u16 = rng.gen_range(0, 100);
+            if clear.contains_key(&closure_id) {
+                closure_id = rng.gen_range(0, 100);
+            }
+            // Clone it for later use in closure
+            let this_closure_id = closure_id.clone();
+            // Generate closure and add to hashmap
+            clear.insert(
+                closure_id,
+                Timeout::new(move || {
+                    // Get hashmap that stores all routines
+                    let mut clear
+                        = this_clear.lock().unwrap_or_else(PoisonError::into_inner);
+                    // Fixes: "cannot move out of `this_clear_ids`, a captured variable in an
+                    // `FnMut` closure" error
+                    let mut clear_ids = clear_ids.to_vec();
+                    log(&format!("Clear IDS: {:?}", &clear_ids));
+                    log(&format!("Status cache: {:?}", &cache));
+                    // Lock and get backup data
+                    let mut cache
+                        = cache.lock().unwrap_or_else(PoisonError::into_inner);
+                    // Perform deletion
+                    for category in clear_ids.into_iter() {
+                        if cache.contains_key(&category) {
+                            cache.remove(&category);
+                        }
+                    }
+                    log(&format!("Status cache: {:?}", &cache));
+                    // Remove this routine
+                    clear.remove(&this_closure_id);
+                    log(&format!("clear size: {}", &clear.len()));
+                }, 7500));
             Ok(JsValue::from(true))
         })
     }
 
-    pub fn undo_delete_categories(&self) -> Promise {
+
+    pub fn undo_delete_categories(&self, categories: Array) -> Promise {
         // Bind private database and cache for deleted password entries
         let private_db = Arc::clone(&self.private.local);
         let mut cache = Arc::clone(&self.category_cache);
+        // Convert received category data to vec
+        let mut categories: Vec<Value> = categories.into_serde().unwrap();
         future_to_promise(async move {
-            // If there any categories to recover
-            if cache.lock().unwrap().len() > 0 {
-                // Iterate over every backup
-                for recovery in cache.lock().unwrap().iter_mut() {
+            // Iterate over received categories that should be recovered
+            for category in categories {
+                // Lock and get full backup data
+                let mut cache = cache.lock().unwrap_or_else(PoisonError::into_inner);
+                // Get id of entry to recover
+                let cat_id = String::from(category["_id"].as_str().unwrap());
+                // Check if cache still contains this category entry
+                if cache.contains_key(&cat_id) {
+                    // Get entry backup data
+                    let recovery = cache.remove(&cat_id).unwrap();
                     // Save category again
                     let insert = recovery.get_category_as_json();
                     let result =
@@ -284,8 +337,6 @@ impl Worker {
                         }
                     }
                 }
-                // Clear backup data of deleted entries
-                cache.lock().unwrap().clear();
             }
             Ok(JsValue::from(true))
         })
