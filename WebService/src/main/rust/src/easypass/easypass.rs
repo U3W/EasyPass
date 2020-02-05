@@ -53,3 +53,50 @@ impl RecoverCategory {
         self.entries.to_owned()
     }
 }
+
+#[derive(Debug)]
+pub struct RecoverPassword {
+    user: String,
+    passwd: String,
+    url: String,
+    title: String,
+    tags: Vec<Value>,
+    tab_id: u64,
+    cat_id: String
+}
+
+impl RecoverPassword {
+    pub fn new(data: &JsValue) -> RecoverPassword {
+        let parsed = data.into_serde::<Value>().unwrap();
+        RecoverPassword {
+            user: String::from(parsed["user"].as_str().unwrap()),
+            passwd: String::from(parsed["passwd"].as_str().unwrap()),
+            url: String::from(parsed["url"].as_str().unwrap()),
+            title: String::from(parsed["title"].as_str().unwrap()),
+            tags: parsed["tags"].as_array().unwrap().to_vec(),
+            tab_id: parsed["tabID"].as_u64().unwrap(),
+            cat_id: String::from(parsed["catID"].as_str().unwrap())
+        }
+    }
+
+    pub fn get_password_as_json(&self) -> JsValue {
+        JsValue::from_serde(&json!({
+            "type": "passwd",
+            "user": self.user,
+            "passwd": self.passwd,
+            "url": self.url,
+            "title": self.title,
+            "tags": self.tags,
+            "tabID": self.tab_id,
+            "catID": self.cat_id
+        })).unwrap()
+    }
+
+    pub fn set_cat_id(&mut self, cat_id: String) {
+        self.cat_id = cat_id;
+    }
+
+    pub fn get_cat_id(&self) -> String {
+        self.cat_id.clone()
+    }
+}

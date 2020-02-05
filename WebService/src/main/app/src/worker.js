@@ -149,17 +149,19 @@ import("../../rust/pkg").then(wasm => {
                 await worker.update_password(data);
                 break;
             case 'deletePassword':
-                const deletedPassword = (await worker.find({"selector":{"_id": data._id, "_rev": data._rev}})).docs[0];
+                /**const deletedPassword = (await worker.find({"selector":{"_id": data._id, "_rev": data._rev}})).docs[0];
                 deletedPasswords.set(deletedPassword, false);
                 const delCheck = await worker.remove(data._id, data._rev);
                 setTimeout(async function() {
                     undoPasswordDelete(deletedPassword);
                 }, 5000);
-                self.postMessage(['deletePassword', delCheck]);
+                self.postMessage(['deletePassword', delCheck]);*/
+                await worker.delete_password(data);
                 break;
             case 'undoDeletePassword':
-                const undoKey = [...deletedPasswords.keys()].find(entry => entry._id === data._id);
-                deletedPasswords.set(undoKey, true);
+                /*const undoKey = [...deletedPasswords.keys()].find(entry => entry._id === data._id);
+                deletedPasswords.set(undoKey, true);*/
+                await worker.undo_delete_password(data);
                 break;
             case 'getPassword':
             case 'getPasswordForUpdate':

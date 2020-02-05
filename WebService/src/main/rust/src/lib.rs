@@ -50,7 +50,9 @@ pub struct Worker {
     private: Connection,
     service_status: Arc<Mutex<String>>,
     category_cache: Arc<Mutex<HashMap<String, RecoverCategory>>>,
-    category_clear: Arc<Mutex<HashMap<u16, Timeout>>>
+    category_clear: Arc<Mutex<HashMap<u16, Timeout>>>,
+    password_cache: Arc<Mutex<HashMap<String, RecoverPassword>>>,
+    password_clear: Arc<Mutex<HashMap<u16, Timeout>>>
 }
 
 pub struct Connection {
@@ -126,7 +128,9 @@ impl Worker {
             private,
             service_status: Arc::new(Mutex::new(String::from("online"))),
             category_cache: Arc::new(Mutex::new(HashMap::new())),
-            category_clear: Arc::new(Mutex::new(HashMap::new()))
+            category_clear: Arc::new(Mutex::new(HashMap::new())),
+            password_cache: Arc::new(Mutex::new(HashMap::new())),
+            password_clear: Arc::new(Mutex::new(HashMap::new())),
         }
     }
 
@@ -174,9 +178,9 @@ impl Worker {
         post_message(&msg);
     }
 
-    fn all_docs_without_passwords(db: &PouchDB) -> Promise {
+    fn all_docs_without_passwords(db: &PouchDB) {
         let action = JsFuture::from(db.all_docs_without_passwords());
-        future_to_promise(async move {
+        let _ = future_to_promise(async move {
             let result = action.await;
             let msg = Array::new_with_length(2);
             msg.set(0, JsValue::from_str("allEntries"));
@@ -184,7 +188,7 @@ impl Worker {
             msg.set(1, result.unwrap());
             post_message(&msg);
             Ok(JsValue::undefined())
-        })
+        });
     }
 
     pub fn save_password(&self, data: JsValue) -> Promise {
@@ -204,6 +208,119 @@ impl Worker {
         future_to_promise(async move {
             let result = action.await;
             Worker::build_and_post_message("updatePassword", result.unwrap());
+            Ok(JsValue::from(true))
+        })
+    }
+
+    pub fn delete_password(&self, data: JsValue) -> Promise {
+        // Bind private database and cache for deleted password entries
+        let private_db = Arc::clone(&self.private.local);
+        let cache = Arc::clone(&self.password_cache);
+        // Clear that stores deletion routines is needed two times (in- and outside of closure)
+        let mut clear = Arc::clone(&self.password_clear);
+        let mut this_clear = Arc::clone(&self.password_clear);
+        // Parse received password entry
+        let mut entry: Value = data.into_serde().unwrap();
+        // Move values to promise, allows usage of async
+        future_to_promise(async move {
+            // Stores id of password entry that is used to get fully and later for deletion
+            let id = String::from(entry["_id"].as_str().unwrap());
+            // Get revision which is needed for deletion
+            let rev = JsValue::from_serde(&entry["_rev"]).unwrap();
+            // Use closure to drop cache lock after insert
+            {
+                // Get full entry for backup
+                let backup_raw
+                    = JsFuture::from(private_db.get(&id)).await.unwrap();
+                // Lock and get full backup data
+                let mut cache
+                    = cache.lock().unwrap_or_else(PoisonError::into_inner);
+                let recovery = RecoverPassword::new(&backup_raw);
+                log(&format!("RECOVERY: {:?}", &recovery));
+                // Add full password entry to password cache
+                cache.insert(
+                    String::from(&id),
+                    recovery
+                );
+            }
+            // Delete password entry and post result
+            let action
+                = JsFuture::from(private_db.remove(&JsValue::from(&id), &rev));
+            let result = action.await;
+            Worker::build_and_post_message("deletePassword", result.unwrap());
+
+            // Delete password entry after a timeout
+            // Get hashmap which stores deletion routines (closures)
+            let mut clear
+                = clear.lock().unwrap_or_else(PoisonError::into_inner);
+            // Generate id for new routine
+            let mut rng = rand::thread_rng();
+            let mut closure_id: u16 = rng.gen_range(0, 200);
+            if clear.contains_key(&closure_id) {
+                closure_id = rng.gen_range(0, 200);
+            }
+            // Clone it for later use in closure
+            let this_closure_id = closure_id.clone();
+            // Generate closure and add to hashmap
+            clear.insert(
+                closure_id,
+                Timeout::new(move || {
+                    // Get hashmap that stores all routines
+                    let mut clear
+                        = this_clear.lock().unwrap_or_else(PoisonError::into_inner);
+                    // Lock and get backup data
+                    let mut cache
+                        = cache.lock().unwrap_or_else(PoisonError::into_inner);
+                    log(&format!("B. Cache {:?}", &cache));
+                    // Perform deletion
+                    if cache.contains_key(&id) {
+                        cache.remove(&id);
+                    }
+                    log(&format!("A. Cache {:?}", &cache));
+                    // Remove this routine
+                    clear.remove(&this_closure_id);
+                    log(&format!("Clear-Length {}", &clear.len()));
+                }, 7500));
+            Ok(JsValue::from(true))
+        })
+    }
+
+    pub fn undo_delete_password(&self, data: JsValue) -> Promise {
+        // Bind private database and cache for deleted password entries
+        let private_db = Arc::clone(&self.private.local);
+        let cache = Arc::clone(&self.password_cache);
+        // Parse received password entry
+        let mut entry: Value = data.into_serde().unwrap();
+        // Move values to promise, allows usage of async
+        future_to_promise(async move {
+            // Lock and get full backup data
+            let mut cache
+                = cache.lock().unwrap_or_else(PoisonError::into_inner);
+            // Get id of entry to recover
+            let id = String::from(entry["_id"].as_str().unwrap());
+            // Check if cache still contains this password entry
+            // If yes, do recover
+            if cache.contains_key(&id) {
+                // Get entry backup data
+                let mut recovery = cache.remove(&id).unwrap();
+                // If entry is mapped to a category, check if mapped category exists
+                let cat_id = recovery.get_cat_id();
+                if cat_id != "0" {
+                    log(&format!("CATID: {}", &cat_id));
+                    let result = JsFuture::from(private_db.get(&cat_id)).await;
+                    // If not, map category to default value
+                    if result.is_err() {
+                        //let result = result.into_serde::<Value>().unwrap();
+                        //log(&format!("Category-Fetch: {:?}", &result));
+                        log("Here!");
+                        recovery.set_cat_id(String::from("0"));
+                    }
+                }
+                // Save password entry again
+                let insert = recovery.get_password_as_json();
+                log(&format!("New Insert: {:?}", &insert));
+                let _ = JsFuture::from(private_db.post(&insert)).await.unwrap();
+            }
             Ok(JsValue::from(true))
         })
     }
@@ -233,12 +350,12 @@ impl Worker {
         // Bind private database and cache for deleted password entries
         let private_db = Arc::clone(&self.private.local);
         let mut cache = Arc::clone(&self.category_cache);
-        // Cache is needed two times (in- and outside of closure)
+        // Clear that stores deletion routines is needed two times (in- and outside of closure)
         let mut clear = Arc::clone(&self.category_clear);
         let mut this_clear = Arc::clone(&self.category_clear);
         // Parse received categories as vec
         let mut categories: Vec<Value> = categories.into_serde().unwrap();
-        // This variable will be used to store the categories that need to be delted
+        // This variable will be used to store the categories that need to be deleted
         let query = Array::new_with_length(categories.len() as u32);
         // Move values to promise, allows usage of async
         future_to_promise(async move {
@@ -297,9 +414,9 @@ impl Worker {
                 = clear.lock().unwrap_or_else(PoisonError::into_inner);
             // Generate id for new routine
             let mut rng = rand::thread_rng();
-            let mut closure_id: u16 = rng.gen_range(0, 100);
+            let mut closure_id: u16 = rng.gen_range(0, 200);
             if clear.contains_key(&closure_id) {
-                closure_id = rng.gen_range(0, 100);
+                closure_id = rng.gen_range(0, 200);
             }
             // Clone it for later use in closure
             let this_closure_id = closure_id.clone();
@@ -333,9 +450,10 @@ impl Worker {
     pub fn undo_delete_categories(&self, categories: Array) -> Promise {
         // Bind private database and cache for deleted password entries
         let private_db = Arc::clone(&self.private.local);
-        let mut cache = Arc::clone(&self.category_cache);
+        let cache = Arc::clone(&self.category_cache);
         // Convert received category data to vec
-        let mut categories: Vec<Value> = categories.into_serde().unwrap();
+        let categories: Vec<Value> = categories.into_serde().unwrap();
+        // Move values to promise, allows usage of async
         future_to_promise(async move {
             // Iterate over received categories that should be recovered
             for category in categories {

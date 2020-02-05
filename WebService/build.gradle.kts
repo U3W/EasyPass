@@ -103,13 +103,6 @@ task<NpmTask>("appTest") {
     setArgs(listOf("test"))
 }
 
-task<NpmTask>("wasmFix") {
-    group = "easypass"
-    description = "Installs wasm-opt"
-    setWorkingDir(file("${project.projectDir}/src/main/app"))
-    setArgs(listOf("install", "wasm-opt", "-g"))
-}
-
 task("appCopy") {
     group = "easypass"
     copy {
