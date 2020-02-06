@@ -59,13 +59,17 @@ extern {
 
 #[wasm_bindgen]
 pub struct Backend {
-    controller: Rc<Controller>
+    controller: Controller
 }
 
 pub struct Controller {
-    worker: Mutex<Worker>,
-    init_closure: Mutex<Option<Closure<dyn FnMut(MessageEvent)>>>,
-    main_closure: Mutex<Option<Closure<dyn FnMut(MessageEvent)>>>
+    data: Arc<Mutex<Data>>
+}
+
+pub struct Data {
+    worker: Worker,
+    init_closure: Option<Closure<dyn FnMut(MessageEvent)>>,
+    main_closure: Option<Closure<dyn FnMut(MessageEvent)>>
 }
 
 #[wasm_bindgen]
@@ -74,90 +78,91 @@ impl Backend {
     #[wasm_bindgen(constructor)]
     pub fn new() -> Backend {
         Backend {
-            controller: Rc::new(Controller::new())
+            controller: Controller::new()
         }
     }
 
-    pub fn start(&self) {
-        Rc::clone(&self.controller).start();
+    pub fn start(&mut self) {
+        self.controller.start();
     }
 }
 
 impl Controller {
     pub fn new() -> Controller {
+        let data = Data {
+            worker: Worker::new(String::from("")),
+            init_closure: None,
+            main_closure: None
+        };
+        let data = Arc::new(Mutex::new(data));
         Controller {
-            worker: Mutex::new(Worker::new(String::from(""))),
-            init_closure: Mutex::new(None),
-            main_closure: Mutex::new(None)
+            data
         }
     }
 
-    pub fn start(self: Rc<Controller>) {
+    pub fn start(&mut self) {
 
-        //let main_closure = Arc::new(Mutex::new(None));
-        //let main = Arc::clone(&self.main_closure);
-        //let init_closure = Arc::new(Mutex::new(None));
-        //let init = Arc::clone(&self.init_closure);
-        //let change = Arc::clone(&self.init_closure);
-        //let myworker = self.worker.borrow_mut();
-
-        let self2 = Rc::clone(&self);
+        let this_here = self.data.clone();
+        let this_moved = self.data.clone();
 
         let closure = Closure::new(move |e: MessageEvent| {
+
+            let mut this = this_moved.lock().unwrap();
             log("Received data!");
-            //let what: Value = e.into_serde::<Value>().unwrap();
+
             log(&format!("WHAT!: {:?}", &e.data()));
 
-            //let init_closure = init.lock().unwrap();
-            //
-            // let init_closure = init_closure.as_ref().unwrap();
+            let check: String = e.data().as_string().unwrap();
+            log(&format!("Check: {}", &check));
 
-            {
-                let init_closure_tmp = self2.init_closure.lock().unwrap();
-                let init_closure = init_closure_tmp.as_ref().unwrap();
+            if check == "initAck" {
+                let init_closure = this.init_closure.as_ref().unwrap();
                 remove_message_listener(&"message", init_closure);
+
+                log("baum");
+                this.init_closure = None;
+
+                let closure
+                    = Controller::build_main_closure(this_moved.clone());
+
+                add_message_listener(&"message", &closure);
+                this.main_closure = Some(closure);
             }
-
-
-            //log(&format!("KEK: {:?}", &self2.worker.lock().unwrap().service_status.lock().unwrap()));
-
-            let self3 = Rc::clone(&self2);
-            self3.hey();
         });
 
         add_message_listener(&"message", &closure);
 
-        //let mut new_val = change.lock().unwrap();
-        //*new_val = Some(closure);
-
-        //*self.init_closure.lock().unwrap() = Some(closure);
-        let mut init_closure = self.init_closure.lock().unwrap();
-        *init_closure = Some(closure);
+        let mut this = this_here.lock().unwrap();
+        this.init_closure = Some(closure);
 
         post_message(&JsValue::from("initDone"));
 
     }
 
-    pub fn hey(self: Rc<Controller>) {
-        //let main = Arc::clone(&self.main_closure);
-        //self.init_closure = None;
+    pub fn build_main_closure(data: Arc<Mutex<Data>>) -> Closure<dyn FnMut(MessageEvent)> {
+        Closure::new(move |e: MessageEvent| {
+            let this = data.lock().unwrap();
+            let (cmd, data) = e.data().get_message();
 
-        //*self.init_closure.lock().unwrap() = None;
-        let mut init_closure = self.init_closure.lock().unwrap();
-        *init_closure = None;
-
-
-        let closure = Closure::new(move |e: MessageEvent| {
             log("Received data!");
+            log(&format!("CMD: {} | DATA: {:?}", &cmd, &data));
             log(&format!("Hey!: {:?}", &e.data()));
-        });
+            log(&format!("Hey!: {:?}", &this.worker.service_status.lock().unwrap()));
+        })
+    }
 
-        add_message_listener(&"message", &closure);
-        //let mut main_closure = main.lock().unwrap();
-        //*main_closure = Some(new_main_closure);
-        //*self.main_closure.lock().unwrap() = Some(closure);
-        let mut main_closure = self.main_closure.lock().unwrap();
-        *main_closure = Some(closure);
+}
+
+trait Utils {
+    fn get_message(&self) -> (String, Value);
+}
+
+impl Utils for JsValue {
+    fn get_message(&self) -> (String, Value) {
+        let mut raw: Vec<Value> = self.into_serde().unwrap();
+        let data = raw.pop().unwrap();
+        let cmd = String::from(raw.pop().unwrap().as_str().unwrap());
+        (cmd, data)
     }
 }
 
