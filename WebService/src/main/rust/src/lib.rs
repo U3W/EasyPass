@@ -23,8 +23,9 @@ use wasm_bindgen::JsCast;
 use serde_json::value::Value::Bool;
 use wasm_bindgen::__rt::std::collections::HashMap;
 
-extern crate rand;
+use web_sys::{MessageEvent};
 
+extern crate rand;
 use rand::Rng;
 
 
@@ -43,6 +44,126 @@ extern {
 
     #[wasm_bindgen(js_name = postMessage)]
     fn post_message_with_transfer(message: &JsValue, transfer: &JsValue);
+
+    #[wasm_bindgen(js_name = sleep)]
+    fn sleep(timeout: u64);
+
+    #[wasm_bindgen(js_name = addEventListenerWorker)]
+    fn add_message_listener(name: &str, closure: &Closure<dyn FnMut(MessageEvent)>);
+
+    #[wasm_bindgen(js_name = removeEventListenerWorker)]
+    fn remove_message_listener(name: &str, closure: &Closure<dyn FnMut(MessageEvent)>);
+}
+
+#[wasm_bindgen]
+pub struct Backend {
+    controller: Rc<Controller>
+}
+
+pub struct Controller {
+    init_closure: Arc<Mutex<Option<Closure<dyn FnMut(MessageEvent)>>>>,
+    main_closure: Arc<Mutex<Option<Closure<dyn FnMut(MessageEvent)>>>>
+}
+
+#[wasm_bindgen]
+impl Backend {
+
+    #[wasm_bindgen(constructor)]
+    pub fn new() -> Backend {
+
+        /**let main_closure = Arc::new(Mutex::new(None));
+        let main = Arc::clone(&main_closure);
+        let init_closure = Arc::new(Mutex::new(None));
+        let init = Arc::clone(&init_closure);
+        let change = Arc::clone(&init_closure);
+
+        let closure = Closure::new(move |e: MessageEvent| {
+            log("Received data!");
+            //let what: Value = e.into_serde::<Value>().unwrap();
+            log(&format!("WHAT!: {:?}", &e.data()));
+
+            let init_closure = init.lock().unwrap();
+            let init_closure = init_closure.as_ref().unwrap();
+            remove_message_listener(&"message", init_closure);
+
+            let closure = Closure::new(move |e: MessageEvent| {
+                log("Received data!");
+                log(&format!("Hey!: {:?}", &e.data()));
+            });
+
+            add_message_listener(&"message", &closure);
+
+            let mut main_closure = main.lock().unwrap();
+            *main_closure = Some(closure);
+
+        });
+
+        add_message_listener(&"message", &closure);
+
+        let mut new_val = change.lock().unwrap();
+        *new_val = Some(closure);
+
+        post_message(&JsValue::from("initDone"));
+
+        Backend {
+            init_closure,
+            main_closure
+        }
+        */
+        Backend {
+            controller: Rc::new(Controller::new())
+        }
+    }
+
+    pub fn start(&self) {
+        Rc::clone(&self.controller).start();
+    }
+}
+
+impl Controller {
+    pub fn new() -> Controller {
+        Controller {
+            init_closure: Arc::new(Mutex::new(None)),
+            main_closure: Arc::new(Mutex::new(None))
+        }
+    }
+
+    pub fn start(self: Rc<Controller>) {
+        //let main_closure = Arc::new(Mutex::new(None));
+        let main = Arc::clone(&self.main_closure);
+        //let init_closure = Arc::new(Mutex::new(None));
+        let init = Arc::clone(&self.init_closure);
+        let change = Arc::clone(&self.init_closure);
+
+        let closure = Closure::new(move |e: MessageEvent| {
+            log("Received data!");
+            //let what: Value = e.into_serde::<Value>().unwrap();
+            log(&format!("WHAT!: {:?}", &e.data()));
+
+            let init_closure = init.lock().unwrap();
+            let init_closure = init_closure.as_ref().unwrap();
+            remove_message_listener(&"message", init_closure);
+
+            let closure = Closure::new(move |e: MessageEvent| {
+                log("Received data!");
+                log(&format!("Hey!: {:?}", &e.data()));
+            });
+
+            add_message_listener(&"message", &closure);
+
+            let mut main_closure = main.lock().unwrap();
+            *main_closure = Some(closure);
+
+        });
+
+        add_message_listener(&"message", &closure);
+
+        let mut new_val = change.lock().unwrap();
+        *new_val = Some(closure);
+
+        post_message(&JsValue::from("initDone"));
+
+    }
 }
 
 #[wasm_bindgen]

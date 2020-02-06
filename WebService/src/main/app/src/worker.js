@@ -4,6 +4,9 @@ importScripts("modules/easypass-lib/dist/easypass-lib.js");
 import("../../rust/pkg").then(wasm => {
 
 
+    let thetest = new wasm.Backend();
+    thetest.start();
+
     let worker = null;
     let remoteInit = false;
     let authUrl = null;
@@ -33,13 +36,13 @@ import("../../rust/pkg").then(wasm => {
             }
         }
         worker = new wasm.Worker(dbUrl);
-        self.addEventListener('message', clientInit, true);
+        /**self.addEventListener('message', clientInit, true);
 
         // Send client OK and wait for response in `clientInit` listener
         while (!clientInitialized) {
             self.postMessage('initDone');
             await sleep(500);
-        }
+        }*/
     };
 
     init();
