@@ -45,7 +45,7 @@ import("../../rust/pkg").then(wasm => {
         }*/
     };
 
-    init();
+    // init();
 
     // Sets host for the remote database when app the goes online
     // Only called when the app is started in offline-mode

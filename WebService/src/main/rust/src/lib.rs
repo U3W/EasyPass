@@ -27,6 +27,8 @@ use web_sys::{MessageEvent};
 
 extern crate rand;
 use rand::Rng;
+use wasm_bindgen::__rt::Ref;
+use wasm_bindgen::__rt::core::borrow::{BorrowMut, Borrow};
 
 
 #[cfg(feature = "wee_alloc")]
@@ -61,6 +63,7 @@ pub struct Backend {
 }
 
 pub struct Controller {
+    worker: RefCell<Worker>,
     init_closure: Arc<Mutex<Option<Closure<dyn FnMut(MessageEvent)>>>>,
     main_closure: Arc<Mutex<Option<Closure<dyn FnMut(MessageEvent)>>>>
 }
@@ -70,46 +73,6 @@ impl Backend {
 
     #[wasm_bindgen(constructor)]
     pub fn new() -> Backend {
-
-        /**let main_closure = Arc::new(Mutex::new(None));
-        let main = Arc::clone(&main_closure);
-        let init_closure = Arc::new(Mutex::new(None));
-        let init = Arc::clone(&init_closure);
-        let change = Arc::clone(&init_closure);
-
-        let closure = Closure::new(move |e: MessageEvent| {
-            log("Received data!");
-            //let what: Value = e.into_serde::<Value>().unwrap();
-            log(&format!("WHAT!: {:?}", &e.data()));
-
-            let init_closure = init.lock().unwrap();
-            let init_closure = init_closure.as_ref().unwrap();
-            remove_message_listener(&"message", init_closure);
-
-            let closure = Closure::new(move |e: MessageEvent| {
-                log("Received data!");
-                log(&format!("Hey!: {:?}", &e.data()));
-            });
-
-            add_message_listener(&"message", &closure);
-
-            let mut main_closure = main.lock().unwrap();
-            *main_closure = Some(closure);
-
-        });
-
-        add_message_listener(&"message", &closure);
-
-        let mut new_val = change.lock().unwrap();
-        *new_val = Some(closure);
-
-        post_message(&JsValue::from("initDone"));
-
-        Backend {
-            init_closure,
-            main_closure
-        }
-        */
         Backend {
             controller: Rc::new(Controller::new())
         }
@@ -123,6 +86,7 @@ impl Backend {
 impl Controller {
     pub fn new() -> Controller {
         Controller {
+            worker: RefCell::new(Worker::new(String::from(""))),
             init_closure: Arc::new(Mutex::new(None)),
             main_closure: Arc::new(Mutex::new(None))
         }
@@ -134,6 +98,8 @@ impl Controller {
         //let init_closure = Arc::new(Mutex::new(None));
         let init = Arc::clone(&self.init_closure);
         let change = Arc::clone(&self.init_closure);
+        //let myworker = self.worker.borrow_mut();
+        let kek = Rc::clone(&self);
 
         let closure = Closure::new(move |e: MessageEvent| {
             log("Received data!");
@@ -143,17 +109,10 @@ impl Controller {
             let init_closure = init.lock().unwrap();
             let init_closure = init_closure.as_ref().unwrap();
             remove_message_listener(&"message", init_closure);
+            log(&format!("KEK: {:?}", &kek.worker.borrow().service_status));
 
-            let closure = Closure::new(move |e: MessageEvent| {
-                log("Received data!");
-                log(&format!("Hey!: {:?}", &e.data()));
-            });
-
-            add_message_listener(&"message", &closure);
-
-            let mut main_closure = main.lock().unwrap();
-            *main_closure = Some(closure);
-
+            let kek2 = Rc::clone(&kek);
+            kek2.hey();
         });
 
         add_message_listener(&"message", &closure);
@@ -164,9 +123,22 @@ impl Controller {
         post_message(&JsValue::from("initDone"));
 
     }
+
+    pub fn hey(self: Rc<Controller>) {
+        let main = Arc::clone(&self.main_closure);
+        self.init_closure = None;
+
+        let new_main_closure = Closure::new(move |e: MessageEvent| {
+            log("Received data!");
+            log(&format!("Hey!: {:?}", &e.data()));
+        });
+
+        add_message_listener(&"message", &new_main_closure);
+        let mut main_closure = main.lock().unwrap();
+        *main_closure = Some(new_main_closure);
+    }
 }
 
-#[wasm_bindgen]
 pub struct Worker {
     private: Connection,
     service_status: Arc<Mutex<String>>,
@@ -195,12 +167,9 @@ pub struct Sync {
     error: Closure<dyn FnMut(JsValue)>
 }
 
-#[wasm_bindgen]
 impl Worker {
-
     /// Creates a new Worker that manages databases.
     /// This includes live syncing and methods for CRUD-operations.
-    #[wasm_bindgen(constructor)]
     pub fn new(url: String) -> Worker {
         // Setup panic hook for better warnings
         utils::set_panic_hook();
