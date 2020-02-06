@@ -63,9 +63,9 @@ pub struct Backend {
 }
 
 pub struct Controller {
-    worker: RefCell<Worker>,
-    init_closure: Arc<Mutex<Option<Closure<dyn FnMut(MessageEvent)>>>>,
-    main_closure: Arc<Mutex<Option<Closure<dyn FnMut(MessageEvent)>>>>
+    worker: Mutex<Worker>,
+    init_closure: Mutex<Option<Closure<dyn FnMut(MessageEvent)>>>,
+    main_closure: Mutex<Option<Closure<dyn FnMut(MessageEvent)>>>
 }
 
 #[wasm_bindgen]
@@ -86,56 +86,78 @@ impl Backend {
 impl Controller {
     pub fn new() -> Controller {
         Controller {
-            worker: RefCell::new(Worker::new(String::from(""))),
-            init_closure: Arc::new(Mutex::new(None)),
-            main_closure: Arc::new(Mutex::new(None))
+            worker: Mutex::new(Worker::new(String::from(""))),
+            init_closure: Mutex::new(None),
+            main_closure: Mutex::new(None)
         }
     }
 
     pub fn start(self: Rc<Controller>) {
+
         //let main_closure = Arc::new(Mutex::new(None));
-        let main = Arc::clone(&self.main_closure);
+        //let main = Arc::clone(&self.main_closure);
         //let init_closure = Arc::new(Mutex::new(None));
-        let init = Arc::clone(&self.init_closure);
-        let change = Arc::clone(&self.init_closure);
+        //let init = Arc::clone(&self.init_closure);
+        //let change = Arc::clone(&self.init_closure);
         //let myworker = self.worker.borrow_mut();
-        let kek = Rc::clone(&self);
+
+        let self2 = Rc::clone(&self);
 
         let closure = Closure::new(move |e: MessageEvent| {
             log("Received data!");
             //let what: Value = e.into_serde::<Value>().unwrap();
             log(&format!("WHAT!: {:?}", &e.data()));
 
-            let init_closure = init.lock().unwrap();
-            let init_closure = init_closure.as_ref().unwrap();
-            remove_message_listener(&"message", init_closure);
-            log(&format!("KEK: {:?}", &kek.worker.borrow().service_status));
+            //let init_closure = init.lock().unwrap();
+            //
+            // let init_closure = init_closure.as_ref().unwrap();
 
-            let kek2 = Rc::clone(&kek);
-            kek2.hey();
+            {
+                let init_closure_tmp = self2.init_closure.lock().unwrap();
+                let init_closure = init_closure_tmp.as_ref().unwrap();
+                remove_message_listener(&"message", init_closure);
+            }
+
+
+            //log(&format!("KEK: {:?}", &self2.worker.lock().unwrap().service_status.lock().unwrap()));
+
+            let self3 = Rc::clone(&self2);
+            self3.hey();
         });
 
         add_message_listener(&"message", &closure);
 
-        let mut new_val = change.lock().unwrap();
-        *new_val = Some(closure);
+        //let mut new_val = change.lock().unwrap();
+        //*new_val = Some(closure);
+
+        //*self.init_closure.lock().unwrap() = Some(closure);
+        let mut init_closure = self.init_closure.lock().unwrap();
+        *init_closure = Some(closure);
 
         post_message(&JsValue::from("initDone"));
 
     }
 
     pub fn hey(self: Rc<Controller>) {
-        let main = Arc::clone(&self.main_closure);
-        self.init_closure = None;
+        //let main = Arc::clone(&self.main_closure);
+        //self.init_closure = None;
 
-        let new_main_closure = Closure::new(move |e: MessageEvent| {
+        //*self.init_closure.lock().unwrap() = None;
+        let mut init_closure = self.init_closure.lock().unwrap();
+        *init_closure = None;
+
+
+        let closure = Closure::new(move |e: MessageEvent| {
             log("Received data!");
             log(&format!("Hey!: {:?}", &e.data()));
         });
 
-        add_message_listener(&"message", &new_main_closure);
-        let mut main_closure = main.lock().unwrap();
-        *main_closure = Some(new_main_closure);
+        add_message_listener(&"message", &closure);
+        //let mut main_closure = main.lock().unwrap();
+        //*main_closure = Some(new_main_closure);
+        //*self.main_closure.lock().unwrap() = Some(closure);
+        let mut main_closure = self.main_closure.lock().unwrap();
+        *main_closure = Some(closure);
     }
 }
 
