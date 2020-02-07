@@ -58,16 +58,14 @@ extern {
     fn remove_message_listener(name: &str, closure: &Closure<dyn FnMut(MessageEvent)>);
 }
 
+/// Represents the Backend - logic functionalities - of the Web-App.
 #[wasm_bindgen]
 pub struct Backend {
-    controller: Controller
+    state: Arc<Mutex<State>>
 }
 
-pub struct Controller {
-    data: Arc<Mutex<Data>>
-}
-
-pub struct Data {
+/// Stores the internal state of the Backend of the Web-App.
+pub struct State {
     worker: Worker,
     init_closure: Option<Closure<dyn FnMut(MessageEvent)>>,
     main_closure: Option<Closure<dyn FnMut(MessageEvent)>>
@@ -76,81 +74,80 @@ pub struct Data {
 #[wasm_bindgen]
 impl Backend {
 
+    /// Creates a new Backend.
     #[wasm_bindgen(constructor)]
     pub fn new() -> Backend {
-        Backend {
-            controller: Controller::new()
-        }
-    }
-
-    pub fn start(&mut self) {
-        self.controller.start();
-    }
-}
-
-impl Controller {
-    pub fn new() -> Controller {
-        let data = Data {
+        // Setup panic hook for better warnings
+        utils::set_panic_hook();
+        // Build and setup internal state
+        let state = State {
             worker: Worker::new(String::from("")),
             init_closure: None,
             main_closure: None
         };
-        let data = Arc::new(Mutex::new(data));
-        Controller {
-            data
+        // Arc and Mutex are needed to modify internal states safely
+        // when it is used in many different parts of the application
+        let state = Arc::new(Mutex::new(state));
+        Backend {
+            state
         }
     }
 
+    /// Starts the whole Backend.
+    /// Creates message listeners for UI requests.
+    /// Also database are initialized and managed.
     pub fn start(&mut self) {
-
-        let this_here = self.data.clone();
-        let this_moved = self.data.clone();
-
+        // Clone and bind internal states
+        let state_here = self.state.clone();
+        let state_moved = self.state.clone();
+        // Create closure for startup process
         let closure = Closure::new(move |e: MessageEvent| {
-
-            let mut this = this_moved.lock().unwrap();
-            log("Received data!");
-
-            log(&format!("WHAT!: {:?}", &e.data()));
-
+            // Lock and get internal state
+            let mut state = state_moved.lock().unwrap();
+            // Parse UI request
             let check: String = e.data().as_string().unwrap();
-            log(&format!("Check: {}", &check));
-
+            // Check if UI is ready for further action
             if check == "initAck" {
-                let init_closure = this.init_closure.as_ref().unwrap();
+                // If so, remove closure for startup process as listener
+                let init_closure = state.init_closure.as_ref().unwrap();
                 remove_message_listener(&"message", init_closure);
-
-                this.init_closure = None;
-
+                state.init_closure = None;
+                // Create new closure for main process
                 let closure
-                    = Controller::build_main_closure(this_moved.clone());
-
+                    = Backend::build_main_closure(state_moved.clone());
+                // Bind closure for main process to message listener
                 add_message_listener(&"message", &closure);
-                this.main_closure = Some(closure);
-
-                Worker::all_docs_without_passwords(&this.worker.get_private_local_db())
+                // Save closure in state
+                state.main_closure = Some(closure);
+                // TODO move somewhere else?
+                // Send all entries to UI
+                Worker::all_docs_without_passwords(&state.worker.get_private_local_db())
             }
         });
-
+        // Bind closure for startup process to message listener
         add_message_listener(&"message", &closure);
-
-        let mut this = this_here.lock().unwrap();
-        this.init_closure = Some(closure);
-
+        // Save closure in state
+        let mut state = state_here.lock().unwrap();
+        state.init_closure = Some(closure);
+        // Tell UI initialization is done
         post_message(&JsValue::from("initDone"));
-
     }
 
-    pub fn build_main_closure(data: Arc<Mutex<Data>>) -> Closure<dyn FnMut(MessageEvent)> {
+    /// Returns "main" closure that process UI requests.
+    fn build_main_closure(state: Arc<Mutex<State>>) -> Closure<dyn FnMut(MessageEvent)> {
         Closure::new(move |e: MessageEvent| {
-            let this = data.lock().unwrap();
-            let worker = &this.worker;
+            // Lock and get internal state
+            let state = state.lock().unwrap();
+            // Bind worker to local variable
+            let worker = &state.worker;
+            // Get command and additional data of UI request
             let (cmd, data) = e.data().get_message();
-
+            // TODO remove this logs
             log("Received data!");
             log(&format!("CMD: {} | DATA: {:?}", &cmd, &data));
             log(&format!("Hey!: {:?}", &e.data()));
             log(&format!("Hey!: {:?}", worker.get_service_status().lock().unwrap()));
+            // Perform operations
             match cmd.as_ref() {
                 /**
                 TODO define modes
@@ -190,14 +187,17 @@ impl Controller {
             }
         })
     }
-
 }
 
 trait Utils {
+    /// Used to parse UI requests.
+    /// Returns command as an String, data is left untouched as JsValue
     fn get_message(&self) -> (String, JsValue);
 }
 
 impl Utils for JsValue {
+    /// Used to parse UI requests.
+    /// Returns command as an String, data is left untouched as JsValue
     fn get_message(&self) -> (String, JsValue) {
         let array = Array::from(self);
         let cmd = array.get(0).as_string().unwrap();

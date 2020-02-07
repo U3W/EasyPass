@@ -75,8 +75,6 @@ impl Worker {
     /// Creates a new Worker that manages databases.
     /// This includes live syncing and methods for CRUD-operations.
     pub fn new(url: String) -> Worker {
-        // Setup panic hook for better warnings
-        utils::set_panic_hook();
         // Setup new local database for private password entries
         let settings = Settings { adapter: "idb".to_string() };
         let local

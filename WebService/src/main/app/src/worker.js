@@ -3,10 +3,17 @@ importScripts("modules/pouchdb/dist/pouchdb.find.min.js");
 importScripts("modules/easypass-lib/dist/easypass-lib.js");
 import("../../rust/pkg").then(wasm => {
 
+    // Create new backend and start it
+    const app = new wasm.Backend();
+    app.start();
 
-    let thetest = new wasm.Backend();
-    thetest.start();
 
+    /**
+     * JS-Code is deprecated.
+     * Still left for code snippets that still need to be ported to WASM.
+     */
+
+    /**
     let worker = null;
     let remoteInit = false;
     let authUrl = null;
@@ -36,13 +43,13 @@ import("../../rust/pkg").then(wasm => {
             }
         }
         worker = new wasm.Worker(dbUrl);
-        /**self.addEventListener('message', clientInit, true);
+        self.addEventListener('message', clientInit, true);
 
         // Send client OK and wait for response in `clientInit` listener
         while (!clientInitialized) {
             self.postMessage('initDone');
             await sleep(500);
-        }*/
+        }
     };
 
     // init();
@@ -135,8 +142,9 @@ import("../../rust/pkg").then(wasm => {
                 self.postMessage(['echo', data]);
                 break;
         }
-    };
+    };*/
 
+    /**
     const dashboardCall = async (cmd, data) => {
         // TODO do postMessage in WebAssembly not js
         switch (cmd) {
@@ -144,26 +152,15 @@ import("../../rust/pkg").then(wasm => {
                 mode = undefined;
                 break;
             case 'savePassword':
-                //const saveResult = await worker.save(data);
-                //self.postMessage(['savePassword', saveResult]);
                 await worker.save_password(data);
                 break;
             case 'updatePassword':
                 await worker.update_password(data);
                 break;
             case 'deletePassword':
-                /**const deletedPassword = (await worker.find({"selector":{"_id": data._id, "_rev": data._rev}})).docs[0];
-                deletedPasswords.set(deletedPassword, false);
-                const delCheck = await worker.remove(data._id, data._rev);
-                setTimeout(async function() {
-                    undoPasswordDelete(deletedPassword);
-                }, 5000);
-                self.postMessage(['deletePassword', delCheck]);*/
                 await worker.delete_password(data);
                 break;
             case 'undoDeletePassword':
-                /*const undoKey = [...deletedPasswords.keys()].find(entry => entry._id === data._id);
-                deletedPasswords.set(undoKey, true);*/
                 await worker.undo_delete_password(data);
                 break;
             case 'getPassword':
@@ -232,7 +229,7 @@ import("../../rust/pkg").then(wasm => {
           await worker.save_password(deletedPassword);
       }
       deletedPasswords.delete(deletedPassword);
-    };
+    };*/
 
     /**
      * Build selector query for PouchDB to verify that data was added.
