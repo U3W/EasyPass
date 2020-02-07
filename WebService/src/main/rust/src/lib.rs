@@ -143,97 +143,48 @@ impl Controller {
 
     pub fn build_main_closure(data: Arc<Mutex<Data>>) -> Closure<dyn FnMut(MessageEvent)> {
         Closure::new(move |e: MessageEvent| {
-            log("2");
             let this = data.lock().unwrap();
             let worker = &this.worker;
             let (cmd, data) = e.data().get_message();
-            // TODO update worker to use Value instead of JsValue
-            let data = JsValue::from_serde(&data).unwrap();
 
             log("Received data!");
             log(&format!("CMD: {} | DATA: {:?}", &cmd, &data));
             log(&format!("Hey!: {:?}", &e.data()));
-            log(&format!("Hey!: {:?}", &this.worker.get_service_status().lock().unwrap()));
+            log(&format!("Hey!: {:?}", worker.get_service_status().lock().unwrap()));
             match cmd.as_ref() {
                 /**
+                TODO define modes
                 case 'unregister':
                 mode = undefined;
                 break;
                 */
                 "savePassword" => {
-                    // await worker.save_password(data);
                     worker.save_password(data);
                 }
                 "updatePassword" => {
-                    // await worker.update_password(data);
                     worker.update_password(data);
                 }
                 "deletePassword" => {
-                    // await worker.delete_password(data);
                     worker.delete_password(data);
                 }
                 "undoDeletePassword" => {
-                    // await worker.undo_delete_password(data);
                     worker.undo_delete_password(data);
                 }
                 "getPassword" | "getPasswordForUpdate" | "getPasswordToClipboard" |
                 "getPasswordAndRedirect" => {
-                    // const encrypted = (await worker.find({"selector":{"_id": data._id, "_rev": data._rev}})).docs[0];
-                    // TODO call decryption
-                    // const decrypted = encrypted;
-                    // if (cmd === 'getPasswordAndRedirect') {
-                    //    self.postMessage([cmd, {_id: decrypted._id, passwd: decrypted.passwd, url: data.url}]);
-                    // } else self.postMessage([cmd, {_id: decrypted._id, passwd: decrypted.passwd}]);
-                    // TODO This section is needs really, really a refactor
-                    //  really
-                    log("why?");
-                    let why = data.into_serde::<Value>().unwrap();
-                    log(&format!("{:?}", &why));
-                    let action = JsFuture::from(worker.find(JsValue::from_serde(&json!({
-                            "selector": {
-                                "_id": why["_id"],
-                                "_rev": why["_rev"],
-                            }
-                        })).unwrap()));
-                    future_to_promise(async move {
-                        let result_raw = action.await.unwrap();
-                        let result_raw = result_raw.into_serde::<Value>().unwrap();
-                        let result = &result_raw["docs"][0];
-                        let back = if cmd == "getPasswordAndRedirect" {
-                            JsValue::from_serde(&json!({
-                                "_id": result["_id"],
-                                "passwd": result["passwd"],
-                                "url": result["url"]
-                            })).unwrap()
-                        } else {
-                            JsValue::from_serde(&json!({
-                                "_id": result["_id"],
-                                "passwd": result["passwd"]
-                            })).unwrap()
-                        };
-                        log(&format!("{:?}", &back));
-                        post_message(&JsValue::from_serde(&json!([
-                            cmd, back.into_serde::<Value>().unwrap()
-                        ])).unwrap());
-                        Ok(JsValue::from(true))
-                    });
-
+                    worker.get_password(cmd, data);
                 }
                 "saveCategory" => {
-                    //  await worker.save_category(data);
                     worker.save_category(data);
                 }
                 "updateCategory" => {
-                    // await worker.update_category(data);
                     worker.update_category(data);
                 }
                 "deleteCategories" => {
-                    // await worker.delete_categories(data);
-                    worker.delete_categories(Array::from(&data));
+                    worker.delete_categories(data);
                 }
                 "undoDeleteCategories" => {
-                    // await worker.undo_delete_categories(data);
-                    worker.undo_delete_categories(Array::from(&data));
+                    worker.undo_delete_categories(data);
                 }
                 _ => {}
             }
@@ -243,14 +194,15 @@ impl Controller {
 }
 
 trait Utils {
-    fn get_message(&self) -> (String, Value);
+    fn get_message(&self) -> (String, JsValue);
 }
 
 impl Utils for JsValue {
-    fn get_message(&self) -> (String, Value) {
-        let mut raw: Vec<Value> = self.into_serde().unwrap();
-        let data = raw.pop().unwrap();
-        let cmd = String::from(raw.pop().unwrap().as_str().unwrap());
+    fn get_message(&self) -> (String, JsValue) {
+        let array = Array::from(self);
+        let cmd = array.get(0).as_string().unwrap();
+        let data = array.get(1);
+        //let data_parsed = data.clone().into_serde::<Value>().unwrap();
         (cmd, data)
     }
 }

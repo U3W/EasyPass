@@ -340,7 +340,9 @@ impl Worker {
         })
     }
 
-    pub fn delete_categories(&self, categories: Array) -> Promise {
+    pub fn delete_categories(&self, categories: JsValue) -> Promise {
+        // Convert JsValue to Array, that its truly is
+        let categories = Array::from(&categories);
         // Bind private database and cache for deleted password entries
         let private_db = Arc::clone(&self.private.local);
         let mut cache = Arc::clone(&self.category_cache);
@@ -441,7 +443,9 @@ impl Worker {
     }
 
 
-    pub fn undo_delete_categories(&self, categories: Array) -> Promise {
+    pub fn undo_delete_categories(&self, categories: JsValue) -> Promise {
+        // Convert JsValue to Array, that its truly is
+        let categories = Array::from(&categories);
         // Bind private database and cache for deleted password entries
         let private_db = Arc::clone(&self.private.local);
         let cache = Arc::clone(&self.category_cache);
@@ -483,6 +487,44 @@ impl Worker {
                     }
                 }
             }
+            Ok(JsValue::from(true))
+        })
+    }
+
+    pub fn get_password(&self, cmd: String, data: JsValue) -> Promise {
+        // Bind private database
+        let private_db = Arc::clone(&self.private.local);
+        // Parse data to make it readable from Rust
+        let data_parsed = data.into_serde::<Value>().unwrap();
+        // Search for received entry
+        let action = JsFuture::from(private_db.find(&JsValue::from_serde(&json!({
+            "selector": {
+                "_id": data_parsed["_id"],
+                "_rev": data_parsed["_rev"],
+            }
+        })).unwrap()));
+        future_to_promise(async move {
+            // Parse received entry
+            let result_raw = action.await.unwrap();
+            let result_raw = result_raw.into_serde::<Value>().unwrap();
+            let result = &result_raw["docs"][0];
+            // Prepare return value (dependant on command)
+            let back = if cmd == "getPasswordAndRedirect" {
+                JsValue::from_serde(&json!({
+                    "_id": result["_id"],
+                    "passwd": result["passwd"],
+                    "url": result["url"]
+                })).unwrap()
+            } else {
+                JsValue::from_serde(&json!({
+                    "_id": result["_id"],
+                    "passwd": result["passwd"]
+                })).unwrap()
+            };
+            // Post return value
+            post_message(&JsValue::from_serde(
+                &json!([cmd, back.into_serde::<Value>().unwrap()])
+            ).unwrap());
             Ok(JsValue::from(true))
         })
     }
