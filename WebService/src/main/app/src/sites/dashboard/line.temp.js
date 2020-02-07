@@ -759,7 +759,7 @@ export default class PassLine extends React.Component {
                                         }
                                     >
                                         { this.state.urlNew.length === 0 ?
-                                            <Button variant="dark" className="buttonSpace" disabled={true} onClick={() => { if ( !this.state.edit && this.state.urlNew.length > 0 )  this.props.callback.goToPage(this.state.urlNew, this.state.id) }}>
+                                            <Button variant="dark" className="buttonSpace" disabled={true} onClick={() => { if ( !this.state.edit && this.state.urlNew.length > 0 )  this.props.callback.goToPage(this.state.urlNew, this.state.id, this.state.rev) }}>
                                                 <img
                                                     src={GoToIcon}
                                                     alt=""
@@ -769,7 +769,7 @@ export default class PassLine extends React.Component {
                                                 />
                                             </Button>
                                             :
-                                            <Button variant="dark" className="buttonSpace" onClick={() => { if ( !this.state.edit )  this.props.callback.goToPage(this.state.urlNew, this.state.id) }}>
+                                            <Button variant="dark" className="buttonSpace" onClick={() => { if ( !this.state.edit )  this.props.callback.goToPage(this.state.urlNew, this.state.id, this.state.rev) }}>
                                                 <img
                                                     src={GoToIcon}
                                                     alt=""
