@@ -263,6 +263,7 @@ class Dashboard extends React.Component {
 
         if (passwordsWithCats !== undefined) {
             renderWithCats = cats.map(function (cat) {
+
                 return (
                     <div key={cat._id}>
                         <strong>{cat.name}</strong>
