@@ -93,25 +93,26 @@ class NavbarVerticalEP2 extends React.Component {
 
     getCat() {
         let getActive = "nav-link-kat fitparentWidth";
-        if ( this.props.callback.state.catselected === 0)
+        if ( this.props.callback.state.catselected === "0")
         {
             getActive = "nav-link-kat fitparentWidth active";
         }
         // always
-        let start = (<li key={0} className="d-flex align-items-center text-muted clickable nav-link-kat-click" onClick={() => this.catChange(0)}>
+        let start = (<li key={0} className="d-flex align-items-center text-muted clickable nav-link-kat-click" onClick={() => this.catChange("0")}>
                         <div className={getActive}>
                             {StringSelector.getString(this.props.callback.state.language).catsAllCat}
                         </div>
                     </li>);
         // single cat.
         let cats = this.props.callback.getCats();
+        /*
         for ( let i = 0; i < cats.length; i++ )
         {
             cats[i].idCat = i+1;
-        }
+        }*/
         // counter for the cats
         let finalCats = cats.map((item) =>
-            this.returnCatBase(item.idCat, item.name)
+            this.returnCatBase(item._id, item.name)
         );
         // loop with onClick={() => this.catChange(i)}> --> i++
         return (

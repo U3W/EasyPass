@@ -224,7 +224,7 @@ class Dashboard extends React.Component {
         if (catData !== undefined && catData.length > 0) {
             catData = this.addCallback(catData);
             passwords[0] = catData.map(singlePass => {
-                if (singlePass.tabID === selectedTab) {
+                //if (singlePass.tabID === selectedTab) {
                     return (
                         <PassLine key={singlePass._id+singlePass._rev} tag={singlePass.tags} id={singlePass._id}
                                   cat={singlePass.catID} rev={singlePass._rev} user={singlePass.user}
@@ -234,7 +234,7 @@ class Dashboard extends React.Component {
                                   passwordCacheID={this.state.passwordCacheID}
                                   show={this.state.show}/>
                     );
-                }
+                //}
             });
             return passwords;
 
@@ -250,24 +250,34 @@ class Dashboard extends React.Component {
         let renderWithCats = "";
         let renderWithout = "";
 
+        let catselected = this.state.catselected;
         if (passwordsWithCats !== undefined) {
             renderWithCats = cats.map(function (cat) {
-                return (
-                    <div key={cat._id}>
-                        <strong>{cat.name}</strong>
-                        {cat.desc.length === 0 ?
-                            ""
-                            :
-                            <br/>
-                        }
-                        {cat.desc}
-                        <hr/>
-                        {passwordsWithCats[cat._id]}
-                    </div>
-                )
+                if ( cat._id === catselected || catselected === "0") {
+                    return (
+                        <div key={cat._id}>
+                            <strong>{cat.name}</strong>
+                            {cat.desc.length === 0 ?
+                                ""
+                                :
+                                <br/>
+                            }
+                            {cat.desc}
+                            <hr/>
+                            {passwordsWithCats[cat._id]}
+                        </div>
+                    )
+                }
+                else {
+                    return (
+                        <></>
+                    )
+                }
+
             });
         }
 
+        console.log("Aha", passwordsWithout);
         if (passwordsWithout !== undefined) {
             renderWithout = (
                 <div>
@@ -282,10 +292,16 @@ class Dashboard extends React.Component {
 
         return (
             <>
-                <h5>{StringSelector.getString(this.state.language).mainAllCat}</h5>
-                <hr/>
+                { this.state.catselected === 0 &&
+                    <>
+                        <h5>{StringSelector.getString(this.state.language).mainAllCat}</h5>
+                        <hr/>
+                    </>
+                }
                 {renderWithCats}
-                {renderWithout}
+                { this.state.catselected === "0" &&
+                    renderWithout
+                }
             </>
         );
     }
@@ -756,7 +772,7 @@ class Dashboard extends React.Component {
     }
 
     changeCat( changeTo ) {
-        //console.log("Change to: " + changeTo);
+        console.log("Change to: " + changeTo);
         this.props.saveCat(this.state.tabselected, changeTo);
         this.setState({
             catselected: changeTo

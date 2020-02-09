@@ -39,6 +39,8 @@ import StringSelector from "../../strings/stings";
  * @param user: username of this password
  * @param pass: password
  * @param url: link to the login page
+ * @param userGroupList: List with all users that are allowed to see this password. Only nessessary when dealing with group passwords and only shown for the admin (creater) of this password
+ *        - Array: [{name: ..}]
  * @param callback: Link to the dashboard class
  * @param rest
  */
@@ -66,6 +68,12 @@ export default class PassLine extends React.Component {
             // generate popup
             generatePassShow: false,
 
+
+            // Group Visibility
+            userGroupAdd: "",
+            /*userGroupListNew: [{name: "Huan"}],*/ userGroupListNew: this.deepCopyTags(this.props.userGroupList),
+            popUpGroupError: false,
+            groupErrTyp: 0,
         };
 
         this.dismissGeneratePass = this.dismissGeneratePass.bind(this);
@@ -236,11 +244,14 @@ export default class PassLine extends React.Component {
     }
 
     deepCopyTags( tags ) {
-        let out = [];
-        for ( let i = 0; i < tags.length; i++ ) {
-            out[i] = JSON.parse(JSON.stringify(tags[i]));
+        if ( tags !== undefined ) {
+            let out = [];
+            for ( let i = 0; i < tags.length; i++ ) {
+                out[i] = JSON.parse(JSON.stringify(tags[i]));
+            }
+            return out;
         }
-        return out;
+        return undefined;
     }
 
     findTagKeyIndex ( keyComp ) {
@@ -523,6 +534,7 @@ export default class PassLine extends React.Component {
             this.returnCatBase(item._id, item.name)
         );
 
+        // ToDo sprache anpassen
         return (
             <>
                 <Modal show={this.state.popUpCatShow} onHide={this.setPopUpCatDisabled} className="ep-modal-dialog">
@@ -556,7 +568,7 @@ export default class PassLine extends React.Component {
         }
         else {
             for ( let i = 0; i < cats.length; i++ ) {
-                if ( cats[i].id === this.state.catIdNew ) {
+                if ( cats[i]._id === this.state.catIdNew ) {
                     catName = cats[i].name;
                 }
             }
@@ -601,10 +613,87 @@ export default class PassLine extends React.Component {
         );
     }
 
+    getGroupErrorMsg() {
+        if ( this.state.popUpGroupError ) {
+            let err = StringSelector.getString(this.props.callback.state.language).addPassUserNotFound;
+            if ( this.state.groupErrTyp === 1 ) {
+                err = StringSelector.getString(this.props.callback.state.language).addPassUserAlready;
+            }
+            return (
+                <p className="text-danger fixErrorMsg">{err}</p>
+            );
+        }
+    }
+
+    getVisibilityTable() {
+        let key = -1;
+        let elms;
+        if ( this.state.userGroupListNew.length === 0 ) {
+            elms = StringSelector.getString(this.props.callback.state.language).addPassUserVisNon;
+            return (
+                <>
+                    <div className="visMargin">
+                        <h6 className="noMarginBottom">{StringSelector.getString(this.props.callback.state.language).addPassUserVis}</h6>
+                        <i>{StringSelector.getString(this.props.callback.state.language).addPassUserVis2}</i>
+                    </div>
+                    - {elms}
+                </>
+            );
+        }
+        else {
+            let elmsArray = [];
+            for ( let i = 0; i < this.state.userGroupListNew.length; i++ ) {
+                const item = this.state.userGroupListNew[i];
+                let tdClass = "";
+                if ( i === 0 ) {
+                    tdClass += "topRound";
+                }
+                if ( i === this.state.userGroupListNew.length-1) {
+                    tdClass += " botRound";
+                }
+                elmsArray[i] = (
+                    <td className={tdClass}>
+                        {item.name}
+                        { this.state.edit &&
+                        <button type="button" className="close userRemove" onClick={() => this.removeUserFromGroup(item.id)}>
+                            <span aria-hidden="true" >×</span>
+                            <span className="sr-only">Close</span>
+                        </button>
+                        }
+                    </td>
+                );
+            }
+
+            elms = elmsArray.map(function(item) {
+                key++;
+                return (
+                    <tr key={key}>
+                        {item}
+                    </tr>
+                );
+            });
+
+            return (
+                <>
+                    <div className="visMargin">
+                        <h6 className="noMarginBottom">{StringSelector.getString(this.props.callback.state.language).addPassUserVis}</h6>
+                        <i>{StringSelector.getString(this.props.callback.state.language).addPassUserVis2}</i>
+                    </div>
+                    <div className="roundDiv">
+                        <Table striped hover size="sm" className="noMarginBottom roundtable">
+                            <tbody>
+                            {elms}
+                            </tbody>
+                        </Table>
+                    </div>
+                </>
+            );
+        }
+    }
+
     render() {
 
         //console.log("Start of render", this.state.urlNew);
-        let url = this.state.urlNew;
 
         let catRender = this.renderCat();
 
@@ -907,7 +996,7 @@ export default class PassLine extends React.Component {
                                 </div>
                                 <br/>
                                 <div>
-                                    <h6>{StringSelector.getString(this.props.callback.state.language).lineTags}</h6>
+                                    <h6>{StringSelector.getString(this.props.callback.state.language).lineCat}</h6>
                                     {catRender}
                                 </div>
                             </div>
