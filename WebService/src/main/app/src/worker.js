@@ -3,17 +3,29 @@ importScripts("modules/pouchdb/dist/pouchdb.find.min.js");
 importScripts("modules/easypass-lib/dist/easypass-lib.js");
 import("../../rust/pkg").then(wasm => {
 
+    // Create new backend and start it
+    const app = new wasm.Backend();
+    app.start();
 
+
+    /**
+     * JS-Code is deprecated.
+     * Still left for code snippets that still need to be ported to WASM.
+     */
+
+    /**
     let worker = null;
     let remoteInit = false;
     let authUrl = null;
     let clientInitialized = false;
     let mode = undefined;
     let deletedPasswords = new Map();
-    //let undoPasswordDeletion = false;
+
+
 
     // Initialize Worker
     const init = async () => {
+
         let dbUrl = "";
         // Create connection to remote database if online
         // When offline, the remote setup will be done when a connection
@@ -32,6 +44,7 @@ import("../../rust/pkg").then(wasm => {
         }
         worker = new wasm.Worker(dbUrl);
         self.addEventListener('message', clientInit, true);
+
         // Send client OK and wait for response in `clientInit` listener
         while (!clientInitialized) {
             self.postMessage('initDone');
@@ -39,7 +52,7 @@ import("../../rust/pkg").then(wasm => {
         }
     };
 
-    init();
+    // init();
 
     // Sets host for the remote database when app the goes online
     // Only called when the app is started in offline-mode
@@ -103,7 +116,9 @@ import("../../rust/pkg").then(wasm => {
             mode = cmd;
             if (mode === 'dashboard') {
                 // TODO Toggle heartbeat
-                heartbeat();
+                //  Refactor hearbeat: loop -> listeners
+                //heartbeat();
+                worker.heartbeat();
             }
         } else {
             switch (mode) {
@@ -127,41 +142,49 @@ import("../../rust/pkg").then(wasm => {
                 self.postMessage(['echo', data]);
                 break;
         }
-    };
+    };*/
 
+    /**
     const dashboardCall = async (cmd, data) => {
+        // TODO do postMessage in WebAssembly not js
         switch (cmd) {
             case 'unregister':
                 mode = undefined;
                 break;
             case 'savePassword':
-                // TODO Worker Decrypt Password
-                const saveCheck = await worker.save(data);
-                self.postMessage(['savePassword', await saveEntryResult(saveCheck)]);
+                await worker.save_password(data);
+                break;
+            case 'updatePassword':
+                await worker.update_password(data);
                 break;
             case 'deletePassword':
-                const deletedPassword = (await worker.find({"selector":{"_id": data._id, "_rev": data._rev}})).docs[0];
-                deletedPasswords.set(deletedPassword, false);
-                const delCheck = await worker.remove(data._id, data._rev);
-                setTimeout(async function() {
-                    undoPasswordDelete(deletedPassword);
-                }, 5000);
-                self.postMessage(['deletePassword', delCheck]);
+                await worker.delete_password(data);
                 break;
             case 'undoDeletePassword':
-                const undoKey = [...deletedPasswords.keys()].find(entry => entry._id === data._id);
-                deletedPasswords.set(undoKey, true);
+                await worker.undo_delete_password(data);
                 break;
             case 'getPassword':
-                // TODO fix spamming worker calls from client for getPassword ...
+            case 'getPasswordForUpdate':
+            case 'getPasswordToClipboard':
+            case 'getPasswordAndRedirect':
                 const encrypted = (await worker.find({"selector":{"_id": data._id, "_rev": data._rev}})).docs[0];
                 // TODO call decryption
                 const decrypted = encrypted;
-                self.postMessage(['getPassword', {_id: decrypted._id, passwd: decrypted.passwd}]);
+                if (cmd === 'getPasswordAndRedirect') {
+                    self.postMessage([cmd, {_id: decrypted._id, passwd: decrypted.passwd, url: data.url}]);
+                } else self.postMessage([cmd, {_id: decrypted._id, passwd: decrypted.passwd}]);
                 break;
             case 'saveCategory':
-                const catCheck = await worker.save(data);
-                self.postMessage(['saveCategory', await saveCatResult(catCheck)]);
+                await worker.save_category(data);
+                break;
+            case 'updateCategory':
+                await worker.update_category(data);
+                break;
+            case 'deleteCategories':
+                await worker.delete_categories(data);
+                break;
+            case 'undoDeleteCategories':
+                await worker.undo_delete_categories(data);
                 break;
 
 
@@ -197,40 +220,16 @@ import("../../rust/pkg").then(wasm => {
         }
     };
 
-    const saveEntryResult = async (check) => {
-        if (check.ok) {
-            const entry =
-                (await worker.find({"selector": {"_id": check.id, "_rev": check.rev}})).docs[0];
-            delete entry.passwd;
-            return {
-                ok: true,
-                entry: entry
-            }
-        } else return { ok: false };
-    };
-
     const undoPasswordDelete = async (deletedPassword) => {
       const check = deletedPasswords.get(deletedPassword);
       if (check)  {
-          console.log("Undoing remove!!!");
           delete deletedPassword._id;
           delete deletedPassword._rev;
           // TODO error handling?
-          await worker.save(deletedPassword);
+          await worker.save_password(deletedPassword);
       }
       deletedPasswords.delete(deletedPassword);
-    };
-
-    const saveCatResult = async (check) => {
-        if (check.ok) {
-            const entry =
-                (await worker.find({"selector": {"_id": check.id, "_rev": check.rev}})).docs[0];
-            return {
-                ok: true,
-                entry: entry
-            }
-        } else return { ok: false };
-    };
+    };*/
 
     /**
      * Build selector query for PouchDB to verify that data was added.
@@ -243,10 +242,6 @@ import("../../rust/pkg").then(wasm => {
                 selector[e] = data[e];
         });
         return selector
-    };
-
-    const returnSaved = async (data) => {
-        const success = await elementExists(data);
     };
 
     /**
@@ -268,7 +263,7 @@ import("../../rust/pkg").then(wasm => {
            entries.push(e.doc);
         });
         return entries;
-    }
+    };
 
 
     /**
@@ -327,6 +322,8 @@ import("../../rust/pkg").then(wasm => {
 
 
     };
+
+
 
 });
 

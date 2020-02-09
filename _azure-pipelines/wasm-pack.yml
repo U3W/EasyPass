@@ -1,3 +1,3 @@
 steps:
-  - script: curl https://rustwasm.github.io/wasm-pack/installer/init.sh -sSf | sh -s -- -f
+  - script: cargo install wasm-pack --version 0.8.1
     displayName: "Install wasm-pack"

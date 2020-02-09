@@ -122,7 +122,7 @@ export default class EditCategory extends React.Component {
 
     editCat() {
         if ( this.state.nameNew.length !== 0 ) {
-            this.props.callback.editCat(this.state.id, this.state.nameNew, this.state.descriptionNew);
+            this.props.callback.updateCat(this.state.id, this.state.nameNew, this.state.descriptionNew);
             this.resetState();
         }
         else {

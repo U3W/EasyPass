@@ -39,8 +39,6 @@ import StringSelector from "../../strings/stings";
  * @param user: username of this password
  * @param pass: password
  * @param url: link to the login page
- * @param userGroupList: List with all users that are allowed to see this password. Only nessessary when dealing with group passwords and only shown for the admin (creater) of this password
- *          - Array: [{name: ..}]
  * @param callback: Link to the dashboard class
  * @param rest
  */
@@ -49,12 +47,13 @@ export default class PassLine extends React.Component {
         super(props);
 
         this.state = {
-            show: false,
+            open: false,
             showCopyAlert: false,
             edit: false,
+            editRequest: false,
             id: this.props.id,
             rev: this.props.rev,
-            passwordNew: "",
+            passwordNew: undefined,
             userNew: this.props.user,
             titleNew: this.props.title,
             imgSucc: false,
@@ -64,17 +63,9 @@ export default class PassLine extends React.Component {
             tagNew: this.deepCopyTags(this.props.tag),
             tagAdded: this.setTagAddedRight(this.props.tag),
             popUpCatShow: false,
-
-            // Group Visibility
-            userGroupAdd: "",
-            /*userGroupListNew: [{name: "Huan"}], */ userGroupListNew: this.deepCopyTags(this.props.userGroupList),
-            popUpGroupError: false,
-            groupErrTyp: 0,
-
-            passwordLoaded: false,
-
             // generate popup
             generatePassShow: false,
+
         };
 
         this.dismissGeneratePass = this.dismissGeneratePass.bind(this);
@@ -215,6 +206,12 @@ export default class PassLine extends React.Component {
 
     }
 
+    componentDidUpdate(prevProps, prevState, snapshot) {
+        if (this.state.editRequest === true && this.props.passwordCache !== undefined) {
+            this.setEdit(true, false);
+        }
+    }
+
     dismissGeneratePass() {
         this.setState({
             generatePassShow: false,
@@ -239,14 +236,11 @@ export default class PassLine extends React.Component {
     }
 
     deepCopyTags( tags ) {
-        if ( tags !== undefined ) {
-            let out = [];
-            for ( let i = 0; i < tags.length; i++ ) {
-                out[i] = JSON.parse(JSON.stringify(tags[i]));
-            }
-            return out;
+        let out = [];
+        for ( let i = 0; i < tags.length; i++ ) {
+            out[i] = JSON.parse(JSON.stringify(tags[i]));
         }
-        return undefined;
+        return out;
     }
 
     findTagKeyIndex ( keyComp ) {
@@ -334,28 +328,38 @@ export default class PassLine extends React.Component {
 
     saveEdit() {
         this.setEdit(false, true);
-        this.props.callback.saveEdit(this.state.id, this.state.userNew, this.state.passwordNew, this.state.titleNew, this.state.catIdNew, this.state.tagNew);
+        this.props.callback.saveEdit(
+            this.state.id, this.state.rev, this.state.userNew, this.state.passwordNew,
+            this.state.urlNew, this.state.titleNew, this.state.tagNew, this.state.catIdNew);
     }
 
     /**
-     * Before calling setEdit, when saving the edited state, saveEdit needs to be called first
+     * Before calling saveEdit, when saving the edited state, setEdit needs to be called first
      * @param changeTo (true|false)
      * @param succ (true|false) success
      */
     setEdit( changeTo, succ ) {
-        //console.log("ChangeTo", changeTo, this.props.tag);
         if ( changeTo ) {
-            // TODO test with prop
-            /**
-            this.setState({
-                passwordNew: this.props.callback.getPass(this.props.id),
-            });*/
-            this.props.callback.getPass(this.props.id);
+            if (this.state.passwordNew === undefined) {
+                if (this.props.passwordCache !== undefined) {
+                    this.setState({
+                        passwordNew: this.props.passwordCache,
+                        editRequest: false,
+                        edit: changeTo
+                    });
+                } else {
+                    this.setState({
+                        editRequest: true
+                    });
+                    this.props.callback.getPassForUpdate(this.props.id, this.state.rev);
+                }
+            }
         }
         else {
             if ( !succ ) {
                 this.setState({
-                    passwordNew: "",
+                    passwordNew: undefined,
+                    editRequest: false,
                     userNew: this.props.user,
                     titleNew: this.props.title,
                     urlNew: this.props.url,
@@ -365,11 +369,10 @@ export default class PassLine extends React.Component {
                     tagNew: this.deepCopyTags(this.props.tag),
                 });
             }
+            this.setState({
+                edit: changeTo
+            })
         }
-        this.setState({
-            edit: changeTo,
-            show: changeTo,
-        })
     }
 
     setPassword() {
@@ -384,10 +387,15 @@ export default class PassLine extends React.Component {
         });
     }
 
-    getPassword(id, rev) {
-        if ( this.state.show ) {
-            return this.props.callback.getPass(id, rev);
-        }
+    /**
+     * Starts the whole process thats results in setting the password
+     * into the cache.
+     * If password is already set, the cache is reseted.
+     */
+    getPassword() {
+        if (this.props.show !== true || this.state.id !== this.props.passwordCacheID) {
+            this.props.callback.getPass(this.state.id, this.state.rev);
+        } else this.props.callback.resetPass();
     }
 
 
@@ -515,7 +523,6 @@ export default class PassLine extends React.Component {
             this.returnCatBase(item._id, item.name)
         );
 
-
         return (
             <>
                 <Modal show={this.state.popUpCatShow} onHide={this.setPopUpCatDisabled} className="ep-modal-dialog">
@@ -527,7 +534,7 @@ export default class PassLine extends React.Component {
                             <tbody>
                                 {finalCats}
                                 <tr>
-                                    <td onClick={() => this.changePassCat(0)}>
+                                    <td onClick={() => this.changePassCat("0")}>
                                         Keiner Kategorie zuordnen
                                     </td>
                                 </tr>
@@ -544,12 +551,12 @@ export default class PassLine extends React.Component {
         let catName;
 
         // keiner Kategorie zugeordnet
-        if ( this.state.catIdNew === 0 ) {
+        if ( this.state.catIdNew === "0" ) {
             catName = "Keiner Kategorie zugeordnet";
         }
         else {
             for ( let i = 0; i < cats.length; i++ ) {
-                if ( cats[i]._id === this.state.catIdNew ) {
+                if ( cats[i].id === this.state.catIdNew ) {
                     catName = cats[i].name;
                 }
             }
@@ -594,113 +601,7 @@ export default class PassLine extends React.Component {
         );
     }
 
-    getGroupErrorMsg() {
-        if ( this.state.popUpGroupError ) {
-            let err = StringSelector.getString(this.props.callback.state.language).addPassUserNotFound;
-            if ( this.state.groupErrTyp === 1 ) {
-                err = StringSelector.getString(this.props.callback.state.language).addPassUserAlready;
-            }
-            return (
-                <p className="text-danger fixErrorMsg">{err}</p>
-            );
-        }
-    }
-
-    getVisibilityTable() {
-        let key = -1;
-        let elms;
-        if ( this.state.userGroupListNew.length === 0 ) {
-            elms = StringSelector.getString(this.props.callback.state.language).addPassUserVisNon;
-            return (
-                <>
-                    <div className="visMargin">
-                        <h6 className="noMarginBottom">{StringSelector.getString(this.props.callback.state.language).addPassUserVis}</h6>
-                        <i>{StringSelector.getString(this.props.callback.state.language).addPassUserVis2}</i>
-                    </div>
-                    - {elms}
-                </>
-            );
-        }
-        else {
-            let elmsArray = [];
-            for ( let i = 0; i < this.state.userGroupListNew.length; i++ ) {
-                const item = this.state.userGroupListNew[i];
-                let tdClass = "";
-                if ( i === 0 ) {
-                    tdClass += "topRound";
-                }
-                if ( i === this.state.userGroupListNew.length-1) {
-                    tdClass += " botRound";
-                }
-                elmsArray[i] = (
-                    <td className={tdClass}>
-                        {item.name}
-                        { this.state.edit &&
-                        <button type="button" className="close userRemove" onClick={() => this.removeUserFromGroup(item.id)}>
-                            <span aria-hidden="true" >×</span>
-                            <span className="sr-only">Close</span>
-                        </button>
-                        }
-                    </td>
-                );
-            }
-
-            elms = elmsArray.map(function(item) {
-                key++;
-                return (
-                    <tr key={key}>
-                        {item}
-                    </tr>
-                );
-            });
-
-            return (
-                <>
-                    <div className="visMargin">
-                        <h6 className="noMarginBottom">{StringSelector.getString(this.props.callback.state.language).addPassUserVis}</h6>
-                        <i>{StringSelector.getString(this.props.callback.state.language).addPassUserVis2}</i>
-                    </div>
-                    <div className="roundDiv">
-                        <Table striped hover size="sm" className="noMarginBottom roundtable">
-                            <tbody>
-                            {elms}
-                            </tbody>
-                        </Table>
-                    </div>
-                </>
-            );
-        }
-    }
-
     render() {
-        /**
-        let flag = true;
-        if (this.state.id !== this.props.passwordCacheID && this.state.show === true) {
-            flag = false;
-            this.setState({
-                show: false
-            });
-        }*/
-
-        /**if (this.props.passwordCacheID !== undefined && this.props.passwordCacheID !== this.state.id) {
-
-        }*/
-
-        // Request password from worker
-        // If-statement is needed to break recursive render loop
-        if (this.state.id !== this.props.passwordCacheID && this.state.show === true) {
-            this.getPassword(this.state.id, this.state.rev);
-        }
-
-        /**
-        if (this.state.passwordLoaded === false && this.props.passwordCacheID !== this.state.id) {
-            this.getPassword(this.state.id, this.state.rev);
-            this.setState({
-                passwordLoaded: true
-            });
-        }*/
-
-
 
         //console.log("Start of render", this.state.urlNew);
         let url = this.state.urlNew;
@@ -711,13 +612,13 @@ export default class PassLine extends React.Component {
         // Password when edited
         let noEdit = (
             <>
-                {this.state.show === true ?
+                {(this.props.show === true && this.state.id === this.props.passwordCacheID) ?
                     <FormControl aria-label="Small" aria-describedby="inputGroup-sizing-sm" type={"text"} disabled={true}  onChange={this.changeListener} value={this.props.passwordCache}/>
                     :
                     <FormControl aria-label="Small" aria-describedby="inputGroup-sizing-sm" type={"password"} disabled={true}  onChange={this.changeListener} value={"*****"}/>
                 }
-                {this.state.show === true ?
-                    <Button variant="dark" className="buttonSpaceInline notRound" onClick={this.setPassword}>
+                {(this.props.show === true && this.state.id === this.props.passwordCacheID) ?
+                    <Button variant="dark" className="buttonSpaceInline notRound" onClick={this.getPassword}>
                         <img
                             src={HideIcon}
                             alt=""
@@ -727,7 +628,7 @@ export default class PassLine extends React.Component {
                         />
                     </Button>
                     :
-                    <Button variant="dark" className="buttonSpaceInline notRound" onClick={this.setPassword}>
+                    <Button variant="dark" className="buttonSpaceInline notRound" onClick={this.getPassword}>
                         <img
                             src={ShowIcon}
                             alt=""
@@ -742,7 +643,7 @@ export default class PassLine extends React.Component {
 
         let edit = (
             <>
-                <FormControl id="password" aria-label="Small" type={"text"} aria-describedby="inputGroup-sizing-sm" onChange={this.changeListener} disabled={false} value={this.props.passwordCache}/>
+                <FormControl id="password" aria-label="Small" type={"text"} aria-describedby="inputGroup-sizing-sm" onChange={this.changeListener} disabled={false} value={this.state.passwordNew}/>
                 <Button variant="dark" className="notRound buttonSpaceInline" onClick={() => this.openGeneratePass()}>
                     <img
                         src={GeneratePassIcon}
@@ -764,58 +665,10 @@ export default class PassLine extends React.Component {
                 </Button>
             </>
         );
-
-
-        let userClass = "";
-        let userComp = "mb-3";
-        if ( this.state.popUpGroupError ) {
-            userClass = "is-invalid text-danger";
-            userComp = "mb-3 errorMargin";
-        }
-        let visEdit = "";
-        let visNoEdit = "";
-
-        console.log("Aha", this.state.userGroupListNew);
-        if ( this.state.userGroupListNew !== undefined ) {
-            visEdit = (
-                <>
-                    <hr/>
-                    <h6>{StringSelector.getString(this.props.callback.state.language).addPassVis}</h6>
-                    <InputGroup size="sm" className={userComp}>
-                        <InputGroup.Prepend>
-                            <InputGroup.Text id="inputGroup-sizing-sm">{StringSelector.getString(this.props.callback.state.language).addPassUserTag}</InputGroup.Text>
-                        </InputGroup.Prepend>
-                        <FormControl className={userClass} autoComplete="off" id="userGroupAdd" aria-label="Small" aria-describedby="inputGroup-sizing-sm" value={this.state.userGroupAdd} placeholder={StringSelector.getString(this.props.callback.state.language).addPassUserInpPlaceholder} onChange={this.changeListener}/>
-                        <InputGroup.Append>
-                            <Button variant="dark" onClick={this.addUserToGroupAcc}>
-                                <img
-                                    src={AddTag}
-                                    alt=""
-                                    width="14"
-                                    height="14"
-                                    className="d-inline-block"
-                                />
-                            </Button>
-                        </InputGroup.Append>
-                    </InputGroup>
-                    {this.getGroupErrorMsg()}
-                    {this.getVisibilityTable()}
-                </>
-            );
-            visNoEdit = (
-                <>
-                    <hr/>
-                    <h6>{StringSelector.getString(this.props.callback.state.language).addPassVis}</h6>
-                    {this.getVisibilityTable()}
-                </>
-            );
-        }
-
         return (
             <Card className="pass-card" name="passCard">
                 <input id="searchInput" type="hidden" value={this.props.title}/>
-                <Accordion.Toggle as={Card.Header} className="clickable center-vert" eventKey={this.props.id}
-                  onClick={() => this.setPasswordTo(false)}>
+                <Accordion.Toggle as={Card.Header} className="clickable center-vert" eventKey={this.props.id}>
                     <Row>
                         <Col sm={1} md={1} lg={1} xs={1} className="fixLogoCol">
                             { this.state.imgSucc ?
@@ -846,7 +699,8 @@ export default class PassLine extends React.Component {
                     {this.state.edit === true ? // Copy and GoToWebsite Buttons
                         <>
                             <Button variant="dark" className="buttonSpace" disabled={true}
-                                    onClick={() => { if ( !this.state.edit ) this.props.callback.copyPass() }}>
+                                    onClick={() => { if ( !this.state.edit )
+                                        this.props.callback.copyPass(this.state.id, this.state.rev) }}>
                                 <img
                                     src={CopyIcon}
                                     alt=""
@@ -856,7 +710,8 @@ export default class PassLine extends React.Component {
                                 />
                             </Button>
                             <Button variant="dark" className="buttonSpace" disabled={true}
-                                    onClick={() => { if ( !this.state.edit ) this.props.callback.goToPage(this.state.urlNew, this.state.id) }}>
+                                    onClick={() => { if ( !this.state.edit )
+                                        this.props.callback.goToPage(this.state.urlNew, this.state.id, this.state.rev) }}>
                                 <img
                                     src={GoToIcon}
                                     alt=""
@@ -879,7 +734,8 @@ export default class PassLine extends React.Component {
                                             </Tooltip>
                                         }
                                     >
-                                        <Button variant="dark" className="buttonSpace" onClick={() => { if ( !this.state.edit ) this.props.callback.copyPass() }}>
+                                        <Button variant="dark" className="buttonSpace" onClick={() => {
+                                            if ( !this.state.edit ) this.props.callback.copyPass(this.state.id, this.state.rev) }}>
                                             <img
                                                 src={CopyIcon}
                                                 alt=""
@@ -903,7 +759,7 @@ export default class PassLine extends React.Component {
                                         }
                                     >
                                         { this.state.urlNew.length === 0 ?
-                                            <Button variant="dark" className="buttonSpace" disabled={true} onClick={() => { if ( !this.state.edit && this.state.urlNew.length > 0 )  this.props.callback.goToPage(this.state.urlNew, this.state.id) }}>
+                                            <Button variant="dark" className="buttonSpace" disabled={true} onClick={() => { if ( !this.state.edit && this.state.urlNew.length > 0 )  this.props.callback.goToPage(this.state.urlNew, this.state.id, this.state.rev) }}>
                                                 <img
                                                     src={GoToIcon}
                                                     alt=""
@@ -913,7 +769,7 @@ export default class PassLine extends React.Component {
                                                 />
                                             </Button>
                                             :
-                                            <Button variant="dark" className="buttonSpace" onClick={() => { if ( !this.state.edit )  this.props.callback.goToPage(this.state.urlNew, this.state.id) }}>
+                                            <Button variant="dark" className="buttonSpace" onClick={() => { if ( !this.state.edit )  this.props.callback.goToPage(this.state.urlNew, this.state.id, this.state.rev) }}>
                                                 <img
                                                     src={GoToIcon}
                                                     alt=""
@@ -932,7 +788,9 @@ export default class PassLine extends React.Component {
                 </div>
                 <Accordion.Collapse eventKey={this.props.id}>
                     <>
-                        <Card.Body>
+                        <Card.Body onChange={(e) => {
+                            console.log("COLLAPSE: ", e);
+                        }}>
                             <Card.Title>
                             {this.state.edit === true ? // Title
                                 <InputGroup size="lg">
@@ -1000,7 +858,7 @@ export default class PassLine extends React.Component {
                                             />
                                         </Button>
                                         :
-                                        <Button variant="dark" className="buttonSpaceInline " onClick={() => this.props.callback.copyPass(this.props.id, this.state.rev)}>
+                                        <Button variant="dark" className="buttonSpaceInline " onClick={() => this.props.callback.copyPass(this.state.id, this.state.rev)}>
                                             <img
                                                 src={CopyIcon}
                                                 alt=""
@@ -1051,13 +909,6 @@ export default class PassLine extends React.Component {
                                 <div>
                                     <h6>{StringSelector.getString(this.props.callback.state.language).lineTags}</h6>
                                     {catRender}
-                                </div>
-                                <div>
-                                    { this.state.edit ?
-                                        visEdit
-                                        :
-                                        visNoEdit
-                                    }
                                 </div>
                             </div>
                         </Card.Body>

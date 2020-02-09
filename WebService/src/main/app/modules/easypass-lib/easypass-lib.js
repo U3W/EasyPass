@@ -56,3 +56,37 @@ const clearAsyncInterval = (intervalIndex) => {
         asyncIntervals[intervalIndex] = false;
     }
 };
+
+/**
+ * Custom setTimeout for Web Worker scope.
+ * Used in WebAssembly code.
+ */
+const setTimeoutWorker = (f, m) => {
+    return self.setTimeout(f, m);
+};
+
+/**
+ * Custom clearTimeout for Web Worker scope.
+ * Used in WebAssembly code.
+ */
+const clearTimeoutWorker = (id) => {
+    return self.clearTimeout(id);
+};
+
+/**
+ * Custom addEventListener for Web Worker scope.
+ * Used in WebAssembly code.
+ */
+const addEventListenerWorker = (name, f) => {
+    self.addEventListener(name, f, true);
+};
+
+/**
+ * Custom removeEventListener for Web Worker scope.
+ * Used in WebAssembly code.
+ */
+const removeEventListenerWorker = (name, f) => {
+    self.removeEventListener(name, f, true);
+};
+
+
