@@ -67,7 +67,7 @@ export default class PassLine extends React.Component {
 
             // Group Visibility
             userGroupAdd: "",
-            userGroupListNew: [{name: "Huan"}], //this.deepCopyTags(this.props.userGroupList),
+            /*userGroupListNew: [{name: "Huan"}], */ userGroupListNew: this.deepCopyTags(this.props.userGroupList),
             popUpGroupError: false,
             groupErrTyp: 0,
 
@@ -512,8 +512,9 @@ export default class PassLine extends React.Component {
         let cats = this.props.callback.getCats();
 
         let finalCats = cats.map((item) =>
-            this.returnCatBase(item.id, item.name)
+            this.returnCatBase(item._id, item.name)
         );
+
 
         return (
             <>
@@ -548,7 +549,7 @@ export default class PassLine extends React.Component {
         }
         else {
             for ( let i = 0; i < cats.length; i++ ) {
-                if ( cats[i].id === this.state.catIdNew ) {
+                if ( cats[i]._id === this.state.catIdNew ) {
                     catName = cats[i].name;
                 }
             }
@@ -773,6 +774,8 @@ export default class PassLine extends React.Component {
         }
         let visEdit = "";
         let visNoEdit = "";
+
+        console.log("Aha", this.state.userGroupListNew);
         if ( this.state.userGroupListNew !== undefined ) {
             visEdit = (
                 <>

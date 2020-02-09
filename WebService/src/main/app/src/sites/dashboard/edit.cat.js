@@ -84,7 +84,7 @@ export default class EditCategory extends React.Component {
         let cats = this.props.callback.getCats();
 
         let finalCats = cats.map((item) =>
-            this.returnCatBase(item.id, item.name, item.desc)
+            this.returnCatBase(item._id, item.name, item.desc)
         );
 
         return (

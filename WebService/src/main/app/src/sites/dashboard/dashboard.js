@@ -206,8 +206,8 @@ class Dashboard extends React.Component {
             for (let i = 0; i < cats.length; i++) {
                 let catId = cats[i]._id;
                 let catData = this.getCatData(catId, this.state.tabselected);
-                // add callback to array
                 if (catData !== undefined) {
+                    // add callback to array
                     catData = this.addCallback(catData);
                     passwords[catId] = catData.map(singlePass => {
                         return (
@@ -293,10 +293,16 @@ class Dashboard extends React.Component {
 
         return (
             <>
-                <h5>{StringSelector.getString(this.state.language).mainAllCat}</h5>
-                <hr/>
+                { this.state.catselected === 0 &&
+                    <>
+                        <h5>{StringSelector.getString(this.state.language).mainAllCat}</h5>
+                        <hr/>
+                    </>
+                }
                 {renderWithCats}
-                {renderWithout}
+                { this.state.catselected === 0 &&
+                    renderWithout
+                }
             </>
         );
     }
@@ -313,7 +319,6 @@ class Dashboard extends React.Component {
     }
 
     setErrorShow( to ) {
-        console.log("Aha", to);
         this.setState({
             errorShow: to,
         });
@@ -682,7 +687,7 @@ class Dashboard extends React.Component {
         this.setState({
             [e.target.id]: e.target.value
         });
-        let input, filter, passwords, div, inp, txtValue;
+        let input, filter, passwords, div, inp, inp2, txtValue;
         input = e.target.value;
 
         filter = input.toUpperCase();
@@ -697,6 +702,7 @@ class Dashboard extends React.Component {
                     if ( editDiv[i].tagName === "DIV" ) {
 
                         inp = editDiv[i].children[0];
+                        inp2 = editDiv[i].children[1];
                         txtValue = inp.value;
                         if (input.length === 0) {
                             editDiv[i].style.display = "";
@@ -780,7 +786,7 @@ class Dashboard extends React.Component {
     }
 
     changeCat( changeTo ) {
-        //console.log("Change to: " + changeTo);
+        console.log("Change to: " + changeTo);
         this.props.saveCat(this.state.tabselected, changeTo);
         this.setState({
             catselected: changeTo
@@ -810,7 +816,7 @@ class Dashboard extends React.Component {
         let cats = this.getCats();
         for ( let i = 0; i < cats.length; i++ )
         {
-            if ( cats[i].id === selected ) {
+            if ( cats[i]._id === selected ) {
                 return cats[i].name;
             }
         }

@@ -95,9 +95,8 @@ export default class DeleteCategory extends React.Component {
 
     render() {
         let finalCats = this.props.callback.getCats().map((item) =>
-            this.returnCatBase(item.id, item.name, item.desc)
+            this.returnCatBase(item._id, item.name, item.desc)
         );
-
 
         return (
             <>
