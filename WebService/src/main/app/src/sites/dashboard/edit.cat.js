@@ -13,7 +13,8 @@ export default class EditCategory extends React.Component {
         super(props);
 
         this.state = {
-            id: 0,
+            id: undefined,
+            rev: undefined,
             catName: StringSelector.getString(this.props.callback.state.language).editCatSelCat,
 
             nameNew: "",
@@ -61,20 +62,21 @@ export default class EditCategory extends React.Component {
         });
     }
 
-    returnCatBase ( id, name, desc) {
+    returnCatBase ( id, rev, name, desc) {
         return (
             <tr key={id}>
-                <td onClick={() => this.changeCat(id, name, desc)}>
+                <td onClick={() => this.changeCat(id, rev, name, desc)}>
                     {name}
                 </td>
             </tr>
         );
     }
 
-    changeCat(id, name, desc) {
+    changeCat(id, rev, name, desc) {
         this.setPopUpCatDisabled();
         this.setState({
             id: id,
+            rev: rev,
             catName: name,
             nameNew: name,
             descriptionNew: desc,
@@ -84,7 +86,7 @@ export default class EditCategory extends React.Component {
         let cats = this.props.callback.getCats();
 
         let finalCats = cats.map((item) =>
-            this.returnCatBase(item.id, item.name, item.desc)
+            this.returnCatBase(item._id, item._rev, item.name, item.desc)
         );
 
         return (
@@ -122,7 +124,7 @@ export default class EditCategory extends React.Component {
 
     editCat() {
         if ( this.state.nameNew.length !== 0 ) {
-            this.props.callback.updateCat(this.state.id, this.state.nameNew, this.state.descriptionNew);
+            this.props.callback.updateCat(this.state.id, this.state.rev, this.state.nameNew, this.state.descriptionNew);
             this.resetState();
         }
         else {

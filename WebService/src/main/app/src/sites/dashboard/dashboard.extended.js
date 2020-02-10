@@ -68,6 +68,10 @@ export function workerCall( e ) {
             this.copy("", dashboardAlerts.showAddedCat, data.ok);
             this.dismissAddCat();
             break;
+        case 'updateCategory':
+            this.copy("", dashboardAlerts.showEditedCat, data.ok);
+            this.dismissEditCat();
+            break;
         case 'deleteCategories':
             // ToDo call Kacpers method
             /**
@@ -162,10 +166,8 @@ export function resetPass() {
  * Recovers and deleted password or category entry.
  */
 export function undoDelete(which, id) {
-    // TODO Enable stop delete
     switch (which) {
         case dashboardAlerts.showDeleteCatAlert:
-            // ToDo call Kacpers  with id
             console.log("undo delete: ", id);
             this.props.worker.postMessage(['undoDeleteCategories', id]);
             this.setState({
@@ -185,7 +187,6 @@ export function undoDelete(which, id) {
  * Adds a new category entry.
  */
 export function addCat(name, description) {
-    // TODO add new category
     const tabID = this.state.tabselected;
     this.props.worker.postMessage(['saveCategory',
         {type: 'cat', name: name, desc: description, tabID: tabID }]);
@@ -194,10 +195,11 @@ export function addCat(name, description) {
 /**
  * Updates a category entry.
  */
-export function updateCat( id, nameNew, descriptionNew) {
-    // ToDo call Kacpers method
-    this.copy("", dashboardAlerts.showEditedCat, false);
-    this.dismissEditCat();
+export function updateCat(id, rev, nameNew, descriptionNew) {
+    const tabID = this.state.tabselected;
+    this.props.worker.postMessage(['updateCategory',
+        {_id: id, _rev: rev, type: 'cat', name: nameNew, desc: descriptionNew, tabID: tabID}]);
+
 }
 
 /**
