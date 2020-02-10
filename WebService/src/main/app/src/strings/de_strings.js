@@ -191,6 +191,8 @@ export const strings = {
     lineCat: "Kategorie",
     lineCatNoCat: "Keiner Kategorie zugeordnet",
 
+    lineTagsNotAdded: "Noch keine Tags hinzugefügt!",
+
     // Pass Line alerts
     lineCopyPass: "Passwort kopieren",
     lineCopyPassGoTo: "Passwort kopieren und Website öffnen",

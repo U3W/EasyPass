@@ -254,12 +254,13 @@ class Dashboard extends React.Component {
         let language = this.state.language;
 
         let nothingAdded = "";
+        let i = -1;
         if (passwordsWithCats !== undefined) {
             renderWithCats = cats.map(function (cat) {
-                console.log("Aha", passwordsWithCats[cat._id]);
                 if ( cat._id === catselected || catselected === "0") {
+                    i++;
                     return (
-                        <div key={cat._id}>
+                        <div key={i}>
                             <strong>{cat.name}</strong>
                             {cat.desc.length === 0 ?
                                 ""
@@ -280,7 +281,7 @@ class Dashboard extends React.Component {
                 }
                 else {
                     return (
-                        <></>
+                        ""
                     )
                 }
 
@@ -288,6 +289,12 @@ class Dashboard extends React.Component {
         }
         else if (passwordsWithout === undefined) {
             nothingAdded = StringSelector.getString(this.state.language).noCatsNoPass;
+            // ToDo vielleicht noch eine schönere Lösung finden
+            if ( this.state.catselected !== "0" ) {
+                this.setState({
+                    catselected: "0",
+                });
+            }
         }
 
 

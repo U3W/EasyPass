@@ -30,6 +30,7 @@ import GeneratePassIcon from "../../img/icons/generate_password_white.svg";
 import GeneratePass from "./generatepass";
 import Spinner from "react-bootstrap/Spinner";
 import StringSelector from "../../strings/stings";
+import RemoveTag from "../../img/icons/password_add_remove_user.svg";
 
 
 /**
@@ -307,6 +308,27 @@ export default class PassLine extends React.Component {
             });
         }
     }
+
+    removeTag( i ) {
+        if ( this.state.edit ) {
+            if (i < this.state.tagNew.length) {
+                let temp = this.state.tagNew;
+                temp.splice(i, 1);
+
+
+                if (this.state.tagNew.length === 0) {
+                    this.setState({
+                        tagAdded: false,
+                    })
+                } else {
+                    this.setState({
+                        tagNew: temp,
+                    });
+                }
+            }
+        }
+    }
+
     changeListener( e ) {
         if ( this.state.edit )
         {
@@ -440,46 +462,79 @@ export default class PassLine extends React.Component {
                 tagCompArray[0] = "Keine Tags vorhanden";
             }
         }
-        for ( let i = 0; i < tag.length; i++ )
-        {
-            //console.log("Tag single: ",tag[i], "I: ", i);
-            let tagKeys = Object.keys(tag[i]);
-            //console.log("key", tagKeys);
-            let but = "";
-            if ( this.state.edit && i === tag.length-1) {
-                but = (
-                    <Button variant="dark" className="buttonSpaceInline" onClick={this.addTag}>
-                        <img
-                            src={AddTag}
-                            alt=""
-                            width="14"
-                            height="14"
-                            className="d-inline-block"
-                        />
-                    </Button>
-                );
-            }
-            if ( this.state.edit ) {
-                //                         <InputGroup.Prepend>
-                //<input id={"tagKey" + i } className="input-group-text setTagEdit" disabled={false} value={tagKeys[i]} onChange={(e) => this.changeTagListener(tagKeys[i], null, e)} />
-                tagCompArray[i] = (
-                    <InputGroup size="sm" className="mb-3">
-                        <FormControl id={"tagKey" + i } className="" aria-label="Small" aria-describedby="inputGroup-sizing-sm" disabled={false} value={tagKeys[0]} onChange={(e) => this.changeTagListener(tagKeys[0], tag[i][tagKeys[0]], i, e)} />
-                        <FormControl id={"tagValue" + i } aria-label="Small" aria-describedby="inputGroup-sizing-sm" disabled={false} value={tag[i][tagKeys[0]]} onChange={(e) => this.changeTagListener(tagKeys[0], tag[i][tagKeys[0]], i, e)} />
-                        {but}
-                    </InputGroup>
-                );
-            }
-            else {
-                tagCompArray[i] = (
-                    <InputGroup size="sm" className="mb-3">
-                        <InputGroup.Prepend>
-                            <input className="input-group-text fixTag" disabled={true} value={tagKeys[0]} onChange={(e) => this.changeTagListener(tagKeys[0], tag[i][tagKeys[0]], i, e)}/>
-                        </InputGroup.Prepend>
-                        <FormControl aria-label="Small" aria-describedby="inputGroup-sizing-sm" disabled={true} value={tag[i][tagKeys[0]]} onChange={(e) => this.changeTagListener(tagKeys[0], tag[i][tagKeys[0]], i, e)}/>
-                        {but}
-                    </InputGroup>
-                );
+        else {
+            for ( let i = 0; i < tag.length; i++ )
+            {
+                let tagKeys = Object.keys(tag[i]);
+
+                let andBut = "";
+                if ( i < tag.length-1) {
+                    andBut = (
+                        <>
+                            <Button variant="dark" className="buttonSpaceInline" onClick={() => this.removeTag(i)}>
+                                <img
+                                    src={RemoveTag}
+                                    alt=""
+                                    width="14"
+                                    height="14"
+                                    className="d-inline-block"
+                                />
+                            </Button>
+                        </>
+                    );
+                }
+                else if ( i === tag.length-1) {
+                    andBut = (
+                        <>
+                            <Button variant="dark" className="buttonSpaceInline notRound" onClick={() => this.removeTag(i)}>
+                                <img
+                                    src={RemoveTag}
+                                    alt=""
+                                    width="14"
+                                    height="14"
+                                    className="d-inline-block"
+                                />
+                            </Button>
+                            <hr className="vertical-button-sep"/>
+                        </>
+                    );
+                }
+                let but = "";
+                if ( this.state.edit && i === tag.length-1) {
+                    but = (
+                        <Button variant="dark" className="buttonSpaceInline" onClick={this.addTag}>
+                            <img
+                                src={AddTag}
+                                alt=""
+                                width="14"
+                                height="14"
+                                className="d-inline-block"
+                            />
+                        </Button>
+                    );
+                }
+                if ( this.state.edit ) {
+                    //                         <InputGroup.Prepend>
+                    //<input id={"tagKey" + i } className="input-group-text setTagEdit" disabled={false} value={tagKeys[i]} onChange={(e) => this.changeTagListener(tagKeys[i], null, e)} />
+                    tagCompArray[i] = (
+                        <InputGroup size="sm" className="mb-3">
+                            <FormControl id={"tagKey" + i } className="" aria-label="Small" aria-describedby="inputGroup-sizing-sm" disabled={false} value={tagKeys[0]} onChange={(e) => this.changeTagListener(tagKeys[0], tag[i][tagKeys[0]], i, e)} />
+                            <FormControl id={"tagValue" + i } aria-label="Small" aria-describedby="inputGroup-sizing-sm" disabled={false} value={tag[i][tagKeys[0]]} onChange={(e) => this.changeTagListener(tagKeys[0], tag[i][tagKeys[0]], i, e)} />
+                            {andBut}
+                            {but}
+                        </InputGroup>
+                    );
+                }
+                else {
+                    tagCompArray[i] = (
+                        <InputGroup size="sm" className="mb-3">
+                            <InputGroup.Prepend>
+                                <input className="input-group-text fixTag" disabled={true} value={tagKeys[0]} onChange={(e) => this.changeTagListener(tagKeys[0], tag[i][tagKeys[0]], i, e)}/>
+                            </InputGroup.Prepend>
+                            <FormControl aria-label="Small" aria-describedby="inputGroup-sizing-sm" disabled={true} value={tag[i][tagKeys[0]]} onChange={(e) => this.changeTagListener(tagKeys[0], tag[i][tagKeys[0]], i, e)}/>
+                        </InputGroup>
+                    );
+                }
             }
         }
         let key = -1;

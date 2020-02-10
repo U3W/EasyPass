@@ -176,6 +176,8 @@ export const strings = {
     lineCat: "Category",
     lineCatNoCat: "Not assigned to any category",
 
+    lineTagsNotAdded: "No tags added yet!",
+
     // Pass Line alerts
     lineCopyPass: "Copy password",
     lineCopyPassGoTo: "Copy password and open website",
