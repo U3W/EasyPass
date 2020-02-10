@@ -117,6 +117,7 @@ export const strings = {
 
     // Navbar Bottom
 
+    addGroup: "Add group",
     // Add Password
     addPass: "Add password",
 
@@ -140,11 +141,26 @@ export const strings = {
 
     addPassAdd: "Add",
 
+    // Add Pass Group
+    addPassVis: "Password visibility",
+    addPassUserTag: "Add user to group",
+    addPassUserInpPlaceholder: "Enter user name",
+
+    addPassUserVis: "Group members",
+    addPassUserVis2: "Users who have access to the password",
+    addPassUserVisNon: "No users added yet",
+
+    addPassUserAlready: "Username does not exist!",
+    addPassUserNotFound: "User already added!",
+
     /** Main Window */
     mainPassGroup: "Group passwords",
     mainPassPriv: "Private passwords",
 
     mainAllCat: "All categories",
+
+    noPassToCat: "No passwords have not yet been added to this category.",
+    noCatsNoPass: "No entries yet.",
 
     mainNotAddedToCat: "Not assigned",
     mainNotAddedToCatInfo: "Here are all passwords that are not assigned to a category",
@@ -160,6 +176,8 @@ export const strings = {
     lineTags: "Tags",
     lineCat: "Category",
     lineCatNoCat: "Not assigned to any category",
+
+    lineTagsNotAdded: "No tags added yet!",
 
     // Pass Line alerts
     lineCopyPass: "Copy password",

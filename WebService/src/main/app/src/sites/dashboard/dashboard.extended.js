@@ -96,6 +96,7 @@ export function workerCall( e ) {
  * Adds a new password entry.
  */
 export function addPass(user, passwd, url, title, tags, catID) {
+    console.log("Add pass", tags);
     const tabID = this.state.tabselected;
     this.props.worker.postMessage(['savePassword',
         {type: 'passwd', user: user, passwd: passwd, url: url, title: title, tags: tags, tabID: tabID, catID: catID, }]);
@@ -209,6 +210,14 @@ export function deleteCats(entries) {
     this.setState({
         currentCatDelete: entries,
     });
+    for ( let i = 0; i < entries.length; i++ ) {
+        if ( entries[i]._id === this.state.catselected ) {
+            this.setState({
+                catselected: "0"
+            });
+            break;
+        }
+    }
     this.props.worker.postMessage(['deleteCategories', entries]);
 }
 

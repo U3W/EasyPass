@@ -13,6 +13,9 @@ import dashboardState from "../dashboard/dashboard.saved.state";
 // Strings
 import StringSelector from "../../strings/stings";
 
+// animatoin
+import * as animation from "../../animation/fadeOutGradient"
+
 // Rest
 import {Card, Nav} from "react-bootstrap";
 import Logo from "../../img/logo/LogoV2.svg"
@@ -23,6 +26,8 @@ import {login, logout, succRegist} from "../../action/auth.action";
 import Indicator from "../../network/network.indicator";
 import {dashboardAlerts} from "../dashboard/const/dashboard.enum";
 import Registration from "../registration/registration";
+import FadeOutGradient from "../../animation/fadeOutGradient";
+import indexState from "../../index.saved.state";
 
 
 
@@ -32,6 +37,9 @@ class Login extends React.Component {
         super(props);
 
         this.state = {
+            // for the loading animation
+            loading: indexState.getLoadingState(),
+
             language: dashboardState.getSelectedLanguage(),
 
             inpPassword: "",
@@ -45,6 +53,8 @@ class Login extends React.Component {
             alertState: "success",
         };
 
+        this.fadeOutGradient = animation.fadeOutGradient.bind(this);
+
         this.handleChange = this.handleChange.bind(this);
         this.handleSubmit = this.handleSubmit.bind(this);
         this.handleKeyevent = this.handleKeyevent.bind(this);
@@ -57,6 +67,12 @@ class Login extends React.Component {
 
     componentDidMount() {
         this.props.worker.addEventListener("message", this.workerCall, true);
+        // end animation thing
+        setTimeout(() => {
+            this.setState({
+                loading: false,
+            });
+        }, 500)
     }
 
     componentWillUnmount() {
@@ -253,42 +269,44 @@ class Login extends React.Component {
     render() {
         return (
             <>
-            { this.state.wantRegister ?
-                <Registration callback={this}/>
-                :
-                <div className="backgroundPicLogin">
-                    <div className="gradientDivLogin">
-                        <Container>
-                            <Row className="size-hole-window">
-                                <Col xs={12} sm={8} md={6} lg={5} className="center-vert center-horz">
-                                    <Card className="card-login login">
-                                        <Card.Img variant="top" src={Logo} />
-                                        <Card.Body>
-                                            <Form autoComplete="off">
-                                                {this.getInputUsername()}
-                                                {this.getInputPassword()}
-                                                <Form.Group>
-                                                        <Form.Check type="checkbox" id="inpKeepLoggedIn" label={StringSelector.getString(this.state.language).keepLoggedIn} />
-                                                    <Nav.Link onClick={() => { this.switchToRegister(true, false, true)} }>{StringSelector.getString(this.state.language).registrationButton}</Nav.Link>
-                                                </Form.Group>
-                                                <Button variant="danger" className={"float-right"} onClick={this.handleSubmit}>
-                                                    {StringSelector.getString(this.state.language).loginButton}
-                                                </Button>
-                                            </Form>
-                                        </Card.Body>
-                                    </Card>
-                                </Col>
-                                <div className="footer">
-                                    {this.printError()}
-                                    {this.printRegistered()}
-                                </div>
-                                <Indicator />
-                            </Row>
-                        </Container>
+                { (this.state.loading === undefined ) &&
+                    this.fadeOutGradient(true)
+                }
+                { this.state.wantRegister ?
+                    <Registration callback={this}/>
+                    :
+                    <div className="backgroundPicLogin">
+                        <div className="gradientDivLogin">
+                            <Container>
+                                <Row className="size-hole-window">
+                                    <Col xs={12} sm={8} md={6} lg={5} className="center-vert center-horz">
+                                        <Card className="card-login login">
+                                            <Card.Img variant="top" src={Logo} />
+                                            <Card.Body>
+                                                <Form autoComplete="off">
+                                                    {this.getInputUsername()}
+                                                    {this.getInputPassword()}
+                                                    <Form.Group>
+                                                            <Form.Check type="checkbox" id="inpKeepLoggedIn" label={StringSelector.getString(this.state.language).keepLoggedIn} />
+                                                        <Nav.Link onClick={() => { this.switchToRegister(true, false, true)} }>{StringSelector.getString(this.state.language).registrationButton}</Nav.Link>
+                                                    </Form.Group>
+                                                    <Button variant="danger" className={"float-right"} onClick={this.handleSubmit}>
+                                                        {StringSelector.getString(this.state.language).loginButton}
+                                                    </Button>
+                                                </Form>
+                                            </Card.Body>
+                                        </Card>
+                                    </Col>
+                                    <div className="footer">
+                                        {this.printError()}
+                                        {this.printRegistered()}
+                                    </div>
+                                    <Indicator />
+                                </Row>
+                            </Container>
+                        </div>
                     </div>
-                </div>
-            }
-
+                }
             </>
         );
     }

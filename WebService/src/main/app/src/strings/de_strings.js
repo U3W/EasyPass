@@ -130,8 +130,8 @@ export const strings = {
     delCatErrSing: "Beim Löschen der Kategorie ist ein Fehler aufgetreten. Bitte versuchen Sie es erneut!",
     delCatErrMult: "Beim Löschen der Kategorien ist ein Fehler aufgetreten. Bitte versuchen Sie es erneut!",
 
-    // Navbar Bottom
 
+    addGroup: "Gruppe hinzufügen",
     // Add Password
     addPass: "Passwort hinzufügen",
 
@@ -155,11 +155,26 @@ export const strings = {
 
     addPassAdd: "Hinzufügen",
 
+    // Add Pass Group
+    addPassVis: "Passwort Sichtbarkeit",
+    addPassUserTag: "Nutzer zur Gruppe hinzufügen",
+    addPassUserInpPlaceholder: "Benutzernamen eingeben",
+
+    addPassUserVis: "Gruppenmitglieder",
+    addPassUserVis2: "Nutzer, die Einsicht in das Passwort haben",
+    addPassUserVisNon: "Noch keine Nutzer hinzugefügt",
+
+    addPassUserAlready: "Benutzername existiert nicht!",
+    addPassUserNotFound: "Benutzer bereits hinzugefügt!",
+
     /** Main Window */
     mainPassGroup: "Gruppen Passwörter",
     mainPassPriv: "Private Passwörter",
 
     mainAllCat: "Alle Kategorien",
+
+    noPassToCat: "Zu dieser Kategorie wurden noch keine Passwörter nicht hinzugefügt.",
+    noCatsNoPass: "Noch keine Einträge.",
 
     mainNotAddedToCat: "Nicht zugeordnet",
     mainNotAddedToCatInfo: "Hier befinden sich alle Passwörter, die keine Kategorie zugeordnet wurden",
@@ -175,6 +190,8 @@ export const strings = {
     lineTags: "Tags",
     lineCat: "Kategorie",
     lineCatNoCat: "Keiner Kategorie zugeordnet",
+
+    lineTagsNotAdded: "Noch keine Tags hinzugefügt!",
 
     // Pass Line alerts
     lineCopyPass: "Passwort kopieren",
@@ -207,6 +224,7 @@ export const strings = {
     // Add Alert
     linePassAddSuc: "Passwort hinzugefügt!",
     linePassAddErr: "Beim Hinzufügen des Passworts ist ein Fehler aufgetreten. Bitte versuchen Sie es erneut!",
+
 
 
 };

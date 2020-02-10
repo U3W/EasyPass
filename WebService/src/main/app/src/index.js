@@ -20,28 +20,112 @@ import {createStore, applyMiddleware} from "redux";
 import rootReducer from "./store/reducers/root.reducer";
 import {Provider} from "react-redux"
 import thunk from "redux-thunk";
-import { Offline, Online, Detector } from "react-detect-offline";
-import {handleConnection} from "./network/network.functions";
 import Dashboard from "./sites/dashboard/dashboard";
-import VerifyAuth from "./authentification/auth.masterpassword"
 import * as serviceWorker from "./service-worker/sw-handler";
-import {dashboardAlerts} from "./sites/dashboard/const/dashboard.enum";
+import * as that from "./sites/dashboard/dashboard.extended";
+
+
+import { ReactComponent as LogoComp } from './img/logo/Logo_Single_Big.svg';
+import Logo from './img/logo/Logo_Single_Big.svg'
+import Cloud1 from './img/logo/Cloud1.svg'
+import Cloud2 from './img/logo/Cloud2.svg'
+import Cloud3 from './img/logo/Cloud3.svg'
+import Cloud4 from './img/logo/Cloud4.svg'
+import {
+    bounceInDown,
+    bounceOutDown,
+    fadeOut,
+    fadeIn,
+    fadeInLeft,
+    fadeInRight,
+    fadeOutLeft,
+    fadeOutRight,
+} from 'react-animations';
+
+import Radium, {StyleRoot} from 'radium';
+import dashboardState from "./sites/dashboard/dashboard.saved.state";
+import indexState from "./index.saved.state";
 
 
 
 // Load service worker
 serviceWorker.register();
 
-// Für Storage
+// For Storage
 const store = createStore(rootReducer, applyMiddleware(thunk));
 
-// Grundapp
+// For the animation
+const styles = {
+    logo: {
+        animation: 'x 1s',
+        animationName: Radium.keyframes(bounceInDown, 'bounceInDown')
+    },
+    logoOut: {
+        animation: 'x 0.7s',
+        animationName: Radium.keyframes(bounceOutDown, 'bounceOutDown')
+    },
+    cloudsOut: {
+        animation: 'x 0.7s',
+        animationName: Radium.keyframes(fadeOut, 'fadeOut')
+    },
+    cloudsIn: {
+        animation: 'x 1.2s',
+        animationName: Radium.keyframes(fadeIn, 'fadeIn')
+    },
+    cloud1LeftIn: {
+        animation: 'x 1s',
+        animationName: Radium.keyframes(fadeInLeft, 'fadeInLeft')
+    },
+    cloud1RightOut: {
+        animation: 'x 1s',
+        animationName: Radium.keyframes(fadeOutRight, 'fadeOutRight')
+    },
+    cloud3LeftIn: {
+        animation: 'x 1.2s',
+        animationName: Radium.keyframes(fadeInLeft, 'fadeInLeft')
+    },
+    cloud4LeftIn: {
+        animation: 'x 1.05s',
+        animationName: Radium.keyframes(fadeInLeft, 'fadeInLeft')
+    },
+    cloud4RightOut: {
+        animation: 'x 1s',
+        animationName: Radium.keyframes(fadeOutRight, 'fadeOutRight')
+    },
+    cloud3RightOut: {
+        animation: 'x 0.7s',
+        animationName: Radium.keyframes(fadeOutRight, 'fadeOutRight')
+    },
+    cloud2RightIn: {
+        animation: 'x 1s',
+        animationName: Radium.keyframes(fadeInRight, 'fadeInRight')
+    },
+    cloud2LeftOut: {
+        animation: 'x 1s',
+        animationName: Radium.keyframes(fadeOutLeft, 'fadeOutLeft')
+    },
+    cloud5RightIn: {
+        animation: 'x 1s',
+        animationName: Radium.keyframes(fadeInRight, 'fadeInRight')
+    },
+    cloud5LeftOut: {
+        animation: 'x 1s',
+        animationName: Radium.keyframes(fadeOutLeft, 'fadeOutLeft')
+    }
+};
+
+// Baseapp
 class App extends React.Component {
 
     constructor(state) {
         super(state);
 
+
+
         this.state = {
+            currLoginAnimation: 0,
+            animationFinished: false,
+            startAnimation: false,
             isDisconnected: false,
             // Load backend with WebAssembly
             worker: new Worker('worker.js'),
@@ -53,8 +137,11 @@ class App extends React.Component {
 
     componentDidMount() {
         // Add listener for Worker
-        if (!this.state.workerInitialized)
+        if (!this.state.workerInitialized) {
             this.state.worker.addEventListener("message", this.workerInit);
+            indexState.setLoadingState(true);
+        }
+
 
         // TODO Fix HandleConnection
         //  Function makes always a re-render, even though the state has not changed
@@ -67,8 +154,10 @@ class App extends React.Component {
     componentWillUnmount() {
         // Remove Worker listener
         this.state.worker.postMessage(['unregister', undefined]);
-        if (!this.state.workerInitialized)
+        if (!this.state.workerInitialized) {
             this.state.worker.removeEventListener("message", this.workerInit);
+            indexState.setLoadingState(true);
+        }
 
         // window.removeEventListener('online', this.handleConnectionChange);
         // window.removeEventListener('offline', this.handleConnectionChange);
@@ -80,7 +169,24 @@ class App extends React.Component {
             this.state.worker.removeEventListener("message", this.workerInit);
             this.state.worker.postMessage('initAck');
             this.setState({
-                workerInitialized: true
+                workerInitialized: true,
+            }, () => {
+                // save to localstorage
+                setTimeout(() => {
+                    indexState.setLoadingState(false);
+                }, 2500);
+                setTimeout(() => {
+                    this.setState({
+                        currentLogoAnimation: 1,
+                    }, () => {
+                        setTimeout(() => {
+                            this.setState({
+                                animationFinished: true,
+                            });
+                        }, 650);
+
+                    })
+                }, 1500);
             });
         }
     }
@@ -98,7 +204,7 @@ class App extends React.Component {
                                 return clearInterval(webPing)
                             });
                         }).catch(() => this.setState({ isDisconnected: true }) )
-                }, 2000);
+                }, 1000);
             return;
         }
 
@@ -108,55 +214,101 @@ class App extends React.Component {
     getApp() {
         console.log("Worker state: " + this.state.workerInitialized);
         console.log("Disconnected: " + this.state.isDisconnected);
-        if (this.state.workerInitialized) {
-            if (!this.state.isDisconnected) {
-                return (
-                    <div className="App">
-                        <Switch>
-                            <Route exact path="/" component={() => <Login worker={this.state.worker}/>}/>
-                            <Route exact path="/registration"
-                                   component={() => <Registration worker={this.state.worker}/>}/>
-                            <ProtectedRoute exact path="/verify" component={() =>
-                                <Masterpassword worker={this.state.worker} />} netState="online" type="auth"/>
-                            {/*<ProtectedRoute exact path="/dashboard" component={() =>
+
+        if ( this.state.animationFinished ) {
+            return (
+                <div className="App">
+                    <Switch>
+                        <Route exact path="/" component={() => <Login worker={this.state.worker}/>}/>
+                        <Route exact path="/registration"
+                               component={() => <Registration worker={this.state.worker}/>}/>
+                        <ProtectedRoute exact path="/verify" component={() =>
+                            <Masterpassword worker={this.state.worker} />} netState="online" type="auth"/>
+                        {/*<ProtectedRoute exact path="/dashboard" component={() =>
                             <Dashboard worker={this.state.worker} workerInitialized={this.state.workerInitialized}
                                 workerIsInitialized={this.workerIsInitialized}/>}
                                 netState="online" type="verify" />*/}
-                            {/*<ProtectedRoute exact path="/dashboard" render={() =>
+                        {/*<ProtectedRoute exact path="/dashboard" render={() =>
                             <h1>Hey</h1>}/>*/}
-                            <ProtectedRoute exact path="/dashboard" component={() =>
-                                <Dashboard worker={this.state.worker} />} netState="online" type="verify"/>
-                            <Route path="*" component={NoMatch}/>
-                        </Switch>
-                    </div>
-                );
-            } else {
-                let redirect = <div/>;
-                if (VerifyAuth.getVerified()) {
-                    redirect = <Redirect to="/dashboard"/>
-                } else {
-                    redirect = <Redirect to="/verify"/>
-                }
-                //console.log("Disconn: " + redirect);
-                return (
-                    <div className="App">
-                        {redirect}
-                        <Switch>
-                            <Route exact path="/verify" component={() => <Masterpassword worker={this.state.worker}/>}/>
-                            <ProtectedRoute exact path="/dashboard"
-                                            component={() => <Dashboard worker={this.state.worker}/>} netState="offline"
-                                            type="verify"/>
-                            <Route path="*" component={NoMatch}/>
-                        </Switch>
-                    </div>
-                );
-            }
+                        <ProtectedRoute exact path="/dashboard" component={() =>
+                            <Dashboard worker={this.state.worker} />} netState="online" type="verify"/>
+                        <Route path="*" component={NoMatch}/>
+                    </Switch>
+                </div>
+            );
         } else {
             // TODO @Seb Please make a cool loading page!
+            let styleType = styles.logo;
+            let styleCloud1 = styles.cloud1LeftIn;
+            let styleCloud2 = styles.cloud2RightIn;
+            let styleCloud3 = styles.cloud3LeftIn;
+            let styleCloud4 = styles.cloud4LeftIn;
+            let styleCloud5 = styles.cloud5RightIn;
+            if ( this.state.currentLogoAnimation === 1 ) {
+                styleType = styles.logoOut;
+                styleCloud1 = styles.cloud1RightOut;
+                styleCloud2 = styles.cloud2LeftOut;
+                styleCloud3 = styles.cloud3RightOut;
+                styleCloud4 = styles.cloud4RightOut;
+                styleCloud5 = styles.cloud5LeftOut;
+            }
+            console.log("Curr", this.state.currentLogoAnimation);
             return (
-                <div>
-                    <h1>Loading Worker...</h1>
-                    <h3>Please wait</h3>
+                <div className="fixHeight">
+                    <StyleRoot className="topPositioning">
+                        <div style={styleType} className="test" >
+                            <img
+                                src={Logo}
+                                alt=""
+                                className="logoAnm"
+                            />
+                        </div>
+                    </StyleRoot>
+                    <StyleRoot className="leftPositioning topPositioning">
+                        <div style={styleCloud1}>
+                            <img
+                                src={Cloud1}
+                                alt=""
+                                className="cloud1"
+                            />
+                        </div>
+                    </StyleRoot>
+                    <StyleRoot className="rightPositioning topPositioning">
+                        <div style={styleCloud2}>
+                            <img
+                                src={Cloud2}
+                                alt=""
+                                className="cloud2"
+                            />
+                        </div>
+                    </StyleRoot>
+                    <StyleRoot className="leftPositioning topPositioning onTop">
+                        <div style={styleCloud3}>
+                            <img
+                                src={Cloud3}
+                                alt=""
+                                className="cloud3"
+                            />
+                        </div>
+                    </StyleRoot>
+                    <StyleRoot className="rightPositioning topPositioning">
+                        <div style={styleCloud5}>
+                            <img
+                                src={Cloud2}
+                                alt=""
+                                className="cloud5"
+                            />
+                        </div>
+                    </StyleRoot>
+                    <StyleRoot className="leftPositioning topPositioning">
+                        <div style={styleCloud4}>
+                            <img
+                                src={Cloud4}
+                                alt=""
+                                className="cloud4"
+                            />
+                        </div>
+                    </StyleRoot>
                 </div>
             )
         }
@@ -167,6 +319,10 @@ class App extends React.Component {
         return this.getApp();
     }
 }
+
+function sleep (time) {
+    return new Promise((resolve) => setTimeout(resolve, time));
+}
 // Ins Grundgerüst setzen
 const rootElement = document.getElementById("root");
-ReactDOM.render(<Provider store={store}><Router history={history}><App /></Router></Provider>, rootElement);
+ReactDOM.render(<Provider store={store}><Router history={history}><App/></Router></Provider>, rootElement);

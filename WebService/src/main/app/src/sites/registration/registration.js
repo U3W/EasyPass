@@ -69,7 +69,6 @@ class Registration extends React.Component {
         this.exit = this.exit.bind(this);
     }
 
-
     handleChange = (e) => {
         this.setState({
             [e.target.id]: e.target.value
@@ -850,47 +849,49 @@ class Registration extends React.Component {
             );
         }
         return (
-            <div className="backgroundPicRegist">
-                <div className="gradientDivLogin">
-                    <Container>
-                        <Row className="size-hole-window">
-                            <Col xs={11} sm={10} md={10} lg={6} className="center-vert center-horz">
-                                <Card className="card-login login">
-                                    <div className="close closeButt" onClick={this.exit}>
-                                        <span aria-hidden="true">×</span>
-                                    </div>
-                                    <Card.Img variant="top" src={Logo} className="centerImg"/>
-                                    <Card.Body>
-                                        <Form autoComplete="off">
-                                            {formOut}
-                                            <Form.Group>
-                                                {StringSelector.getString(this.props.callback.state.language).registStep} {this.state.step}/2
-                                            </Form.Group>
-                                            {this.state.step === 2 &&
-                                                <Button variant="danger" onClick={this.resetToFirst}>
-                                                    {StringSelector.getString(this.props.callback.state.language).registPrevButton}
-                                                </Button>
-                                            }
-
-                                            <Button variant="danger" className={"float-right"} onClick={this.handleSubmit}>
-                                                {this.state.step === 1 ?
-                                                    StringSelector.getString(this.props.callback.state.language).registNextButton
-                                                    :
-                                                    StringSelector.getString(this.props.callback.state.language).registButton
+            <>
+                <div className="backgroundPicRegist">
+                    <div className="gradientDivLogin">
+                        <Container>
+                            <Row className="size-hole-window">
+                                <Col xs={11} sm={10} md={10} lg={6} className="center-vert center-horz">
+                                    <Card className="card-login login">
+                                        <div className="close closeButt" onClick={this.exit}>
+                                            <span aria-hidden="true">×</span>
+                                        </div>
+                                        <Card.Img variant="top" src={Logo} className="centerImg"/>
+                                        <Card.Body>
+                                            <Form autoComplete="off">
+                                                {formOut}
+                                                <Form.Group>
+                                                    {StringSelector.getString(this.props.callback.state.language).registStep} {this.state.step}/2
+                                                </Form.Group>
+                                                {this.state.step === 2 &&
+                                                    <Button variant="danger" onClick={this.resetToFirst}>
+                                                        {StringSelector.getString(this.props.callback.state.language).registPrevButton}
+                                                    </Button>
                                                 }
-                                            </Button>
-                                        </Form>
-                                    </Card.Body>
-                                </Card>
-                            </Col>
-                            <div className="footer">
-                                {this.printError()}
-                            </div>
-                            <Indicator />
-                        </Row>
-                    </Container>
+
+                                                <Button variant="danger" className={"float-right"} onClick={this.handleSubmit}>
+                                                    {this.state.step === 1 ?
+                                                        StringSelector.getString(this.props.callback.state.language).registNextButton
+                                                        :
+                                                        StringSelector.getString(this.props.callback.state.language).registButton
+                                                    }
+                                                </Button>
+                                            </Form>
+                                        </Card.Body>
+                                    </Card>
+                                </Col>
+                                <div className="footer">
+                                    {this.printError()}
+                                </div>
+                                <Indicator />
+                            </Row>
+                        </Container>
+                    </div>
                 </div>
-            </div>
+            </>
         );
     }
 }

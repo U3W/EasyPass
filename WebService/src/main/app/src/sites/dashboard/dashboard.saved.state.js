@@ -35,7 +35,7 @@ class dashboardState {
     static getSelectedLanguage() {
         if ( JSON.parse(localStorage.getItem(dashboardConst.languageSelected)) === null )
         {
-            return false;
+            return 0;
         }
         return JSON.parse(localStorage.getItem(dashboardConst.languageSelected));
     }

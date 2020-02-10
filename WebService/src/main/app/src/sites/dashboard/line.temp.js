@@ -30,6 +30,7 @@ import GeneratePassIcon from "../../img/icons/generate_password_white.svg";
 import GeneratePass from "./generatepass";
 import Spinner from "react-bootstrap/Spinner";
 import StringSelector from "../../strings/stings";
+import RemoveTag from "../../img/icons/password_add_remove_user.svg";
 
 
 /**
@@ -39,6 +40,8 @@ import StringSelector from "../../strings/stings";
  * @param user: username of this password
  * @param pass: password
  * @param url: link to the login page
+ * @param userGroupList: List with all users that are allowed to see this password. Only nessessary when dealing with group passwords and only shown for the admin (creater) of this password
+ *        - Array: [{name: ..}]
  * @param callback: Link to the dashboard class
  * @param rest
  */
@@ -66,6 +69,12 @@ export default class PassLine extends React.Component {
             // generate popup
             generatePassShow: false,
 
+
+            // Group Visibility
+            userGroupAdd: "",
+            /*userGroupListNew: [{name: "Huan"}],*/ userGroupListNew: this.deepCopyTags(this.props.userGroupList),
+            popUpGroupError: false,
+            groupErrTyp: 0,
         };
 
         this.dismissGeneratePass = this.dismissGeneratePass.bind(this);
@@ -236,11 +245,14 @@ export default class PassLine extends React.Component {
     }
 
     deepCopyTags( tags ) {
-        let out = [];
-        for ( let i = 0; i < tags.length; i++ ) {
-            out[i] = JSON.parse(JSON.stringify(tags[i]));
+        if ( tags !== undefined ) {
+            let out = [];
+            for ( let i = 0; i < tags.length; i++ ) {
+                out[i] = JSON.parse(JSON.stringify(tags[i]));
+            }
+            return out;
         }
-        return out;
+        return undefined;
     }
 
     findTagKeyIndex ( keyComp ) {
@@ -296,6 +308,27 @@ export default class PassLine extends React.Component {
             });
         }
     }
+
+    removeTag( i ) {
+        if ( this.state.edit ) {
+            if (i < this.state.tagNew.length) {
+                let temp = this.state.tagNew;
+                temp.splice(i, 1);
+
+
+                if (this.state.tagNew.length === 0) {
+                    this.setState({
+                        tagAdded: false,
+                    })
+                } else {
+                    this.setState({
+                        tagNew: temp,
+                    });
+                }
+            }
+        }
+    }
+
     changeListener( e ) {
         if ( this.state.edit )
         {
@@ -429,46 +462,79 @@ export default class PassLine extends React.Component {
                 tagCompArray[0] = "Keine Tags vorhanden";
             }
         }
-        for ( let i = 0; i < tag.length; i++ )
-        {
-            //console.log("Tag single: ",tag[i], "I: ", i);
-            let tagKeys = Object.keys(tag[i]);
-            //console.log("key", tagKeys);
-            let but = "";
-            if ( this.state.edit && i === tag.length-1) {
-                but = (
-                    <Button variant="dark" className="buttonSpaceInline" onClick={this.addTag}>
-                        <img
-                            src={AddTag}
-                            alt=""
-                            width="14"
-                            height="14"
-                            className="d-inline-block"
-                        />
-                    </Button>
-                );
-            }
-            if ( this.state.edit ) {
-                //                         <InputGroup.Prepend>
-                //<input id={"tagKey" + i } className="input-group-text setTagEdit" disabled={false} value={tagKeys[i]} onChange={(e) => this.changeTagListener(tagKeys[i], null, e)} />
-                tagCompArray[i] = (
-                    <InputGroup size="sm" className="mb-3">
-                        <FormControl id={"tagKey" + i } className="" aria-label="Small" aria-describedby="inputGroup-sizing-sm" disabled={false} value={tagKeys[0]} onChange={(e) => this.changeTagListener(tagKeys[0], tag[i][tagKeys[0]], i, e)} />
-                        <FormControl id={"tagValue" + i } aria-label="Small" aria-describedby="inputGroup-sizing-sm" disabled={false} value={tag[i][tagKeys[0]]} onChange={(e) => this.changeTagListener(tagKeys[0], tag[i][tagKeys[0]], i, e)} />
-                        {but}
-                    </InputGroup>
-                );
-            }
-            else {
-                tagCompArray[i] = (
-                    <InputGroup size="sm" className="mb-3">
-                        <InputGroup.Prepend>
-                            <input className="input-group-text fixTag" disabled={true} value={tagKeys[0]} onChange={(e) => this.changeTagListener(tagKeys[0], tag[i][tagKeys[0]], i, e)}/>
-                        </InputGroup.Prepend>
-                        <FormControl aria-label="Small" aria-describedby="inputGroup-sizing-sm" disabled={true} value={tag[i][tagKeys[0]]} onChange={(e) => this.changeTagListener(tagKeys[0], tag[i][tagKeys[0]], i, e)}/>
-                        {but}
-                    </InputGroup>
-                );
+        else {
+            for ( let i = 0; i < tag.length; i++ )
+            {
+                let tagKeys = Object.keys(tag[i]);
+
+                let andBut = "";
+                if ( i < tag.length-1) {
+                    andBut = (
+                        <>
+                            <Button variant="dark" className="buttonSpaceInline" onClick={() => this.removeTag(i)}>
+                                <img
+                                    src={RemoveTag}
+                                    alt=""
+                                    width="14"
+                                    height="14"
+                                    className="d-inline-block"
+                                />
+                            </Button>
+                        </>
+                    );
+                }
+                else if ( i === tag.length-1) {
+                    andBut = (
+                        <>
+                            <Button variant="dark" className="buttonSpaceInline notRound" onClick={() => this.removeTag(i)}>
+                                <img
+                                    src={RemoveTag}
+                                    alt=""
+                                    width="14"
+                                    height="14"
+                                    className="d-inline-block"
+                                />
+                            </Button>
+                            <hr className="vertical-button-sep"/>
+                        </>
+                    );
+                }
+                let but = "";
+                if ( this.state.edit && i === tag.length-1) {
+                    but = (
+                        <Button variant="dark" className="buttonSpaceInline" onClick={this.addTag}>
+                            <img
+                                src={AddTag}
+                                alt=""
+                                width="14"
+                                height="14"
+                                className="d-inline-block"
+                            />
+                        </Button>
+                    );
+                }
+                if ( this.state.edit ) {
+                    //                         <InputGroup.Prepend>
+                    //<input id={"tagKey" + i } className="input-group-text setTagEdit" disabled={false} value={tagKeys[i]} onChange={(e) => this.changeTagListener(tagKeys[i], null, e)} />
+                    tagCompArray[i] = (
+                        <InputGroup size="sm" className="mb-3">
+                            <FormControl id={"tagKey" + i } className="" aria-label="Small" aria-describedby="inputGroup-sizing-sm" disabled={false} value={tagKeys[0]} onChange={(e) => this.changeTagListener(tagKeys[0], tag[i][tagKeys[0]], i, e)} />
+                            <FormControl id={"tagValue" + i } aria-label="Small" aria-describedby="inputGroup-sizing-sm" disabled={false} value={tag[i][tagKeys[0]]} onChange={(e) => this.changeTagListener(tagKeys[0], tag[i][tagKeys[0]], i, e)} />
+                            {andBut}
+                            {but}
+                        </InputGroup>
+                    );
+                }
+                else {
+                    tagCompArray[i] = (
+                        <InputGroup size="sm" className="mb-3">
+                            <InputGroup.Prepend>
+                                <input className="input-group-text fixTag" disabled={true} value={tagKeys[0]} onChange={(e) => this.changeTagListener(tagKeys[0], tag[i][tagKeys[0]], i, e)}/>
+                            </InputGroup.Prepend>
+                            <FormControl aria-label="Small" aria-describedby="inputGroup-sizing-sm" disabled={true} value={tag[i][tagKeys[0]]} onChange={(e) => this.changeTagListener(tagKeys[0], tag[i][tagKeys[0]], i, e)}/>
+                        </InputGroup>
+                    );
+                }
             }
         }
         let key = -1;
@@ -523,6 +589,7 @@ export default class PassLine extends React.Component {
             this.returnCatBase(item._id, item.name)
         );
 
+        // ToDo sprache anpassen
         return (
             <>
                 <Modal show={this.state.popUpCatShow} onHide={this.setPopUpCatDisabled} className="ep-modal-dialog">
@@ -556,7 +623,7 @@ export default class PassLine extends React.Component {
         }
         else {
             for ( let i = 0; i < cats.length; i++ ) {
-                if ( cats[i].id === this.state.catIdNew ) {
+                if ( cats[i]._id === this.state.catIdNew ) {
                     catName = cats[i].name;
                 }
             }
@@ -601,10 +668,87 @@ export default class PassLine extends React.Component {
         );
     }
 
+    getGroupErrorMsg() {
+        if ( this.state.popUpGroupError ) {
+            let err = StringSelector.getString(this.props.callback.state.language).addPassUserNotFound;
+            if ( this.state.groupErrTyp === 1 ) {
+                err = StringSelector.getString(this.props.callback.state.language).addPassUserAlready;
+            }
+            return (
+                <p className="text-danger fixErrorMsg">{err}</p>
+            );
+        }
+    }
+
+    getVisibilityTable() {
+        let key = -1;
+        let elms;
+        if ( this.state.userGroupListNew.length === 0 ) {
+            elms = StringSelector.getString(this.props.callback.state.language).addPassUserVisNon;
+            return (
+                <>
+                    <div className="visMargin">
+                        <h6 className="noMarginBottom">{StringSelector.getString(this.props.callback.state.language).addPassUserVis}</h6>
+                        <i>{StringSelector.getString(this.props.callback.state.language).addPassUserVis2}</i>
+                    </div>
+                    - {elms}
+                </>
+            );
+        }
+        else {
+            let elmsArray = [];
+            for ( let i = 0; i < this.state.userGroupListNew.length; i++ ) {
+                const item = this.state.userGroupListNew[i];
+                let tdClass = "";
+                if ( i === 0 ) {
+                    tdClass += "topRound";
+                }
+                if ( i === this.state.userGroupListNew.length-1) {
+                    tdClass += " botRound";
+                }
+                elmsArray[i] = (
+                    <td className={tdClass}>
+                        {item.name}
+                        { this.state.edit &&
+                        <button type="button" className="close userRemove" onClick={() => this.removeUserFromGroup(item.id)}>
+                            <span aria-hidden="true" >×</span>
+                            <span className="sr-only">Close</span>
+                        </button>
+                        }
+                    </td>
+                );
+            }
+
+            elms = elmsArray.map(function(item) {
+                key++;
+                return (
+                    <tr key={key}>
+                        {item}
+                    </tr>
+                );
+            });
+
+            return (
+                <>
+                    <div className="visMargin">
+                        <h6 className="noMarginBottom">{StringSelector.getString(this.props.callback.state.language).addPassUserVis}</h6>
+                        <i>{StringSelector.getString(this.props.callback.state.language).addPassUserVis2}</i>
+                    </div>
+                    <div className="roundDiv">
+                        <Table striped hover size="sm" className="noMarginBottom roundtable">
+                            <tbody>
+                            {elms}
+                            </tbody>
+                        </Table>
+                    </div>
+                </>
+            );
+        }
+    }
+
     render() {
 
         //console.log("Start of render", this.state.urlNew);
-        let url = this.state.urlNew;
 
         let catRender = this.renderCat();
 
@@ -907,7 +1051,7 @@ export default class PassLine extends React.Component {
                                 </div>
                                 <br/>
                                 <div>
-                                    <h6>{StringSelector.getString(this.props.callback.state.language).lineTags}</h6>
+                                    <h6>{StringSelector.getString(this.props.callback.state.language).lineCat}</h6>
                                     {catRender}
                                 </div>
                             </div>

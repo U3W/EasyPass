@@ -30,8 +30,6 @@ export default class DeleteCategory extends React.Component {
 
 
     setCatDel( id, rev) {
-
-
         let catDelIds = this.state.catDelIds;
         if ( catDelIds.map((e) => {return e._id;}).indexOf(id) === -1 ) {
             catDelIds.push({_id: id, _rev: rev});
@@ -40,11 +38,24 @@ export default class DeleteCategory extends React.Component {
             //catDelIds.splice(catDelIds.indexOf([id, rev]), 1);
             catDelIds.splice(catDelIds.map((e) => {return e._id;}).indexOf(id), 1);
         }
+        this.setState({
+            catDelIds: catDelIds,
+        });
     };
+
+    catDelIdsIncludesId( id ) {
+        for ( let i = 0; i < this.state.catDelIds.length; i++ ) {
+           let elm = this.state.catDelIds[i];
+           if ( elm._id === id ) {
+               return true;
+           }
+        }
+        return false;
+    }
 
     returnCatBase ( id, rev, name, desc) {
         return (
-            <tr key={id}>
+            <tr key={id} onClick={() =>this.setCatDel(id, rev)}>
                 <td>
                     <b>{name}</b>
                 </td>
@@ -52,18 +63,23 @@ export default class DeleteCategory extends React.Component {
                     {desc}
                 </td>
                 <td>
-                    {['checkbox'].map(type => (
-                        <div key={`custom-inline-${type}`} className="float-center">
-                            <Form.Check
-                                custom
-                                inline
-                                label=""
-                                type={type}
-                                id={`custom-inline-${type}-${id}`}
-                                onClick={() =>this.setCatDel(id, rev)}
-                            />
-                        </div>
-                    ))}
+                    {
+                        ['checkbox'].map(type => (
+                            <div key={`custom-inline-${type}`} className="float-center">
+                                <Form.Check
+                                    custom
+                                    checked={this.catDelIdsIncludesId(id)}
+                                    inline
+                                    readOnly={true}
+                                    label=""
+                                    type={type}
+                                    id={`custom-inline-${type}-${id}`}
+                                    className="clickable"
+                                    onClick={() =>this.setCatDel(id, rev)}
+                                />
+                            </div>
+                        ))
+                    }
                 </td>
             </tr>
         );

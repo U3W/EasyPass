@@ -23,6 +23,7 @@ import {dashboardAlerts, dashboardLanguage} from "./const/dashboard.enum";
 import AddPassword from "../dashboard/add.password"
 // Icons
 import AddPass from "../../img/icons/password_add_pass.svg";
+import AddGroup from "../../img/icons/group_add.svg";
 import Undo from "../../img/icons/password_delete_undo_blue.svg"
 
 import AddCategory from "./add.cat";
@@ -224,7 +225,7 @@ class Dashboard extends React.Component {
         if (catData !== undefined && catData.length > 0) {
             catData = this.addCallback(catData);
             passwords[0] = catData.map(singlePass => {
-                if (singlePass.tabID === selectedTab) {
+                //if (singlePass.tabID === selectedTab) {
                     return (
                         <PassLine key={singlePass._id+singlePass._rev} tag={singlePass.tags} id={singlePass._id}
                                   cat={singlePass.catID} rev={singlePass._rev} user={singlePass.user}
@@ -234,7 +235,7 @@ class Dashboard extends React.Component {
                                   passwordCacheID={this.state.passwordCacheID}
                                   show={this.state.show}/>
                     );
-                }
+                //}
             });
             return passwords;
 
@@ -250,23 +251,53 @@ class Dashboard extends React.Component {
         let renderWithCats = "";
         let renderWithout = "";
 
+        let catselected = this.state.catselected;
+        let language = this.state.language;
+
+        let nothingAdded = "";
+        let i = -1;
         if (passwordsWithCats !== undefined) {
             renderWithCats = cats.map(function (cat) {
-                return (
-                    <div key={cat._id}>
-                        <strong>{cat.name}</strong>
-                        {cat.desc.length === 0 ?
-                            ""
-                            :
-                            <br/>
-                        }
-                        {cat.desc}
-                        <hr/>
-                        {passwordsWithCats[cat._id]}
-                    </div>
-                )
+                if ( cat._id === catselected || catselected === "0") {
+                    i++;
+                    return (
+                        <div key={i}>
+                            <strong>{cat.name}</strong>
+                            {cat.desc.length === 0 ?
+                                ""
+                                :
+                                <br/>
+                            }
+                            {cat.desc}
+                            <hr/>
+                            { passwordsWithCats[cat._id].length === 0 ?
+                                <>
+                                    <p>{StringSelector.getString(language).noPassToCat}</p>
+                                </>
+                                :
+                                passwordsWithCats[cat._id]
+                            }
+                        </div>
+                    )
+                }
+                else {
+                    return (
+                        ""
+                    )
+                }
+
             });
         }
+        else if (passwordsWithout === undefined) {
+            nothingAdded = StringSelector.getString(this.state.language).noCatsNoPass;
+            // ToDo vielleicht noch eine schönere Lösung finden
+            if ( this.state.catselected !== "0" ) {
+                this.setState({
+                    catselected: "0",
+                });
+            }
+        }
+
 
         if (passwordsWithout !== undefined) {
             renderWithout = (
@@ -280,12 +311,20 @@ class Dashboard extends React.Component {
             );
         }
 
+
         return (
             <>
-                <h5>{StringSelector.getString(this.state.language).mainAllCat}</h5>
-                <hr/>
+                { this.state.catselected === "0" &&
+                    <>
+                        <h5>{StringSelector.getString(this.state.language).mainAllCat}</h5>
+                        <hr/>
+                    </>
+                }
                 {renderWithCats}
-                {renderWithout}
+                { this.state.catselected === "0" &&
+                    renderWithout
+                }
+                {nothingAdded}
             </>
         );
     }
@@ -302,7 +341,6 @@ class Dashboard extends React.Component {
     }
 
     setErrorShow( to ) {
-        console.log("Aha", to);
         this.setState({
             errorShow: to,
         });
@@ -756,7 +794,7 @@ class Dashboard extends React.Component {
     }
 
     changeCat( changeTo ) {
-        //console.log("Change to: " + changeTo);
+        console.log("Change to: " + changeTo);
         this.props.saveCat(this.state.tabselected, changeTo);
         this.setState({
             catselected: changeTo
@@ -768,7 +806,16 @@ class Dashboard extends React.Component {
      * @returns [] a list with all the categories created by the user
      */
     getCats() {
-        return this.getCatsFromTab(this.state.tabselected);
+        return this.sortCatsAlph(this.getCatsFromTab(this.state.tabselected));
+    }
+
+    sortCatsAlph( cats ) {
+        cats.sort(function(a, b){
+            if(a.name < b.name) { return -1; }
+            if(a.name > b.name) { return 1; }
+            return 0;
+        });
+        return cats
     }
 
     getSelectedCatName() {
@@ -932,6 +979,33 @@ class Dashboard extends React.Component {
                         <hr/>
                         <IndicatorSide className={indicatorClass} />
                     </Row>
+                    { this.state.tabselected === tabs.GROUPPASS ?
+                        <Button className="groupfab" variant="danger" onClick={this.showAddPass}>
+                            <img
+                                src={AddGroup}
+                                alt=""
+                                width="20"
+                                height="20"
+                                className="d-inline-block addIcon"
+                            />
+                            <div className={langText}>
+                                <span>{StringSelector.getString(this.state.language).addGroup}</span>
+                            </div>
+                        </Button>
+                        :
+                        <Button className="groupOut groupfab" variant="danger" onClick={this.showAddPass}>
+                            <img
+                                src={AddGroup}
+                                alt=""
+                                width="20"
+                                height="20"
+                                className="d-inline-block addIcon"
+                            />
+                            <div className={langText}>
+                                <span>{StringSelector.getString(this.state.language).addGroup}</span>
+                            </div>
+                        </Button>
+                    }
                     <Button className="fab" variant="danger" onClick={this.showAddPass}>
                         <img
                             src={AddPass}

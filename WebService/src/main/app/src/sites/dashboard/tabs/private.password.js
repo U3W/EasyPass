@@ -10,10 +10,6 @@ class PrivatePassword extends React.Component {
         super(props);
     }
 
-
-
-
-
     render() {
         // url zum favcon holen: https://www.google.com/s2/favicons?domain=
         return (
