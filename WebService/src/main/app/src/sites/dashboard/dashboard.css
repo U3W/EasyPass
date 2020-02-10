@@ -89,6 +89,61 @@ body {
     }
 }
 
+/* Add group */
+.groupOut {
+    right: -100px !important
+}
+.groupfab {
+    width: 50px;
+    height: 50px;
+    background-color: #D31E14;
+    border-radius: 25px;
+
+    box-shadow: 2px 2px 20px rgba(0,0,0,0.1);
+    transition: all 0.3s ease-in-out;
+
+    position: fixed;
+    right: 30px;
+    bottom: 70px;
+    overflow: hidden;
+}
+
+.groupfab .addIcon {
+    position: absolute;
+    left: 15px;
+    top: 15px;
+}
+
+.groupfab:hover .addIcon {
+
+}
+
+.groupfab .text {
+    opacity:0;
+    transition-delay: 0s;
+    transition-duration: 0.4s;
+    position: absolute;
+    white-space: nowrap;
+    left: 45px;
+    top: 12px
+}
+.groupfab:hover .text {
+    opacity:1;
+    transform: translateX(0px);
+    -webkit-transform: translateX(0px);
+}
+
+
+.groupfab:hover {
+    width: 215px;
+    border-radius: 25px;
+    background-color: #9e1512;
+    border-color: #9c000a !important;
+    box-shadow: 5px 10px 20px 1px rgba(0, 0, 0, 0.25);
+    transition: all 0.3s ease-in-out;
+}
+
+
 /* Add password */
 .fab {
     width: 50px;
@@ -131,20 +186,14 @@ body {
     -webkit-transform: translateX(0px);
 }
 
+
 .fab:hover {
-    width: 210px;
+    width: 215px;
     border-radius: 25px;
     background-color: #9e1512;
     border-color: #9c000a !important;
     box-shadow: 5px 10px 20px 1px rgba(0, 0, 0, 0.25);
     transition: all 0.3s ease-in-out;
-}
-
-.animateWidth {
-    transition: all 0.3s ease-in-out !important;
-}
-.fitHole {
-    width: 100% !important;
 }
 
 @media (max-width: 425px) {
@@ -160,6 +209,94 @@ body {
         bottom: 15px;
     }
 }
+/* Fab english version */
+.fabEng {
+    width: 50px;
+    height: 50px;
+    background-color: #D31E14;
+    border-radius: 25px;
+
+    box-shadow: 2px 2px 20px rgba(0,0,0,0.1);
+    transition: all 0.3s ease-in-out;
+
+    position: fixed;
+    right: 30px;
+    bottom: 15px;
+    overflow: hidden;
+
+}
+
+.fabEng .addIcon {
+    position: absolute;
+    left: 15px;
+    top: 15px;
+}
+
+.fabEng .text {
+    opacity:0;
+    transition-delay: 0s;
+    transition-duration: 0.4s;
+    position: absolute;
+    white-space: nowrap;
+    left: 45px;
+    top: 12px
+}
+.fabEng:hover .text {
+    opacity:1;
+    transform: translateX(0px);
+    -webkit-transform: translateX(0px);
+}
+
+
+.fabEng:hover {
+    width: 170px;
+    border-radius: 25px;
+    background-color: #9e1512;
+    border-color: #9c000a !important;
+    box-shadow: 5px 10px 20px 1px rgba(0, 0, 0, 0.25);
+    transition: all 0.3s ease-in-out;
+}
+
+@media (max-width: 425px) {
+    .fabEng {
+        right: 15px;
+        bottom: 75px;
+    }
+}
+
+@media (min-width: 426px) {
+    .fabEng {
+        right: 30px;
+        bottom: 15px;
+    }
+}
+
+/* Group user */
+.userTable {
+    flex: 1 1 0%;
+}
+.userTableItem :nth-of-type(odd)  {
+    background-color: #e9ecef;
+}
+.userTableItem {
+    flex: 1 1 0%;
+    color: #495057;
+    background-color: #fff;
+    cursor: default;
+}
+
+userRemove {
+    margin: 0;
+}
+
+.animateWidth {
+    transition: all 0.3s ease-in-out !important;
+}
+.fitHole {
+    width: 100% !important;
+}
+
+
 
 /* Copy alert */
 .in-front {
@@ -188,4 +325,51 @@ body {
         right: 0;
         left: 0;
     }
+}
+
+.roundDiv {
+    border: 1px solid #ced4da;
+    border-radius: 0.25rem;
+    -moz-border-radius:0.25rem;
+    background-color: #e9ecef
+}
+
+.roundtable {
+    background: transparent !important;
+}
+
+.roundtable td {
+    border-top: 0;
+}
+.roundtable tbody tr td {
+    border-radius: 0;
+}
+.roundtable tbody tr:nth-of-type(odd) {
+    border-bottom: 1px solid #ced4da;
+}
+.roundtable tbody tr:nth-of-type(even) {
+    border-top: 1px solid #ced4da;
+    border-bottom: 1px solid #ced4da;
+}
+
+
+.gradientDiv {
+    position: absolute;
+    z-index: 9999;
+    height: 100%;
+    width: 100%;
+    background: linear-gradient(to right, rgba(157, 212, 241, 0.7), rgba(157, 212, 241, 0.2));
+    opacity: 1.0;
+}
+.gradientDivWhite {
+    position: absolute;
+    z-index: 9998;
+    height: 100%;
+    width: 100%;
+    background: #FFFFFF;
+    opacity: 1.0;
+}
+
+.custom-control-label::after {
+    cursor: pointer !important;
 }

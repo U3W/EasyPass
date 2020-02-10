@@ -1,7 +1,7 @@
 
 export const login = (credentials) => {
     return (dispatch, getState) => {
-        console.log(credentials);
+        //console.log(credentials);
         const {inpPassword, inpUsername} = credentials;
         // kacper methoden aufruf
         if ( inpUsername === "test" && inpPassword === "test")
@@ -18,7 +18,7 @@ export const login = (credentials) => {
 
 export const logout = () => {
     return (dispatch, getState) => {
-        console.log("Logging out");
+        //console.log("Logging out");
         dispatch({type: "LOGOUT_SUCCESS"})
     }
 };

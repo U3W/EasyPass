@@ -5,6 +5,7 @@ import FormControl from "react-bootstrap/FormControl";
 import Button from "react-bootstrap/Button";
 import {Card} from "react-bootstrap";
 import Table from "react-bootstrap/Table";
+import StringSelector from "../../strings/stings";
 
 export default class EditCategory extends React.Component {
 
@@ -12,8 +13,9 @@ export default class EditCategory extends React.Component {
         super(props);
 
         this.state = {
-            id: 0,
-            catName: "Kategorie auswählen",
+            id: undefined,
+            rev: undefined,
+            catName: StringSelector.getString(this.props.callback.state.language).editCatSelCat,
 
             nameNew: "",
             descriptionNew: "",
@@ -29,6 +31,7 @@ export default class EditCategory extends React.Component {
         this.setPopUpCatDisabled = this.setPopUpCatDisabled.bind(this);
 
         this.changeInput = this.changeInput.bind(this);
+        this.editCat = this.editCat.bind(this);
 
         this.resetState = this.resetState.bind(this);
 
@@ -39,7 +42,7 @@ export default class EditCategory extends React.Component {
         this.setState({
             [e.target.id]: e.target.value,
         }, () => { if ( this.state.nameNew.length > 0 ) { this.setState({ missingName: false})} });
-        console.log("Target:", e.target.id);
+        //console.log("Target:", e.target.id);
     };
 
     dismissPopUp() {
@@ -59,20 +62,21 @@ export default class EditCategory extends React.Component {
         });
     }
 
-    returnCatBase ( id, name, desc) {
+    returnCatBase ( id, rev, name, desc) {
         return (
             <tr key={id}>
-                <td onClick={() => this.changeCat(id, name, desc)}>
+                <td onClick={() => this.changeCat(id, rev, name, desc)}>
                     {name}
                 </td>
             </tr>
         );
     }
 
-    changeCat(id, name, desc) {
+    changeCat(id, rev, name, desc) {
         this.setPopUpCatDisabled();
         this.setState({
             id: id,
+            rev: rev,
             catName: name,
             nameNew: name,
             descriptionNew: desc,
@@ -82,14 +86,14 @@ export default class EditCategory extends React.Component {
         let cats = this.props.callback.getCats();
 
         let finalCats = cats.map((item) =>
-            this.returnCatBase(item.id, item.name, item.desc)
+            this.returnCatBase(item._id, item._rev, item.name, item.desc)
         );
 
         return (
             <>
                 <Modal show={this.state.catPopUpShow} onHide={this.setPopUpCatDisabled} className="ep-modal-dialog">
                     <Modal.Header closeButton>
-                        <Modal.Title>Kategorie auswählen:</Modal.Title>
+                        <Modal.Title>{StringSelector.getString(this.props.callback.state.language).editCatSelCat}:</Modal.Title>
                     </Modal.Header>
                     <Modal.Body className="ep-modal-body">
                         <Table striped bordered hover className="ep-modal-table">
@@ -107,7 +111,7 @@ export default class EditCategory extends React.Component {
     resetState() {
         this.setState({
             id: 0,
-            catName: "Kategorie auswählen",
+            catName: StringSelector.getString(this.props.callback.state.language).editCatSelCat,
 
             nameNew: "",
             descriptionNew: "",
@@ -120,7 +124,7 @@ export default class EditCategory extends React.Component {
 
     editCat() {
         if ( this.state.nameNew.length !== 0 ) {
-            this.props.callback.editCat(this.state.id, this.state.nameNew, this.state.descriptionNew);
+            this.props.callback.updateCat(this.state.id, this.state.rev, this.state.nameNew, this.state.descriptionNew);
             this.resetState();
         }
         else {
@@ -146,14 +150,14 @@ export default class EditCategory extends React.Component {
             <>
                 <InputGroup size="lg" className="mb-3">
                     <InputGroup.Prepend>
-                        <InputGroup.Text id="inputGroup-sizing-lg">Name</InputGroup.Text>
+                        <InputGroup.Text id="inputGroup-sizing-lg">{StringSelector.getString(this.props.callback.state.language).addCatName}</InputGroup.Text>
                     </InputGroup.Prepend>
                     <FormControl autoComplete="off" id="nameNew" aria-label="Large" aria-describedby="inputGroup-sizing-sm" value={this.state.nameNew} disabled={true} onChange={() => { if ( this.state.id !== 0 ) this.changeInput() }}/>
                 </InputGroup>
                 <hr/>
                 <InputGroup size="sm" className="mb-3">
                     <InputGroup.Prepend>
-                        <InputGroup.Text id="inputGroup-sizing-sm">Beschreibung</InputGroup.Text>
+                        <InputGroup.Text id="inputGroup-sizing-sm">{StringSelector.getString(this.props.callback.state.language).addCatDesc}</InputGroup.Text>
                     </InputGroup.Prepend>
                     <FormControl autoComplete="off" id="descriptionNew" aria-label="Small" aria-describedby="inputGroup-sizing-sm" value={this.state.descriptionNew} disabled={true} onChange={() => { if ( this.state.id !== 0 ) this.changeInput() }}/>
                 </InputGroup>
@@ -165,14 +169,14 @@ export default class EditCategory extends React.Component {
                 { this.state.missingName ?
                     <InputGroup size="lg" className="mb-3">
                         <InputGroup.Prepend>
-                            <InputGroup.Text id="inputGroup-sizing-lg">Name</InputGroup.Text>
+                            <InputGroup.Text id="inputGroup-sizing-lg">{StringSelector.getString(this.props.callback.state.language).addCatName}</InputGroup.Text>
                         </InputGroup.Prepend>
                         <FormControl className="text-danger is-invalid"  autoComplete="off" id="nameNew" aria-label="Large" aria-describedby="inputGroup-sizing-sm" value={this.state.nameNew} onChange={this.changeInput}/>
                     </InputGroup>
                     :
                     <InputGroup size="lg" className="mb-3">
                         <InputGroup.Prepend>
-                            <InputGroup.Text id="inputGroup-sizing-lg">Name</InputGroup.Text>
+                            <InputGroup.Text id="inputGroup-sizing-lg">{StringSelector.getString(this.props.callback.state.language).addCatName}</InputGroup.Text>
                         </InputGroup.Prepend>
                         <FormControl autoComplete="off" id="nameNew" aria-label="Large" aria-describedby="inputGroup-sizing-sm" value={this.state.nameNew} onChange={this.changeInput}/>
                     </InputGroup>
@@ -182,7 +186,7 @@ export default class EditCategory extends React.Component {
 
                 <InputGroup size="sm" className="mb-3">
                     <InputGroup.Prepend>
-                        <InputGroup.Text id="inputGroup-sizing-sm">Beschreibung</InputGroup.Text>
+                        <InputGroup.Text id="inputGroup-sizing-sm">{StringSelector.getString(this.props.callback.state.language).addCatDesc}</InputGroup.Text>
                     </InputGroup.Prepend>
                     <FormControl autoComplete="off" id="descriptionNew" aria-label="Small" aria-describedby="inputGroup-sizing-sm" value={this.state.descriptionNew} onChange={this.changeInput}/>
                 </InputGroup>
@@ -194,7 +198,7 @@ export default class EditCategory extends React.Component {
             <>
                 <Modal onKeyDown={this.handleKeyevent} show={this.props.callback.getCatEditShow()} onHide={this.dismissPopUp} className="ep-modal-dialog addPassPopUp">
                     <Modal.Header closeButton>
-                        <Modal.Title>Kategorie bearbeiten</Modal.Title>
+                        <Modal.Title>{StringSelector.getString(this.props.callback.state.language).editCat}:</Modal.Title>
                     </Modal.Header>
                     <Modal.Body className="ep-modal-body">
                         <Card.Body>

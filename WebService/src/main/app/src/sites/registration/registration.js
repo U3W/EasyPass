@@ -24,19 +24,26 @@ import {saveCat, saveTab} from "../../action/dashboard.action";
 import tabs from "../dashboard/tabs/tab.enum";
 import dashboard from "../dashboard/dashboard";
 import ShowIcon from "../../img/icons/password_show_white.svg";
-
+import HideIcon from "../../img/icons/password_hide_white.svg"
+import history from "../../routing/history";
+import OverlayTrigger from "react-bootstrap/OverlayTrigger";
+import Tooltip from "react-bootstrap/Tooltip";
+import CopyIcon from "../../img/icons/password_copy_white.svg";
+import InfoIcon from "../../img/icons/regist_info.svg"
 class Registration extends React.Component {
     constructor(props) {
         super(props);
 
         this.state = {
-            language: dashboardState.getSelectedLanguage(),
-
             newPass: "",
+            newPassShow: false,
             newPassSec: "",
+            newPassSecShow: false,
             newUser: "",
             newMasterpass: "",
+            newMasterpassShow: false,
             newMasterpassSec: "",
+            newMasterpassSecShow: false,
 
             step: 1,
 
@@ -65,12 +72,13 @@ class Registration extends React.Component {
     handleChange = (e) => {
         this.setState({
             [e.target.id]: e.target.value
-        },this.resetError(e));
+        });
+        this.resetError(e.target.id, e.target.value);
     };
 
-    resetError( e ) {
-        if ( e.target.value.length > 0 ) {
-            switch (e.target.id) {
+    resetError( id, value ) {
+        if ( value.length > 0 ) {
+            switch (id) {
                 case "newPass":
                     this.setState({
                         missingPassword: false,
@@ -138,9 +146,9 @@ class Registration extends React.Component {
         return (
             <Alert show={show} variant="danger" className="center-horz error" dismissible
                    onClose={() => this.setShow(false)}>
-                <Alert.Heading>{StringSelector.getString(this.state.language).wrongLoginHeader}</Alert.Heading>
+                <Alert.Heading>{StringSelector.getString(this.props.callback.state.language).wrongLoginHeader}</Alert.Heading>
                 <p>
-                    {StringSelector.getString(this.state.language).wrongLogin}
+                    {StringSelector.getString(this.props.callback.state.language).wrongLogin}
                 </p>
             </Alert>
         );
@@ -262,12 +270,10 @@ class Registration extends React.Component {
 
 
                 // ToDo Kall Kaspers method
-                if (true) {
-                    this.props.history.push("/");
+                if (false) {
+                    this.props.callback.switchToRegister(false, true, false);
                 } else {
-                    // Fehlermeldung
-                    this.setState({error: true});
-                    this.dismissError();
+                    this.props.callback.switchToRegister(false, false, false);
                 }
 
 
@@ -301,13 +307,36 @@ class Registration extends React.Component {
             let toAdd;
             if ( !this.state.missingUsername && this.state.userAlreadyTaken ) {
                 toAdd = (
-                    <a className="text-danger">Username bereits vorhanden!</a>
+                    <a className="text-danger">{StringSelector.getString(this.props.callback.state.language).registUserAlreadyExist}</a>
                 );
             }
             return (
                 <Form.Group>
-                    <Form.Label className="text-danger">{StringSelector.getString(this.state.language).username}</Form.Label>
-                    <Form.Control className="is-invalid" type="username" id="newUser" placeholder={StringSelector.getString(this.state.language).usernamePlaceholder} value={this.state.newUser}
+                    <Form.Label>
+                        {StringSelector.getString(this.props.callback.state.language).registUser}
+                        {['right'].map(placement => (
+                            <OverlayTrigger
+                                key={placement}
+                                placement={placement}
+                                overlay={
+                                    <Tooltip id={`tooltip-${placement}`}>
+                                        {StringSelector.getString(this.props.callback.state.language).registUserInfo}
+                                    </Tooltip>
+                                }
+                            >
+                                <Button variant="dark" className="infoButton round">
+                                    <img
+                                        src={InfoIcon}
+                                        alt=""
+                                        width="14"
+                                        height="14"
+                                        className="d-inline-block"
+                                    />
+                                </Button>
+                            </OverlayTrigger>
+                        ))}
+                    </Form.Label>
+                    <Form.Control className="is-invalid" type="username" id="newUser" placeholder={StringSelector.getString(this.props.callback.state.language).registUserPlaceholder} value={this.state.newUser}
                                   onKeyDown={this.handleKeyevent} onChange={this.handleChange} />
                     {toAdd}
                 </Form.Group>
@@ -317,11 +346,55 @@ class Registration extends React.Component {
         {
             return (
                 <Form.Group>
-                    <Form.Label>{StringSelector.getString(this.state.language).username}</Form.Label>
-                    <Form.Control type="username" id="newUser" placeholder={StringSelector.getString(this.state.language).usernamePlaceholder} value={this.state.newUser}
+                    <Form.Label>
+                        {StringSelector.getString(this.props.callback.state.language).registUser}
+                        {['right'].map(placement => (
+                            <OverlayTrigger
+                                key={placement}
+                                placement={placement}
+                                overlay={
+                                    <Tooltip id={`tooltip-${placement}`}>
+                                        {StringSelector.getString(this.props.callback.state.language).registUserInfo}
+                                    </Tooltip>
+                                }
+                            >
+                                <Button variant="dark" className="infoButton round">
+                                    <img
+                                        src={InfoIcon}
+                                        alt=""
+                                        width="14"
+                                        height="14"
+                                        className="d-inline-block"
+                                    />
+                                </Button>
+                            </OverlayTrigger>
+                        ))}
+                    </Form.Label>
+                    <Form.Control type="username" id="newUser" placeholder={StringSelector.getString(this.props.callback.state.language).registUserPlaceholder} value={this.state.newUser}
                                   onKeyDown={this.handleKeyevent} onChange={this.handleChange} />
                 </Form.Group>
             );
+        }
+    }
+
+    setPasswordShow( id ) {
+        switch (id) {
+            // pass
+            case 0:
+                this.setState({newPassShow: !this.state.newPassShow});
+                break;
+            // pass sec
+            case 1:
+                this.setState({newPassSecShow: !this.state.newPassSecShow});
+                break;
+            // masterpass
+            case 2:
+                this.setState({newMasterpassShow: !this.state.newMasterpassShow});
+                break;
+            // masterpass sec
+            case 3:
+                this.setState({newMasterpassSecShow: !this.state.newMasterpassSecShow});
+                break;
         }
     }
 
@@ -330,18 +403,57 @@ class Registration extends React.Component {
         {
             return (
                 <Form.Group>
-                    <Form.Label className="text-danger">{StringSelector.getString(this.state.language).password}</Form.Label>
+                    <Form.Label className="text-danger" >
+                        {StringSelector.getString(this.props.callback.state.language).registPass}
+                        {['right'].map(placement => (
+                            <OverlayTrigger
+                                key={placement}
+                                placement={placement}
+                                overlay={
+                                    <Tooltip id={`tooltip-${placement}`}>
+                                        {StringSelector.getString(this.props.callback.state.language).registPassInfo}
+                                    </Tooltip>
+                                }
+                            >
+                                <Button variant="dark" className="infoButton round">
+                                    <img
+                                        src={InfoIcon}
+                                        alt=""
+                                        width="14"
+                                        height="14"
+                                        className="d-inline-block"
+                                    />
+                                </Button>
+                            </OverlayTrigger>
+                        ))}
+                    </Form.Label>
                     <Row className="password-row">
-                        <Form.Control className="is-invalid passInp" type="password" id="newPass" placeholder={StringSelector.getString(this.state.language).passwordPlaceholder} value={this.state.newPass}
-                                      onKeyDown={this.handleKeyevent} onChange={this.handleChange} />
-                        <Button variant="dark" className="buttonInline" onClick={this.setPassword}>
-                            <img
-                                src={ShowIcon}
-                                alt=""
-                                width="18"
-                                height="18"
-                                className="d-inline-block"
-                            />
+                        { this.state.newPassShow ?
+                            <Form.Control className="is-invalid passInp" type="text" id="newPass" placeholder={StringSelector.getString(this.props.callback.state.language).registPassPlaceholder} value={this.state.newPass}
+                                          onKeyDown={this.handleKeyevent} onChange={this.handleChange} />
+                            :
+                            <Form.Control className="is-invalid passInp" type="password" id="newPass" placeholder={StringSelector.getString(this.props.callback.state.language).registPassPlaceholder} value={this.state.newPass}
+                                          onKeyDown={this.handleKeyevent} onChange={this.handleChange} />
+                        }
+
+                        <Button variant="dark" className="buttonInline" onClick={() => this.setPasswordShow(0)}>
+                            {this.state.newPassShow ?
+                                <img
+                                    src={HideIcon}
+                                    alt=""
+                                    width="18"
+                                    height="18"
+                                    className="d-inline-block"
+                                />
+                                :
+                                <img
+                                    src={ShowIcon}
+                                    alt=""
+                                    width="18"
+                                    height="18"
+                                    className="d-inline-block"
+                                />
+                            }
                         </Button>
                     </Row>
                 </Form.Group>
@@ -351,18 +463,56 @@ class Registration extends React.Component {
         {
             return (
                 <Form.Group>
-                    <Form.Label>{StringSelector.getString(this.state.language).password}</Form.Label>
+                    <Form.Label>
+                        {StringSelector.getString(this.props.callback.state.language).registPass}
+                        {['right'].map(placement => (
+                            <OverlayTrigger
+                                key={placement}
+                                placement={placement}
+                                overlay={
+                                    <Tooltip id={`tooltip-${placement}`}>
+                                        {StringSelector.getString(this.props.callback.state.language).registPassInfo}
+                                    </Tooltip>
+                                }
+                            >
+                                <Button variant="dark" className="infoButton round">
+                                    <img
+                                        src={InfoIcon}
+                                        alt=""
+                                        width="14"
+                                        height="14"
+                                        className="d-inline-block"
+                                    />
+                                </Button>
+                            </OverlayTrigger>
+                        ))}
+                    </Form.Label>
                     <Row className="password-row">
-                        <Form.Control className="passInp" type="password" id="newPass" placeholder={StringSelector.getString(this.state.language).passwordPlaceholder} value={this.state.newPass}
-                                      onKeyDown={this.handleKeyevent} onChange={this.handleChange} />
-                        <Button variant="dark" className="buttonInline" onClick={this.setPassword}>
-                            <img
-                                src={ShowIcon}
-                                alt=""
-                                width="18"
-                                height="18"
-                                className="d-inline-block"
-                            />
+                        {this.state.newPassShow ?
+                            <Form.Control className="passInp" type="text" id="newPass" placeholder={StringSelector.getString(this.props.callback.state.language).registPassPlaceholder} value={this.state.newPass}
+                                          onKeyDown={this.handleKeyevent} onChange={this.handleChange} />
+                            :
+                            <Form.Control className="passInp" type="password" id="newPass" placeholder={StringSelector.getString(this.props.callback.state.language).registPassPlaceholder} value={this.state.newPass}
+                                          onKeyDown={this.handleKeyevent} onChange={this.handleChange} />
+                        }
+                        <Button variant="dark" className="buttonInline" onClick={() => this.setPasswordShow(0)}>
+                            {this.state.newPassShow ?
+                                <img
+                                    src={HideIcon}
+                                    alt=""
+                                    width="18"
+                                    height="18"
+                                    className="d-inline-block"
+                                />
+                                :
+                                <img
+                                    src={ShowIcon}
+                                    alt=""
+                                    width="18"
+                                    height="18"
+                                    className="d-inline-block"
+                                />
+                            }
                         </Button>
                     </Row>
                 </Form.Group>
@@ -376,23 +526,40 @@ class Registration extends React.Component {
             let toAdd;
             if ( !this.state.missingSecPassword && this.state.passNoMatch) {
                 toAdd = (
-                    <a className="text-danger">Passwörter stimmen nicht überein!</a>
+                    <a className="text-danger">{StringSelector.getString(this.props.callback.state.language).registPassNotIdent}</a>
                 );
             }
             return (
                 <Form.Group>
-                    <Form.Label className="text-danger">Passwort wiederholen</Form.Label>
+                    <Form.Label className="text-danger">
+                        {StringSelector.getString(this.props.callback.state.language).registPassSec}
+                    </Form.Label>
                     <Row className="password-row">
-                        <Form.Control className="is-invalid passInp" type="password" id="newPassSec" placeholder={StringSelector.getString(this.state.language).passwordPlaceholder} value={this.state.newPassSec}
-                                      onKeyDown={this.handleKeyevent} onChange={this.handleChange} />
-                        <Button variant="dark" className="buttonInline" onClick={this.setPassword}>
-                            <img
-                                src={ShowIcon}
-                                alt=""
-                                width="18"
-                                height="18"
-                                className="d-inline-block"
-                            />
+                        {this.state.newPassSecShow ?
+                            <Form.Control className="is-invalid passInp" type="text" id="newPassSec" placeholder={StringSelector.getString(this.props.callback.state.language).registPassSecPlaceholder} value={this.state.newPassSec}
+                                          onKeyDown={this.handleKeyevent} onChange={this.handleChange} />
+                            :
+                            <Form.Control className="is-invalid passInp" type="password" id="newPassSec" placeholder={StringSelector.getString(this.props.callback.state.language).registPassSecPlaceholder} value={this.state.newPassSec}
+                                          onKeyDown={this.handleKeyevent} onChange={this.handleChange} />
+                        }
+                        <Button variant="dark" className="buttonInline" onClick={() => this.setPasswordShow(1)}>
+                            {this.state.newPassSecShow ?
+                                <img
+                                    src={HideIcon}
+                                    alt=""
+                                    width="18"
+                                    height="18"
+                                    className="d-inline-block"
+                                />
+                                :
+                                <img
+                                    src={ShowIcon}
+                                    alt=""
+                                    width="18"
+                                    height="18"
+                                    className="d-inline-block"
+                                />
+                            }
                         </Button>
                     </Row>
                     {toAdd}
@@ -403,18 +570,35 @@ class Registration extends React.Component {
         {
             return (
                 <Form.Group>
-                    <Form.Label>Passwort wiederholen</Form.Label>
+                    <Form.Label>
+                        {StringSelector.getString(this.props.callback.state.language).registPassSec}
+                    </Form.Label>
                     <Row className="password-row">
-                        <Form.Control className="passInp" type="password" id="newPassSec" placeholder={StringSelector.getString(this.state.language).passwordPlaceholder} value={this.state.newPassSec}
-                                  onKeyDown={this.handleKeyevent} onChange={this.handleChange} />
-                        <Button variant="dark" className="buttonInline" onClick={this.setPassword}>
-                            <img
-                                src={ShowIcon}
-                                alt=""
-                                width="18"
-                                height="18"
-                                className="d-inline-block"
-                            />
+                        { this.state.newPassSecShow ?
+                            <Form.Control className="passInp" type="text" id="newPassSec" placeholder={StringSelector.getString(this.props.callback.state.language).registPassSecPlaceholder} value={this.state.newPassSec}
+                                          onKeyDown={this.handleKeyevent} onChange={this.handleChange} />
+                            :
+                            <Form.Control className="passInp" type="password" id="newPassSec" placeholder={StringSelector.getString(this.props.callback.state.language).registPassSecPlaceholder} value={this.state.newPassSec}
+                                          onKeyDown={this.handleKeyevent} onChange={this.handleChange} />
+                        }
+                        <Button variant="dark" className="buttonInline" onClick={() => this.setPasswordShow(1)}>
+                            {this.state.newPassSecShow ?
+                                <img
+                                    src={HideIcon}
+                                    alt=""
+                                    width="18"
+                                    height="18"
+                                    className="d-inline-block"
+                                />
+                                :
+                                <img
+                                    src={ShowIcon}
+                                    alt=""
+                                    width="18"
+                                    height="18"
+                                    className="d-inline-block"
+                                />
+                            }
                         </Button>
                   </Row>
                 </Form.Group>
@@ -428,9 +612,58 @@ class Registration extends React.Component {
         {
             return (
                 <Form.Group>
-                    <Form.Label className="text-danger">Masterpasswort</Form.Label>
-                    <Form.Control className="is-invalid" type="password" id="newMasterpass" placeholder={StringSelector.getString(this.state.language).passwordPlaceholder} value={this.state.newMasterpass}
-                                  onKeyDown={this.handleKeyevent} onChange={this.handleChange} />
+                    <Form.Label className="text-danger">
+                        {StringSelector.getString(this.props.callback.state.language).registMaster}
+                        {['right'].map(placement => (
+                            <OverlayTrigger
+                                key={placement}
+                                placement={placement}
+                                overlay={
+                                    <Tooltip id={`tooltip-${placement}`}>
+                                        {StringSelector.getString(this.props.callback.state.language).registMasterInfo}
+                                    </Tooltip>
+                                }
+                            >
+                                <Button variant="dark" className="infoButton round">
+                                    <img
+                                        src={InfoIcon}
+                                        alt=""
+                                        width="14"
+                                        height="14"
+                                        className="d-inline-block"
+                                    />
+                                </Button>
+                            </OverlayTrigger>
+                        ))}
+                    </Form.Label>
+                    <Row className="password-row">
+                        { this.state.newMasterpassShow ?
+                            <Form.Control className="is-invalid passInp" type="text" id="newMasterpass" placeholder={StringSelector.getString(this.props.callback.state.language).registMasterPlaceholder} value={this.state.newMasterpass}
+                                          onKeyDown={this.handleKeyevent} onChange={this.handleChange} />
+                            :
+                            <Form.Control className="is-invalid passInp" type="password" id="newMasterpass" placeholder={StringSelector.getString(this.props.callback.state.language).registMasterPlaceholder} value={this.state.newMasterpass}
+                                          onKeyDown={this.handleKeyevent} onChange={this.handleChange} />
+                        }
+                        <Button variant="dark" className="buttonInline" onClick={() => this.setPasswordShow(2)}>
+                            {this.state.newMasterpassShow ?
+                                <img
+                                    src={HideIcon}
+                                    alt=""
+                                    width="18"
+                                    height="18"
+                                    className="d-inline-block"
+                                />
+                                :
+                                <img
+                                    src={ShowIcon}
+                                    alt=""
+                                    width="18"
+                                    height="18"
+                                    className="d-inline-block"
+                                />
+                            }
+                        </Button>
+                    </Row>
                 </Form.Group>
             );
         }
@@ -438,9 +671,58 @@ class Registration extends React.Component {
         {
             return (
                 <Form.Group>
-                    <Form.Label>Masterpasswort</Form.Label>
-                    <Form.Control type="password" id="newMasterpass" placeholder={StringSelector.getString(this.state.language).passwordPlaceholder} value={this.state.newMasterpass}
-                                  onKeyDown={this.handleKeyevent} onChange={this.handleChange} />
+                    <Form.Label>
+                        {StringSelector.getString(this.props.callback.state.language).registMaster}
+                        {['right'].map(placement => (
+                            <OverlayTrigger
+                                key={placement}
+                                placement={placement}
+                                overlay={
+                                    <Tooltip id={`tooltip-${placement}`}>
+                                        {StringSelector.getString(this.props.callback.state.language).registMasterInfo}
+                                    </Tooltip>
+                                }
+                            >
+                                <Button variant="dark" className="infoButton round">
+                                    <img
+                                        src={InfoIcon}
+                                        alt=""
+                                        width="14"
+                                        height="14"
+                                        className="d-inline-block"
+                                    />
+                                </Button>
+                            </OverlayTrigger>
+                        ))}
+                    </Form.Label>
+                    <Row className="password-row">
+                        { this.state.newMasterpassShow ?
+                            <Form.Control className="passInp" type="text" id="newMasterpass" placeholder={StringSelector.getString(this.props.callback.state.language).registMasterPlaceholder} value={this.state.newMasterpass}
+                                          onKeyDown={this.handleKeyevent} onChange={this.handleChange} />
+                            :
+                            <Form.Control className="passInp" type="password" id="newMasterpass" placeholder={StringSelector.getString(this.props.callback.state.language).registMasterPlaceholder} value={this.state.newMasterpass}
+                                          onKeyDown={this.handleKeyevent} onChange={this.handleChange} />
+                        }
+                        <Button variant="dark" className="buttonInline" onClick={() => this.setPasswordShow(2)}>
+                            {this.state.newMasterpassShow ?
+                                <img
+                                    src={HideIcon}
+                                    alt=""
+                                    width="18"
+                                    height="18"
+                                    className="d-inline-block"
+                                />
+                                :
+                                <img
+                                    src={ShowIcon}
+                                    alt=""
+                                    width="18"
+                                    height="18"
+                                    className="d-inline-block"
+                                />
+                            }
+                        </Button>
+                    </Row>
                 </Form.Group>
             );
         }
@@ -454,21 +736,49 @@ class Registration extends React.Component {
             if ( !this.state.missingSecMasterpassword ) {
                 if ( this.state.masterpassNoMatch) {
                     toAdd = (
-                        <a className="text-danger">Masterpasswörter stimmen nicht überein!</a>
+                        <a className="text-danger">{StringSelector.getString(this.props.callback.state.language).registMasterNotIdent}</a>
                     );
                 }
                 else if ( this.state.masterpassMatchPass )
                 {
                     toAdd = (
-                        <a className="text-danger">Masterpassworter darf nicht mit dem Passwort übereinstimmen!</a>
+                        <a className="text-danger">{StringSelector.getString(this.props.callback.state.language).registMasterMatchPass}</a>
                     );
                 }
             }
             return (
                 <Form.Group>
-                    <Form.Label className="text-danger">Masterpasswort wiederholen</Form.Label>
-                    <Form.Control className="is-invalid" type="password" id="newMasterpassSec" placeholder={StringSelector.getString(this.state.language).passwordPlaceholder} value={this.state.newMasterpassSec}
-                                  onKeyDown={this.handleKeyevent} onChange={this.handleChange} />
+                    <Form.Label className="text-danger">
+                        {StringSelector.getString(this.props.callback.state.language).registMasterSec}
+                    </Form.Label>
+                        <Row className="password-row">
+                        { this.state.newMasterpassSecShow ?
+                            <Form.Control className="is-invalid passInp" type="text" id="newMasterpassSec" placeholder={StringSelector.getString(this.props.callback.state.language).registMasterSecPlaceholder} value={this.state.newMasterpassSec}
+                                          onKeyDown={this.handleKeyevent} onChange={this.handleChange} />
+                            :
+                            <Form.Control className="is-invalid passInp" type="password" id="newMasterpassSec" placeholder={StringSelector.getString(this.props.callback.state.language).registMasterSecPlaceholder} value={this.state.newMasterpassSec}
+                                          onKeyDown={this.handleKeyevent} onChange={this.handleChange} />
+                        }
+                        <Button variant="dark" className="buttonInline" onClick={() => this.setPasswordShow(3)}>
+                            {this.state.newMasterpassSecShow ?
+                                <img
+                                    src={HideIcon}
+                                    alt=""
+                                    width="18"
+                                    height="18"
+                                    className="d-inline-block"
+                                />
+                                :
+                                <img
+                                    src={ShowIcon}
+                                    alt=""
+                                    width="18"
+                                    height="18"
+                                    className="d-inline-block"
+                                />
+                            }
+                        </Button>
+                    </Row>
                     {toAdd}
                 </Form.Group>
             );
@@ -477,16 +787,44 @@ class Registration extends React.Component {
         {
             return (
                 <Form.Group>
-                    <Form.Label>Masterpasswort wiederholen</Form.Label>
-                    <Form.Control type="password" id="newMasterpassSec" placeholder={StringSelector.getString(this.state.language).passwordPlaceholder} value={this.state.newMasterpassSec}
-                                  onKeyDown={this.handleKeyevent} onChange={this.handleChange} />
+                    <Form.Label>
+                        {StringSelector.getString(this.props.callback.state.language).registMasterSec}
+                    </Form.Label>
+                        <Row className="password-row">
+                        { this.state.newMasterpassSecShow ?
+                            <Form.Control className="passInp" type="text" id="newMasterpassSec" placeholder={StringSelector.getString(this.props.callback.state.language).registMasterSecPlaceholder} value={this.state.newMasterpassSec}
+                                          onKeyDown={this.handleKeyevent} onChange={this.handleChange} />
+                            :
+                            <Form.Control className="passInp" type="password" id="newMasterpassSec" placeholder={StringSelector.getString(this.props.callback.state.language).registMasterSecPlaceholder} value={this.state.newMasterpassSec}
+                                          onKeyDown={this.handleKeyevent} onChange={this.handleChange} />
+                        }
+                        <Button variant="dark" className="buttonInline" onClick={() => this.setPasswordShow(3)}>
+                            {this.state.newMasterpassSecShow ?
+                                <img
+                                    src={HideIcon}
+                                    alt=""
+                                    width="18"
+                                    height="18"
+                                    className="d-inline-block"
+                                />
+                                :
+                                <img
+                                    src={ShowIcon}
+                                    alt=""
+                                    width="18"
+                                    height="18"
+                                    className="d-inline-block"
+                                />
+                            }
+                        </Button>
+                    </Row>
                 </Form.Group>
             );
         }
     }
 
     exit() {
-        this.props.history.push("/");
+        this.props.callback.switchToRegister(false,false,true);
     }
 
 
@@ -511,42 +849,49 @@ class Registration extends React.Component {
             );
         }
         return (
-            <div className="backgroundPicRegist">
-                <div className="gradientDivLogin">
-                    <Container>
-                        <Row className="size-hole-window">
-                            <Col xs={11} sm={10} md={10} lg={6} className="center-vert center-horz">
-                                <Card className="card-login login">
-                                    <div className="close closeButt" onClick={this.exit}>
-                                        <span aria-hidden="true">×</span>
-                                    </div>
-                                    <Card.Img variant="top" src={Logo} className="centerImg"/>
-                                    <Card.Body>
-                                        <Form autoComplete="off">
-                                            {formOut}
-                                            <Form.Group>
-                                                Schritt {this.state.step}/2
-                                            </Form.Group>
-                                            {this.state.step === 2 &&
-                                                <Button variant="danger" onClick={this.resetToFirst}>
-                                                    Vorheriger Schritt
+            <>
+                <div className="backgroundPicRegist">
+                    <div className="gradientDivLogin">
+                        <Container>
+                            <Row className="size-hole-window">
+                                <Col xs={11} sm={10} md={10} lg={6} className="center-vert center-horz">
+                                    <Card className="card-login login">
+                                        <div className="close closeButt" onClick={this.exit}>
+                                            <span aria-hidden="true">×</span>
+                                        </div>
+                                        <Card.Img variant="top" src={Logo} className="centerImg"/>
+                                        <Card.Body>
+                                            <Form autoComplete="off">
+                                                {formOut}
+                                                <Form.Group>
+                                                    {StringSelector.getString(this.props.callback.state.language).registStep} {this.state.step}/2
+                                                </Form.Group>
+                                                {this.state.step === 2 &&
+                                                    <Button variant="danger" onClick={this.resetToFirst}>
+                                                        {StringSelector.getString(this.props.callback.state.language).registPrevButton}
+                                                    </Button>
+                                                }
+
+                                                <Button variant="danger" className={"float-right"} onClick={this.handleSubmit}>
+                                                    {this.state.step === 1 ?
+                                                        StringSelector.getString(this.props.callback.state.language).registNextButton
+                                                        :
+                                                        StringSelector.getString(this.props.callback.state.language).registButton
+                                                    }
                                                 </Button>
-                                            }
-                                            <Button variant="danger" className={"float-right"} onClick={this.handleSubmit}>
-                                                Nächster Schritt
-                                            </Button>
-                                        </Form>
-                                    </Card.Body>
-                                </Card>
-                            </Col>
-                            <div className="footer">
-                                {this.printError()}
-                            </div>
-                            <Indicator />
-                        </Row>
-                    </Container>
+                                            </Form>
+                                        </Card.Body>
+                                    </Card>
+                                </Col>
+                                <div className="footer">
+                                    {this.printError()}
+                                </div>
+                                <Indicator />
+                            </Row>
+                        </Container>
+                    </div>
                 </div>
-            </div>
+            </>
         );
     }
 }
@@ -555,10 +900,5 @@ function sleep (time) {
     return new Promise((resolve) => setTimeout(resolve, time));
 }
 
-const mapDispatchToProps4 = (dispatch) => {
-    return {
-        login: (creds) => dispatch(login(creds)),
-    }
-};
 
-export default connect(null , mapDispatchToProps4, null, { pure: false})(Registration);
+export default Registration;

@@ -8,10 +8,11 @@ import Button from "react-bootstrap/Button";
 import "./add.password.css"
 // Icons
 import GeneratePassIcon from "../../img/icons/generate_password_white.svg";
-import ReloadPass from "../../img/icons/generate_reload_white.svg"
 import AddTag from "../../img/icons/password_add_tag.svg";
-import Row from "react-bootstrap/Row";
+import RemoveTag from "../../img/icons/password_add_remove_user.svg";
 import GeneratePass from "./generatepass";
+import StringSelector from "../../strings/stings";
+import tabs from "./tabs/tab.enum";
 
 export default class AddPassword extends React.Component {
 
@@ -24,8 +25,11 @@ export default class AddPassword extends React.Component {
             pass: "",
             url: "",
             tagAdded: false,
-            tag: [{"":""}],
-            catID: 0,
+            tag: [],
+            catID: "0",
+
+            userGroupAdd: "",
+            userGroupList: [],
             // Popup
             popUpCatShow: false,
             generatePassShow: false,
@@ -89,8 +93,10 @@ export default class AddPassword extends React.Component {
             pass: "",
             url: "",
             tagAdded: false,
-            tag: [{"":""}],
-            catID: 0,
+            tag: [],
+            catID: "0",
+            userGroupAdd: "",
+            userGroupList: [],
             // Popup
             popUpCatShow: false,
             // errors / fields
@@ -102,14 +108,15 @@ export default class AddPassword extends React.Component {
 
 
     changeTagListener (key, value, i, e ) {
+        console.log("aha key:", key, "value:", value, i);
         if ( this.state.tagAdded ) {
             // just tags
             let tagNew = this.state.tag;
-            console.log("Thisss", tagNew, "key", key);
+
+            console.log("aha Thisss", tagNew, "key", key);
             if (e.target.id.length > 8) {
                 // tagValue + i
                 if (e.target.id.includes("tagValue")) {
-
                     tagNew[i][key] = e.target.value;
                     this.setState({
                         tag: tagNew
@@ -117,7 +124,6 @@ export default class AddPassword extends React.Component {
                 }
             } else if (e.target.id.length > 6) {
                 // tagKey + i
-
                 if (e.target.id.includes("tagKey")) {
                     tagNew[i][e.target.value] = tagNew[i][key];
                     delete tagNew[i][key];
@@ -130,10 +136,19 @@ export default class AddPassword extends React.Component {
         }
     }
 
+    addUserToGroupAcc() {
+        if ( this.state.userGroupAdd.length > 0 ) {
+            if ( this.props.callback.addUserToGroupAcc(this.state.userGroupAdd)) {
+
+            }
+        }
+    }
+
     addTag() {
         if ( !this.state.tagAdded ) {
             this.setState({
                 tagAdded: true,
+                tag: [{"":""}],
             });
         }
         else {
@@ -145,47 +160,120 @@ export default class AddPassword extends React.Component {
         }
     }
 
-    renderTag() {
-        let tag = this.state.tag;
-        let tagCompArray = [];
+    removeTag( i ) {
+        if ( i < this.state.tag.length ) {
+            let temp = this.state.tag;
+            temp.splice(i, 1);
 
-        for ( let i = 0; i < tag.length; i++ )
-        {
-            let tagKeys = Object.keys(tag[i]);
-            let but = "";
-            if ( i === tag.length-1) {
-                but = (
-                    <Button variant="dark" className="buttonSpaceInline" onClick={this.addTag}>
-                        <img
-                            src={AddTag}
-                            alt=""
-                            width="14"
-                            height="14"
-                            className="d-inline-block"
-                        />
-                    </Button>
-                );
+
+            if ( this.state.tag.length === 0 ) {
+                this.setState({
+                    tagAdded: false,
+                })
             }
-            tagCompArray[i] = (
-                <InputGroup size="sm" className="mb-3">
-                    <FormControl autoComplete="off" id={"tagKey" + i } className="" aria-label="Small" aria-describedby="inputGroup-sizing-sm" disabled={!this.state.tagAdded} value={tagKeys[0]} onChange={(e) => this.changeTagListener(tagKeys[0], tag[i][tagKeys[0]], i, e)} />
-                    <FormControl autoComplete="off" id={"tagValue" + i } aria-label="Small" aria-describedby="inputGroup-sizing-sm" disabled={!this.state.tagAdded} value={tag[i][tagKeys[0]]} onChange={(e) => this.changeTagListener(tagKeys[0], tag[i][tagKeys[0]], i, e)} />
-                    {but}
-                </InputGroup>
-            );
-
+            else {
+                this.setState({
+                    tag: temp,
+                });
+            }
         }
-        let key = -1;
-        return tagCompArray.map(function (tagComp) {
-            key++;
-            return (
-                <div key={key}>
-                    {tagComp}
-                </div>
-            );
-        });
     }
 
+    renderTag() {
+        if ( this.state.tag.length > 0 ) {
+            let tag = this.state.tag;
+            let tagCompArray = [];
+
+            for ( let i = 0; i < tag.length; i++ )
+            {
+                let tagKeys = Object.keys(tag[i]);
+                console.log("Aha key", tagKeys, tag);
+                let andBut = "";
+                if ( i < tag.length-1) {
+                    andBut = (
+                        <>
+                            <Button variant="dark" className="buttonSpaceInline" onClick={() => this.removeTag(i)}>
+                                <img
+                                    src={RemoveTag}
+                                    alt=""
+                                    width="14"
+                                    height="14"
+                                    className="d-inline-block"
+                                />
+                            </Button>
+                        </>
+                    );
+                }
+                else if ( i === tag.length-1) {
+                    andBut = (
+                        <>
+                            <Button variant="dark" className="buttonSpaceInline notRound" onClick={() => this.removeTag(i)}>
+                                <img
+                                    src={RemoveTag}
+                                    alt=""
+                                    width="14"
+                                    height="14"
+                                    className="d-inline-block"
+                                />
+                            </Button>
+                            <hr className="vertical-button-sep"/>
+                        </>
+                    );
+                }
+                let but = "";
+                if ( i === tag.length-1) {
+                    but = (
+                        <Button variant="dark" className="buttonSpaceInline" onClick={this.addTag}>
+                            <img
+                                src={AddTag}
+                                alt=""
+                                width="14"
+                                height="14"
+                                className="d-inline-block"
+                            />
+                        </Button>
+                    );
+                }
+                tagCompArray[i] = (
+                    <InputGroup size="sm" className="mb-3">
+                        <FormControl autoComplete="off" id={"tagKey" + i } className="" aria-label="Small" aria-describedby="inputGroup-sizing-sm" disabled={!this.state.tagAdded} value={tagKeys[0]} onChange={(e) => this.changeTagListener(tagKeys[0], tag[i][tagKeys[0]], i, e)} />
+                        <FormControl autoComplete="off" id={"tagValue" + i } aria-label="Small" aria-describedby="inputGroup-sizing-sm" disabled={!this.state.tagAdded} value={tag[i][tagKeys[0]]} onChange={(e) => this.changeTagListener(tagKeys[0], tag[i][tagKeys[0]], i, e)} />
+                        {andBut}
+                        {but}
+                    </InputGroup>
+                );
+
+            }
+            let key = -1;
+            return tagCompArray.map(function (tagComp) {
+                key++;
+                return (
+                    <div key={key}>
+                        {tagComp}
+                    </div>
+                );
+            });
+        }
+        else {
+            return (
+                    <div>
+                        <InputGroup size="sm" className="mb-3">
+                            <FormControl autoComplete="off" id={"tagKey-1"} className="" aria-label="Small" aria-describedby="inputGroup-sizing-sm" disabled={!this.state.tagAdded} />
+                            <FormControl autoComplete="off" id={"tagValue-1" } aria-label="Small" aria-describedby="inputGroup-sizing-sm" disabled={!this.state.tagAdded}/>
+                            <Button variant="dark" className="buttonSpaceInline" onClick={this.addTag}>
+                                <img
+                                    src={AddTag}
+                                    alt=""
+                                    width="14"
+                                    height="14"
+                                    className="d-inline-block"
+                                />
+                            </Button>
+                        </InputGroup>
+                    </div>
+            );
+        }
+    }
 
     changeCat(id) {
         this.setState({
@@ -220,7 +308,7 @@ export default class AddPassword extends React.Component {
         let cats = this.props.callback.getCats();
 
         let finalCats = cats.map((item) =>
-            this.returnCatBase(item.id, item.name)
+            this.returnCatBase(item._id, item.name)
         );
 
         return (
@@ -235,7 +323,7 @@ export default class AddPassword extends React.Component {
                                 {finalCats}
                                 <tr>
                                     <td onClick={() => this.changeCat(0)}>
-                                        Keiner Kategorie zuordnen
+                                        {StringSelector.getString(this.props.callback.state.language).addPassCatNoCat}
                                     </td>
                                 </tr>
                             </tbody>
@@ -249,12 +337,12 @@ export default class AddPassword extends React.Component {
     getCatName() {
         let cats = this.props.callback.getCats();
         let catName;
-        if ( this.state.catID === 0 ) {
-            return "Keiner Kategorie zugeordnet"
+        if ( this.state.catID === "0" ) {
+            return StringSelector.getString(this.props.callback.state.language).addPassCatNoCat
         }
         else {
             for ( let i = 0; i < cats.length; i++ ) {
-                if ( cats[i].id === this.state.catID ) {
+                if ( cats[i]._id === this.state.catID ) {
                     catName = cats[i].name;
                 }
             }
@@ -286,6 +374,10 @@ export default class AddPassword extends React.Component {
                     url: e.target.value,
                 });
                 break;
+            case "userGroupAdd":
+                this.setState({
+                    userGroupAdd: e.target.value,
+                });
         }
     };
 
@@ -298,8 +390,10 @@ export default class AddPassword extends React.Component {
     }
 
     addPass() {
+        console.log("add.password.js: catID: " + this.state.catID);
         if ( this.state.user.length > 0 && this.state.title.length > 0 && this.state.pass.length > 0) {
-            this.props.callback.addPass(this.state.user, this.state.pass, this.state.url, this.state.title, this.state.catID, this.state.tag);
+            this.props.callback.addPass(this.state.user, this.state.pass, this.state.url, this.state.title,
+                this.state.tag, this.state.catID);
             this.resetState();
         }
         else {
@@ -328,13 +422,13 @@ export default class AddPassword extends React.Component {
             <>
                 <Modal onKeyDown={this.handleKeyevent} show={this.props.callback.getPassAddShow()} onHide={this.dismissPopUp} className="ep-modal-dialog addPassPopUp">
                     <Modal.Header closeButton>
-                        <Modal.Title>Passwort hinzufügen:</Modal.Title>
+                        <Modal.Title>{StringSelector.getString(this.props.callback.state.language).addPass}:</Modal.Title>
                     </Modal.Header>
                     <Modal.Body className="ep-modal-body">
                         <Card.Body>
                             <InputGroup size="lg" className="mb-3">
                                 <InputGroup.Prepend>
-                                    <InputGroup.Text id="inputGroup-sizing-lg">Titel</InputGroup.Text>
+                                    <InputGroup.Text id="inputGroup-sizing-lg">{StringSelector.getString(this.props.callback.state.language).addPassTitle}</InputGroup.Text>
                                 </InputGroup.Prepend>
                                 { this.state.missingTitle ?
                                     <FormControl className="text-danger is-invalid" autoComplete="off" id="title" aria-label="Large" aria-describedby="inputGroup-sizing-sm" value={this.state.title} onChange={this.changeInput}/>
@@ -345,7 +439,7 @@ export default class AddPassword extends React.Component {
                             <hr/>
                             <InputGroup size="sm" className="mb-3">
                                 <InputGroup.Prepend>
-                                    <InputGroup.Text id="inputGroup-sizing-sm">User</InputGroup.Text>
+                                    <InputGroup.Text id="inputGroup-sizing-sm">{StringSelector.getString(this.props.callback.state.language).addPassUser}</InputGroup.Text>
                                 </InputGroup.Prepend>
                                 { this.state.missingUser ?
                                     <FormControl className="text-danger is-invalid" autoComplete="off" id="username" aria-label="Small" aria-describedby="inputGroup-sizing-sm" value={this.state.user} onChange={this.changeInput}/>
@@ -356,7 +450,7 @@ export default class AddPassword extends React.Component {
 
                             <InputGroup size="sm" className="mb-3">
                                 <InputGroup.Prepend>
-                                    <InputGroup.Text id="inputGroup-sizing-sm">Password</InputGroup.Text>
+                                    <InputGroup.Text id="inputGroup-sizing-sm">{StringSelector.getString(this.props.callback.state.language).addPassPass}</InputGroup.Text>
                                 </InputGroup.Prepend>
                                 { this.state.missingPass ?
                                     <FormControl className="text-danger is-invalid" autoComplete="off" id="password" aria-label="Small" aria-describedby="inputGroup-sizing-sm" value={this.state.pass} onChange={this.changeInput}/>
@@ -376,19 +470,19 @@ export default class AddPassword extends React.Component {
 
                             <InputGroup size="sm" className="mb-3">
                                 <InputGroup.Prepend>
-                                    <InputGroup.Text id="inputGroup-sizing-sm">Website (Login)</InputGroup.Text>
+                                    <InputGroup.Text id="inputGroup-sizing-sm">{StringSelector.getString(this.props.callback.state.language).addPassWebsite}</InputGroup.Text>
                                 </InputGroup.Prepend>
                                 <FormControl autoComplete="off" id="url" aria-label="Small" aria-describedby="inputGroup-sizing-sm" value={this.state.url} onChange={this.changeInput}/>
                             </InputGroup>
 
                             <hr/>
                             <div>
-                                <h6>Tags</h6>
+                                <h6>{StringSelector.getString(this.props.callback.state.language).addPassTags}</h6>
                                 {this.renderTag()}
                             </div>
 
                             <div>
-                                <h6>Kategorie</h6>
+                                <h6>{StringSelector.getString(this.props.callback.state.language).addPassCat}</h6>
                                 <InputGroup size="sm" className="mb-3 editCat" onClick={this.setPopUpCatEnabled}>
                                     <FormControl autoComplete="off" aria-label="Small" className="round-cat dropdown-toggle nav-link" role="button" value={this.getCatName()} aria-describedby="inputGroup-sizing-sm" disabled={true}/>
                                     <InputGroup.Append>
@@ -398,16 +492,42 @@ export default class AddPassword extends React.Component {
                                     </InputGroup.Append>
                                 </InputGroup>
                             </div>
+                            { this.props.callback.state.tabselected === tabs.GROUPPASS &&
+                                <>
+                                    <hr/>
+                                    <h6>{StringSelector.getString(this.props.callback.state.language).addPassVis}</h6>
+                                    <InputGroup size="sm" className="mb-3">
+                                        <InputGroup.Prepend>
+                                            <InputGroup.Text id="inputGroup-sizing-sm">{StringSelector.getString(this.props.callback.state.language).username}</InputGroup.Text>
+                                        </InputGroup.Prepend>
+                                        <Form.Control autoComplete="off" id="userGroupAdd" aria-label="Small" aria-describedby="inputGroup-sizing-sm" value={this.state.userGroupAdd} placeholder={StringSelector.getString(this.props.callback.state.language).addPassUserInpPlaceholder} onChange={this.changeInput}/>
+                                        <InputGroup.Append>
+                                            <Button variant="dark" className="buttonSpaceInline" >
+                                                <img
+                                                    src={AddTag}
+                                                    alt=""
+                                                    width="14"
+                                                    height="14"
+                                                    className="d-inline-block"
+                                                />
+                                            </Button>
+                                        </InputGroup.Append>
+                                    </InputGroup>
+                                </>
+                            }
                         </Card.Body>
                     </Modal.Body>
                     <Modal.Footer>
-                        <Button variant={"danger"} onClick={this.addPass}>Hinzufügen</Button>
+                        <Button variant={"danger"} onClick={this.addPass}>{StringSelector.getString(this.props.callback.state.language).addPassAdd}</Button>
                     </Modal.Footer>
                 </Modal>
                 {this.getPopUpCat()}
-                <GeneratePass callback={this} show={this.state.generatePassShow}/>
+                <GeneratePass callback={this} language={this.props.callback.state.language} show={this.state.generatePassShow}/>
             </>
         );
     }
 
 }
+
+
+

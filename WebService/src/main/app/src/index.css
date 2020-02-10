@@ -11,3 +11,105 @@ code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, "Courier New",
     monospace;
 }
+
+.hiddenOverflow {
+  overflow: hidden;
+}
+.fixHeight {
+  position: absolute;
+  height: 100%;
+  width: 100%;
+  overflow: hidden;
+  background: linear-gradient(to right, rgba(157, 212, 241, 0.7), rgba(157, 212, 241, 0.2));
+  opacity: 1.0;
+}
+.matchParent {
+  height: 100%;
+  width: 100%;
+}
+
+.topPositioning {
+  position: absolute;
+  height: 70%;
+  width: 100%;
+  top: 15%;
+  z-index: 1005;
+  bottom: 15%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+
+.leftPositioning {
+  z-index: 1000;
+}
+
+.rightPositioning {
+  z-index: 1000;
+}
+
+.onTop {
+  z-index: 1006;
+}
+
+.test {
+
+}
+
+.logoAnm {
+  position: relative;
+  overflow: hidden;
+  margin-right: 20%;
+  margin-left: 20%;
+}
+
+.cloud1 {
+  display: block;
+  position: relative;
+  overflow: hidden;
+  margin-left: 30%;
+  margin-top: -2%;
+  height: 65%;
+  width: 65%;
+}
+
+.cloud2 {
+  display: block;
+  position: relative;
+  overflow: hidden;
+  margin-left: 10%;
+  margin-top: -8%;
+  height: 60%;
+  width: 60%;
+}
+
+.cloud3 {
+  display: block;
+  position: relative;
+  overflow: hidden;
+  margin-left: 0;
+  margin-top: -5%;
+  height: 50%;
+  width: 50%;
+}
+
+.cloud4 {
+  display: block;
+  position: relative;
+  overflow: hidden;
+  margin-left: 15%;
+  margin-top: 12%;
+  height: 45%;
+  width: 45%;
+}
+
+.cloud5 {
+  display: block;
+  position: relative;
+  overflow: hidden;
+  margin-left: 40%;
+  margin-top: 25%;
+  height: 45%;
+  width: 45%;
+}
