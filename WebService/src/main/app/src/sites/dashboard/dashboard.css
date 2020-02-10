@@ -89,6 +89,61 @@ body {
     }
 }
 
+/* Add group */
+.groupOut {
+    right: -100px !important
+}
+.groupfab {
+    width: 50px;
+    height: 50px;
+    background-color: #D31E14;
+    border-radius: 25px;
+
+    box-shadow: 2px 2px 20px rgba(0,0,0,0.1);
+    transition: all 0.3s ease-in-out;
+
+    position: fixed;
+    right: 30px;
+    bottom: 70px;
+    overflow: hidden;
+}
+
+.groupfab .addIcon {
+    position: absolute;
+    left: 15px;
+    top: 15px;
+}
+
+.groupfab:hover .addIcon {
+
+}
+
+.groupfab .text {
+    opacity:0;
+    transition-delay: 0s;
+    transition-duration: 0.4s;
+    position: absolute;
+    white-space: nowrap;
+    left: 45px;
+    top: 12px
+}
+.groupfab:hover .text {
+    opacity:1;
+    transform: translateX(0px);
+    -webkit-transform: translateX(0px);
+}
+
+
+.groupfab:hover {
+    width: 215px;
+    border-radius: 25px;
+    background-color: #9e1512;
+    border-color: #9c000a !important;
+    box-shadow: 5px 10px 20px 1px rgba(0, 0, 0, 0.25);
+    transition: all 0.3s ease-in-out;
+}
+
+
 /* Add password */
 .fab {
     width: 50px;

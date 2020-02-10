@@ -23,6 +23,7 @@ import {dashboardAlerts, dashboardLanguage} from "./const/dashboard.enum";
 import AddPassword from "../dashboard/add.password"
 // Icons
 import AddPass from "../../img/icons/password_add_pass.svg";
+import AddGroup from "../../img/icons/group_add.svg";
 import Undo from "../../img/icons/password_delete_undo_blue.svg"
 
 import AddCategory from "./add.cat";
@@ -298,7 +299,6 @@ class Dashboard extends React.Component {
         }
 
 
-        console.log("Aha", passwordsWithout);
         if (passwordsWithout !== undefined) {
             renderWithout = (
                 <div>
@@ -341,7 +341,6 @@ class Dashboard extends React.Component {
     }
 
     setErrorShow( to ) {
-        console.log("Aha", to);
         this.setState({
             errorShow: to,
         });
@@ -807,7 +806,16 @@ class Dashboard extends React.Component {
      * @returns [] a list with all the categories created by the user
      */
     getCats() {
-        return this.getCatsFromTab(this.state.tabselected);
+        return this.sortCatsAlph(this.getCatsFromTab(this.state.tabselected));
+    }
+
+    sortCatsAlph( cats ) {
+        cats.sort(function(a, b){
+            if(a.name < b.name) { return -1; }
+            if(a.name > b.name) { return 1; }
+            return 0;
+        });
+        return cats
     }
 
     getSelectedCatName() {
@@ -971,6 +979,33 @@ class Dashboard extends React.Component {
                         <hr/>
                         <IndicatorSide className={indicatorClass} />
                     </Row>
+                    { this.state.tabselected === tabs.GROUPPASS ?
+                        <Button className="groupfab" variant="danger" onClick={this.showAddPass}>
+                            <img
+                                src={AddGroup}
+                                alt=""
+                                width="20"
+                                height="20"
+                                className="d-inline-block addIcon"
+                            />
+                            <div className={langText}>
+                                <span>{StringSelector.getString(this.state.language).addGroup}</span>
+                            </div>
+                        </Button>
+                        :
+                        <Button className="groupOut groupfab" variant="danger" onClick={this.showAddPass}>
+                            <img
+                                src={AddGroup}
+                                alt=""
+                                width="20"
+                                height="20"
+                                className="d-inline-block addIcon"
+                            />
+                            <div className={langText}>
+                                <span>{StringSelector.getString(this.state.language).addGroup}</span>
+                            </div>
+                        </Button>
+                    }
                     <Button className="fab" variant="danger" onClick={this.showAddPass}>
                         <img
                             src={AddPass}

@@ -30,7 +30,6 @@ export default class DeleteCategory extends React.Component {
 
 
     setCatDel( id, rev) {
-        console.log("Clicked", id);
         let catDelIds = this.state.catDelIds;
         if ( catDelIds.map((e) => {return e._id;}).indexOf(id) === -1 ) {
             catDelIds.push({_id: id, _rev: rev});
@@ -42,7 +41,6 @@ export default class DeleteCategory extends React.Component {
         this.setState({
             catDelIds: catDelIds,
         });
-        console.log("Clicked", this.state.catDelIds);
     };
 
     catDelIdsIncludesId( id ) {
@@ -56,7 +54,6 @@ export default class DeleteCategory extends React.Component {
     }
 
     returnCatBase ( id, rev, name, desc) {
-        console.log("aha", this.catDelIdsIncludesId(id) );
         return (
             <tr key={id} onClick={() =>this.setCatDel(id, rev)}>
                 <td>

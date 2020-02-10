@@ -130,8 +130,8 @@ export const strings = {
     delCatErrSing: "Beim Löschen der Kategorie ist ein Fehler aufgetreten. Bitte versuchen Sie es erneut!",
     delCatErrMult: "Beim Löschen der Kategorien ist ein Fehler aufgetreten. Bitte versuchen Sie es erneut!",
 
-    // Navbar Bottom
 
+    addGroup: "Gruppe hinzufügen",
     // Add Password
     addPass: "Passwort hinzufügen",
 

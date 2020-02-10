@@ -117,6 +117,7 @@ export const strings = {
 
     // Navbar Bottom
 
+    addGroup: "Add group",
     // Add Password
     addPass: "Add password",
 
