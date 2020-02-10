@@ -314,3 +314,7 @@ userRemove {
     background: #FFFFFF;
     opacity: 1.0;
 }
+
+.custom-control-label::after {
+    cursor: pointer !important;
+}

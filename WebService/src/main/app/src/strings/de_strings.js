@@ -173,6 +173,9 @@ export const strings = {
 
     mainAllCat: "Alle Kategorien",
 
+    noPassToCat: "Zu dieser Kategorie wurden noch keine Passwörter nicht hinzugefügt.",
+    noCatsNoPass: "Noch keine Einträge.",
+
     mainNotAddedToCat: "Nicht zugeordnet",
     mainNotAddedToCatInfo: "Hier befinden sich alle Passwörter, die keine Kategorie zugeordnet wurden",
 

@@ -251,8 +251,12 @@ class Dashboard extends React.Component {
         let renderWithout = "";
 
         let catselected = this.state.catselected;
+        let language = this.state.language;
+
+        let nothingAdded = "";
         if (passwordsWithCats !== undefined) {
             renderWithCats = cats.map(function (cat) {
+                console.log("Aha", passwordsWithCats[cat._id]);
                 if ( cat._id === catselected || catselected === "0") {
                     return (
                         <div key={cat._id}>
@@ -264,7 +268,13 @@ class Dashboard extends React.Component {
                             }
                             {cat.desc}
                             <hr/>
-                            {passwordsWithCats[cat._id]}
+                            { passwordsWithCats[cat._id].length === 0 ?
+                                <>
+                                    <p>{StringSelector.getString(language).noPassToCat}</p>
+                                </>
+                                :
+                                passwordsWithCats[cat._id]
+                            }
                         </div>
                     )
                 }
@@ -276,6 +286,10 @@ class Dashboard extends React.Component {
 
             });
         }
+        else if (passwordsWithout === undefined) {
+            nothingAdded = StringSelector.getString(this.state.language).noCatsNoPass;
+        }
+
 
         console.log("Aha", passwordsWithout);
         if (passwordsWithout !== undefined) {
@@ -290,9 +304,10 @@ class Dashboard extends React.Component {
             );
         }
 
+
         return (
             <>
-                { this.state.catselected === 0 &&
+                { this.state.catselected === "0" &&
                     <>
                         <h5>{StringSelector.getString(this.state.language).mainAllCat}</h5>
                         <hr/>
@@ -302,6 +317,7 @@ class Dashboard extends React.Component {
                 { this.state.catselected === "0" &&
                     renderWithout
                 }
+                {nothingAdded}
             </>
         );
     }
