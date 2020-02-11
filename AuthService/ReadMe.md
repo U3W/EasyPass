@@ -9,7 +9,7 @@ curl -i -X POST -H "Content-Type: application/json" -d "{\"hash\": \"mwustinger\
 
 curl -i -X POST -d username=mwustinger -d password=Challenge -c cookieUser.txt http://localhost:7000/auth/login
 
-curl -i -X GET -H "Accept:application/json" -b cookieUser.txt http://localhost:7000/store/mwustinger
+curl -i -X GET -H "Accept:application/json" -b cookieUser.txt http://localhost:7000/store/mwustinger-p
 
 curl -i -X POST -b cookieUser.txt http://localhost:7000/user/remove
 

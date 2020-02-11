@@ -40,7 +40,9 @@ class AuthRestController(private val challengeAuthenticationProvider: ChallengeA
     @PostMapping("/register")
     fun register(@RequestBody user: User, response: HttpServletResponse) = try {
         userRepository.add(user)
-        couchDBConnectionProvider.createCouchDbConnector(user.uname)
+        couchDBConnectionProvider.createCouchDbConnector(user.uname+"-m")
+        couchDBConnectionProvider.createCouchDbConnector(user.uname+"-p")
+        couchDBConnectionProvider.createCouchDbConnector(user.uname+"-g")
         response.status = HttpServletResponse.SC_OK
     } catch (ex: DbAccessException) {
         response.sendError(HttpServletResponse.SC_FORBIDDEN, "${user.uname} was not registered!")

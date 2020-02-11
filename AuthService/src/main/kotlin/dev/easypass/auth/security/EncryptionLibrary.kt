@@ -33,11 +33,12 @@ class EncryptionLibrary(private val properties: Properties) {
      * Generates a random [String] challenge
      */
     fun generateAuthenticationChallenge(): String {
-        val allowedChars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890"
+        //TODO Challenge auswählen
+        /*val allowedChars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890"
         return (1..512)
                 .map { allowedChars.random() }
-                .joinToString("")
-        //return "Challenge"
+                .joinToString("")*/
+        return "Challenge"
     }
 
     /**
