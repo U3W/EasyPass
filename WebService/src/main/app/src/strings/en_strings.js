@@ -109,8 +109,8 @@ export const strings = {
     delCat: "Delete category",
     delCatDel: "Delete",
     // alerts
-    delCatSuccSing: "Category deleted ",
-    delCatSuccMult: "Categories deleted ",
+    delCatSuccSing: "Category deleted!",
+    delCatSuccMult: "Categories deleted!",
     delCatSucc2: "undo",
     delCatErrSing: "An error occurred when deleting the category. Please try again!",
     delCatErrMult: "An error occurred when deleting the categories. Please try again!",
@@ -191,7 +191,8 @@ export const strings = {
 
     // Pass Line alerts
     // Copy
-    linePassCopied: "Password was copied to the clipboard!",
+    linePassCopiedSuc: "Password was copied to the clipboard!",
+    linePassCopiedErr: "An error occurred while copying the password. Please try again!",
     lineUserCopied: "Username was copied to the clipboard!",
     lineURLCopied: "URL was copied to the clipboard!",
 

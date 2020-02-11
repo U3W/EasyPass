@@ -56,7 +56,7 @@ export function workerCall( e ) {
             this.clipboardCopy(data.passwd);
             function correctUrl(url) {
                 let out = url;
-                if (!( url.includes("https://") || url.includes("https://") )) {
+                if (!( url.includes("http://") || url.includes("https://") )) {
                     out = "https://" + url;
                 }
                 return out;

@@ -124,8 +124,8 @@ export const strings = {
     delCat: "Kategorie löschen",
     delCatDel: "Löschen",
     // alerts
-    delCatSuccSing: "Kategorie gelöscht ",
-    delCatSuccMult: "Kategorien gelöscht ",
+    delCatSuccSing: "Kategorie gelöscht!",
+    delCatSuccMult: "Kategorien gelöscht!",
     delCatSucc2: "Rückgängig",
     delCatErrSing: "Beim Löschen der Kategorie ist ein Fehler aufgetreten. Bitte versuchen Sie es erneut!",
     delCatErrMult: "Beim Löschen der Kategorien ist ein Fehler aufgetreten. Bitte versuchen Sie es erneut!",

@@ -21,6 +21,7 @@ import dashboardState from "./dashboard.saved.state"
 import Alert from "react-bootstrap/Alert";
 import {dashboardAlerts, dashboardLanguage} from "./const/dashboard.enum";
 import AddPassword from "../dashboard/add.password"
+import copy from 'copy-to-clipboard';
 // Icons
 import AddPass from "../../img/icons/password_add_pass.svg";
 import AddGroup from "../../img/icons/group_add.svg";
@@ -468,15 +469,15 @@ class Dashboard extends React.Component {
             err = StringSelector.getString(this.state.language).delCatErrMult;
         }
         else {
-            succ = "Kateogrie gelöscht ";
-            err = "Beim Löschen der Kategorie ist ein Fehler aufgetreten. Bitte versuchen Sie es erneut!";
+            succ = StringSelector.getString(this.state.language).delCatSuccSing;
+            err = StringSelector.getString(this.state.language).delCatErrSing;
         }
         return (
             <Alert show={show} variant={this.state.alertState} className="center-horz center-vert error fixed-top-easypass in-front">
                 <p className="center-horz center-vert center-text">
                     { this.state.alertState === "success" ?
                         <>
-                            {succ}
+                            {succ + " "}
                             <a className="makeLookLikeLink" onClick={() => this.undoDelete(dashboardAlerts.showDeleteCatAlert, this.state.currentCatDelete)}>
                                 {StringSelector.getString(this.state.language).delCatSucc2}
                                 <img
@@ -505,7 +506,7 @@ class Dashboard extends React.Component {
                 <p className="center-horz center-vert center-text">
                     { this.state.alertState === "success" ?
                         <>
-                            {succ}
+                            {succ + " "}
                             <a className="makeLookLikeLink" onClick={() => this.undoDelete(dashboardAlerts.showDeletePassAlert, this.state.currentPassDelete)}>
                                 {StringSelector.getString(this.state.language).linePassDelSuc2}
                                 <img
@@ -585,14 +586,10 @@ class Dashboard extends React.Component {
 
 
     clipboardCopy( text ) {
-        // another method for firefox
-        if (navigator.userAgent.toLowerCase().indexOf('firefox') > -1) { // geht nicht ToDo @Kacper do this!!!!
-            navigator.clipboard.writeText(text).then(function() {
-            }, function() {
-            });
-        }
-        else {
-            // Create new element
+        navigator.clipboard.writeText(text).then(() => {
+            console.log("Kein Error");
+        }).catch(e => {
+            console.log("Error", e);
             let el = document.createElement('textarea');
             el.value = text;
             el.setAttribute('readonly', text);
@@ -604,8 +601,8 @@ class Dashboard extends React.Component {
             document.execCommand('copy');
             // Remove temporary element
             document.body.removeChild(el);
-        }
-
+        });
+        //await copy(text);
     }
 
     showDeletePopUp( which, succ ) {
@@ -969,8 +966,12 @@ class Dashboard extends React.Component {
         }
 
         let langText = "text";
+        let fabPassClass = "fab";
+        let fabGroupClass = "groupfab";
         if ( this.state.language === dashboardLanguage.english ) {
             langText = "textEng";
+            fabPassClass = "fabEng";
+            fabGroupClass = "groupfabEng";
         }
 
         return (
@@ -992,7 +993,7 @@ class Dashboard extends React.Component {
                         <IndicatorSide className={indicatorClass} />
                     </Row>
                     { this.state.tabselected === tabs.GROUPPASS ?
-                        <Button className="groupfab" variant="danger" onClick={this.showAddPass}>
+                        <Button className={fabGroupClass} variant="danger" onClick={this.showAddPass}>
                             <img
                                 src={AddGroup}
                                 alt=""
@@ -1005,7 +1006,7 @@ class Dashboard extends React.Component {
                             </div>
                         </Button>
                         :
-                        <Button className="groupOut groupfab" variant="danger" onClick={this.showAddPass}>
+                        <Button className={fabGroupClass + " groupOut"} variant="danger" onClick={this.showAddPass}>
                             <img
                                 src={AddGroup}
                                 alt=""
@@ -1018,7 +1019,7 @@ class Dashboard extends React.Component {
                             </div>
                         </Button>
                     }
-                    <Button className="fab" variant="danger" onClick={this.showAddPass}>
+                    <Button className={fabPassClass} variant="danger" onClick={this.showAddPass}>
                         <img
                             src={AddPass}
                             alt=""
