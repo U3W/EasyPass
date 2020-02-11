@@ -587,7 +587,7 @@ class Dashboard extends React.Component {
 
     clipboardCopy( text ) {
         navigator.clipboard.writeText(text).then(() => {
-            console.log("Kein Error");
+            console.log("Copied to Clipboard");
         }).catch(e => {
             console.log("Error", e);
             let el = document.createElement('textarea');
