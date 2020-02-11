@@ -24,7 +24,7 @@ import AddPassword from "../dashboard/add.password"
 import copy from 'copy-to-clipboard';
 // Icons
 import AddPass from "../../img/icons/password_add_pass.svg";
-import AddGroup from "../../img/icons/group_add.svg";
+import AddGroupIcon from "../../img/icons/group_add.svg";
 import Undo from "../../img/icons/password_delete_undo_blue.svg"
 
 import AddCategory from "./add.cat";
@@ -35,6 +35,7 @@ import StringSelector from "../../strings/stings";
 //import Entries from "./Entries";
 import * as that from "./dashboard.extended";
 import * as dashboardEntries from "./dashboard.entries";
+import AddGroup from "./add.group";
 
 class Dashboard extends React.Component {
 
@@ -98,7 +99,9 @@ class Dashboard extends React.Component {
             showDeleteCatAlert: false,
             // password add
             popUpAddPassShow: false,
-            // password delete
+            // group add
+            popUpAddGroupShow: false, // false,
+            // password delete alert
             showDeletePassAlert: false,
 
             // for the undo delete
@@ -141,6 +144,9 @@ class Dashboard extends React.Component {
         this.showAddPass = this.showAddPass.bind(this);
         this.dismissAddPass = this.dismissAddPass.bind(this);
         this.getPassAddShow = this.getPassAddShow.bind(this);
+        this.showAddGroup = this.showAddGroup.bind(this);
+        this.dismissAddGroup = this.dismissAddGroup.bind(this);
+        this.getGroupAddShow = this.getGroupAddShow.bind(this);
         // update, delete and so on
         this.getCats = this.getCats.bind(this);
         this.renderLinesSonstige = this.renderLinesSonstige.bind(this);
@@ -871,6 +877,21 @@ class Dashboard extends React.Component {
         return this.state.popUpAddPassShow;
     }
 
+    showAddGroup() {
+        this.setState({
+            popUpAddGroupShow: true,
+        })
+    }
+
+    dismissAddGroup() {
+        this.setState({
+            popUpAddGroupShow: false,
+        })
+    }
+    getGroupAddShow() {
+        return this.state.popUpAddGroupShow;
+    }
+
     dismissAddCat() {
         this.setState({
             popUpAddCatShow: false,
@@ -993,9 +1014,9 @@ class Dashboard extends React.Component {
                         <IndicatorSide className={indicatorClass} />
                     </Row>
                     { this.state.tabselected === tabs.GROUPPASS ?
-                        <Button className={fabGroupClass} variant="danger" onClick={this.showAddPass}>
+                        <Button className={fabGroupClass} variant="danger" onClick={this.showAddGroup}>
                             <img
-                                src={AddGroup}
+                                src={AddGroupIcon}
                                 alt=""
                                 width="20"
                                 height="20"
@@ -1006,9 +1027,9 @@ class Dashboard extends React.Component {
                             </div>
                         </Button>
                         :
-                        <Button className={fabGroupClass + " groupOut"} variant="danger" onClick={this.showAddPass}>
+                        <Button className={fabGroupClass + " groupOut"} variant="danger">
                             <img
-                                src={AddGroup}
+                                src={AddGroupIcon}
                                 alt=""
                                 width="20"
                                 height="20"
@@ -1032,6 +1053,7 @@ class Dashboard extends React.Component {
                         </div>
                     </Button>
                     <AddPassword callback={this}/>
+                    <AddGroup callback={this}/>
                 </div>
                 <AddCategory callback={this}/>
                 <EditCategory callback={this}/>

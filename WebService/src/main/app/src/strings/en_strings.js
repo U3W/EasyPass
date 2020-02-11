@@ -117,7 +117,24 @@ export const strings = {
 
     // Navbar Bottom
 
+    // Add Group
     addGroup: "Add group",
+    addGroupBut: "Add",
+
+    addGroupName: "Name",
+
+    // Vis
+    addGroupVis: "Member administration",
+    addGroupUserTag: "Add user to group",
+    addGroupUserInpPlaceholder: "Enter user name",
+
+    addGroupUserVis: "Group members",
+    addGroupUserVis2: "Users who have access to the password",
+    addGroupUserVisNon: "No users added yet",
+
+    addGroupUserAlready: "Username does not exist!",
+    addGroupUserNotFound: "User already added!",
+
     // Add Password
     addPass: "Add password",
 
@@ -140,18 +157,6 @@ export const strings = {
     addPassCatChange: "Change category",
 
     addPassAdd: "Add",
-
-    // Add Pass Group
-    addPassVis: "Password visibility",
-    addPassUserTag: "Add user to group",
-    addPassUserInpPlaceholder: "Enter user name",
-
-    addPassUserVis: "Group members",
-    addPassUserVis2: "Users who have access to the password",
-    addPassUserVisNon: "No users added yet",
-
-    addPassUserAlready: "Username does not exist!",
-    addPassUserNotFound: "User already added!",
 
     /** Main Window */
     mainPassGroup: "Group passwords",

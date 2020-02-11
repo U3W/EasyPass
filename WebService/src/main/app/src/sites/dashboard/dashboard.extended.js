@@ -61,7 +61,7 @@ export function workerCall( e ) {
                 }
                 return out;
             }
-            window.open(correctUrl(url), "_blank");
+            window.open(correctUrl(data.url), "_blank");
             break;
         case 'saveCategory':
             this.copy("", dashboardAlerts.showAddedCat, data.ok);
