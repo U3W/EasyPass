@@ -123,7 +123,8 @@ module.exports = (args, options) => {
     },
     plugins: [
       new CopyWebPackPlugin([
-        {from: "modules", to: "modules"}
+        {from: "modules/easypass-lib/dist/**"},
+        {from: "modules/pouchdb/dist/**"}
       ]),
       // TODO exclude unnecessary bower components
       new WorkboxPlugin.InjectManifest({
