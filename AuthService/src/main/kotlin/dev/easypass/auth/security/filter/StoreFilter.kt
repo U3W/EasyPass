@@ -25,10 +25,10 @@ class StoreFilter : OncePerRequestFilter() {
         else {
             val authorities = AuthorityUtils.authorityListToSet(authentication.authorities)
             val hash = request.servletPath.substringAfter("/store/").split("-")[0]
-            if (!authorities.contains("HASH_$hash"))
-                response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Unauthorized for this datastore!")
-            else
+            if (authorities.contains("HASH_$hash"))
                 filterChain.doFilter(request, response)
+            else
+                response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Unauthorized for this datastore!")
         }
     }
 
