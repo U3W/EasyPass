@@ -14,8 +14,8 @@ import javax.servlet.http.*
  * @param groupRepository: an instance of the class [GroupRepository] to gain CRUD operations for [Group]s
  */
 @RestController
-@RequestMapping("/group")
-class GroupRestController(private val couchDBConnectionProvider: CouchDBConnectionProvider,
+@RequestMapping("/admin")
+class AdminRestController(private val couchDBConnectionProvider: CouchDBConnectionProvider,
                           private val groupRepository: GroupRepository) {
     /**
      * A Request removes the current [Group] from the CouchDB-Datastore and deletes the corresponding database

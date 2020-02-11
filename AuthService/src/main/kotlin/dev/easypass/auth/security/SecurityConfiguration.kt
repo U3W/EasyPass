@@ -55,12 +55,12 @@ class SecurityConfiguration(private val authProvider: ChallengeAuthenticationPro
                 .authorizeRequests()
                 .antMatchers(HttpMethod.POST, "/auth/**").permitAll()
                 .antMatchers(HttpMethod.POST, "/admin/**").authenticated()
+                .antMatchers(HttpMethod.POST, "/user/**").authenticated()
                 .antMatchers("/store/**").authenticated()
                 .anyRequest().denyAll()
                 .and()
                 .addFilterBefore(isAdminFilter, AnonymousAuthenticationFilter::class.java)
                 .addFilterBefore(isUserFilter, AnonymousAuthenticationFilter::class.java)
                 .addFilterBefore(storeFilter, AnonymousAuthenticationFilter::class.java)
-
     }
 }

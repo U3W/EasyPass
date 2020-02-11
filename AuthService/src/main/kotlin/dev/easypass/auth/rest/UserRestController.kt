@@ -20,6 +20,7 @@ import javax.servlet.http.*
 class UserRestController(private val couchDBConnectionProvider: CouchDBConnectionProvider,
                          private val userRepository: UserRepository,
                          private val groupRepository: GroupRepository) {
+
     /**
      * A Request removes the current [User] from the CouchDB-Datastore and deletes the corresponding database
      * @param request: an instance of the class [HttpServletRequest]
@@ -27,6 +28,7 @@ class UserRestController(private val couchDBConnectionProvider: CouchDBConnectio
      */
     @PostMapping("/remove")
     fun removeUser(request: HttpServletRequest, authentication: Authentication) {
+        println("REST")
         val authorities = AuthorityUtils.authorityListToSet(authentication.authorities)
         for (auth in authorities) {
             val hash = auth.toString().substringAfter("HASH_")
@@ -48,7 +50,6 @@ class UserRestController(private val couchDBConnectionProvider: CouchDBConnectio
      */
     @PostMapping("/createGroup")
     fun createGroup(@RequestBody group: Group, response: HttpServletResponse, authentication: Authentication) = try {
-
         groupRepository.add(group)
         couchDBConnectionProvider.createCouchDbConnector("${group.gid}-m")
         couchDBConnectionProvider.createCouchDbConnector("${group.gid}-p")

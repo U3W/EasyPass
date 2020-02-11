@@ -21,13 +21,13 @@ class IsUserFilter : OncePerRequestFilter() {
     override fun doFilterInternal(request: HttpServletRequest, response: HttpServletResponse, filterChain: FilterChain) {
         val authentication = SecurityContextHolder.getContext().authentication
         if (authentication == null)
-            response.status = HttpServletResponse.SC_UNAUTHORIZED
+            response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "NULL")
         else {
             val authorities = AuthorityUtils.authorityListToSet(authentication.authorities)
-            if (!(authorities.contains("ROLE_USER")))
-                response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "This task is only available for users.")
-            else
+            if (authorities.contains("ROLE_USER"))
                 filterChain.doFilter(request, response)
+            else
+                response.sendError(HttpServletResponse.SC_FORBIDDEN, "This task is only available for users.")
         }
     }
 
