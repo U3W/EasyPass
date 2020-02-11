@@ -591,11 +591,18 @@ class Dashboard extends React.Component {
     }
 
 
-    clipboardCopy( text ) {
-        navigator.clipboard.writeText(text).then(() => {
-            console.log("Copied to Clipboard");
-        }).catch(e => {
-            console.log("Error", e);
+    async clipboardCopy( text ) {
+        // For browser that support the new clipboard-API
+        if (navigator.clipboard !== undefined) {
+            try {
+                await navigator.clipboard.writeText(text);
+                console.log("Copied to Clipboard");
+                return Promise.resolve();
+            } catch (e) {
+                console.log("Could not copy to Clipboard", e);
+                return Promise.reject();
+            }
+        } else { // Legacy support
             let el = document.createElement('textarea');
             el.value = text;
             el.setAttribute('readonly', text);
@@ -607,8 +614,8 @@ class Dashboard extends React.Component {
             document.execCommand('copy');
             // Remove temporary element
             document.body.removeChild(el);
-        });
-        //await copy(text);
+            return Promise.resolve();
+        }
     }
 
     showDeletePopUp( which, succ ) {

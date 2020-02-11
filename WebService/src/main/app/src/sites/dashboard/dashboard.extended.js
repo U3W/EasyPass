@@ -53,15 +53,16 @@ export function workerCall( e ) {
             });
             break;
         case 'getPasswordAndRedirect':
-            this.clipboardCopy(data.passwd);
-            function correctUrl(url) {
-                let out = url;
-                if (!( url.includes("http://") || url.includes("https://") )) {
-                    out = "https://" + url;
+            this.clipboardCopy(data.passwd).then(() => {
+                function correctUrl(url) {
+                    let out = url;
+                    if (!( url.includes("http://") || url.includes("https://") )) {
+                        out = "https://" + url;
+                    }
+                    return out;
                 }
-                return out;
-            }
-            window.open(correctUrl(data.url), "_blank");
+                window.open(correctUrl(data.url), "_blank");
+            }).catch();
             break;
         case 'saveCategory':
             this.copy("", dashboardAlerts.showAddedCat, data.ok);
@@ -72,11 +73,6 @@ export function workerCall( e ) {
             this.dismissEditCat();
             break;
         case 'deleteCategories':
-            // ToDo call Kacpers method
-            /**
-            this.setState({
-                currentCatDelete: id,
-            });*/
             let success = true;
             for (let i = 0; i < data.length; i++) {
                 if (data[i].ok === false) {
