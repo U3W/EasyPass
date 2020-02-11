@@ -28,8 +28,6 @@ export default class AddPassword extends React.Component {
             tag: [],
             catID: "0",
 
-            userGroupAdd: "",
-            userGroupList: [],
             // Popup
             popUpCatShow: false,
             generatePassShow: false,
@@ -95,8 +93,7 @@ export default class AddPassword extends React.Component {
             tagAdded: false,
             tag: [],
             catID: "0",
-            userGroupAdd: "",
-            userGroupList: [],
+
             // Popup
             popUpCatShow: false,
             // errors / fields
@@ -492,29 +489,6 @@ export default class AddPassword extends React.Component {
                                     </InputGroup.Append>
                                 </InputGroup>
                             </div>
-                            { this.props.callback.state.tabselected === tabs.GROUPPASS &&
-                                <>
-                                    <hr/>
-                                    <h6>{StringSelector.getString(this.props.callback.state.language).addPassVis}</h6>
-                                    <InputGroup size="sm" className="mb-3">
-                                        <InputGroup.Prepend>
-                                            <InputGroup.Text id="inputGroup-sizing-sm">{StringSelector.getString(this.props.callback.state.language).username}</InputGroup.Text>
-                                        </InputGroup.Prepend>
-                                        <Form.Control autoComplete="off" id="userGroupAdd" aria-label="Small" aria-describedby="inputGroup-sizing-sm" value={this.state.userGroupAdd} placeholder={StringSelector.getString(this.props.callback.state.language).addPassUserInpPlaceholder} onChange={this.changeInput}/>
-                                        <InputGroup.Append>
-                                            <Button variant="dark" className="buttonSpaceInline" >
-                                                <img
-                                                    src={AddTag}
-                                                    alt=""
-                                                    width="14"
-                                                    height="14"
-                                                    className="d-inline-block"
-                                                />
-                                            </Button>
-                                        </InputGroup.Append>
-                                    </InputGroup>
-                                </>
-                            }
                         </Card.Body>
                     </Modal.Body>
                     <Modal.Footer>

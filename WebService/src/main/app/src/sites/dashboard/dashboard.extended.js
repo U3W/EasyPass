@@ -54,15 +54,14 @@ export function workerCall( e ) {
             break;
         case 'getPasswordAndRedirect':
             this.clipboardCopy(data.passwd);
-            const url = data.url;
             function correctUrl(url) {
                 let out = url;
-                if (!( url.includes("https://") || url.includes("https://") )) {
+                if (!( url.includes("http://") || url.includes("https://") )) {
                     out = "https://" + url;
                 }
                 return out;
             }
-            window.open(correctUrl(url), "_blank");
+            window.open(correctUrl(data.url), "_blank");
             break;
         case 'saveCategory':
             this.copy("", dashboardAlerts.showAddedCat, data.ok);

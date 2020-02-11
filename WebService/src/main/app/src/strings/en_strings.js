@@ -109,15 +109,32 @@ export const strings = {
     delCat: "Delete category",
     delCatDel: "Delete",
     // alerts
-    delCatSuccSing: "Category deleted ",
-    delCatSuccMult: "Categories deleted ",
+    delCatSuccSing: "Category deleted!",
+    delCatSuccMult: "Categories deleted!",
     delCatSucc2: "undo",
     delCatErrSing: "An error occurred when deleting the category. Please try again!",
     delCatErrMult: "An error occurred when deleting the categories. Please try again!",
 
     // Navbar Bottom
 
+    // Add Group
     addGroup: "Add group",
+    addGroupBut: "Add",
+
+    addGroupName: "Name",
+
+    // Vis
+    addGroupVis: "Member administration",
+    addGroupUserTag: "Add user to group",
+    addGroupUserInpPlaceholder: "Enter user name",
+
+    addGroupUserVis: "Group members",
+    addGroupUserVis2: "Users who have access to the password",
+    addGroupUserVisNon: "No users added yet",
+
+    addGroupUserAlready: "Username does not exist!",
+    addGroupUserNotFound: "User already added!",
+
     // Add Password
     addPass: "Add password",
 
@@ -140,18 +157,6 @@ export const strings = {
     addPassCatChange: "Change category",
 
     addPassAdd: "Add",
-
-    // Add Pass Group
-    addPassVis: "Password visibility",
-    addPassUserTag: "Add user to group",
-    addPassUserInpPlaceholder: "Enter user name",
-
-    addPassUserVis: "Group members",
-    addPassUserVis2: "Users who have access to the password",
-    addPassUserVisNon: "No users added yet",
-
-    addPassUserAlready: "Username does not exist!",
-    addPassUserNotFound: "User already added!",
 
     /** Main Window */
     mainPassGroup: "Group passwords",
@@ -191,7 +196,8 @@ export const strings = {
 
     // Pass Line alerts
     // Copy
-    linePassCopied: "Password was copied to the clipboard!",
+    linePassCopiedSuc: "Password was copied to the clipboard!",
+    linePassCopiedErr: "An error occurred while copying the password. Please try again!",
     lineUserCopied: "Username was copied to the clipboard!",
     lineURLCopied: "URL was copied to the clipboard!",
 

@@ -124,14 +124,31 @@ export const strings = {
     delCat: "Kategorie löschen",
     delCatDel: "Löschen",
     // alerts
-    delCatSuccSing: "Kategorie gelöscht ",
-    delCatSuccMult: "Kategorien gelöscht ",
+    delCatSuccSing: "Kategorie gelöscht!",
+    delCatSuccMult: "Kategorien gelöscht!",
     delCatSucc2: "Rückgängig",
     delCatErrSing: "Beim Löschen der Kategorie ist ein Fehler aufgetreten. Bitte versuchen Sie es erneut!",
     delCatErrMult: "Beim Löschen der Kategorien ist ein Fehler aufgetreten. Bitte versuchen Sie es erneut!",
 
-
+    // Add Group
     addGroup: "Gruppe hinzufügen",
+    addGroupBut: "Hinzufügen",
+
+    addGroupName: "Name",
+
+    // Vis
+    addGroupVis: "Mitgliederverwaltung",
+    addGroupUserTag: "Nutzer zur Gruppe hinzufügen",
+    addGroupUserInpPlaceholder: "Benutzernamen eingeben",
+
+    addGroupUserVis: "Gruppenmitglieder",
+    addGroupUserVis2: "Nutzer, die Einsicht in das Passwort haben",
+    addGroupUserVisNon: "Noch keine Nutzer hinzugefügt",
+
+    addGroupUserAlready: "Benutzername existiert nicht!",
+    addGroupUserNotFound: "Benutzer bereits hinzugefügt!",
+
+
     // Add Password
     addPass: "Passwort hinzufügen",
 
@@ -154,18 +171,6 @@ export const strings = {
     addPassCatChange: "Kategorie ändern",
 
     addPassAdd: "Hinzufügen",
-
-    // Add Pass Group
-    addPassVis: "Passwort Sichtbarkeit",
-    addPassUserTag: "Nutzer zur Gruppe hinzufügen",
-    addPassUserInpPlaceholder: "Benutzernamen eingeben",
-
-    addPassUserVis: "Gruppenmitglieder",
-    addPassUserVis2: "Nutzer, die Einsicht in das Passwort haben",
-    addPassUserVisNon: "Noch keine Nutzer hinzugefügt",
-
-    addPassUserAlready: "Benutzername existiert nicht!",
-    addPassUserNotFound: "Benutzer bereits hinzugefügt!",
 
     /** Main Window */
     mainPassGroup: "Gruppen Passwörter",
