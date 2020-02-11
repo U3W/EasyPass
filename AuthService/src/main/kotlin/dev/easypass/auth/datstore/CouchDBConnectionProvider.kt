@@ -27,11 +27,11 @@ class CouchDBConnectionProvider(private val properties: Properties) {
      */
     fun createCouchDbInstance(): StdCouchDbInstance {
         val url = properties.getProperty("couchDb.url")
-        val uname = properties.getProperty("couchDb.username")
+        val uid = properties.getProperty("couchDb.username")
         val pwd = properties.getProperty("couchDb.password")
         val httpClient = StdHttpClient.Builder()
                 .url(url)
-                .username(uname)
+                .username(uid)
                 .password(pwd)
                 .build()
 

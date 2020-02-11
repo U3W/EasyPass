@@ -27,9 +27,9 @@ class RestAPITest {
     fun registerTest() {
         mvc!!.perform(post("/register")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content("{\"uname\": \"$testUname\", \"pwd\": \"$testPwd\"}"))
+                .content("{\"uid\": \"$testUID\", \"pwd\": \"$testPwd\"}"))
 
-        val u = repo!!.findByUname(testUname)
+        val u = repo!!.findByUID(testUID)
         assertTrue(!u.isNullOrEmpty())
         assertTrue(u?.get(0)!!.checkPwd(testPwd))
     }

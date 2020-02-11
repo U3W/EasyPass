@@ -3,7 +3,7 @@
 Test for User:
 
 ```
-curl -i -X POST -H "Content-Type: application/json" -d "{\"uname\": \"mwustinger\", \"pubK\": \"PUBKEY\", \"privK\": \"PRIVKEY\"}" http://localhost:7000/auth/register
+curl -i -X POST -H "Content-Type: application/json" -d "{\"uid\": \"mwustinger\", \"pubK\": \"PUBKEY\", \"privK\": \"PRIVKEY\"}" http://localhost:7000/auth/register
 
 curl -i -X POST -H "Content-Type: application/json" -d "{\"hash\": \"mwustinger\", \"role\": \"USER\"}" http://localhost:7000/auth/challenge
 
@@ -18,7 +18,7 @@ curl -i -X POST -b cookieUser.txt http://localhost:7000/user/remove
 Test for Group:
 
 ```
-curl -i -X POST -H "Content-Type: application/json" -d "{\"gname\": \"family\", \"pubK\": \"PUBKEY\", \"privK\": \"PRIVKEY\", \"apubK\": \"APUBKEY\", \"aprivK\": \"APRIVKEY\"}" -b cookieUser.txt http://localhost:7000/user/createGroup
+curl -i -X POST -H "Content-Type: application/json" -d "{\"gid\": \"family\", \"pubK\": \"PUBKEY\", \"privK\": \"PRIVKEY\", \"apubK\": \"APUBKEY\", \"aprivK\": \"APRIVKEY\"}" -b cookieUser.txt http://localhost:7000/user/createGroup
 
 curl -i -X POST -H "Content-Type: application/json" -d "{\"hash\": \"family\", \"role\": \"GROUP\"}" http://localhost:7000/auth/challenge
 
@@ -55,7 +55,7 @@ curl -i -X POST -c cookieUser.txt http://localhost:7000/auth/logout
 Full Test:
 
 ```
-curl -i -X POST -H "Content-Type: application/json" -d "{\"uname\": \"mwustinger\", \"role\": \"USER\"}" http://localhost:7000/auth/challenge
+curl -i -X POST -H "Content-Type: application/json" -d "{\"uid\": \"mwustinger\", \"role\": \"USER\"}" http://localhost:7000/auth/challenge
 
 curl -i --header "Accept:application/json" -X GET -b cookieUser.txt http://localhost:7000/store/mwustinger
 

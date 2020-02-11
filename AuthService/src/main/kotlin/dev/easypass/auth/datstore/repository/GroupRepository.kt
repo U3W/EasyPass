@@ -25,25 +25,25 @@ class GroupRepository(db: CouchDbConnector) : CouchDbRepositorySupport<Group>(Gr
     }
 
     /**
-     * returns a [List] of all the entries with the passed [gname] that are stored in the database
-     * @param gname: the name of the [Group]
+     * returns a [List] of all the entries with the passed [gid] that are stored in the database
+     * @param gid: the name of the [Group]
      * @return a list of objects of the class [Group]
      */
     @GenerateView
-    private fun findByGname(gname: String?): List<Group> {
-        return queryView("by_gname", gname)
+    private fun findByGID(gid: String?): List<Group> {
+        return queryView("by_gid", gid)
     }
 
     /**
-     * returns only the first entry of the [List] of [findByGname]
-     * @param gname: the name of the [Group]
+     * returns only the first entry of the [List] of [findByGID]
+     * @param gid: the name of the [Group]
      * @return an object of the class [Group]
      */
     @Throws(DocumentNotFoundException::class, UpdateConflictException::class)
-    fun findOneByGname(gname: String): Group {
-        val list = findByGname(gname)
+    fun findOneByGID(gid: String): Group {
+        val list = findByGID(gid)
         if (list.isEmpty())
-            throw DocumentNotFoundException("The Group [$gname] is NOT FOUND in the database")
+            throw DocumentNotFoundException("The Group [$gid] is NOT FOUND in the database")
         if (list.size > 1)
             throw UpdateConflictException()
         return list[0]
@@ -51,22 +51,22 @@ class GroupRepository(db: CouchDbConnector) : CouchDbRepositorySupport<Group>(Gr
 
     /**
      * This methods overrides the add-method of [CouchDbRepositorySupport],
-     * throws an [UpdateConflictException], when an entity with the same gname as [entity] is already saved in the database
+     * throws an [UpdateConflictException], when an entity with the same gid as [entity] is already saved in the database
      * @param entity: an object of the class [Group]
      */
     @Throws(UpdateConflictException::class)
-    override fun add(entity: Group) = if (findByGname(entity.gname).isEmpty()) {
+    override fun add(entity: Group) = if (findByGID(entity.gid).isEmpty()) {
         super.add(entity)
     } else {
         throw UpdateConflictException()
     }
 
     /**
-     * Removes all [Group]s with the given [gname]
-     * @param gname: the name of the [Group]
+     * Removes all [Group]s with the given [gid]
+     * @param gid: the name of the [Group]
      */
-    fun removeAllByGname(gname: String) {
-        for (group in findByGname(gname))
+    fun removeAllByGID(gid: String) {
+        for (group in findByGID(gid))
             remove(group)
     }
 }

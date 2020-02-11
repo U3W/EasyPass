@@ -85,7 +85,7 @@ class ChallengeAuthenticationProvider(private val userRepository: UserRepository
 
     /**
      * Adds a new [InternalChallenge] to the [currentChallenges]
-     * @param uname: the name of the user
+     * @param uid: the name of the user
      */
     fun addUserChallenge(key: Pair<String, String>, role: String): ResponseChallenge = try {
         if (currentChallenges.keys.contains(key)) {
@@ -96,17 +96,17 @@ class ChallengeAuthenticationProvider(private val userRepository: UserRepository
         }
         when (role) {
             "USER"  -> {
-                val user = userRepository.findOneByUname(key.second)
+                val user = userRepository.findOneByUID(key.second)
                 currentChallenges[key] = Pair(encryptionLibrary.generateInternalAdministrationChallenge(), role)
                 ResponseChallenge(currentChallenges[key]!!.first.getChallengeEncryptedByPubK(user.pubK), user.privK)
             }
             "GROUP" -> {
-                val group = groupRepository.findOneByGname(key.second)
+                val group = groupRepository.findOneByGID(key.second)
                 currentChallenges[key] = Pair(encryptionLibrary.generateInternalAdministrationChallenge(), role)
                 ResponseChallenge(currentChallenges[key]!!.first.getChallengeEncryptedByPubK(group.pubK), group.privK)
             }
             "ADMIN" -> {
-                val group = groupRepository.findOneByGname(key.second)
+                val group = groupRepository.findOneByGID(key.second)
                 currentChallenges[key] = Pair(encryptionLibrary.generateInternalAdministrationChallenge(), role)
                 ResponseChallenge(currentChallenges[key]!!.first.getChallengeEncryptedByPubK(group.apubK), group.aprivK)
             }

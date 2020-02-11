@@ -31,7 +31,7 @@ class UserRestController(private val couchDBConnectionProvider: CouchDBConnectio
         for (auth in authorities) {
             val hash = auth.toString().substringAfter("HASH_")
             if (hash != auth) {
-                userRepository.removeAllByUname(hash)
+                userRepository.removeAllByUID(hash)
                 couchDBConnectionProvider.deleteCouchDbDatabase("$hash-m")
                 couchDBConnectionProvider.deleteCouchDbDatabase("$hash-p")
                 couchDBConnectionProvider.deleteCouchDbDatabase("$hash-g")
@@ -48,9 +48,10 @@ class UserRestController(private val couchDBConnectionProvider: CouchDBConnectio
      */
     @PostMapping("/createGroup")
     fun createGroup(@RequestBody group: Group, response: HttpServletResponse, authentication: Authentication) = try {
+
         groupRepository.add(group)
-        couchDBConnectionProvider.createCouchDbConnector("${group.gname}-m")
-        couchDBConnectionProvider.createCouchDbConnector("${group.gname}-p")
+        couchDBConnectionProvider.createCouchDbConnector("${group.gid}-m")
+        couchDBConnectionProvider.createCouchDbConnector("${group.gid}-p")
         val authorities = AuthorityUtils.authorityListToSet(authentication.authorities)
         for (auth in authorities) {
             val hash = auth.toString().substringAfter("HASH_")

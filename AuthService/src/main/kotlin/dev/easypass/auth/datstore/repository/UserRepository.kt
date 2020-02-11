@@ -25,25 +25,25 @@ class UserRepository(db: CouchDbConnector) : CouchDbRepositorySupport<User>(User
     }
 
     /**
-     * returns a [List] of all the entries with the passed [uname], that are stored in the database
-     * @param uname: the name of the [User]
+     * returns a [List] of all the entries with the passed [uid], that are stored in the database
+     * @param uid: the name of the [User]
      * @return a list of objects of the class [User]
      */
     @GenerateView
-    private fun findByUname(uname: String?): List<User> {
-        return queryView("by_uname", uname)
+    private fun findByUID(uid: String?): List<User> {
+        return queryView("by_uid", uid)
     }
 
     /**
-     * returns only the first entry of the [List] of all the entries with the passed [uname], that are stored in the database
-     * @param uname: the name of the [User]
+     * returns only the first entry of the [List] of all the entries with the passed [uid], that are stored in the database
+     * @param uid: the name of the [User]
      * @return an object of the class [User]
      */
     @Throws(DocumentNotFoundException::class, UpdateConflictException::class)
-    fun findOneByUname(uname: String): User {
-        val list = findByUname(uname)
+    fun findOneByUID(uid: String): User {
+        val list = findByUID(uid)
         if (list.isEmpty())
-            throw DocumentNotFoundException("The User [$uname] is NOT FOUND in the database")
+            throw DocumentNotFoundException("The User [$uid] is NOT FOUND in the database")
         if (list.size > 1)
             throw UpdateConflictException()
         return list[0]
@@ -51,22 +51,22 @@ class UserRepository(db: CouchDbConnector) : CouchDbRepositorySupport<User>(User
 
     /**
      * This methods overrides the add-method of [CouchDbRepositorySupport],
-     * throws an [UpdateConflictException], when an entity with the same uname as [entity] is already saved in the database
+     * throws an [UpdateConflictException], when an entity with the same uid as [entity] is already saved in the database
      * @param entity: an object of the class [User]
      */
     @Throws(UpdateConflictException::class)
-    override fun add(entity: User) = if (findByUname(entity.uname).isEmpty()) {
+    override fun add(entity: User) = if (findByUID(entity.uid).isEmpty()) {
         super.add(entity)
     } else {
         throw UpdateConflictException()
     }
 
     /**
-     * Removes all [User]s with the given [uname]
-     * @param uname: the name of the [User]
+     * Removes all [User]s with the given [uid]
+     * @param uid: the name of the [User]
      */
-    fun removeAllByUname(uname: String) {
-        for (user in findByUname(uname))
+    fun removeAllByUID(uid: String) {
+        for (user in findByUID(uid))
             remove(user)
     }
 }
