@@ -31,7 +31,7 @@ class UserRestController(private val couchDBConnectionProvider: CouchDBConnectio
         for (auth in authorities) {
             val hash = auth.toString().substringAfter("HASH_")
             if (hash != auth) {
-                userRepository.removeAllByUID(hash)
+                userRepository.removeAllByUid(hash)
                 couchDBConnectionProvider.deleteCouchDbDatabase("$hash-m")
                 couchDBConnectionProvider.deleteCouchDbDatabase("$hash-p")
                 couchDBConnectionProvider.deleteCouchDbDatabase("$hash-g")

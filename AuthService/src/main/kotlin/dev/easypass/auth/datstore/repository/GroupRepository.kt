@@ -30,18 +30,18 @@ class GroupRepository(db: CouchDbConnector) : CouchDbRepositorySupport<Group>(Gr
      * @return a list of objects of the class [Group]
      */
     @GenerateView
-    private fun findByGID(gid: String?): List<Group> {
+    private fun findByGid(gid: String?): List<Group> {
         return queryView("by_gid", gid)
     }
 
     /**
-     * returns only the first entry of the [List] of [findByGID]
+     * returns only the first entry of the [List] of [findByGid]
      * @param gid: the name of the [Group]
      * @return an object of the class [Group]
      */
     @Throws(DocumentNotFoundException::class, UpdateConflictException::class)
-    fun findOneByGID(gid: String): Group {
-        val list = findByGID(gid)
+    fun findOneByGid(gid: String): Group {
+        val list = findByGid(gid)
         if (list.isEmpty())
             throw DocumentNotFoundException("The Group [$gid] is NOT FOUND in the database")
         if (list.size > 1)
@@ -55,7 +55,7 @@ class GroupRepository(db: CouchDbConnector) : CouchDbRepositorySupport<Group>(Gr
      * @param entity: an object of the class [Group]
      */
     @Throws(UpdateConflictException::class)
-    override fun add(entity: Group) = if (findByGID(entity.gid).isEmpty()) {
+    override fun add(entity: Group) = if (findByGid(entity.gid).isEmpty()) {
         super.add(entity)
     } else {
         throw UpdateConflictException()
@@ -65,8 +65,8 @@ class GroupRepository(db: CouchDbConnector) : CouchDbRepositorySupport<Group>(Gr
      * Removes all [Group]s with the given [gid]
      * @param gid: the name of the [Group]
      */
-    fun removeAllByGID(gid: String) {
-        for (group in findByGID(gid))
+    fun removeAllByGid(gid: String) {
+        for (group in findByGid(gid))
             remove(group)
     }
 }

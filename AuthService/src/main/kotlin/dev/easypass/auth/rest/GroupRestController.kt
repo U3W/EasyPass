@@ -29,7 +29,7 @@ class GroupRestController(private val couchDBConnectionProvider: CouchDBConnecti
         for (auth in authorities) {
             val hash = auth.toString().substringAfter("HASH_")
             if (hash != auth) {
-                groupRepository.removeAllByGID(hash)
+                groupRepository.removeAllByGid(hash)
                 couchDBConnectionProvider.deleteCouchDbDatabase("$hash-m")
                 couchDBConnectionProvider.deleteCouchDbDatabase("$hash-p")
                 request.logout()

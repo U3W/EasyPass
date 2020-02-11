@@ -20,13 +20,16 @@ class StoreFilter : OncePerRequestFilter() {
      */
     override fun doFilterInternal(request: HttpServletRequest, response: HttpServletResponse, filterChain: FilterChain) {
         val authentication = SecurityContextHolder.getContext().authentication
-        val authorities = AuthorityUtils.authorityListToSet(authentication.authorities)
-        println("Store $authorities ${request.requestURL}")
-        val hash = request.servletPath.substringAfter("/store/").split("-")[0]
-        if (!authorities.contains("HASH_$hash"))
-            response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Unauthorized for this datastore!")
-        else
-            filterChain.doFilter(request, response)
+        if (authentication == null)
+            response.status = HttpServletResponse.SC_UNAUTHORIZED
+        else {
+            val authorities = AuthorityUtils.authorityListToSet(authentication.authorities)
+            val hash = request.servletPath.substringAfter("/store/").split("-")[0]
+            if (!authorities.contains("HASH_$hash"))
+                response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Unauthorized for this datastore!")
+            else
+                filterChain.doFilter(request, response)
+        }
     }
 
     /**
@@ -35,7 +38,6 @@ class StoreFilter : OncePerRequestFilter() {
      */
     override fun shouldNotFilter(request: HttpServletRequest): Boolean {
         val path = request.servletPath
-        println("Store $path ${request.requestURL}")
         return !path.startsWith("/store/")
     }
 }

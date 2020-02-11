@@ -96,17 +96,17 @@ class ChallengeAuthenticationProvider(private val userRepository: UserRepository
         }
         when (role) {
             "USER"  -> {
-                val user = userRepository.findOneByUID(key.second)
+                val user = userRepository.findOneByUid(key.second)
                 currentChallenges[key] = Pair(encryptionLibrary.generateInternalAdministrationChallenge(), role)
                 ResponseChallenge(currentChallenges[key]!!.first.getChallengeEncryptedByPubK(user.pubK), user.privK)
             }
             "GROUP" -> {
-                val group = groupRepository.findOneByGID(key.second)
+                val group = groupRepository.findOneByGid(key.second)
                 currentChallenges[key] = Pair(encryptionLibrary.generateInternalAdministrationChallenge(), role)
                 ResponseChallenge(currentChallenges[key]!!.first.getChallengeEncryptedByPubK(group.pubK), group.privK)
             }
             "ADMIN" -> {
-                val group = groupRepository.findOneByGID(key.second)
+                val group = groupRepository.findOneByGid(key.second)
                 currentChallenges[key] = Pair(encryptionLibrary.generateInternalAdministrationChallenge(), role)
                 ResponseChallenge(currentChallenges[key]!!.first.getChallengeEncryptedByPubK(group.apubK), group.aprivK)
             }

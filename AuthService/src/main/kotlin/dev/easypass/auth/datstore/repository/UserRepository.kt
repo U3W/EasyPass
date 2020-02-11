@@ -30,7 +30,7 @@ class UserRepository(db: CouchDbConnector) : CouchDbRepositorySupport<User>(User
      * @return a list of objects of the class [User]
      */
     @GenerateView
-    private fun findByUID(uid: String?): List<User> {
+    private fun findByUid(uid: String?): List<User> {
         return queryView("by_uid", uid)
     }
 
@@ -40,8 +40,8 @@ class UserRepository(db: CouchDbConnector) : CouchDbRepositorySupport<User>(User
      * @return an object of the class [User]
      */
     @Throws(DocumentNotFoundException::class, UpdateConflictException::class)
-    fun findOneByUID(uid: String): User {
-        val list = findByUID(uid)
+    fun findOneByUid(uid: String): User {
+        val list = findByUid(uid)
         if (list.isEmpty())
             throw DocumentNotFoundException("The User [$uid] is NOT FOUND in the database")
         if (list.size > 1)
@@ -55,7 +55,7 @@ class UserRepository(db: CouchDbConnector) : CouchDbRepositorySupport<User>(User
      * @param entity: an object of the class [User]
      */
     @Throws(UpdateConflictException::class)
-    override fun add(entity: User) = if (findByUID(entity.uid).isEmpty()) {
+    override fun add(entity: User) = if (findByUid(entity.uid).isEmpty()) {
         super.add(entity)
     } else {
         throw UpdateConflictException()
@@ -65,8 +65,8 @@ class UserRepository(db: CouchDbConnector) : CouchDbRepositorySupport<User>(User
      * Removes all [User]s with the given [uid]
      * @param uid: the name of the [User]
      */
-    fun removeAllByUID(uid: String) {
-        for (user in findByUID(uid))
+    fun removeAllByUid(uid: String) {
+        for (user in findByUid(uid))
             remove(user)
     }
 }
