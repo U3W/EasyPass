@@ -19,7 +19,7 @@ use serde_json::json;
 use wasm_bindgen::__rt::std::future::Future;
 use wasm_bindgen::__rt::std::rc::Rc;
 use wasm_bindgen::__rt::core::cell::RefCell;
-use wasm_bindgen::__rt::std::sync::{Arc, Mutex, PoisonError};
+use wasm_bindgen::__rt::std::sync::{Arc, Mutex, PoisonError, MutexGuard};
 use wasm_bindgen::JsCast;
 use serde_json::value::Value::Bool;
 use wasm_bindgen::__rt::std::collections::HashMap;
@@ -66,6 +66,7 @@ pub struct Backend {
 
 /// Stores the internal state of the Backend of the Web-App.
 pub struct State {
+    mode: Option<String>,
     worker: Worker,
     init_closure: Option<Closure<dyn FnMut(MessageEvent)>>,
     main_closure: Option<Closure<dyn FnMut(MessageEvent)>>
@@ -81,6 +82,7 @@ impl Backend {
         utils::set_panic_hook();
         // Build and setup internal state
         let state = State {
+            mode: None,
             worker: Worker::new(String::from("")),
             init_closure: None,
             main_closure: None
@@ -119,9 +121,6 @@ impl Backend {
                 add_message_listener(&"message", &closure);
                 // Save closure in state
                 state.main_closure = Some(closure);
-                // TODO move somewhere else?
-                // Send all entries to UI
-                Worker::all_docs_without_passwords(&state.worker.get_private_local_db())
             }
         });
         // Bind closure for startup process to message listener
@@ -137,55 +136,76 @@ impl Backend {
     fn build_main_closure(state: Arc<Mutex<State>>) -> Closure<dyn FnMut(MessageEvent)> {
         Closure::new(move |e: MessageEvent| {
             // Lock and get internal state
-            let state = state.lock().unwrap();
-            // Bind worker to local variable
-            let worker = &state.worker;
+            let mut state
+                = state.lock().unwrap_or_else(PoisonError::into_inner);
             // Get command and additional data of UI request
             let (cmd, data) = e.data().get_message();
+
             // TODO remove this logs
             log("Received data!");
             log(&format!("CMD: {} | DATA: {:?}", &cmd, &data));
             log(&format!("Hey!: {:?}", &e.data()));
-            log(&format!("Hey!: {:?}", worker.get_service_status().lock().unwrap()));
-            // Perform operations
-            match cmd.as_ref() {
-                /**
-                TODO define modes
-                case 'unregister':
-                mode = undefined;
-                break;
-                */
-                "savePassword" => {
-                    worker.save_password(data);
+
+            // Check which mode (= active page in UI) is and perform
+            // associated function
+            // If no mode is set, set it
+            if state.mode.as_ref().is_none() {
+                state.mode = Some(String::from(&cmd));
+                // If the dashboard page is called
+                if state.mode.as_ref().unwrap().as_str() == "dashboard" {
+                    // Send all entries to UI
+                    Worker::all_docs_without_passwords(&state.worker.get_private_local_db())
                 }
-                "updatePassword" => {
-                    worker.update_password(data);
+            } else {
+                match state.mode.as_ref().unwrap().as_str() {
+                    "dashboard" => Backend::dashboard_call(cmd, data, state),
+                    _ => {}
                 }
-                "deletePassword" => {
-                    worker.delete_password(data);
-                }
-                "undoDeletePassword" => {
-                    worker.undo_delete_password(data);
-                }
-                "getPassword" | "getPasswordForUpdate" | "getPasswordToClipboard" |
-                "getPasswordAndRedirect" => {
-                    worker.get_password(cmd, data);
-                }
-                "saveCategory" => {
-                    worker.save_category(data);
-                }
-                "updateCategory" => {
-                    worker.update_category(data);
-                }
-                "deleteCategories" => {
-                    worker.delete_categories(data);
-                }
-                "undoDeleteCategories" => {
-                    worker.undo_delete_categories(data);
-                }
-                _ => {}
             }
+
         })
+    }
+
+    /// Process calls on the dashboard page.
+    fn dashboard_call(cmd: String, data: JsValue, mut state: MutexGuard<State>) {
+        log("DASHBOARD_CALL");
+        // Bind worker to local variable
+        let worker = &state.worker;
+        // Perform operation
+        match cmd.as_ref() {
+            "savePassword" => {
+                worker.save_password(data);
+            }
+            "updatePassword" => {
+                worker.update_password(data);
+            }
+            "deletePassword" => {
+                worker.delete_password(data);
+            }
+            "undoDeletePassword" => {
+                worker.undo_delete_password(data);
+            }
+            "getPassword" | "getPasswordForUpdate" |
+            "getPasswordToClipboard" | "getPasswordAndRedirect" => {
+                worker.get_password(cmd, data);
+            }
+            "saveCategory" => {
+                worker.save_category(data);
+            }
+            "updateCategory" => {
+                worker.update_category(data);
+            }
+            "deleteCategories" => {
+                worker.delete_categories(data);
+            }
+            "undoDeleteCategories" => {
+                worker.undo_delete_categories(data);
+            }
+            "unregister" => {
+                state.mode = None;
+            }
+            _ => {}
+        }
     }
 }
 
