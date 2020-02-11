@@ -1002,7 +1002,10 @@ export default class PassLine extends React.Component {
                                             />
                                         </Button>
                                         :
-                                        <Button variant="dark" className="buttonSpaceInline " onClick={() => this.props.callback.copyPass(this.state.id, this.state.rev)}>
+                                        <Button variant="dark" className="buttonSpaceInline " disabled={false} onClick={() => {
+                                            console.log("Aha", this.props, this.state);
+                                            this.props.callback.copyPass(this.state.id, this.state.rev);
+                                        }}>
                                             <img
                                                 src={CopyIcon}
                                                 alt=""

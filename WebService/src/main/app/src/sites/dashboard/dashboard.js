@@ -113,6 +113,9 @@ class Dashboard extends React.Component {
             errorShow: false,
             errorText: "",
             errorState: "success",
+
+            // To Copy the password in firefox
+            copyText: "",
         };
 
         this.setErrorShow = this.setErrorShow.bind(this);
@@ -580,19 +583,38 @@ class Dashboard extends React.Component {
 
     }
 
+    penis() {
+        navigator.clipboard.writeText("Hundesohn du neger").then(function() {
+            console.log("Kein neger")
+        }, function( e ) {
+            console.log("Neger", e)
+        });
+    }
+
+
     clipboardCopy( text ) {
-        // Create new element
-        let el = document.createElement('textarea');
-        el.value = text;
-        el.setAttribute('readonly', text);
-        el.style = {display: 'none',};
-        document.body.appendChild(el);
-        el.select();
-        el.setSelectionRange(0, 99999);
-        // Copy text to clipboard
-        document.execCommand('copy');
-        // Remove temporary element
-        document.body.removeChild(el);
+        // another method for firefox
+
+        if (navigator.userAgent.toLowerCase().indexOf('firefox') > -1) { // geht nicht ToDo @Kacper do this!!!!
+            navigator.clipboard.writeText(text).then(function() {
+            }, function() {
+            });
+        }
+        else {
+            // Create new element
+            let el = document.createElement('textarea');
+            el.value = text;
+            el.setAttribute('readonly', text);
+            el.style = {display: 'none',};
+            document.body.appendChild(el);
+            el.select();
+            //el.setSelectionRange(0, 99999);
+            // Copy text to clipboard
+            document.execCommand('copy');
+            // Remove temporary element
+            document.body.removeChild(el);
+        }
+
     }
 
     showDeletePopUp( which, succ ) {
@@ -969,13 +991,14 @@ class Dashboard extends React.Component {
                         { this.state.sidebarClosed ?
                             <Col className={mainClasses + " fitHole"}>
                                 {this.getTab()}
+                                <h1 onClick={this.penis}>penis</h1>
                             </Col>
                             :
                             <Col md={9} sm={7} xs={7} lg={9} className={mainClasses}>
                                 {this.getTab()}
+                                <h1 onClick={this.penis}>penis</h1>
                             </Col>
                         }
-
                         <hr/>
                         <IndicatorSide className={indicatorClass} />
                     </Row>

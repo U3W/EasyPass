@@ -54,7 +54,6 @@ export function workerCall( e ) {
             break;
         case 'getPasswordAndRedirect':
             this.clipboardCopy(data.passwd);
-            const url = data.url;
             function correctUrl(url) {
                 let out = url;
                 if (!( url.includes("https://") || url.includes("https://") )) {
