@@ -583,18 +583,9 @@ class Dashboard extends React.Component {
 
     }
 
-    penis() {
-        navigator.clipboard.writeText("Hundesohn du neger").then(function() {
-            console.log("Kein neger")
-        }, function( e ) {
-            console.log("Neger", e)
-        });
-    }
-
 
     clipboardCopy( text ) {
         // another method for firefox
-
         if (navigator.userAgent.toLowerCase().indexOf('firefox') > -1) { // geht nicht ToDo @Kacper do this!!!!
             navigator.clipboard.writeText(text).then(function() {
             }, function() {
@@ -991,12 +982,10 @@ class Dashboard extends React.Component {
                         { this.state.sidebarClosed ?
                             <Col className={mainClasses + " fitHole"}>
                                 {this.getTab()}
-                                <h1 onClick={this.penis}>penis</h1>
                             </Col>
                             :
                             <Col md={9} sm={7} xs={7} lg={9} className={mainClasses}>
                                 {this.getTab()}
-                                <h1 onClick={this.penis}>penis</h1>
                             </Col>
                         }
                         <hr/>
