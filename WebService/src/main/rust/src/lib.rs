@@ -85,13 +85,13 @@ mod state {
 
     impl State {
         pub fn new(
-            mode: Option<String>, worker: Worker,
+            mode: Option<String>, worker: Rc<Worker>,
             init_closure: Option<Closure<dyn FnMut(MessageEvent)>>,
             main_closure: Option<Closure<dyn FnMut(MessageEvent)>>
         ) -> State {
             State {
                 mode: RefCell::new(mode),
-                worker: Rc::new(worker),
+                worker,
                 init_closure: RefCell::new(init_closure),
                 main_closure: RefCell::new(main_closure)
             }

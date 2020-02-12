@@ -45,24 +45,24 @@ extern {
 
 pub struct Worker {
     private: Connection,
-    service_status: Arc<Mutex<String>>,
-    category_cache: Arc<Mutex<HashMap<String, RecoverCategory>>>,
-    category_clear: Arc<Mutex<HashMap<u16, Timeout>>>,
-    password_cache: Arc<Mutex<HashMap<String, RecoverPassword>>>,
-    password_clear: Arc<Mutex<HashMap<u16, Timeout>>>
+    service_status: RefCell<String>,
+    category_cache: RefCell<HashMap<String, RecoverCategory>>,
+    category_clear: RefCell<HashMap<u16, Timeout>>,
+    password_cache: RefCell<HashMap<String, RecoverPassword>>,
+    password_clear: RefCell<HashMap<u16, Timeout>>
 }
 
 pub struct Connection {
-    local: Arc<PouchDB>,
-    remote: Option<PouchDB>,
+    local_db: PouchDB,
+    remote_db: RefCell<Option<PouchDB>>,
     changes: Changes,
-    sync: Option<Sync>
+    sync: RefCell<Option<Sync>>
 }
 
 pub struct Changes {
     changes_feed: ChangesFeed,
-    change: Closure<dyn FnMut(JsValue)>,
-    error: Closure<dyn FnMut(JsValue)>
+    change: RefCell<Option<Closure<dyn FnMut(JsValue)>>>,
+    error: RefCell<Option<Closure<dyn FnMut(JsValue)>>>
 }
 
 pub struct Sync {
@@ -71,59 +71,75 @@ pub struct Sync {
     error: Closure<dyn FnMut(JsValue)>
 }
 
+
 impl Worker {
     /// Creates a new Worker that manages databases.
     /// This includes live syncing and methods for CRUD-operations.
-    pub fn new(url: String) -> Worker {
+    pub fn new(url: String) -> Rc<Worker> {
         // Setup new local database for private password entries
         let settings = Settings { adapter: "idb".to_string() };
-        let local
-            = Arc::new(PouchDB::new("Local", &JsValue::from_serde(&settings).unwrap()));
+        let local_db = PouchDB::new("Local", &JsValue::from_serde(&settings).unwrap());
         // Setup new remote database for private password entries
         // If offline, do not create remote connection
-        let remote = if url.len() == 0 {
-            None
+        let remote_db = if url.len() == 0 {
+            RefCell::new(None)
         } else {
-            Some(PouchDB::new_with_name(&url))
+            RefCell::new(Some(PouchDB::new_with_name(&url)))
         };
         // Setup changes feed for database of private entries
-        let changes_feed = local.changes();
-        // Define functionality on database update
-        // Send all documents to ui on change
-        let local_copy = Arc::clone(&local);
-        let change = Closure::new(move |val: JsValue| {
-            log("We have a change!");
-            Worker::all_docs_without_passwords(&local_copy);
-        });
-        // Define functionality on database error
-        let error = Closure::new(move |val: JsValue| {
-            log("EEEEEEEEEEEERRRRRRRRROOOOOOOOOOORRRRRRRRR!");
-        });
-        // Bind on change functions
-        changes_feed.on_change(&change);
-        changes_feed.on_error(&error);
+        let changes_feed = local_db.changes();
+
+        let change = RefCell::new(None);
+        let error = RefCell::new(None);
+
         // Create struct that holds everything relevant to changes
         let changes = Changes {
             changes_feed,
             change,
             error
         };
+
+        let sync = RefCell::new(None);
         // Create struct that holds everything relevant to database of private entries
         let private = Connection {
-            local,
-            remote,
+            local_db,
+            remote_db,
             changes,
-            sync: None
+            sync
         };
         // Create worker
-        Worker {
+        let worker = Rc::new(Worker {
             private,
-            service_status: Arc::new(Mutex::new(String::from("online"))),
-            category_cache: Arc::new(Mutex::new(HashMap::new())),
-            category_clear: Arc::new(Mutex::new(HashMap::new())),
-            password_cache: Arc::new(Mutex::new(HashMap::new())),
-            password_clear: Arc::new(Mutex::new(HashMap::new())),
-        }
+            service_status: RefCell::new(String::from("online")),
+            category_cache: RefCell::new(HashMap::new()),
+            category_clear: RefCell::new(HashMap::new()),
+            password_cache: RefCell::new(HashMap::new()),
+            password_clear: RefCell::new(HashMap::new()),
+        });
+
+        // Define functionality on database update
+        // Send all documents to ui on change
+        let worker_moved_change = worker.clone();
+        let change = Closure::new(move |val: JsValue| {
+            let worker = worker_moved_change;
+            log("We have a change!");
+            Worker::all_docs_without_passwords(&worker.private.local_db);
+        });
+        // Define functionality on database error
+        let worker_moved_error = worker.clone();
+        let error = Closure::new(move |val: JsValue| {
+            let worker = worker_moved_error;
+            log("EEEEEEEEEEEERRRRRRRRROOOOOOOOOOORRRRRRRRR!");
+        });
+
+        // Bind on change functions
+        worker.private.changes.changes_feed.on_change(&change);
+        worker.private.changes.changes_feed.on_error(&error);
+
+        worker.private.changes.change.replace(change);
+        worker.private.changes.error.replace(error);
+
+        worker
     }
 
     /// Starts live replication for private password entries.
@@ -187,20 +203,20 @@ impl Worker {
 
     pub fn save_password(self: Rc<Worker>, data: JsValue) -> Promise {
         // TODO Worker Decrypt Password
-        let private_db = Arc::clone(&self.private.local);
-        let action = JsFuture::from(private_db.post(&data));
+
         future_to_promise(async move {
-            let result = action.await;
+            let result
+                = JsFuture::from(self.private.local_db.post(&data)).await;
             Worker::build_and_post_message("savePassword", result.unwrap());
             Ok(JsValue::from(true))
         })
     }
 
     pub fn update_password(self: Rc<Worker>, data: JsValue) -> Promise {
-        let private_db = Arc::clone(&self.private.local);
-        let action = JsFuture::from(private_db.put(&data));
+
         future_to_promise(async move {
-            let result = action.await;
+            let result
+                = JsFuture::from(self.private.local_db.put(&data)).await;
             Worker::build_and_post_message("updatePassword", result.unwrap());
             Ok(JsValue::from(true))
         })
@@ -208,7 +224,7 @@ impl Worker {
 
     pub fn delete_password(self: Rc<Worker>, data: JsValue) -> Promise {
         // Bind private database and cache for deleted password entries
-        let private_db = Arc::clone(&self.private.local);
+
         let cache = Arc::clone(&self.password_cache);
         // Clear that stores deletion routines is needed two times (in- and outside of closure)
         let mut clear = Arc::clone(&self.password_clear);
@@ -217,6 +233,9 @@ impl Worker {
         let mut entry: Value = data.into_serde().unwrap();
         // Move values to promise, allows usage of async
         future_to_promise(async move {
+
+            let private_db = &self.private.local_db;
+
             // Stores id of password entry that is used to get fully and later for deletion
             let id = String::from(entry["_id"].as_str().unwrap());
             // Get revision which is needed for deletion
@@ -281,12 +300,15 @@ impl Worker {
 
     pub fn undo_delete_password(self: Rc<Worker>, data: JsValue) -> Promise {
         // Bind private database and cache for deleted password entries
-        let private_db = Arc::clone(&self.private.local);
+
         let cache = Arc::clone(&self.password_cache);
         // Parse received password entry
         let mut entry: Value = data.into_serde().unwrap();
         // Move values to promise, allows usage of async
         future_to_promise(async move {
+
+            let private_db = &self.private.local_db;
+
             // Lock and get full backup data
             let mut cache
                 = cache.lock().unwrap_or_else(PoisonError::into_inner);
@@ -321,20 +343,20 @@ impl Worker {
 
     pub fn save_category(self: Rc<Worker>, data: JsValue) -> Promise {
         // TODO Worker Decrypt Password
-        let private_db = Arc::clone(&self.private.local);
-        let action = JsFuture::from(private_db.post(&data));
+
         future_to_promise(async move {
-            let result = action.await;
+            let result
+                = JsFuture::from(self.private.local_db.post(&data)).await;
             Worker::build_and_post_message("saveCategory", result.unwrap());
             Ok(JsValue::from(true))
         })
     }
 
     pub fn update_category(self: Rc<Worker>, data: JsValue) -> Promise {
-        let private_db = Arc::clone(&self.private.local);
-        let action = JsFuture::from(private_db.put(&data));
+
         future_to_promise(async move {
-            let result = action.await;
+            let result
+                = JsFuture::from(self.private.local_db.put(&data)).await;
             Worker::build_and_post_message("updateCategory", result.unwrap());
             Ok(JsValue::from(true))
         })
@@ -344,7 +366,7 @@ impl Worker {
         // Convert JsValue to Array, that its truly is
         let categories = Array::from(&categories);
         // Bind private database and cache for deleted password entries
-        let private_db = Arc::clone(&self.private.local);
+
         let mut cache = Arc::clone(&self.category_cache);
         // Clear that stores deletion routines is needed two times (in- and outside of closure)
         let mut clear = Arc::clone(&self.category_clear);
@@ -355,6 +377,9 @@ impl Worker {
         let query = Array::new_with_length(categories.len() as u32);
         // Move values to promise, allows usage of async
         future_to_promise(async move {
+
+            let private_db = &self.private.local_db;
+
             // Stores received category ids that need to be deleted later on
             let mut clear_ids = Vec::new();
             // Enumerate over received categories
@@ -447,12 +472,15 @@ impl Worker {
         // Convert JsValue to Array, that its truly is
         let categories = Array::from(&categories);
         // Bind private database and cache for deleted password entries
-        let private_db = Arc::clone(&self.private.local);
+
         let cache = Arc::clone(&self.category_cache);
         // Convert received category data to vec
         let categories: Vec<Value> = categories.into_serde().unwrap();
         // Move values to promise, allows usage of async
         future_to_promise(async move {
+
+            let private_db = &self.private.local_db;
+
             // Iterate over received categories that should be recovered
             for category in categories {
                 // Lock and get full backup data
@@ -493,7 +521,7 @@ impl Worker {
 
     pub fn get_password(self: Rc<Worker>, cmd: String, data: JsValue) -> Promise {
         // Bind private database
-        let private_db = Arc::clone(&self.private.local);
+        let private_db = &self.private.local_db;
         // Parse data to make it readable from Rust
         let data_parsed = data.into_serde::<Value>().unwrap();
         // Search for received entry
@@ -530,44 +558,37 @@ impl Worker {
     }
 
     pub fn find(self: Rc<Worker>, data: JsValue) -> Promise {
-        let private_db = Arc::clone(&self.private.local);
-        let action = JsFuture::from(private_db.find(&data));
         future_to_promise(async move {
-            action.await
+            JsFuture::from(self.private.local_db.find(&data)).await
         })
     }
 
     pub fn all_docs(self: Rc<Worker>) -> Promise {
-        let private_db = Arc::clone(&self.private.local);
-        let action = JsFuture::from(private_db.all_docs_included());
         future_to_promise(async move {
-            action.await
+            JsFuture::from(self.private.local_db.all_docs_included()).await
         })
     }
 
     pub fn remove_with_element(self: Rc<Worker>, data: JsValue) -> Promise {
-        let private_db = Arc::clone(&self.private.local);
-        let action = JsFuture::from(private_db.remove_with_element(&data));
         future_to_promise(async move {
-            action.await
+            JsFuture::from(self.private.local_db.remove_with_element(&data)).await
         })
     }
 
     pub fn remove(self: Rc<Worker>, doc_id: JsValue, doc_rev: JsValue) -> Promise {
-        let private_db = Arc::clone(&self.private.local);
-        let action = JsFuture::from(private_db.remove(&doc_id, &doc_rev));
         future_to_promise(async move {
-            action.await
+            JsFuture::from(self.private.local_db.remove(&doc_id, &doc_rev)).await
         })
     }
 }
 
 /// Functions that return or alter Worker state
 impl Worker {
-    pub fn get_private_local_db(self: Rc<Worker>) -> Arc<PouchDB> {
-        self.private.local.clone()
+    pub fn get_private_local_db(&self) -> &PouchDB {
+        &self.private.local_db
     }
 
+    // TODO refactor?
     pub fn get_service_status(self: Rc<Worker>) -> Arc<Mutex<String>> {
         self.service_status.clone()
     }
