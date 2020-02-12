@@ -9,6 +9,7 @@ import GeneratePassIcon from "../../img/icons/generate_password_white.svg";
 import tabs from "./tabs/tab.enum";
 import AddTag from "../../img/icons/password_add_tag.svg";
 import GeneratePass from "./generatepass";
+import Table from "react-bootstrap/Table";
 
 
 export default class AddGroup extends React.Component {
@@ -16,9 +17,15 @@ export default class AddGroup extends React.Component {
         super(props);
         this.state = {
             name: "",
+
+            // visibility
             userGroupAdd: "",
             userGroupList: [],
+            popUpGroupError: false,
+            groupErrTyp: 0,
         };
+
+        this.handleKeyevent = this.handleKeyevent.bind(this);
     }
 
     resetState() {
@@ -46,6 +53,85 @@ export default class AddGroup extends React.Component {
 
     addGroup() {
 
+    }
+
+
+    getGroupErrorMsg() {
+        if ( this.state.popUpGroupError ) {
+            let err = StringSelector.getString(this.props.callback.state.language).addPassUserNotFound;
+            if ( this.state.groupErrTyp === 1 ) {
+                err = StringSelector.getString(this.props.callback.state.language).addPassUserAlready;
+            }
+            return (
+                <p className="text-danger fixErrorMsg">{err}</p>
+            );
+        }
+    }
+
+    getVisibilityTable() {
+        let key = -1;
+        let elms;
+        if ( this.state.userGroupList.length === 0 ) {
+            elms = StringSelector.getString(this.props.callback.state.language).addPassUserVisNon;
+            return (
+                <>
+                    <div className="visMargin">
+                        <h6 className="noMarginBottom">{StringSelector.getString(this.props.callback.state.language).addPassUserVis}</h6>
+                        <i>{StringSelector.getString(this.props.callback.state.language).addPassUserVis2}</i>
+                    </div>
+                    - {elms}
+                </>
+            );
+        }
+        else {
+            let elmsArray = [];
+            for ( let i = 0; i < this.state.userGroupList.length; i++ ) {
+                const item = this.state.userGroupList[i];
+                let tdClass = "";
+                if ( i === 0 ) {
+                    tdClass += "topRound";
+                }
+                if ( i === this.state.userGroupList.length-1) {
+                    tdClass += " botRound";
+                }
+                elmsArray[i] = (
+                    <td className={tdClass}>
+                        {item.name}
+                        { this.state.edit &&
+                        <button type="button" className="close userRemove" onClick={() => this.removeUserFromGroup(item.id)}>
+                            <span aria-hidden="true" >×</span>
+                            <span className="sr-only">Close</span>
+                        </button>
+                        }
+                    </td>
+                );
+            }
+
+            elms = elmsArray.map(function(item) {
+                key++;
+                return (
+                    <tr key={key}>
+                        {item}
+                    </tr>
+                );
+            });
+
+            return (
+                <>
+                    <div className="visMargin">
+                        <h6 className="noMarginBottom">{StringSelector.getString(this.props.callback.state.language).addPassUserVis}</h6>
+                        <i>{StringSelector.getString(this.props.callback.state.language).addPassUserVis2}</i>
+                    </div>
+                    <div className="roundDiv">
+                        <Table striped hover size="sm" className="noMarginBottom roundtable">
+                            <tbody>
+                            {elms}
+                            </tbody>
+                        </Table>
+                    </div>
+                </>
+            );
+        }
     }
 
     render() {
@@ -82,6 +168,8 @@ export default class AddGroup extends React.Component {
                                     </Button>
                                 </InputGroup.Append>
                             </InputGroup>
+                            {this.getVisibilityTable()}
+                            {this.getGroupErrorMsg()}
                         </Card.Body>
                     </Modal.Body>
                     <Modal.Footer>

@@ -1,13 +1,13 @@
 import React from "react"
-import {PassCard} from "../card.temp";
+import GroupCard from "../card.temp";
 import {ProtectedRoute} from "../../../routing/ProtectedRoute";
 import Dashboard from "../dashboard";
 import Logo from "../../../img/logo/LogoV2.svg"
 import Row from "react-bootstrap/Row";
 import Col from "react-bootstrap/Col";
 import {Container} from "react-bootstrap";
-import {PassLine} from "../line.temp";
 import Accordion from "react-bootstrap/Accordion";
+import StringSelector from "../../../strings/stings";
 
 class GroupPassword extends React.Component {
     constructor(props) {
@@ -17,11 +17,11 @@ class GroupPassword extends React.Component {
     render() {
         return (
             <>
-               <h1 className="fixHeader">Group Passwords</h1>
+               <h1 className="fixHeader">{StringSelector.getString(this.props.callback.language).groupPass}</h1>
                 <hr/>
                 <Container>
                     <Accordion id="passwords">
-                        {this.props.callback.renderCat()}
+                        {this.props.callback.renderGroup()}
                     </Accordion>
                 </Container>
             </>

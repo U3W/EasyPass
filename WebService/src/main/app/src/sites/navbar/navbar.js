@@ -157,7 +157,7 @@ class NavbarEP extends React.Component {
                         <Table striped bordered hover className="ep-modal-table">
                             <tbody>
                                 <tr key={0}>
-                                    <td onClick={() => this.changeCat(0)}>
+                                    <td onClick={() => this.changeCat("0")}>
                                         {StringSelector.getString(this.props.callback.state.language).catsAllCat}
                                     </td>
                                 </tr>

@@ -4,6 +4,7 @@ export const dashboardConst = {
     catselectedGroup: "2",
     sidebarClosed: "3",
     languageSelected: "4",
+    groupSelected: "5",
 };
 
 export const dashboardLanguage  = {

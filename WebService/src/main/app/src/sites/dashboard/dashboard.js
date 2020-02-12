@@ -14,7 +14,7 @@ import MockPasswords from "./MockPasswords";
 import PassLine from "./line.temp";
 import {
     changeLanguage,
-    saveCat, saveSidebarClosed,
+    saveCat, saveGroup, saveSidebarClosed,
     saveTab
 } from "../../action/dashboard.action";
 import dashboardState from "./dashboard.saved.state"
@@ -36,6 +36,7 @@ import StringSelector from "../../strings/stings";
 import * as that from "./dashboard.extended";
 import * as dashboardEntries from "./dashboard.entries";
 import AddGroup from "./add.group";
+import GroupCard from "./card.temp";
 
 class Dashboard extends React.Component {
 
@@ -79,6 +80,8 @@ class Dashboard extends React.Component {
             username: "Username",
             tabselected: tab, // tabs.PRIVPASS
             catselected: cat, //JSON.parse(localStorage.getItem(dashboardConst.catselectedPriv)),
+            groupselected: dashboardState.getSelectedGroup(),
+
             expanded: false,
             settingsExpanded: false,
             // alerts
@@ -136,6 +139,7 @@ class Dashboard extends React.Component {
         this.dismissCopy = this.dismissCopy.bind(this);
         this.saveEdit = that.saveEdit.bind(this);
         this.renderCat = this.renderCat.bind(this);
+        this.renderGroup = this.renderGroup.bind(this);
         this.resetSettingsExpanded = this.resetSettingsExpanded.bind(this);
         // Popups
         this.dismissAddCat = this.dismissAddCat.bind(this);
@@ -201,7 +205,6 @@ class Dashboard extends React.Component {
         let passwords = {};
 
         if (cats[0] !== undefined) {
-            console.log(cats);
             for (let i = 0; i < cats.length; i++) {
                 let catId = cats[i]._id;
                 let catData = this.getCatData(catId, this.state.tabselected);
@@ -252,6 +255,37 @@ class Dashboard extends React.Component {
         } else return undefined;
     }
 
+    renderGroup() {
+        let allGroups = "";
+        if ( this.state.groupselected === "0") {
+            allGroups = (
+                <Row>
+                    <Col>
+                        <GroupCard callback={this} name={"Test"} id={"1"}/>
+                    </Col>
+                    <Col>
+                        <GroupCard callback={this} name={"Test"} id={"2"}/>
+                    </Col>
+                    <Col>
+                        <GroupCard callback={this} name={"Test"} id={"3"}/>
+                    </Col>
+                    <Col>
+                        <GroupCard callback={this} name={"Test"} id={"4"}/>
+                    </Col>
+                    <Col>
+                        <GroupCard callback={this} name={"Test"} id={"5"}/>
+                    </Col>
+                    <Col>
+                        <GroupCard callback={this} name={"Test"} id={"6"}/>
+                    </Col>
+                </Row>
+            );
+        }
+        return (
+            {allGroups}
+        );
+    }
+
     renderCat() {
         let cats = this.getCats();
 
@@ -299,6 +333,7 @@ class Dashboard extends React.Component {
             });
         }
         else if (passwordsWithout === undefined) {
+            // If there are no cats and pass
             nothingAdded = StringSelector.getString(this.state.language).noCatsNoPass;
             // ToDo vielleicht noch eine schönere Lösung finden
             if ( this.state.catselected !== "0" ) {
@@ -375,7 +410,6 @@ class Dashboard extends React.Component {
     }
 
     printResetPassPopUp() {
-        console.log("Show State", this.state.errorShow);
         return (
             <Alert show={this.state.errorShow} variant={this.state.errorState} className="center-horz center-vert error fixed-top-easypass in-front">
                 <p className="center-horz center-vert center-text">
@@ -785,6 +819,13 @@ class Dashboard extends React.Component {
         }
     }
 
+    changeGroup( changeTo ) {
+        this.props.saveGroup(changeTo);
+        this.setState({
+            groupselected: changeTo,
+        });
+    }
+
     changeTab( changeTo ) {
         //console.log("Changed to Tab:");
         //console.log(changeTo);
@@ -836,15 +877,14 @@ class Dashboard extends React.Component {
 
     getSelectedCatName() {
         let selected = this.state.catselected;
-        if ( selected === 0 )
+        if ( selected === "0" )
         {
-            // TODO change language
-            return "Alle Kategorien"
+            return StringSelector.getString(this.state.language).catsAllCat
         }
         let cats = this.getCats();
         for ( let i = 0; i < cats.length; i++ )
         {
-            if ( cats[i].id === selected ) {
+            if ( cats[i]._id === selected ) {
                 return cats[i].name;
             }
         }
@@ -1081,6 +1121,7 @@ const mapDispatchToProps3 = (dispatch) => {
         saveCat: (tabselected, catselected) => dispatch(saveCat(tabselected, catselected)),
         saveSidebarClosed: (sidebarClosed) => dispatch(saveSidebarClosed(sidebarClosed)),
         changeLanguage: (language) => dispatch(changeLanguage(language)),
+        saveGroup: (groupselected) => dispatch(saveGroup(groupselected)),
     };
 };
 

@@ -2,7 +2,7 @@ import {
     GET_CAT_GROUP,
     GET_CAT_PRIV,
     GET_TAB,
-    SAVE_CAT, SAVE_LANGUAGE, SAVE_SIDEBAR,
+    SAVE_CAT, SAVE_GROUP, SAVE_LANGUAGE, SAVE_SIDEBAR,
     SAVE_TAB
 } from "../../action/dashboard.action";
 import {dashboardConst} from "../../sites/dashboard/const/dashboard.enum";
@@ -35,6 +35,9 @@ const saveReducer = ( state, action) => {
             return {};
         case SAVE_MAUTH_STATE:
             localStorage.setItem(masterpasswordConst.radioSelected, action.twoFactorOpt);
+            return {};
+        case SAVE_GROUP:
+            localStorage.setItem(dashboardConst.groupSelected, action.groupselected);
             return {};
         default:
             return {};

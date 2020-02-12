@@ -170,6 +170,10 @@ export const strings = {
     mainNotAddedToCat: "Not assigned",
     mainNotAddedToCatInfo: "Here are all passwords that are not assigned to a category",
 
+    // Group Card
+    cardEdit: "Edit this group",
+    cardDel: "Delete this group",
+    cardOpen: "Open this group",
 
     // Pass Line
 

@@ -1,0 +1,23 @@
+
+.spezFooter {
+    background: transparent !important;
+    padding: .7rem .7rem;
+}
+
+.groupCard {
+    background-color: #f8f9fa !important;
+}
+
+.groupButton {
+    line-height: 0;
+    padding: 0;
+    height: 25px;
+    width: 25px;
+    left: 50%;
+    right: 50%;
+    position: absolute;
+}
+.groupIcons {
+    height: 15px;
+    width: 15px;
+}

@@ -184,6 +184,10 @@ export const strings = {
     mainNotAddedToCat: "Nicht zugeordnet",
     mainNotAddedToCatInfo: "Hier befinden sich alle Passwörter, die keine Kategorie zugeordnet wurden",
 
+    // Group Card
+    cardEdit: "Diese Gruppe bearbeiten",
+    cardDel: "Diese Gruppe löschen",
+    cardOpen: "Diese Gruppe öffnen",
 
     // Pass Line
 

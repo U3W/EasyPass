@@ -12,16 +12,23 @@ class dashboardState {
 
     static getCatPriv() {
         if ( JSON.parse(localStorage.getItem(dashboardConst.catselectedPriv)) === null ) {
-            return 0;
+            return "0";
         }
         return JSON.parse(localStorage.getItem(dashboardConst.catselectedPriv));
     }
 
     static getCatGroup() {
         if ( JSON.parse(localStorage.getItem(dashboardConst.catselectedGroup)) === null ) {
-            return 0;
+            return "0";
         }
         return JSON.parse(localStorage.getItem(dashboardConst.catselectedGroup));
+    }
+
+    static getSelectedGroup() {
+        if ( JSON.parse(localStorage.getItem(dashboardConst.groupSelected)) === null ) {
+            return "0";
+        }
+        return JSON.parse(localStorage.getItem(dashboardConst.groupSelected));
     }
 
     static getSidebarClosed() {
