@@ -73,11 +73,12 @@ mod state {
     use wasm_bindgen::__rt::core::cell::{RefCell, Ref};
     use crate::easypass::worker::Worker;
     use wasm_bindgen::__rt::core::borrow::Borrow;
+    use wasm_bindgen::__rt::std::rc::Rc;
 
     /// Stores the internal state of the Backend of the Web-App.
     pub struct State {
         mode: RefCell<Option<String>>,
-        worker: Worker,
+        worker: Rc<Worker>,
         init_closure: RefCell<Option<Closure<dyn FnMut(MessageEvent)>>>,
         main_closure: RefCell<Option<Closure<dyn FnMut(MessageEvent)>>>
     }
@@ -90,7 +91,7 @@ mod state {
         ) -> State {
             State {
                 mode: RefCell::new(mode),
-                worker,
+                worker: Rc::new(worker),
                 init_closure: RefCell::new(init_closure),
                 main_closure: RefCell::new(main_closure)
             }
@@ -116,8 +117,8 @@ mod state {
             }
         }
 
-        pub fn worker(&self) -> &Worker {
-            &self.worker
+        pub fn worker(&self) -> Rc<Worker> {
+            self.worker.clone()
         }
 
         pub fn init_closure(&self) -> Ref<Option<Closure<dyn FnMut(MessageEvent)>>> {

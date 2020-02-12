@@ -128,6 +128,7 @@ impl Worker {
 
     /// Starts live replication for private password entries.
     pub fn heartbeat(&mut self) {
+        /**
         // Establish remote connection and sync only when online
         if self.private.remote.is_some() {
             // Get Sync Handler
@@ -159,7 +160,8 @@ impl Worker {
             self.private.sync = Some(sync);
         }
         // Fetch all current docs and send result to UI
-        Worker::all_docs_without_passwords(&self.private.local);
+        Worker::all_docs_without_passwords(&self.private.local);*/
+        log("NOT used");
     }
 
     fn build_and_post_message(cmd: &str, data: JsValue) {
@@ -183,7 +185,7 @@ impl Worker {
         });
     }
 
-    pub fn save_password(&self, data: JsValue) -> Promise {
+    pub fn save_password(self: Rc<Worker>, data: JsValue) -> Promise {
         // TODO Worker Decrypt Password
         let private_db = Arc::clone(&self.private.local);
         let action = JsFuture::from(private_db.post(&data));
@@ -194,7 +196,7 @@ impl Worker {
         })
     }
 
-    pub fn update_password(&self, data: JsValue) -> Promise {
+    pub fn update_password(self: Rc<Worker>, data: JsValue) -> Promise {
         let private_db = Arc::clone(&self.private.local);
         let action = JsFuture::from(private_db.put(&data));
         future_to_promise(async move {
@@ -204,7 +206,7 @@ impl Worker {
         })
     }
 
-    pub fn delete_password(&self, data: JsValue) -> Promise {
+    pub fn delete_password(self: Rc<Worker>, data: JsValue) -> Promise {
         // Bind private database and cache for deleted password entries
         let private_db = Arc::clone(&self.private.local);
         let cache = Arc::clone(&self.password_cache);
@@ -277,7 +279,7 @@ impl Worker {
         })
     }
 
-    pub fn undo_delete_password(&self, data: JsValue) -> Promise {
+    pub fn undo_delete_password(self: Rc<Worker>, data: JsValue) -> Promise {
         // Bind private database and cache for deleted password entries
         let private_db = Arc::clone(&self.private.local);
         let cache = Arc::clone(&self.password_cache);
@@ -317,7 +319,7 @@ impl Worker {
         })
     }
 
-    pub fn save_category(&self, data: JsValue) -> Promise {
+    pub fn save_category(self: Rc<Worker>, data: JsValue) -> Promise {
         // TODO Worker Decrypt Password
         let private_db = Arc::clone(&self.private.local);
         let action = JsFuture::from(private_db.post(&data));
@@ -328,7 +330,7 @@ impl Worker {
         })
     }
 
-    pub fn update_category(&self, data: JsValue) -> Promise {
+    pub fn update_category(self: Rc<Worker>, data: JsValue) -> Promise {
         let private_db = Arc::clone(&self.private.local);
         let action = JsFuture::from(private_db.put(&data));
         future_to_promise(async move {
@@ -338,7 +340,7 @@ impl Worker {
         })
     }
 
-    pub fn delete_categories(&self, categories: JsValue) -> Promise {
+    pub fn delete_categories(self: Rc<Worker>, categories: JsValue) -> Promise {
         // Convert JsValue to Array, that its truly is
         let categories = Array::from(&categories);
         // Bind private database and cache for deleted password entries
@@ -441,7 +443,7 @@ impl Worker {
     }
 
 
-    pub fn undo_delete_categories(&self, categories: JsValue) -> Promise {
+    pub fn undo_delete_categories(self: Rc<Worker>, categories: JsValue) -> Promise {
         // Convert JsValue to Array, that its truly is
         let categories = Array::from(&categories);
         // Bind private database and cache for deleted password entries
@@ -489,7 +491,7 @@ impl Worker {
         })
     }
 
-    pub fn get_password(&self, cmd: String, data: JsValue) -> Promise {
+    pub fn get_password(self: Rc<Worker>, cmd: String, data: JsValue) -> Promise {
         // Bind private database
         let private_db = Arc::clone(&self.private.local);
         // Parse data to make it readable from Rust
@@ -527,7 +529,7 @@ impl Worker {
         })
     }
 
-    pub fn find(&self, data: JsValue) -> Promise {
+    pub fn find(self: Rc<Worker>, data: JsValue) -> Promise {
         let private_db = Arc::clone(&self.private.local);
         let action = JsFuture::from(private_db.find(&data));
         future_to_promise(async move {
@@ -535,7 +537,7 @@ impl Worker {
         })
     }
 
-    pub fn all_docs(&self) -> Promise {
+    pub fn all_docs(self: Rc<Worker>) -> Promise {
         let private_db = Arc::clone(&self.private.local);
         let action = JsFuture::from(private_db.all_docs_included());
         future_to_promise(async move {
@@ -543,7 +545,7 @@ impl Worker {
         })
     }
 
-    pub fn remove_with_element(&self, data: JsValue) -> Promise {
+    pub fn remove_with_element(self: Rc<Worker>, data: JsValue) -> Promise {
         let private_db = Arc::clone(&self.private.local);
         let action = JsFuture::from(private_db.remove_with_element(&data));
         future_to_promise(async move {
@@ -551,7 +553,7 @@ impl Worker {
         })
     }
 
-    pub fn remove(&self, doc_id: JsValue, doc_rev: JsValue) -> Promise {
+    pub fn remove(self: Rc<Worker>, doc_id: JsValue, doc_rev: JsValue) -> Promise {
         let private_db = Arc::clone(&self.private.local);
         let action = JsFuture::from(private_db.remove(&doc_id, &doc_rev));
         future_to_promise(async move {
@@ -562,11 +564,11 @@ impl Worker {
 
 /// Functions that return or alter Worker state
 impl Worker {
-    pub fn get_private_local_db(&self) -> Arc<PouchDB> {
+    pub fn get_private_local_db(self: Rc<Worker>) -> Arc<PouchDB> {
         self.private.local.clone()
     }
 
-    pub fn get_service_status(&self) -> Arc<Mutex<String>> {
+    pub fn get_service_status(self: Rc<Worker>) -> Arc<Mutex<String>> {
         self.service_status.clone()
     }
 }
