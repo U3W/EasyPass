@@ -476,3 +476,18 @@ userRemove {
 .custom-control-label::after {
     cursor: pointer !important;
 }
+
+/* Group return Button */
+.groupReturnButton {
+    line-height: 0;
+    padding: 0;
+    height: 28px;
+    width: 28px;
+}
+.groupReturnIcon {
+    height: 20px;
+    width: 20px;
+}
+.groupPadding {
+    padding-top: 0.5em;
+}

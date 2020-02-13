@@ -239,16 +239,17 @@ class NavbarVerticalEP2 extends React.Component {
                                 </li>)
                             }
                         </ul>
-
-                        <ul className="nav flex-column">
-                            <h6 className="d-flex justify-content-between align-items-center px-3 mt-1 mb-1 text-muted fixKat">
-                                <span>{StringSelector.getString(this.props.callback.state.language).cats}</span>
-                            </h6>
-                            <hr />
-                            {this.getCat()}
-                            <hr />
-                            {this.getEditCat()}
-                        </ul>
+                        { (this.props.callback.state.groupselected !== "0" && this.props.callback.state.tabselected === tabs.GROUPPASS || this.props.callback.state.tabselected === tabs.PRIVPASS) &&
+                            <ul className="nav flex-column">
+                                <h6 className="d-flex justify-content-between align-items-center px-3 mt-1 mb-1 text-muted fixKat">
+                                    <span>{StringSelector.getString(this.props.callback.state.language).cats}</span>
+                                </h6>
+                                <hr />
+                                {this.getCat()}
+                                <hr />
+                                {this.getEditCat()}
+                            </ul>
+                        }
                     </div>
                 </nav>
                 {/* Bottom Navbar */}

@@ -171,9 +171,14 @@ export const strings = {
     mainNotAddedToCatInfo: "Here are all passwords that are not assigned to a category",
 
     // Group Card
+    cardMenu: "Group menu - all groups",
+
+    cardGroupMembers: "Group members:",
+
     cardEdit: "Edit this group",
     cardDel: "Delete this group",
     cardOpen: "Open this group",
+    cardReturn: "Return to the group menu",
 
     // Pass Line
 

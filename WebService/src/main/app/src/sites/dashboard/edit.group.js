@@ -12,15 +12,15 @@ import GeneratePass from "./generatepass";
 import Table from "react-bootstrap/Table";
 
 
-export default class AddGroup extends React.Component {
+export default class EditGroup extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
-            name: "",
+            name: this.props.name,
 
             // visibility
             userGroupAdd: "",
-            userGroupList: [],
+            userGroupList: this.props.userGroupList,
             popUpGroupError: false,
             groupErrTyp: 0,
         };
@@ -30,13 +30,7 @@ export default class AddGroup extends React.Component {
 
     resetState() {
         this.setState({
-            name: "",
 
-            // visibility
-            userGroupAdd: "",
-            userGroupList: [],
-            popUpGroupError: false,
-            groupErrTyp: 0,
         })
     }
 
@@ -48,13 +42,33 @@ export default class AddGroup extends React.Component {
         if (event.keyCode === 13 )
         {
             // Enter
-            this.addGroup();
+            this.saveEdit();
         }
     }
 
-    addGroup() {
+    dismissPopUp() {
 
     }
+
+
+    saveEdit() {
+
+    }
+
+
+    getGroupErrorMsg() {
+        if ( this.state.popUpGroupError ) {
+            let err = StringSelector.getString(this.props.callback.state.language).addPassUserNotFound;
+            if ( this.state.groupErrTyp === 1 ) {
+                err = StringSelector.getString(this.props.callback.state.language).addPassUserAlready;
+            }
+            return (
+                <p className="text-danger fixErrorMsg">{err}</p>
+            );
+        }
+    }
+
+
 
     render() {
         return (

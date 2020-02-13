@@ -37,7 +37,7 @@ const saveReducer = ( state, action) => {
             localStorage.setItem(masterpasswordConst.radioSelected, action.twoFactorOpt);
             return {};
         case SAVE_GROUP:
-            localStorage.setItem(dashboardConst.groupSelected, action.groupselected);
+            localStorage.setItem(dashboardConst.groupSelected, JSON.stringify(action.groupselected));
             return {};
         default:
             return {};

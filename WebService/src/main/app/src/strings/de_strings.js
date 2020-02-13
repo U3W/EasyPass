@@ -185,9 +185,14 @@ export const strings = {
     mainNotAddedToCatInfo: "Hier befinden sich alle Passwörter, die keine Kategorie zugeordnet wurden",
 
     // Group Card
+    cardMenu: "Gruppen Menü - Alle Gruppen",
+
+    cardGroupMembers: "Gruppenmitglieder:",
+
     cardEdit: "Diese Gruppe bearbeiten",
     cardDel: "Diese Gruppe löschen",
     cardOpen: "Diese Gruppe öffnen",
+    cardReturn: "Zum Gruppemenü zurückkehren",
 
     // Pass Line
 

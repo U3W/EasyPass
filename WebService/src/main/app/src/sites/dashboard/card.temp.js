@@ -28,7 +28,6 @@ export default class GroupCard extends React.Component {
             id: this.props.id,
         };
 
-        console.log("AHa", props);
     }
 
     /* <input type="hidden" value={title}/>: Must be at the first position, otherwise the search function wont find it -> exception */
@@ -40,7 +39,7 @@ export default class GroupCard extends React.Component {
                     <Card.Title>
                         {this.props.name}
                     </Card.Title>
-                    <h6>Gruppenmitglieder</h6>
+                    <h6>{StringSelector.getString(this.props.callback.state.language).cardGroupMembers} {this.props.callback.countGroupMembers(this.state.id)}</h6>
 
                     <Card.Footer className="spezFooter">
                         <Row>
@@ -55,7 +54,7 @@ export default class GroupCard extends React.Component {
                                             </Tooltip>
                                         }
                                     >
-                                        <Button variant="dark" className="groupButton">
+                                        <Button variant="dark" className="groupButton" onClick={() => this.props.callback.deleteGroup(this.state.id, false)}>
                                             <img
                                                 src={DeleteIcon}
                                                 alt=""
@@ -76,7 +75,7 @@ export default class GroupCard extends React.Component {
                                             </Tooltip>
                                         }
                                     >
-                                        <Button variant="dark" className="groupButton">
+                                        <Button variant="dark" className="groupButton" onClick={() => this.props.callback.triggerEditGroup( this.state.id, false)}>
                                             <img
                                                 src={EditIcon}
                                                 alt=""
