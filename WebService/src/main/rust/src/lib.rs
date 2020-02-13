@@ -185,14 +185,20 @@ impl Backend {
                 state.set_main_closure(Some(closure));
             }
         });
-        // Bind state to local variable
-        let state = state_here;
         // Bind closure for startup process to message listener
         add_message_listener(&"message", &closure);
         // Save closure in state
-        state.set_init_closure(Some(closure));
-        // Tell UI initialization is done
-        post_message(&JsValue::from("initDone"));
+        state_here.set_init_closure(Some(closure));
+        // Finish initialization with worker setup
+        let _ = future_to_promise(async move {
+            // Bind state to local variable
+            let state = state_here;
+            // Initialize worker
+            let _ = state.worker().init().await;
+            // Tell UI initialization is done
+            post_message(&JsValue::from("initDone"));
+            Ok(JsValue::from(true))
+        });
     }
 
     /// Returns "main" closure that process UI requests.
@@ -214,8 +220,8 @@ impl Backend {
                 state.set_mode(Some(String::from(&cmd)));
                 // If the dashboard page is called
                 if state.mode_as_string() == "dashboard" {
-                    // Send all entries to UI
-                    Worker::all_docs_without_passwords(&state.worker().get_private_local_db())
+                    // Start live replication and send all data to UI
+                    state.worker().hearbeat();
                 }
             } else {
                 match state.mode_as_string().as_ref() {

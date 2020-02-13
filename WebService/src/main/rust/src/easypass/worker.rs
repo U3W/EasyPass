@@ -41,6 +41,15 @@ extern {
 
     #[wasm_bindgen(js_name = sleep)]
     fn sleep(timeout: u64);
+
+    #[wasm_bindgen(js_name = isOnline)]
+    fn is_online() -> bool;
+
+    #[wasm_bindgen(js_name = getDatabaseURL)]
+    fn get_database_url() -> Promise;
+
+    #[wasm_bindgen(js_name = getNodeMode)]
+    fn get_node_mode() -> String;
 }
 
 
@@ -48,6 +57,7 @@ extern {
 pub struct Worker {
     private: Connection,
     service_status: RefCell<String>,
+    database_url: RefCell<Option<String>>,
     category_cache: RefCell<HashMap<String, RecoverCategory>>,
     category_clear: RefCell<HashMap<u16, Timeout>>,
     password_cache: RefCell<HashMap<String, RecoverPassword>>,
@@ -116,39 +126,72 @@ impl Worker {
         // in multiple parts in the application
         let worker = Rc::new(Worker {
             private,
-            service_status: RefCell::new(String::from("online")),
+            service_status: RefCell::new(String::from("offline")),
+            database_url: RefCell::new(None),
             category_cache: RefCell::new(HashMap::new()),
             category_clear: RefCell::new(HashMap::new()),
             password_cache: RefCell::new(HashMap::new()),
             password_clear: RefCell::new(HashMap::new()),
         });
+        // Return reference counted worker
+        worker
+    }
+
+    pub async fn init(self: Rc<Worker>) -> Result<JsValue, JsValue> {
+        log("init1");
+        log(&get_node_mode());
+        //self.service_status.replace(network_status.clone());
+        if is_online() {
+            let worker = self.clone();
+            //let _ = future_to_promise(async move {
+            log("init2");
+            let result = JsFuture::from(get_database_url()).await;
+            match result {
+                Ok(url_raw) => {
+                    let url = url_raw.as_string().unwrap();
+                    log(&format!("My URL!! {}", &url));
+                    worker.database_url.replace(Some(url));
+                }
+                Err(_) => {
+                    log("down");
+                    worker.service_status.replace(String::from("down"));
+                }
+            }
+
+            //});
+        } else {
+            log("offline");
+            self.service_status.replace(String::from("offline"));
+        }
+        Ok(JsValue::from(true))
+    }
+
+    /// Starts live replication for private password entries.
+    pub fn hearbeat(self: Rc<Worker>) {
         // With the reference to the Worker the functionality
         // for database updates can be defined
-        let worker_moved_change = worker.clone();
+        let worker_moved_change = self.clone();
         let change = Closure::new(move |val: JsValue| {
             let worker = &worker_moved_change;
             log("We have a change!");
             // Send all documents to ui on change
-            Worker::all_docs_without_passwords(&worker.private.local_db);
+            worker.clone().all_docs_without_passwords();
         });
         // With the reference to the Worker the functionality
         // for database errors can be defined
-        let worker_moved_error = worker.clone();
+        let worker_moved_error = self.clone();
         let error = Closure::new(move |val: JsValue| {
             let worker = &worker_moved_error;
             log("EEEEEEEEEEEERRRRRRRRROOOOOOOOOOORRRRRRRRR!");
         });
         // On change functions need to be bound to the changes feed
-        worker.private.changes.changes_feed.on_change(&change);
-        worker.private.changes.changes_feed.on_error(&error);
-        worker.private.changes.change.replace(Some(change));
-        worker.private.changes.error.replace(Some(error));
-        // Return referenced counted worker
-        worker
-    }
+        self.private.changes.changes_feed.on_change(&change);
+        self.private.changes.changes_feed.on_error(&error);
+        self.private.changes.change.replace(Some(change));
+        self.private.changes.error.replace(Some(error));
 
-    /// Starts live replication for private password entries.
-    pub fn heartbeat(&mut self) {
+        // Send all entries to UI
+        self.clone().all_docs_without_passwords();
         /**
         // Establish remote connection and sync only when online
         if self.private.remote.is_some() {
@@ -193,9 +236,9 @@ impl Worker {
         post_message(&msg);
     }
 
-    pub fn all_docs_without_passwords(db: &PouchDB) {
-        let action = JsFuture::from(db.all_docs_without_passwords());
+    pub fn all_docs_without_passwords(self: Rc<Worker>) {
         let _ = future_to_promise(async move {
+            let action = JsFuture::from(self.private.local_db.all_docs_without_passwords());
             let result = action.await;
             let msg = Array::new_with_length(2);
             msg.set(0, JsValue::from_str("allEntries"));
