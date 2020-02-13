@@ -138,27 +138,24 @@ impl Worker {
     }
 
     pub async fn init(self: Rc<Worker>) -> Result<JsValue, JsValue> {
-        log("init1");
+        log("init");
         log(&get_node_mode());
-        //self.service_status.replace(network_status.clone());
         if is_online() {
             let worker = self.clone();
-            //let _ = future_to_promise(async move {
-            log("init2");
             let result = JsFuture::from(get_database_url()).await;
             match result {
                 Ok(url_raw) => {
                     let url = url_raw.as_string().unwrap();
                     log(&format!("My URL!! {}", &url));
                     worker.database_url.replace(Some(url));
+                    worker.service_status.replace(String::from("online"));
                 }
                 Err(_) => {
+                    // TODO interval that checks if service is available again
                     log("down");
                     worker.service_status.replace(String::from("down"));
                 }
             }
-
-            //});
         } else {
             log("offline");
             self.service_status.replace(String::from("offline"));
@@ -190,8 +187,39 @@ impl Worker {
         self.private.changes.change.replace(Some(change));
         self.private.changes.error.replace(Some(error));
 
-        // Send all entries to UI
-        self.clone().all_docs_without_passwords();
+        log("heart 1");
+        if self.service_status.borrow().as_str() == "online" {
+            log("Heart 2");
+            // Init remote databases
+            self.private.remote_db.replace(
+                Some(PouchDB::new_with_name(&format!("{}/testdb",
+                     &self.database_url.borrow().as_ref().unwrap())))
+            );
+            // Get Sync Handler
+            let sync_handler: SyncHandler
+                = self.private.local_db.sync(&self.private.remote_db.borrow().as_ref().unwrap());
+            // Define functionality on change when syncing
+            let change_closure = Closure::new(move |val: JsValue| {
+                log("Sync Change!");
+            });
+            // Define functionality on error when syncing
+            let error_closure = Closure::new(move |val: JsValue| {
+                log(&format!("Error {:?}", &val));
+            });
+            // Bind on change functions
+            sync_handler.on_change(&change_closure);
+            sync_handler.on_error(&error_closure);
+            // Create struct that holds everything relevant to syncing
+            let sync = Sync {
+                sync_handler,
+                change: change_closure,
+                error: error_closure
+            };
+            // And add it to the Worker
+            self.private.sync.replace(Some(sync));
+
+        }
+
         /**
         // Establish remote connection and sync only when online
         if self.private.remote.is_some() {
@@ -223,9 +251,11 @@ impl Worker {
             // And add it to the Worker
             self.private.sync = Some(sync);
         }
+        */
+
+
         // Fetch all current docs and send result to UI
-        Worker::all_docs_without_passwords(&self.private.local);*/
-        log("NOT used");
+        self.clone().all_docs_without_passwords();
     }
 
     fn build_and_post_message(cmd: &str, data: JsValue) {

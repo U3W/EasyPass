@@ -203,7 +203,6 @@ impl Backend {
 
     /// Returns "main" closure that process UI requests.
     fn build_main_closure(state: Rc<State>) -> Closure<dyn FnMut(MessageEvent)> {
-        log("daumen!");
         Closure::new(move |e: MessageEvent| {
             // Get command and additional data of UI request
             let (cmd, data) = e.data().get_message();
@@ -219,8 +218,10 @@ impl Backend {
             if state.mode_is_none() {
                 state.set_mode(Some(String::from(&cmd)));
                 // If the dashboard page is called
+                log("dashboard init 1");
                 if state.mode_as_string() == "dashboard" {
                     // Start live replication and send all data to UI
+                    log("dashboard init 2");
                     state.worker().hearbeat();
                 }
             } else {

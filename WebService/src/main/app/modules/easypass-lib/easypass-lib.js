@@ -117,7 +117,7 @@ const getDatabaseURL = async () => {
         const response = await fullResponse.json();
         return response.db;
     } else {
-        return "http://localhost:5984";
+        return "http://localhost:5984/";
     }
 };
 
