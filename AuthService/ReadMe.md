@@ -8,28 +8,28 @@ curl -i -X POST -H "Content-Type: application/json" -d "{\"uid\": \"mwustinger\"
 
 curl -i -X POST -H "Content-Type: application/json" -d "{\"hash\": \"mwustinger\", \"role\": \"USER\"}" http://localhost:7000/auth/challenge
 
-curl -i -X POST -d username=mwustinger -d password=Challenge -c cookieUser.txt http://localhost:7000/auth/login
+curl -i -X POST -d username=mwustinger -d password=Challenge -c cookie.txt http://localhost:7000/auth/login
 
-curl -i -X GET -H "Accept:application/json" -b cookieUser.txt http://localhost:7000/store/mwustinger-p
+curl -i -X GET -H "Accept:application/json" -b cookie.txt http://localhost:7000/store/mwustinger-p
 
 
-curl -i -X POST -b cookieUser.txt http://localhost:7000/auth/logout
+curl -i -X POST -b cookie.txt http://localhost:7000/auth/logout
 
-curl -i -X POST -b cookieUser.txt http://localhost:7000/user/remove
+curl -i -X POST -b cookie.txt http://localhost:7000/user/remove
 
 ```
 
 Test for Group:
 
 ```
-curl -i -X POST -H "Content-Type: application/json" -d "{\"gid\": \"family\", \"pubK\": \"PUBKEY\", \"privK\": \"PRIVKEY\", \"apubK\": \"APUBKEY\", \"aprivK\": \"APRIVKEY\"}" -b cookieUser.txt http://localhost:7000/user/createGroup
+curl -i -X POST -H "Content-Type: application/json" -d "{\"pubK\": \"PUBKEY\", \"privK\": \"PRIVKEY\", \"apubK\": \"APUBKEY\", \"aprivK\": \"APRIVKEY\"}" -b cookie.txt http://localhost:7000/user/createGroup
 
 
-curl -i -X POST -H "Content-Type: application/json" -d "{\"hash\": \"family\", \"role\": \"GROUP\"}" http://localhost:7000/auth/challenge
+curl -i -X POST -H "Content-Type: application/json" -d "{\"hash\": \"488b87a896fd41cab169638af221bdb8\", \"role\": \"GROUP\"}" http://localhost:7000/auth/challenge
 
-curl -i -X POST -d username=family -d password=Challenge -c cookieGroup.txt http://localhost:7000/auth/login
+curl -i -X POST -d username=488b87a896fd41cab169638af221bdb8 -d password=Challenge -b cookie.txt -c cookie.txt http://localhost:7000/user/login
 
-curl -i -X GET -H "Accept:application/json" -b cookieGroup.txt http://localhost:7000/store/family-p
+curl -i -X GET -H "Accept:application/json" -b cookie.txt http://localhost:7000/store/family-p
 
 
 curl -i -X POST -b cookieUser.txt http://localhost:7000/auth/logout

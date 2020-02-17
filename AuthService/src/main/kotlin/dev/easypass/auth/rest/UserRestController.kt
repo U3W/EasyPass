@@ -3,11 +3,16 @@ package dev.easypass.auth.rest
 import dev.easypass.auth.datstore.*
 import dev.easypass.auth.datstore.document.*
 import dev.easypass.auth.datstore.repository.*
+import dev.easypass.auth.security.*
+import dev.easypass.auth.security.mapper.*
 import org.ektorp.*
+import org.springframework.security.authentication.*
 import org.springframework.security.core.*
-import org.springframework.security.core.authority.*
+import org.springframework.security.core.authority.AuthorityUtils.*
 import org.springframework.web.bind.annotation.*
+import java.util.*
 import javax.servlet.http.*
+import kotlin.collections.ArrayList
 
 /**
  * This [RestController] provides the Rest-Api for the user features
@@ -18,9 +23,9 @@ import javax.servlet.http.*
 @RestController
 @RequestMapping("/user")
 class UserRestController(private val couchDBConnectionProvider: CouchDBConnectionProvider,
+                         private val challengeAuthenticationProvider: ChallengeAuthenticationProvider,
                          private val userRepository: UserRepository,
                          private val groupRepository: GroupRepository) {
-
     /**
      * A Request removes the current [User] from the CouchDB-Datastore and deletes the corresponding database
      * @param request: an instance of the class [HttpServletRequest]
@@ -28,7 +33,7 @@ class UserRestController(private val couchDBConnectionProvider: CouchDBConnectio
      */
     @PostMapping("/remove")
     fun removeUser(request: HttpServletRequest, response: HttpServletResponse, authentication: Authentication) {
-        val hash = getHash(authentication)
+        val hash = getUserHash(authentication)
         if (hash != null) {
             userRepository.removeAllByUid(hash)
             couchDBConnectionProvider.deleteCouchDbDatabase("$hash-m")
@@ -37,6 +42,7 @@ class UserRestController(private val couchDBConnectionProvider: CouchDBConnectio
             request.logout()
         } else
             response.status = HttpServletResponse.SC_UNAUTHORIZED
+
     }
 
     /**
@@ -45,17 +51,30 @@ class UserRestController(private val couchDBConnectionProvider: CouchDBConnectio
      * @param response: an instance of the class [HttpServletResponse]
      * @param authentication: an instance of the class [Authentication]
      */
-    @PostMapping("/createGroup")
-    fun createGroup(@RequestBody group: Group, response: HttpServletResponse, authentication: Authentication) = try {
-        groupRepository.add(group)
-        couchDBConnectionProvider.createCouchDbConnector("${group.gid}-p")
-        val hash = getHash(authentication)
-        if (hash != null) {
-                //TODO Add current User as admin
-        } else
-            response.status = HttpServletResponse.SC_UNAUTHORIZED
+    @PostMapping("/create_group")
+    fun createGroup(@RequestBody cred: GroupCredentials, response: HttpServletResponse, authentication: Authentication) = try {
+        val gid = UUID.randomUUID().toString().replace("-", "")
+        val hash = getUserHash(authentication)
+        //TODO Add current User as admin
+        groupRepository.add(Group(gid, cred.pubK, cred.privK, cred.apubK, cred.aprivK, ArrayList()))
+        couchDBConnectionProvider.createCouchDbConnector("$gid-p")
         response.status = HttpServletResponse.SC_OK
     } catch (ex: DbAccessException) {
         response.status = HttpServletResponse.SC_FORBIDDEN
+    }
+
+    @PostMapping("/auth_group")
+    fun authenticateGroup(username: String, password: String, response: HttpServletResponse, authentication: Authentication) = try {
+        challengeAuthenticationProvider.authenticate(UsernamePasswordAuthenticationToken(username, password, authentication.authorities))
+        response.status = HttpServletResponse.SC_OK
+    } catch (ex: AuthenticationException) {
+        response.status = HttpServletResponse.SC_UNAUTHORIZED
+    }
+
+    fun getUserHash(authentication: Authentication): String? {
+        for (authority in authorityListToSet(authentication.authorities))
+            if (authority.toString().startsWith("USER_"))
+                return authority.toString().substringAfter("USER_", "")
+        return null
     }
 }

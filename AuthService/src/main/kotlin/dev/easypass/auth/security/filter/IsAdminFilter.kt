@@ -1,5 +1,6 @@
 package dev.easypass.auth.security.filter
 
+import org.springframework.security.core.*
 import org.springframework.security.core.authority.*
 import org.springframework.security.core.context.*
 import org.springframework.stereotype.*
@@ -21,13 +22,12 @@ class IsAdminFilter : OncePerRequestFilter() {
     override fun doFilterInternal(request: HttpServletRequest, response: HttpServletResponse, filterChain: FilterChain) {
         val authentication = SecurityContextHolder.getContext().authentication
         if (authentication == null)
-            response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "NULL")
+            response.status = HttpServletResponse.SC_UNAUTHORIZED
         else {
-            val authorities = AuthorityUtils.authorityListToSet(authentication.authorities)
-            if (authorities.contains("ROLE_ADMIN"))
+            if (getAdminHashes(authentication).contains(request.servletPath.substringAfter("/admin/").substringBefore("/")))
                 filterChain.doFilter(request, response)
             else
-                response.sendError(HttpServletResponse.SC_FORBIDDEN, "This task is only available for admins.")
+                response.status = HttpServletResponse.SC_FORBIDDEN
         }
     }
 
@@ -38,5 +38,12 @@ class IsAdminFilter : OncePerRequestFilter() {
     override fun shouldNotFilter(request: HttpServletRequest): Boolean {
         val path = request.servletPath
         return !path.startsWith("/admin/")
+    }
+
+    fun getAdminHashes(authentication: Authentication): ArrayList<String> {
+        val hashes = ArrayList<String>()
+        for (authority in AuthorityUtils.authorityListToSet(authentication.authorities))
+            hashes.add(authority.toString().substringAfter("ADMIN_", ""))
+        return hashes
     }
 }

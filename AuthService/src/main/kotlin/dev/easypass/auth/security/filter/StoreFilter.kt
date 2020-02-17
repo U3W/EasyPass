@@ -1,5 +1,6 @@
 package dev.easypass.auth.security.filter
 
+import org.springframework.security.core.*
 import org.springframework.security.core.authority.*
 import org.springframework.security.core.context.*
 import org.springframework.stereotype.*
@@ -23,21 +24,29 @@ class StoreFilter : OncePerRequestFilter() {
         if (authentication == null)
             response.status = HttpServletResponse.SC_UNAUTHORIZED
         else {
-            val authorities = AuthorityUtils.authorityListToSet(authentication.authorities)
-            val hash = request.servletPath.substringAfter("/store/").split("-")[0]
-            if (authorities.contains("HASH_$hash"))
+            if (getHashes(authentication).contains(request.servletPath.substringAfter("/store/").substringBefore("/")))
                 filterChain.doFilter(request, response)
             else
-                response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Unauthorized for this datastore!")
+                response.status = HttpServletResponse.SC_FORBIDDEN
         }
     }
 
     /**
-     * When the url doesn't contain "/admin/" the filter is not applied
+     * When the url doesn't contain "/store/" the filter is not applied
      * @param request: an instance of the class [HttpServletRequest]
      */
     override fun shouldNotFilter(request: HttpServletRequest): Boolean {
         val path = request.servletPath
         return !path.startsWith("/store/")
+    }
+
+    fun getHashes(authentication: Authentication): ArrayList<String> {
+        val hashes = ArrayList<String>()
+        for (authority in AuthorityUtils.authorityListToSet(authentication.authorities)) {
+            hashes.add(authority.toString().substringAfter("USER_", ""))
+            hashes.add(authority.toString().substringAfter("GROUP_", ""))
+            hashes.add(authority.toString().substringAfter("ADMIN_", ""))
+        }
+        return hashes
     }
 }

@@ -3,8 +3,9 @@ package dev.easypass.auth.rest
 import dev.easypass.auth.datstore.*
 import dev.easypass.auth.datstore.document.*
 import dev.easypass.auth.datstore.repository.*
+import dev.easypass.auth.security.mapper.*
+import org.ektorp.*
 import org.springframework.security.core.*
-import org.springframework.security.core.authority.*
 import org.springframework.web.bind.annotation.*
 import javax.servlet.http.*
 
@@ -17,41 +18,35 @@ import javax.servlet.http.*
 @RequestMapping("/admin")
 class AdminRestController(private val couchDBConnectionProvider: CouchDBConnectionProvider,
                           private val groupRepository: GroupRepository) {
-
     /**
      * A Request removes the current [Group] from the CouchDB-Datastore and deletes the corresponding database
      * @param request: an instance of the class [HttpServletRequest]
      * @param authentication: an instance of the class [Authentication]
      */
-    @PostMapping("/remove")
-    fun removeGroup(request: HttpServletRequest, authentication: Authentication) {
-        val hash = getHash(authentication)
-        if (hash != null) {
-            groupRepository.removeAllByGid(hash)
-            couchDBConnectionProvider.deleteCouchDbDatabase("$hash-m")
-            couchDBConnectionProvider.deleteCouchDbDatabase("$hash-p")
-            request.logout()
-        }
+    @PostMapping("{gid}/remove")
+    fun removeGroup(@PathVariable gid: String, request: HttpServletRequest, authentication: Authentication) {
+        groupRepository.removeAllByGid(gid)
+        couchDBConnectionProvider.deleteCouchDbDatabase(gid)
+        request.logout()
     }
 
-    @PostMapping("/pubK")
-    fun getPubK(response: HttpServletResponse, authentication: Authentication): String {
-        val hash = getHash(authentication)
-        if (hash != null)
-            return groupRepository.findOneByGid(hash).pubK
-        else
-            response.status = HttpServletResponse.SC_UNAUTHORIZED
+    @PostMapping("{gid}/pubK")
+    fun getPubK(@PathVariable gid: String, response: HttpServletResponse): String {
+        try {
+            return groupRepository.findOneByGid(gid).pubK
+        } catch (ex: DbAccessException) {
+            response.sendError(HttpServletResponse.SC_FORBIDDEN, "Requested group not found!")
+        }
         return ""
     }
-}
 
-fun getHash(authentication: Authentication): String? {
-    val authorities = AuthorityUtils.authorityListToSet(authentication.authorities)
-    for (auth in authorities) {
-        val hash = auth.toString().substringAfter("HASH_")
-        if (hash != auth) {
-            return hash
-        }
+    @PostMapping("{gid}/add_user")
+    fun addUser(@PathVariable gid: String, response: HttpServletResponse) {
+        //TODO
     }
-    return null
+
+    @PostMapping("{gid}/change_cred")
+    fun addUser(@PathVariable gid: String, @RequestBody cred: GroupCredentials, response: HttpServletResponse) {
+        //TODO
+    }
 }

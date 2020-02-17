@@ -27,7 +27,7 @@ class AuthRestController(private val challengeAuthenticationProvider: ChallengeA
      */
     @PostMapping("/challenge")
     fun unlockChallenge(@RequestBody challenge: RequestChallenge, request: HttpServletRequest): ResponseChallenge {
-        return challengeAuthenticationProvider.addUserChallenge(Pair(request.remoteAddr, challenge.hash), challenge.role)
+        return challengeAuthenticationProvider.addChallenge(Pair(request.remoteAddr, challenge.hash), challenge.role)
     }
 
     /**

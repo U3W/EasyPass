@@ -3,6 +3,7 @@ package dev.easypass.auth.rest
 import dev.easypass.auth.datstore.*
 import dev.easypass.auth.datstore.document.*
 import dev.easypass.auth.datstore.repository.*
+import org.ektorp.*
 import org.springframework.security.core.*
 import org.springframework.security.core.authority.*
 import org.springframework.web.bind.annotation.*
@@ -16,13 +17,14 @@ import javax.servlet.http.*
 @RequestMapping("/group")
 class GroupRestController(private val groupRepository: GroupRepository) {
 
-    @PostMapping("/members")
-    fun getMembers(response: HttpServletResponse, authentication: Authentication): List<String> {
-        val hash = getHash(authentication)
-        if (hash != null) {
-            return groupRepository.findOneByGid(hash).members
-        } else
-            response.status = HttpServletResponse.SC_UNAUTHORIZED
+    @PostMapping("{gid}/members")
+    fun getMembers(@PathVariable gid: String, response: HttpServletResponse, authentication: Authentication): List<String> {
+        try {
+            return groupRepository.findOneByGid(gid).members
+        } catch (ex: DbAccessException) {
+            response.sendError(HttpServletResponse.SC_FORBIDDEN, "Requested group not found!")
+        }
         return ArrayList()
+
     }
 }
