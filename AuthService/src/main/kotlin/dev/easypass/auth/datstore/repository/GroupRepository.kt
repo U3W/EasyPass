@@ -70,5 +70,4 @@ class GroupRepository(db: CouchDbConnector) : CouchDbRepositorySupport<Group>(Gr
             remove(group)
     }
 
-
 }

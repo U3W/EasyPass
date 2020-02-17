@@ -6,7 +6,6 @@ import dev.easypass.auth.datstore.repository.*
 import dev.easypass.auth.security.*
 import dev.easypass.auth.security.mapper.*
 import org.ektorp.*
-import org.springframework.security.authentication.*
 import org.springframework.security.core.*
 import org.springframework.security.core.authority.AuthorityUtils.*
 import org.springframework.web.bind.annotation.*
@@ -33,7 +32,6 @@ class UserRestController(private val couchDBConnectionProvider: CouchDBConnectio
      */
     @PostMapping("/remove")
     fun removeUser(request: HttpServletRequest, response: HttpServletResponse, authentication: Authentication) {
-        println("access")
         val hash = getUserHash(authentication)
         if (hash != null) {
             couchDBConnectionProvider.deleteCouchDbDatabase("$hash")
@@ -52,8 +50,7 @@ class UserRestController(private val couchDBConnectionProvider: CouchDBConnectio
      */
     @PostMapping("/create_group")
     fun createGroup(@RequestBody cred: GroupCredentials, response: HttpServletResponse, authentication: Authentication) = try {
-        val gid = "g"+UUID.randomUUID().toString().replace("-", "")
-        println(gid)
+        val gid = "g" + UUID.randomUUID().toString().replace("-", "")
         //val hash = getUserHash(authentication)
         //TODO Add current User as admin
         groupRepository.add(Group(gid, cred.pubK, cred.privK, cred.apubK, cred.aprivK, ArrayList()))
@@ -72,8 +69,8 @@ class UserRestController(private val couchDBConnectionProvider: CouchDBConnectio
      * @param authentication: an instance of the class [Authentication]
      */
     @PostMapping("/auth_group")
-    fun authenticateGroup(username: String, password: String, response: HttpServletResponse, authentication: Authentication) = try {
-        challengeAuthenticationProvider.authenticate(UsernamePasswordAuthenticationToken(username, password, authentication.authorities))
+    fun authenticateGroup(username: String, password: String, request: HttpServletRequest, response: HttpServletResponse, authentication: Authentication) = try {
+        challengeAuthenticationProvider.addAuthorities(username, password, request.remoteAddr, authentication)
         response.status = HttpServletResponse.SC_OK
     } catch (ex: AuthenticationException) {
         response.status = HttpServletResponse.SC_UNAUTHORIZED
@@ -86,7 +83,6 @@ class UserRestController(private val couchDBConnectionProvider: CouchDBConnectio
      */
     fun getUserHash(authentication: Authentication): String? {
         for (authority in authorityListToSet(authentication.authorities)) {
-            println(authority)
             if (authority.toString().startsWith("USER_"))
                 return authority.toString().substringAfter("USER_", "")
         }

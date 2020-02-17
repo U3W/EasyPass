@@ -46,7 +46,7 @@ class IsGroupFilter : OncePerRequestFilter() {
             hashes.add(authority.toString().substringAfter("GROUP_", ""))
             hashes.add(authority.toString().substringAfter("ADMIN_", ""))
         }
-        println(hashes)
+
         return hashes
     }
 }

@@ -8,6 +8,7 @@ import org.ektorp.*
 import org.springframework.security.authentication.*
 import org.springframework.security.core.*
 import org.springframework.security.core.authority.*
+import org.springframework.security.core.context.*
 import org.springframework.security.web.authentication.*
 import org.springframework.stereotype.*
 import java.time.*
@@ -36,20 +37,13 @@ class ChallengeAuthenticationProvider(private val userRepository: UserRepository
     override fun authenticate(authentication: Authentication): Authentication? {
         val key = Pair((authentication.details as WebAuthenticationDetails).remoteAddress, authentication.name)
         val pwd = authentication.credentials.toString()
-        if (currentChallenges[key] == null || !currentChallenges[key]!!.first.isActive()) {
-            loginFailed(key)
-            throw NoActiveChallengeException()
-        } else if (isBlocked(key)) {
-            loginFailed(key)
-            throw UserIsBlockedException()
-        } else if (!currentChallenges[key]!!.first.checkChallenge(pwd)) {
-            loginFailed(key)
-            throw BadCredentialsException("Wrong credentials provided")
-        } else {
-            val authorities = ArrayList<GrantedAuthority>(authentication.authorities)
+        if (isAuthenticated(key, pwd)) {
+            val authorities = ArrayList<GrantedAuthority>()
             authorities.add(SimpleGrantedAuthority("${currentChallenges[key]?.second}_${key.second}"))
             loginSucceeded(key)
             return UsernamePasswordAuthenticationToken(key.second, pwd, authorities)
+        } else {
+            return null
         }
     }
 
@@ -60,6 +54,34 @@ class ChallengeAuthenticationProvider(private val userRepository: UserRepository
     override fun supports(authentication: Class<*>): Boolean {
         return authentication == UsernamePasswordAuthenticationToken::class.java
     }
+
+    @Throws(AuthenticationException::class)
+    fun addAuthorities(username: String, password: String, remoteAddress: String, authentication: Authentication) {
+        val key = Pair(remoteAddress, username)
+        if (isAuthenticated(key, password)) {
+            val authorities = ArrayList<GrantedAuthority>(authentication.authorities)
+            authorities.add(SimpleGrantedAuthority("${currentChallenges[key]?.second}_${key.second}"))
+
+            loginSucceeded(key)
+            SecurityContextHolder.getContext().authentication = UsernamePasswordAuthenticationToken(authentication.principal, authentication.credentials, authorities)
+        }
+    }
+
+    @Throws(AuthenticationException::class)
+    fun isAuthenticated(key: Pair<String, String>, pwd: String): Boolean =
+            if (currentChallenges[key] == null || !currentChallenges[key]!!.first.isActive()) {
+                loginFailed(key)
+                throw NoActiveChallengeException()
+            } else if (isBlocked(key)) {
+                loginFailed(key)
+                throw UserIsBlockedException()
+            } else if (!currentChallenges[key]!!.first.checkChallenge(pwd)) {
+                loginFailed(key)
+                throw BadCredentialsException("Wrong credentials provided")
+            } else {
+                true
+            }
+
 
     fun loginSucceeded(key: Pair<String, String>) {
         currentChallenges.remove(key)
