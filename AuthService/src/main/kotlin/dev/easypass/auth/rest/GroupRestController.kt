@@ -22,7 +22,7 @@ class GroupRestController(private val groupRepository: GroupRepository) {
         try {
             return groupRepository.findOneByGid(gid).members
         } catch (ex: DbAccessException) {
-            response.sendError(HttpServletResponse.SC_FORBIDDEN, "Requested group not found!")
+            response.sendError(HttpServletResponse.SC_CONFLICT, "Requested group not found!")
         }
         return ArrayList()
 

@@ -8,7 +8,6 @@ import org.ektorp.*
 import org.springframework.security.authentication.*
 import org.springframework.security.core.*
 import org.springframework.security.core.authority.*
-import org.springframework.security.core.context.*
 import org.springframework.security.web.authentication.*
 import org.springframework.stereotype.*
 import java.time.*
@@ -48,7 +47,7 @@ class ChallengeAuthenticationProvider(private val userRepository: UserRepository
             throw BadCredentialsException("Wrong credentials provided")
         } else {
             val authorities = ArrayList<GrantedAuthority>(authentication.authorities)
-            authorities.add(SimpleGrantedAuthority("${currentChallenges[key]?.second}${key.second}"))
+            authorities.add(SimpleGrantedAuthority("${currentChallenges[key]?.second}_${key.second}"))
             loginSucceeded(key)
             return UsernamePasswordAuthenticationToken(key.second, pwd, authorities)
         }
@@ -97,7 +96,7 @@ class ChallengeAuthenticationProvider(private val userRepository: UserRepository
                 currentChallenges.remove(key)
         }
         when (role) {
-            "USER"  -> {
+            "USER"           -> {
                 val user = userRepository.findOneByUid(key.second)
                 currentChallenges[key] = Pair(encryptionLibrary.generateInternalAdministrationChallenge(), role)
                 ResponseChallenge(currentChallenges[key]!!.first.getChallengeEncryptedByPubK(user.pubK), user.privK)
@@ -107,7 +106,7 @@ class ChallengeAuthenticationProvider(private val userRepository: UserRepository
                 currentChallenges[key] = Pair(encryptionLibrary.generateInternalAdministrationChallenge(), role)
                 ResponseChallenge(currentChallenges[key]!!.first.getChallengeEncryptedByPubK(group.pubK), group.privK)
             }
-            else    -> {
+            else             -> {
                 throw DocumentNotFoundException("A Dummy User will be created in the Catch-Block!")
             }
         }

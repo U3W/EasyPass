@@ -44,6 +44,7 @@ class IsAdminFilter : OncePerRequestFilter() {
         val hashes = ArrayList<String>()
         for (authority in AuthorityUtils.authorityListToSet(authentication.authorities))
             hashes.add(authority.toString().substringAfter("ADMIN_", ""))
+        println(hashes)
         return hashes
     }
 }

@@ -52,6 +52,7 @@ class CouchDBConnectionProvider(private val properties: Properties) {
      * @param dbname: the name of the database
      */
     fun deleteCouchDbDatabase(dbname: String) {
-        createCouchDbInstance().deleteDatabase(dbname)
+        if(createCouchDbInstance().checkIfDbExists(dbname))
+            createCouchDbInstance().deleteDatabase(dbname)
     }
 }

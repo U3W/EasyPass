@@ -24,7 +24,7 @@ class StoreFilter : OncePerRequestFilter() {
         if (authentication == null)
             response.status = HttpServletResponse.SC_UNAUTHORIZED
         else {
-            if (getHashes(authentication).contains(request.servletPath.substringAfter("/store/").substringBefore("/")))
+            if (getHashes(authentication).contains(request.servletPath.substringAfter("/store/").substringBefore("/").substringBefore("-")))
                 filterChain.doFilter(request, response)
             else
                 response.status = HttpServletResponse.SC_FORBIDDEN
@@ -47,6 +47,7 @@ class StoreFilter : OncePerRequestFilter() {
             hashes.add(authority.toString().substringAfter("GROUP_", ""))
             hashes.add(authority.toString().substringAfter("ADMIN_", ""))
         }
+        println(hashes)
         return hashes
     }
 }

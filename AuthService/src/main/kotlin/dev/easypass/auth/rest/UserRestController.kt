@@ -33,16 +33,15 @@ class UserRestController(private val couchDBConnectionProvider: CouchDBConnectio
      */
     @PostMapping("/remove")
     fun removeUser(request: HttpServletRequest, response: HttpServletResponse, authentication: Authentication) {
+        println("access")
         val hash = getUserHash(authentication)
         if (hash != null) {
+            couchDBConnectionProvider.deleteCouchDbDatabase("$hash")
+            couchDBConnectionProvider.deleteCouchDbDatabase("$hash-meta")
             userRepository.removeAllByUid(hash)
-            couchDBConnectionProvider.deleteCouchDbDatabase("$hash-m")
-            couchDBConnectionProvider.deleteCouchDbDatabase("$hash-p")
-            couchDBConnectionProvider.deleteCouchDbDatabase("$hash-g")
             request.logout()
         } else
             response.status = HttpServletResponse.SC_UNAUTHORIZED
-
     }
 
     /**
@@ -54,13 +53,13 @@ class UserRestController(private val couchDBConnectionProvider: CouchDBConnectio
     @PostMapping("/create_group")
     fun createGroup(@RequestBody cred: GroupCredentials, response: HttpServletResponse, authentication: Authentication) = try {
         val gid = UUID.randomUUID().toString().replace("-", "")
-        val hash = getUserHash(authentication)
+        //val hash = getUserHash(authentication)
         //TODO Add current User as admin
         groupRepository.add(Group(gid, cred.pubK, cred.privK, cred.apubK, cred.aprivK, ArrayList()))
-        couchDBConnectionProvider.createCouchDbConnector("$gid-p")
+        couchDBConnectionProvider.createCouchDbConnector(gid)
         response.status = HttpServletResponse.SC_OK
     } catch (ex: DbAccessException) {
-        response.status = HttpServletResponse.SC_FORBIDDEN
+        response.status = HttpServletResponse.SC_CONFLICT
     }
 
     @PostMapping("/auth_group")
@@ -72,9 +71,11 @@ class UserRestController(private val couchDBConnectionProvider: CouchDBConnectio
     }
 
     fun getUserHash(authentication: Authentication): String? {
-        for (authority in authorityListToSet(authentication.authorities))
+        for (authority in authorityListToSet(authentication.authorities)) {
+            println(authority)
             if (authority.toString().startsWith("USER_"))
                 return authority.toString().substringAfter("USER_", "")
+        }
         return null
     }
 }
