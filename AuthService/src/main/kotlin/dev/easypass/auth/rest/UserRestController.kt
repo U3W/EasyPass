@@ -62,6 +62,14 @@ class UserRestController(private val couchDBConnectionProvider: CouchDBConnectio
         response.status = HttpServletResponse.SC_CONFLICT
     }
 
+    /**
+     * A request tries to obtain access to a group by adding the required authorities to the session cookie
+     * The authentication process similar to the regular user one
+     * @param username: the [Group.gid] of that [Group]
+     * @param password: the decrypted challenge earlier obtained by a request to [AuthRestController.unlockChallenge]
+     * @param response: an instance of the class [HttpServletResponse]
+     * @param authentication: an instance of the class [Authentication]
+     */
     @PostMapping("/auth_group")
     fun authenticateGroup(username: String, password: String, response: HttpServletResponse, authentication: Authentication) = try {
         challengeAuthenticationProvider.authenticate(UsernamePasswordAuthenticationToken(username, password, authentication.authorities))
@@ -70,6 +78,11 @@ class UserRestController(private val couchDBConnectionProvider: CouchDBConnectio
         response.status = HttpServletResponse.SC_UNAUTHORIZED
     }
 
+    /**
+     * Filters the uid from the authorities of the given [Authentication]
+     * @param authentication: an instance of the class [Authentication]
+     * @return the uid of the given [Authentication]
+     */
     fun getUserHash(authentication: Authentication): String? {
         for (authority in authorityListToSet(authentication.authorities)) {
             println(authority)
