@@ -52,7 +52,8 @@ class UserRestController(private val couchDBConnectionProvider: CouchDBConnectio
      */
     @PostMapping("/create_group")
     fun createGroup(@RequestBody cred: GroupCredentials, response: HttpServletResponse, authentication: Authentication) = try {
-        val gid = UUID.randomUUID().toString().replace("-", "")
+        val gid = "g"+UUID.randomUUID().toString().replace("-", "")
+        println(gid)
         //val hash = getUserHash(authentication)
         //TODO Add current User as admin
         groupRepository.add(Group(gid, cred.pubK, cred.privK, cred.apubK, cred.aprivK, ArrayList()))

@@ -11,4 +11,4 @@ import org.ektorp.support.*
  * @param aprivK: a private key encrypted with the masterpassword used for the authentication of an admin user.
  * @param members: a list of all users of that group encrypted by the [pubK] of the group
  */
-class Group(val gid: String = "Default", val pubK: String = "Default", val privK: String = "Default", val apubK: String = "Default", val aprivK: String = "Default", var members: ArrayList<String> = ArrayList()) : CouchDbDocument()
+class Group(val gid: String = "Default", val pubK: String = "Default", val privK: String = "Default", val apubK: String = "Default", val aprivK: String = "Default", val members: ArrayList<String> = ArrayList()) : CouchDbDocument()
