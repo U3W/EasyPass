@@ -23,14 +23,14 @@ class AdminRestController(private val couchDBConnectionProvider: CouchDBConnecti
      * @param request: an instance of the class [HttpServletRequest]
      * @param authentication: an instance of the class [Authentication]
      */
-    @PostMapping("{gid}/remove")
+    @PostMapping("/{gid}/remove")
     fun removeGroup(@PathVariable gid: String, request: HttpServletRequest, authentication: Authentication) {
         groupRepository.removeAllByGid(gid)
         couchDBConnectionProvider.deleteCouchDbDatabase(gid)
         request.logout()
     }
 
-    @PostMapping("{gid}/pubK")
+    @PostMapping("/{gid}/pubK")
     fun getPubK(@PathVariable gid: String, response: HttpServletResponse): String {
         try {
             return groupRepository.findOneByGid(gid).pubK
@@ -40,13 +40,14 @@ class AdminRestController(private val couchDBConnectionProvider: CouchDBConnecti
         return ""
     }
 
-    @PostMapping("{gid}/add_user")
+    @PostMapping("/{gid}/add_user")
     fun addUser(@PathVariable gid: String, response: HttpServletResponse) {
         //TODO
     }
 
-    @PostMapping("{gid}/change_cred")
-    fun addUser(@PathVariable gid: String, @RequestBody cred: GroupCredentials, response: HttpServletResponse) {
-        //TODO
+    @PostMapping("/{gid}/change_cred")
+    fun changeCredentials(@PathVariable gid: String, @RequestBody cred: GroupCredentials, response: HttpServletResponse) {
+        groupRepository.removeAllByGid(gid)
+        groupRepository.add(Group(gid, cred.pubK, cred.privK, cred.apubK, cred.aprivK, ArrayList()))
     }
 }

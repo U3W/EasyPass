@@ -14,14 +14,14 @@ import javax.servlet.http.*
 @RestController
 @RequestMapping("/group")
 class GroupRestController(private val groupRepository: GroupRepository) {
-    @PostMapping("{gid}/members")
+    @PostMapping("/{gid}/members")
     fun getMembers(@PathVariable gid: String, response: HttpServletResponse, authentication: Authentication): List<String> {
+        println("REST")
         try {
             return groupRepository.findOneByGid(gid).members
         } catch (ex: DbAccessException) {
             response.sendError(HttpServletResponse.SC_CONFLICT, "Requested group not found!")
         }
         return ArrayList()
-
     }
 }

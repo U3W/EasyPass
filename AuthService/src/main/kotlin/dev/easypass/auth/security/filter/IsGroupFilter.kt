@@ -24,7 +24,7 @@ class IsGroupFilter : OncePerRequestFilter() {
         if (authentication == null)
             response.status = HttpServletResponse.SC_UNAUTHORIZED
         else {
-            if (getGroupAndAdminHashes(authentication).contains(request.servletPath.substringAfter("/admin/").substringBefore("/")))
+            if (getGroupAndAdminHashes(authentication).contains(request.servletPath.substringAfter("/group/").substringBefore("/")))
                 filterChain.doFilter(request, response)
             else
                 response.status = HttpServletResponse.SC_FORBIDDEN
@@ -37,6 +37,7 @@ class IsGroupFilter : OncePerRequestFilter() {
      */
     override fun shouldNotFilter(request: HttpServletRequest): Boolean {
         val path = request.servletPath
+        println(path)
         return !path.startsWith("/group/")
     }
 
@@ -46,7 +47,7 @@ class IsGroupFilter : OncePerRequestFilter() {
             hashes.add(authority.toString().substringAfter("GROUP_", ""))
             hashes.add(authority.toString().substringAfter("ADMIN_", ""))
         }
-
+        println(hashes)
         return hashes
     }
 }
