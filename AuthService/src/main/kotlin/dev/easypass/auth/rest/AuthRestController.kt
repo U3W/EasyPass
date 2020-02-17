@@ -4,7 +4,7 @@ import dev.easypass.auth.datstore.*
 import dev.easypass.auth.datstore.document.*
 import dev.easypass.auth.datstore.repository.*
 import dev.easypass.auth.security.*
-import dev.easypass.auth.security.challenge.*
+import dev.easypass.auth.security.mapper.*
 import org.ektorp.*
 import org.springframework.web.bind.annotation.*
 import javax.servlet.http.*

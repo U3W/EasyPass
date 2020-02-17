@@ -27,19 +27,16 @@ class UserRestController(private val couchDBConnectionProvider: CouchDBConnectio
      * @param authentication: an instance of the class [Authentication]
      */
     @PostMapping("/remove")
-    fun removeUser(request: HttpServletRequest, authentication: Authentication) {
-        println("REST")
-        val authorities = AuthorityUtils.authorityListToSet(authentication.authorities)
-        for (auth in authorities) {
-            val hash = auth.toString().substringAfter("HASH_")
-            if (hash != auth) {
-                userRepository.removeAllByUid(hash)
-                couchDBConnectionProvider.deleteCouchDbDatabase("$hash-m")
-                couchDBConnectionProvider.deleteCouchDbDatabase("$hash-p")
-                couchDBConnectionProvider.deleteCouchDbDatabase("$hash-g")
-                request.logout()
-            }
-        }
+    fun removeUser(request: HttpServletRequest, response: HttpServletResponse, authentication: Authentication) {
+        val hash = getHash(authentication)
+        if (hash != null) {
+            userRepository.removeAllByUid(hash)
+            couchDBConnectionProvider.deleteCouchDbDatabase("$hash-m")
+            couchDBConnectionProvider.deleteCouchDbDatabase("$hash-p")
+            couchDBConnectionProvider.deleteCouchDbDatabase("$hash-g")
+            request.logout()
+        } else
+            response.status = HttpServletResponse.SC_UNAUTHORIZED
     }
 
     /**
@@ -51,15 +48,12 @@ class UserRestController(private val couchDBConnectionProvider: CouchDBConnectio
     @PostMapping("/createGroup")
     fun createGroup(@RequestBody group: Group, response: HttpServletResponse, authentication: Authentication) = try {
         groupRepository.add(group)
-        couchDBConnectionProvider.createCouchDbConnector("${group.gid}-m")
         couchDBConnectionProvider.createCouchDbConnector("${group.gid}-p")
-        val authorities = AuthorityUtils.authorityListToSet(authentication.authorities)
-        for (auth in authorities) {
-            val hash = auth.toString().substringAfter("HASH_")
-            if (hash != auth) {
+        val hash = getHash(authentication)
+        if (hash != null) {
                 //TODO Add current User as admin
-            }
-        }
+        } else
+            response.status = HttpServletResponse.SC_UNAUTHORIZED
         response.status = HttpServletResponse.SC_OK
     } catch (ex: DbAccessException) {
         response.status = HttpServletResponse.SC_FORBIDDEN

@@ -69,4 +69,6 @@ class GroupRepository(db: CouchDbConnector) : CouchDbRepositorySupport<Group>(Gr
         for (group in findByGid(gid))
             remove(group)
     }
+
+
 }

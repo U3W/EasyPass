@@ -3,6 +3,7 @@ package dev.easypass.auth.security
 import dev.easypass.auth.datstore.repository.*
 import dev.easypass.auth.security.challenge.*
 import dev.easypass.auth.security.exception.*
+import dev.easypass.auth.security.mapper.*
 import org.ektorp.*
 import org.springframework.security.authentication.*
 import org.springframework.security.core.*

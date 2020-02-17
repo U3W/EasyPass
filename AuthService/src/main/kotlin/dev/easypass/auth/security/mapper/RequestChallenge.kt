@@ -1,4 +1,4 @@
-package dev.easypass.auth.security.challenge
+package dev.easypass.auth.security.mapper
 
 /**
  * A mapper-class to receive the challenge credentials in json format

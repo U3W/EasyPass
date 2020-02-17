@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.*
 import javax.servlet.http.*
 
 /**
- * This [RestController] provides the Rest-Api for the group features
+ * This [RestController] provides the Rest-Api for the admin features
  * @param couchDBConnectionProvider: an instance of the class [CouchDBConnectionProvider] to access the CouchDB-Datastore
  * @param groupRepository: an instance of the class [GroupRepository] to gain CRUD operations for [Group]s
  */
@@ -17,6 +17,7 @@ import javax.servlet.http.*
 @RequestMapping("/admin")
 class AdminRestController(private val couchDBConnectionProvider: CouchDBConnectionProvider,
                           private val groupRepository: GroupRepository) {
+
     /**
      * A Request removes the current [Group] from the CouchDB-Datastore and deletes the corresponding database
      * @param request: an instance of the class [HttpServletRequest]
@@ -24,16 +25,33 @@ class AdminRestController(private val couchDBConnectionProvider: CouchDBConnecti
      */
     @PostMapping("/remove")
     fun removeGroup(request: HttpServletRequest, authentication: Authentication) {
-        val authorities = AuthorityUtils.authorityListToSet(authentication.authorities)
-        println("Rest $authorities ${request.requestURL}")
-        for (auth in authorities) {
-            val hash = auth.toString().substringAfter("HASH_")
-            if (hash != auth) {
-                groupRepository.removeAllByGid(hash)
-                couchDBConnectionProvider.deleteCouchDbDatabase("$hash-m")
-                couchDBConnectionProvider.deleteCouchDbDatabase("$hash-p")
-                request.logout()
-            }
+        val hash = getHash(authentication)
+        if (hash != null) {
+            groupRepository.removeAllByGid(hash)
+            couchDBConnectionProvider.deleteCouchDbDatabase("$hash-m")
+            couchDBConnectionProvider.deleteCouchDbDatabase("$hash-p")
+            request.logout()
         }
     }
+
+    @PostMapping("/pubK")
+    fun getPubK(response: HttpServletResponse, authentication: Authentication): String {
+        val hash = getHash(authentication)
+        if (hash != null)
+            return groupRepository.findOneByGid(hash).pubK
+        else
+            response.status = HttpServletResponse.SC_UNAUTHORIZED
+        return ""
+    }
+}
+
+fun getHash(authentication: Authentication): String? {
+    val authorities = AuthorityUtils.authorityListToSet(authentication.authorities)
+    for (auth in authorities) {
+        val hash = auth.toString().substringAfter("HASH_")
+        if (hash != auth) {
+            return hash
+        }
+    }
+    return null
 }

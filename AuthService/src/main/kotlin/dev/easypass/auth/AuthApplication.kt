@@ -5,6 +5,8 @@ import org.springframework.boot.autoconfigure.*
 import org.springframework.cloud.client.discovery.*
 import org.springframework.cloud.netflix.zuul.*
 import org.springframework.context.annotation.*
+import org.springframework.security.core.*
+import org.springframework.security.core.authority.*
 import org.springframework.util.*
 import java.io.*
 import java.util.*
