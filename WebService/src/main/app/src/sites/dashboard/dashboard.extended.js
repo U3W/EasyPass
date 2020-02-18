@@ -92,6 +92,13 @@ export function workerCall( e ) {
 }
 
 /**
+ *
+ */
+export function addGroup(name, userGroupList) {
+    /*this.props.worker.postMessage(['savePassword',
+        {type: 'passwd', user: user, passwd: passwd, url: url, title: title, tags: tags, tabID: tabID, catID: catID, }]);*/
+}
+/**
  * Adds a new password entry.
  */
 export function addPass(user, passwd, url, title, tags, catID) {
@@ -178,6 +185,12 @@ export function undoDelete(which, id) {
             this.props.worker.postMessage(['undoDeletePassword', {_id: id}]);
             this.setState({
                 showDeletePassAlert: false,
+            });
+            break;
+        case dashboardAlerts.showDeleteGroup:
+            //this.props.worker.postMessage(['undoDeleteGroup', {_id: id}]);
+            this.setState({
+                showDeleteGroup: false,
             });
             break;
     }

@@ -20,12 +20,22 @@ export default class EditGroup extends React.Component {
 
             // visibility
             userGroupAdd: "",
-            userGroupList: this.props.userGroupList,
+            userGroupList: this.deepCopy(this.props.userGroupList),
             popUpGroupError: false,
             groupErrTyp: 0,
         };
 
         this.handleKeyevent = this.handleKeyevent.bind(this);
+    }
+
+    deepCopy( toCopy ) {
+        let out = [];
+        if ( toCopy !== undefined ) {
+            for ( let i = 0; i < toCopy.length; i++ ) {
+                out[i] = JSON.parse(JSON.stringify(toCopy[i]));
+            }
+        }
+        return out;
     }
 
     resetState() {
@@ -52,30 +62,15 @@ export default class EditGroup extends React.Component {
 
 
     saveEdit() {
-
+        this.props.callback.editGroup(this.state.id, this.state.name, this.state.userGroupList)
     }
-
-
-    getGroupErrorMsg() {
-        if ( this.state.popUpGroupError ) {
-            let err = StringSelector.getString(this.props.callback.state.language).addPassUserNotFound;
-            if ( this.state.groupErrTyp === 1 ) {
-                err = StringSelector.getString(this.props.callback.state.language).addPassUserAlready;
-            }
-            return (
-                <p className="text-danger fixErrorMsg">{err}</p>
-            );
-        }
-    }
-
-
 
     render() {
         return (
             <>
-                <Modal onKeyDown={this.handleKeyevent} show={this.props.callback.getGroupAddShow()} onHide={this.props.callback.dismissAddGroup} className="ep-modal-dialog addPassPopUp">
+                <Modal onKeyDown={this.handleKeyevent} show={this.props.callback.getEditGroup()} onHide={() => {this.props.callback.disableEditGroup(); this.resetState();}} className="ep-modal-dialog addPassPopUp">
                     <Modal.Header closeButton>
-                        <Modal.Title>{StringSelector.getString(this.props.callback.state.language).addGroup}:</Modal.Title>
+                        <Modal.Title>{StringSelector.getString(this.props.callback.state.language).editGroup}:</Modal.Title>
                     </Modal.Header>
                     <Modal.Body className="ep-modal-body">
                         <Card.Body>

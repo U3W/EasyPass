@@ -24,7 +24,8 @@ export default class GroupCard extends React.Component {
         super(props);
 
         this.state = {
-            name: "Test",
+            name: this.props.name,
+            userGroupList: this.props.userGroupList,
             id: this.props.id,
         };
 
@@ -39,7 +40,7 @@ export default class GroupCard extends React.Component {
                     <Card.Title>
                         {this.props.name}
                     </Card.Title>
-                    <h6>{StringSelector.getString(this.props.callback.state.language).cardGroupMembers} {this.props.callback.countGroupMembers(this.state.id)}</h6>
+                    <h6>{StringSelector.getString(this.props.callback.state.language).cardGroupMembers} {this.state.userGroupList.length}</h6>
 
                     <Card.Footer className="spezFooter">
                         <Row>
@@ -75,7 +76,7 @@ export default class GroupCard extends React.Component {
                                             </Tooltip>
                                         }
                                     >
-                                        <Button variant="dark" className="groupButton" onClick={() => this.props.callback.triggerEditGroup( this.state.id, false)}>
+                                        <Button variant="dark" className="groupButton" onClick={() => this.props.callback.triggerEditGroup( this.state.id, this.state.name, this.state.userGroupList, false)}>
                                             <img
                                                 src={EditIcon}
                                                 alt=""

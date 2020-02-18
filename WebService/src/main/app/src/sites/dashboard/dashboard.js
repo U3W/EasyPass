@@ -43,6 +43,8 @@ import Tooltip from "react-bootstrap/Tooltip";
 import DeleteIcon from "../../img/icons/password_delete_white.svg";
 import EditIcon from "../../img/icons/password_edit_white.svg";
 import Table from "react-bootstrap/Table";
+import EditGroup from "./edit.group";
+import SingleGroup from "./single.group";
 
 class Dashboard extends React.Component {
 
@@ -123,6 +125,12 @@ class Dashboard extends React.Component {
             // for the undo delete
             currentCatDelete: [],
             currentPassDelete: -1,
+            currentGroupDelete: -1,
+            // for edit group
+            currGroupEditId: -1,
+            currGroupEditName: "",
+            currGroupEditUserGroupList: [],
+
             // with, height
             width: 0,
             height: 0,
@@ -169,6 +177,7 @@ class Dashboard extends React.Component {
         this.getCats = this.getCats.bind(this);
         this.renderLinesSonstige = this.renderLinesSonstige.bind(this);
         this.renderLines = this.renderLines.bind(this);
+        this.addGroup = that.addGroup.bind(this);
         this.addPass = that.addPass.bind(this);
         this.deletePass = that.deletePass.bind(this);
         this.getPass = that.getPass.bind(this);
@@ -181,6 +190,9 @@ class Dashboard extends React.Component {
         this.addCat = that.addCat.bind(this);
         this.updateCat = that.updateCat.bind(this);
         this.deleteCats = that.deleteCats.bind(this);
+
+        this.triggerEditGroup = this.triggerEditGroup.bind(this);
+
         // WindowDimensions
         this.updateWindowDimensions = this.updateWindowDimensions.bind(this);
         // Worker
@@ -288,141 +300,99 @@ class Dashboard extends React.Component {
             toDel = this.state.groupselected;
         }
         // ToDo call Kacpers method
-        this.setState({showDeleteGroup: true});
+        this.setState({
+            showDeleteGroup: true,
+            currentGroupDelete: toDel
+        });
         this.dismissCopy(dashboardAlerts.showDeleteGroup);
     }
 
-    triggerEditGroup( id, dashboard ) {
-
+    getEditGroup() {
+        return this.state.showEditGroupPopUp;
     }
 
-    editGroup( name, userGroupList) {
+    disableEditGroup() {
+        this.setState({
+            showEditGroupPopUp: false,
+        });
+    }
+
+    triggerEditGroup( id, name, userGroupList) {
+        this.setState({
+            showEditGroupPopUp: true,
+            currGroupEditId: id,
+            currGroupEditName: name,
+            currGroupEditUserGroupList: userGroupList,
+        })
+    }
+
+
+    editGroup( id, name, userGroupList) {
 
     }
 
     renderGroup() {
         let rend;
+        // ToDo kacpers method
+        const groups = [
+            {name: "Test1", userGroupList:["Aha", "huhu"], id:"1"},
+            {name: "Test2", userGroupList:["Aha", "huhu"], id:"2"},
+            {name: "Test3", userGroupList:["Aha", "huhu"], id:"3"},
+            {name: "Test4", userGroupList:["Aha", "huhu"], id:"4"},
+            {name: "Test5", userGroupList:["Aha", "huhu"], id:"5"},
+            {name: "Test6", userGroupList:["Aha", "huhu"], id:"6"},
+            {name: "Test7", userGroupList:["Aha", "huhu"], id:"7"},
+        ];
         if ( this.state.groupselected === "0") {
             // Group menu
+            let i = -1;
+            let groupsRend = groups.map(singleGroup => {
+                i++;
+                return (
+                    <Col key={i} xs={12} sm={6} md={4}>
+                        <GroupCard callback={this} name={singleGroup.name} userGroupList={singleGroup.userGroupList} id={singleGroup.id}/>
+                    </Col>
+                );
+            });
             rend = (
                 <>
                     <h5>{StringSelector.getString(this.state.language).cardMenu}</h5>
                     <hr/>
                     <Row>
-                        <Col xs={12} sm={6} md={4}>
-                            <GroupCard callback={this} name={"Test"} id={"1"}/>
-                        </Col>
-                        <Col xs={12} sm={6} md={4}>
-                            <GroupCard callback={this} name={"Test"} id={"2"}/>
-                        </Col>
-                        <Col xs={12} sm={6} md={4}>
-                            <GroupCard callback={this} name={"Test"} id={"3"}/>
-                        </Col>
-                        <Col xs={12} sm={6} md={4}>
-                            <GroupCard callback={this} name={"Test"} id={"4"}/>
-                        </Col>
-                        <Col xs={12} sm={6} md={4}>
-                            <GroupCard callback={this} name={"Test"} id={"5"}/>
-                        </Col>
-                        <Col xs={12} sm={6} md={4}>
-                            <GroupCard callback={this} name={"Test"} id={"6"}/>
-                        </Col>
+                        {groupsRend}
                     </Row>
                 </>
             );
         }
         else {
+            // Single Group
+            let singleInd = -1;
+            for ( let i = 0; i < groups.length; i++ ) {
+                console.log("Aha", groups[i].id, this.state.groupselected);
+                if ( groups[i].id === this.state.groupselected ) {
+                    singleInd = i;
+                    break;
+                }
+            }
             rend = (
                 <>
-                    <Row>
-                        <Col>
-                            <h5>{this.getSelectedGroupName()}</h5>
-                        </Col>
-                        <Col className="center-vert">
-                            <div className="float-right">
-                                {['bottom'].map(placement => (
-                                    <OverlayTrigger
-                                        key={placement}
-                                        placement={placement}
-                                        overlay={
-                                            <Tooltip id={`tooltip-${placement}`}>
-                                                {StringSelector.getString(this.state.language).cardDel}
-                                            </Tooltip>
-                                        }
-                                    >
-                                        <Button variant="dark" className="groupReturnButton buttonSpace " onClick={this.deleteGroup}>
-                                            <img
-                                                src={DeleteIcon}
-                                                alt=""
-                                                className="groupReturnIcon"
-                                            />
-                                        </Button>
-                                    </OverlayTrigger>
-                                ))}
-                                {['bottom'].map(placement => (
-                                    <OverlayTrigger
-                                        key={placement}
-                                        placement={placement}
-                                        overlay={
-                                            <Tooltip id={`tooltip-${placement}`}>
-                                                {StringSelector.getString(this.state.language).cardEdit}
-                                            </Tooltip>
-                                        }
-                                    >
-                                        <Button variant="dark" className="groupReturnButton buttonSpace ">
-                                            <img
-                                                src={EditIcon}
-                                                alt=""
-                                                className="groupReturnIcon"
-                                            />
-                                        </Button>
-                                    </OverlayTrigger>
-                                ))}
-                                {['bottom'].map(placement => (
-                                    <OverlayTrigger
-                                        key={placement}
-                                        placement={placement}
-                                        overlay={
-                                            <Tooltip id={`tooltip-${placement}`}>
-                                                {StringSelector.getString(this.state.language).cardReturn}
-                                            </Tooltip>
-                                        }
-                                    >
-                                        <Button variant="dark" className="groupReturnButton buttonSpace " onClick={() => this.changeGroup("0")}>
-                                            <img
-                                                src={GroupReturn}
-                                                alt=""
-                                                className={"groupReturnIcon"}
-                                            />
-                                        </Button>
-                                    </OverlayTrigger>
-                                ))}
-
-                            </div>
-                        </Col>
-                    </Row>
-                    <Row className="groupPadding">
-                        <Col>
-                            <b>{StringSelector.getString(this.state.language).cardGroupMembers}</b>
-                        </Col>
-                    </Row>
-                    <hr/>
+                    <SingleGroup callback={this} name={groups[singleInd].name} userGroupList={groups[singleInd].userGroupList} id={groups[singleInd].id}/>
                 </>
             );
         }
         return rend;
     }
 
-    getVisibilityTable( userGroupList ) {
+    getVisibilityTable( userGroupList, callback ) {
         let key = -1;
         let elms;
         if ( userGroupList.length === 0 ) {
-            elms = StringSelector.getString(this.state.language).addPassUserVisNon;
+            elms = StringSelector.getString(this.state.language).addGroupUserVisNon;
             return (
                 <>
                     <div className="visMargin">
-                        <h6 className="noMarginBottom">{StringSelector.getString(this.state.language).addPassUserVis}</h6>
-                        <i>{StringSelector.getString(this.state.language).addPassUserVis2}</i>
+                        <h6 className="noMarginBottom">{StringSelector.getString(this.state.language).addGroupUserVis}</h6>
+                        <i>{StringSelector.getString(this.state.language).addGroupUserVis2}</i>
                     </div>
                     - {elms}
                 </>
@@ -441,8 +411,8 @@ class Dashboard extends React.Component {
                 }
                 elmsArray[i] = (
                     <td className={tdClass}>
-                        {item.name}
-                        <button type="button" className="close userRemove" onClick={() => this.removeUserFromGroup(item.id)}>
+                        {item}
+                        <button type="button" className="close userRemove" onClick={() => callback.removeUserFromGroup(i)}>
                             <span aria-hidden="true" >×</span>
                             <span className="sr-only">Close</span>
                         </button>
@@ -462,8 +432,8 @@ class Dashboard extends React.Component {
             return (
                 <>
                     <div className="visMargin">
-                        <h6 className="noMarginBottom">{StringSelector.getString(this.state.language).addPassUserVis}</h6>
-                        <i>{StringSelector.getString(this.state.language).addPassUserVis2}</i>
+                        <h6 className="noMarginBottom">{StringSelector.getString(this.state.language).addGroupUserVis}</h6>
+                        <i>{StringSelector.getString(this.state.language).addGroupUserVis2}</i>
                     </div>
                     <div className="roundDiv">
                         <Table striped hover size="sm" className="noMarginBottom roundtable">
@@ -799,9 +769,8 @@ class Dashboard extends React.Component {
 
     printAddGroup() {
         const show = this.state.showAddedGroup;
-        // ToDo AddGroup PopUp Text ändern
-        let succ = StringSelector.getString(this.state.language).linePassAddSuc;
-        let err = StringSelector.getString(this.state.language).linePassAddErr;
+        let succ = StringSelector.getString(this.state.language).cardAddSuc;
+        let err = StringSelector.getString(this.state.language).cardAddErr;
         return (
             <Alert show={show} variant={this.state.alertState} className="center-horz center-vert error fixed-top-easypass in-front">
                 <p className="center-horz center-vert center-text">
@@ -817,14 +786,25 @@ class Dashboard extends React.Component {
 
     printDeleteGroup() {
         const show = this.state.showDeleteGroup;
-        // ToDo DeleteGroup PopUp Text ändern
-        let succ = StringSelector.getString(this.state.language).linePassAddSuc;
+        let succ = StringSelector.getString(this.state.language).cardDelSuc;
         let err = StringSelector.getString(this.state.language).linePassAddErr;
         return (
             <Alert show={show} variant={this.state.alertState} className="center-horz center-vert error fixed-top-easypass in-front">
                 <p className="center-horz center-vert center-text">
                     {this.state.alertState === "success" ?
-                        succ
+                        <>
+                            {succ + " "}
+                            <a className="makeLookLikeLink" onClick={() => this.undoDelete(dashboardAlerts.showDeleteGroup, this.state.currentGroupDelete)}>
+                                {StringSelector.getString(this.state.language).cardDelSuc2}
+                                <img
+                                    src={Undo}
+                                    alt=""
+                                    width="18"
+                                    height="18"
+                                    className="d-inline-block"
+                                />
+                            </a>
+                        </>
                         :
                         err
                     }
@@ -835,9 +815,8 @@ class Dashboard extends React.Component {
 
     printEditGroup() {
         const show = this.state.showEditedGroup;
-        // ToDo EditGroup PopUp Text ändern
-        let succ = StringSelector.getString(this.state.language).linePassAddSuc;
-        let err = StringSelector.getString(this.state.language).linePassAddErr;
+        let succ = StringSelector.getString(this.state.language).cardAddSuc;
+        let err = StringSelector.getString(this.state.language).cardAddErr;
         return (
             <Alert show={show} variant={this.state.alertState} className="center-horz center-vert error fixed-top-easypass in-front">
                 <p className="center-horz center-vert center-text">
@@ -1358,12 +1337,14 @@ class Dashboard extends React.Component {
                             <span>{StringSelector.getString(this.state.language).addPass}</span>
                         </div>
                     </Button>
-                    <AddPassword callback={this}/>
-                    <AddGroup callback={this}/>
+
                 </div>
+                <AddPassword callback={this}/>
+                <AddGroup callback={this}/>
                 <AddCategory callback={this}/>
                 <EditCategory callback={this}/>
                 <DeleteCategory callback={this}/>
+                <EditGroup callback={this} id={this.state.currGroupEditId} name={this.state.currGroupEditName} userGroupList={this.state.currGroupEditUserGroupList}/>
                 {this.printResetPassPopUp()}
                 {this.printCopy()}
                 {this.printUser()}
