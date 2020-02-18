@@ -138,6 +138,9 @@ impl Worker {
     }
 
     pub async fn init(self: Rc<Worker>) -> Result<JsValue, JsValue> {
+
+        //let mut mybool = Worker::test().await;
+
         log("init");
         log(&get_node_mode());
         if is_online() {
@@ -162,17 +165,29 @@ impl Worker {
         }
         Ok(JsValue::from(true))
     }
+    fn baum() -> Closure<dyn FnMut()> {
+        Closure::new(|| { spawn_local(async move {
+            log("Baum");
+            log("Baum Baum");
+        })})
+    }
 
     /// Starts live replication for private password entries.
     pub fn hearbeat(self: Rc<Worker>) {
+
+        let kek = Worker::baum();
+
         // With the reference to the Worker the functionality
         // for database updates can be defined
         let worker_moved_change = self.clone();
         let change = Closure::new(move |val: JsValue| {
-            let worker = &worker_moved_change;
-            log("We have a change!");
-            // Send all documents to ui on change
-            worker.clone().all_docs_without_passwords();
+            let worker = worker_moved_change.clone();
+            spawn_local(async move {
+                //let worker = &worker_moved_change;
+                log("We have a change!");
+                // Send all documents to ui on change
+                worker.clone().all_docs_without_passwords();
+            });
         });
         // With the reference to the Worker the functionality
         // for database errors can be defined

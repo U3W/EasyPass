@@ -1,4 +1,5 @@
 #![feature(in_band_lifetimes)]
+#![feature(async_closure)]
 
 mod utils;
 
@@ -204,38 +205,44 @@ impl Backend {
     /// Returns "main" closure that process UI requests.
     fn build_main_closure(state: Rc<State>) -> Closure<dyn FnMut(MessageEvent)> {
         Closure::new(move |e: MessageEvent| {
+            // Clone state for other needed move
+            let state = state.clone();
             // Get command and additional data of UI request
             let (cmd, data) = e.data().get_message();
+            // Execute code asynchronously
+            spawn_local(async move {
+                let why = data.clone();
+                // TODO remove this logs
+                log("Received data!");
+                log(&format!("CMD: {} | DATA: {:?}", &cmd, &data));
+                //log(&format!("Hey!: {:?}", &e.data()));
 
-            // TODO remove this logs
-            log("Received data!");
-            log(&format!("CMD: {} | DATA: {:?}", &cmd, &data));
-            log(&format!("Hey!: {:?}", &e.data()));
+                // Check which mode (= active page in UI) is and perform
+                // associated function
+                // If no mode is set, set it
+                if state.mode_is_none() {
+                    state.set_mode(Some(String::from(&cmd)));
+                    // If the dashboard page is called
+                    log("dashboard init 1");
+                    if state.mode_as_string() == "dashboard" {
+                        // Start live replication and send all data to UI
+                        log("dashboard init 2");
+                        state.worker().hearbeat();
+                    }
+                } else {
+                    match state.mode_as_string().as_ref() {
+                        "dashboard" => Backend::dashboard_call(cmd, data, state.clone()).await,
+                        _ => {}
+                    }
+                }
+            });
 
-            // Check which mode (= active page in UI) is and perform
-            // associated function
-            // If no mode is set, set it
-            if state.mode_is_none() {
-                state.set_mode(Some(String::from(&cmd)));
-                // If the dashboard page is called
-                log("dashboard init 1");
-                if state.mode_as_string() == "dashboard" {
-                    // Start live replication and send all data to UI
-                    log("dashboard init 2");
-                    state.worker().hearbeat();
-                }
-            } else {
-                match state.mode_as_string().as_ref() {
-                    "dashboard" => Backend::dashboard_call(cmd, data, state.clone()),
-                    _ => {}
-                }
-            }
 
         })
     }
 
     /// Process calls on the dashboard page.
-    fn dashboard_call(cmd: String, data: JsValue, mut state: Rc<State>) {
+    async fn dashboard_call(cmd: String, data: JsValue, mut state: Rc<State>) {
         log("DASHBOARD_CALL");
         // Bind worker to local variable
         let worker = state.worker();
@@ -289,7 +296,7 @@ impl Utils for JsValue {
     fn get_message(&self) -> (String, JsValue) {
         let array = Array::from(self);
         let cmd = array.get(0).as_string().unwrap();
-        let data = array.get(1);
+        let data = array.get(1).clone();
         //let data_parsed = data.clone().into_serde::<Value>().unwrap();
         (cmd, data)
     }
