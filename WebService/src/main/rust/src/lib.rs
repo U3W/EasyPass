@@ -67,79 +67,6 @@ pub struct Backend {
     state: Rc<State>
 }
 
-/// TODO comment
-mod state {
-    use wasm_bindgen::closure::Closure;
-    use web_sys::{MessageEvent};
-    use wasm_bindgen::__rt::core::cell::{RefCell, Ref};
-    use crate::easypass::worker::Worker;
-    use wasm_bindgen::__rt::core::borrow::Borrow;
-    use wasm_bindgen::__rt::std::rc::Rc;
-
-    /// Stores the internal state of the Backend of the Web-App.
-    pub struct State {
-        mode: RefCell<Option<String>>,
-        worker: Rc<Worker>,
-        init_closure: RefCell<Option<Closure<dyn FnMut(MessageEvent)>>>,
-        main_closure: RefCell<Option<Closure<dyn FnMut(MessageEvent)>>>
-    }
-
-    impl State {
-        pub fn new(
-            mode: Option<String>, worker: Rc<Worker>,
-            init_closure: Option<Closure<dyn FnMut(MessageEvent)>>,
-            main_closure: Option<Closure<dyn FnMut(MessageEvent)>>
-        ) -> State {
-            State {
-                mode: RefCell::new(mode),
-                worker,
-                init_closure: RefCell::new(init_closure),
-                main_closure: RefCell::new(main_closure)
-            }
-        }
-
-        pub fn mode(&self) -> Ref<Option<String>> {
-            self.mode.borrow()
-        }
-
-        pub fn set_mode(&self, mode: Option<String>) {
-            self.mode.replace(mode);
-        }
-
-        pub fn mode_is_none(&self) -> bool {
-            self.mode.borrow().is_none()
-        }
-
-        pub fn mode_as_string(&self) -> String {
-            if self.mode_is_none() {
-                String::from("")
-            } else {
-                String::from(self.mode.borrow().as_ref().unwrap())
-            }
-        }
-
-        pub fn worker(&self) -> Rc<Worker> {
-            self.worker.clone()
-        }
-
-        pub fn init_closure(&self) -> Ref<Option<Closure<dyn FnMut(MessageEvent)>>> {
-            self.init_closure.borrow()
-        }
-
-        pub fn set_init_closure(&self, init_closure: Option<Closure<dyn FnMut(MessageEvent)>>) {
-            self.init_closure.replace(init_closure);
-        }
-
-        pub fn main_closure(&self) -> Ref<Option<Closure<dyn FnMut(MessageEvent)>>> {
-            self.main_closure.borrow()
-        }
-
-        pub fn set_main_closure(&self, main_closure: Option<Closure<dyn FnMut(MessageEvent)>>) {
-            self.main_closure.replace(main_closure);
-        }
-    }
-}
-
 #[wasm_bindgen]
 impl Backend {
 
@@ -215,8 +142,6 @@ impl Backend {
                 // TODO remove this logs
                 log("Received data!");
                 log(&format!("CMD: {} | DATA: {:?}", &cmd, &data));
-                //log(&format!("Hey!: {:?}", &e.data()));
-
                 // Check which mode (= active page in UI) is and perform
                 // associated function
                 // If no mode is set, set it
@@ -236,8 +161,6 @@ impl Backend {
                     }
                 }
             });
-
-
         })
     }
 
@@ -249,37 +172,112 @@ impl Backend {
         // Perform operation
         match cmd.as_ref() {
             "savePassword" => {
-                worker.save_password(data);
+                worker.save_password(data).await;
             }
             "updatePassword" => {
-                worker.update_password(data);
+                worker.update_password(data).await;
             }
             "deletePassword" => {
-                worker.delete_password(data);
+                worker.delete_password(data).await;
             }
             "undoDeletePassword" => {
-                worker.undo_delete_password(data);
+                worker.undo_delete_password(data).await;
             }
             "getPassword" | "getPasswordForUpdate" |
             "getPasswordToClipboard" | "getPasswordAndRedirect" => {
-                worker.get_password(cmd, data);
+                worker.get_password(cmd, data).await;
             }
             "saveCategory" => {
-                worker.save_category(data);
+                worker.save_category(data).await;
             }
             "updateCategory" => {
-                worker.update_category(data);
+                worker.update_category(data).await;
             }
             "deleteCategories" => {
-                worker.delete_categories(data);
+                worker.delete_categories(data).await;
             }
             "undoDeleteCategories" => {
-                worker.undo_delete_categories(data);
+                worker.undo_delete_categories(data).await;
             }
             "unregister" => {
                 state.set_mode(None);
             }
             _ => {}
+        }
+    }
+}
+
+/// Represents the state of the Backend.
+/// State is its own struct allow usage in different parts of
+/// the application.
+mod state {
+    use wasm_bindgen::closure::Closure;
+    use web_sys::{MessageEvent};
+    use wasm_bindgen::__rt::core::cell::{RefCell, Ref};
+    use crate::easypass::worker::Worker;
+    use wasm_bindgen::__rt::core::borrow::Borrow;
+    use wasm_bindgen::__rt::std::rc::Rc;
+
+    /// Stores the internal state of the Backend of the Web-App.
+    pub struct State {
+        mode: RefCell<Option<String>>,
+        worker: Rc<Worker>,
+        init_closure: RefCell<Option<Closure<dyn FnMut(MessageEvent)>>>,
+        main_closure: RefCell<Option<Closure<dyn FnMut(MessageEvent)>>>
+    }
+
+    impl State {
+        pub fn new(
+            mode: Option<String>, worker: Rc<Worker>,
+            init_closure: Option<Closure<dyn FnMut(MessageEvent)>>,
+            main_closure: Option<Closure<dyn FnMut(MessageEvent)>>
+        ) -> State {
+            State {
+                mode: RefCell::new(mode),
+                worker,
+                init_closure: RefCell::new(init_closure),
+                main_closure: RefCell::new(main_closure)
+            }
+        }
+
+        pub fn mode(&self) -> Ref<Option<String>> {
+            self.mode.borrow()
+        }
+
+        pub fn set_mode(&self, mode: Option<String>) {
+            self.mode.replace(mode);
+        }
+
+        pub fn mode_is_none(&self) -> bool {
+            self.mode.borrow().is_none()
+        }
+
+        pub fn mode_as_string(&self) -> String {
+            if self.mode_is_none() {
+                String::from("")
+            } else {
+                String::from(self.mode.borrow().as_ref().unwrap())
+            }
+        }
+
+        pub fn worker(&self) -> Rc<Worker> {
+            self.worker.clone()
+        }
+
+        pub fn init_closure(&self) -> Ref<Option<Closure<dyn FnMut(MessageEvent)>>> {
+            self.init_closure.borrow()
+        }
+
+        pub fn set_init_closure(&self, init_closure: Option<Closure<dyn FnMut(MessageEvent)>>) {
+            self.init_closure.replace(init_closure);
+        }
+
+        pub fn main_closure(&self) -> Ref<Option<Closure<dyn FnMut(MessageEvent)>>> {
+            self.main_closure.borrow()
+        }
+
+        pub fn set_main_closure(&self, main_closure: Option<Closure<dyn FnMut(MessageEvent)>>) {
+            self.main_closure.replace(main_closure);
         }
     }
 }
