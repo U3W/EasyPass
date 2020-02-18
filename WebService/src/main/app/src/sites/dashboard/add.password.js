@@ -105,12 +105,10 @@ export default class AddPassword extends React.Component {
 
 
     changeTagListener (key, value, i, e ) {
-        console.log("aha key:", key, "value:", value, i);
         if ( this.state.tagAdded ) {
             // just tags
             let tagNew = this.state.tag;
 
-            console.log("aha Thisss", tagNew, "key", key);
             if (e.target.id.length > 8) {
                 // tagValue + i
                 if (e.target.id.includes("tagValue")) {
@@ -184,7 +182,6 @@ export default class AddPassword extends React.Component {
             for ( let i = 0; i < tag.length; i++ )
             {
                 let tagKeys = Object.keys(tag[i]);
-                console.log("Aha key", tagKeys, tag);
                 let andBut = "";
                 if ( i < tag.length-1) {
                     andBut = (
@@ -389,8 +386,14 @@ export default class AddPassword extends React.Component {
     addPass() {
         console.log("add.password.js: catID: " + this.state.catID);
         if ( this.state.user.length > 0 && this.state.title.length > 0 && this.state.pass.length > 0) {
-            this.props.callback.addPass(this.state.user, this.state.pass, this.state.url, this.state.title,
-                this.state.tag, this.state.catID);
+            if ( this.props.callback.state.tabselected === tabs.PRIVPASS ) {
+                this.props.callback.addPass(this.state.user, this.state.pass, this.state.url, this.state.title,
+                    this.state.tag, this.state.catID, null);
+            }
+            else {
+                this.props.callback.addPass(this.state.user, this.state.pass, this.state.url, this.state.title,
+                    this.state.tag, this.state.catID, this.props.callback.state.groupselected);
+            }
             this.resetState();
         }
         else {

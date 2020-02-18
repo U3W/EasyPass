@@ -1,4 +1,4 @@
-import React from "react";
+import React, {useReducer} from "react";
 import Modal from "react-bootstrap/Modal";
 import StringSelector from "../../strings/stings";
 import {Card, Form} from "react-bootstrap";
@@ -16,16 +16,39 @@ export default class EditGroup extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
-            name: this.props.name,
+            id: "-1",
+            name: "",
 
             // visibility
             userGroupAdd: "",
-            userGroupList: this.deepCopy(this.props.userGroupList),
+            userGroupList: [],
             popUpGroupError: false,
             groupErrTyp: 0,
+
+            // update
+            updated: false,
         };
 
         this.handleKeyevent = this.handleKeyevent.bind(this);
+        this.changeInput = this.changeInput.bind(this);
+        this.addToGroupAdd = this.addToGroupAdd.bind(this);
+        this.saveEdit = this.saveEdit.bind(this);
+    }
+
+    componentDidMount() {
+        // Test with multiple callbacks
+        this.props.callback.setEditCallback(this.setEditValues.bind(this))
+    }
+
+    setEditValues( id, name, userGroupList) {
+        console.log("Aha", id, name, userGroupList);
+        this.setState({
+            id: id,
+            name: name,
+
+            // visibility
+            userGroupList: userGroupList,
+        });
     }
 
     deepCopy( toCopy ) {
@@ -40,29 +63,89 @@ export default class EditGroup extends React.Component {
 
     resetState() {
         this.setState({
+            id: "-1",
+            name: "",
 
+            // visibility
+            userGroupAdd: "",
+            userGroupList: [],
+            popUpGroupError: false,
+            groupErrTyp: 0,
+
+            // update
+            updated: false,
         })
     }
 
     changeInput(e) {
-
+        this.setState({
+            [e.target.id]: e.target.value,
+        });
+        if ( e.target.id === "userGroupAdd" && e.target.length > 0 ) {
+            this.setState({
+                popUpGroupError: false,
+            })
+        }
     }
 
     handleKeyevent(event) {
         if (event.keyCode === 13 )
         {
-            // Enter
-            this.saveEdit();
+            if ( event.target.id === "userGroupAdd" ) {
+                this.addToGroupAdd();
+            }
+            else {
+                // Enter
+                this.saveEdit();
+            }
         }
     }
 
-    dismissPopUp() {
 
+    removeUserFromGroup( ind ) {
+        let arr = this.state.userGroupList;
+        arr.splice(ind, 1);
+        this.setState({
+            userGroupList: arr,
+        });
+    }
+
+    addToGroupAdd() {
+        if ( this.state.userGroupAdd.length > 0 ) {
+            if ( this.state.userGroupList.includes(this.state.userGroupAdd) ) {
+                this.setState({
+                    popUpGroupError: true,
+                    groupErrTyp: 1,
+                })
+            }
+            else {
+                // ToDo check if user exists
+                if ( true ) {
+                    this.state.userGroupList.push(this.state.userGroupAdd);
+                    this.setState({
+                        userGroupAdd: "",
+                    })
+                }
+                else {
+                    this.setState({
+                        popUpGroupError: true,
+                        groupErrTyp: 0,
+                    })
+                }
+            }
+        }
+        else {
+            this.setState({
+                userGroupAddError: true,
+            });
+        }
     }
 
 
     saveEdit() {
-        this.props.callback.editGroup(this.state.id, this.state.name, this.state.userGroupList)
+        this.props.callback.editGroup(this.state.id, this.state.name, this.deepCopy(this.state.userGroupList));
+        this.props.callback.disableEditGroup();
+        this.resetState();
     }
 
     render() {
@@ -78,7 +161,7 @@ export default class EditGroup extends React.Component {
                                 <InputGroup.Prepend>
                                     <InputGroup.Text id="inputGroup-sizing-lg">{StringSelector.getString(this.props.callback.state.language).addGroupName}</InputGroup.Text>
                                 </InputGroup.Prepend>
-                                <FormControl autoComplete="off" id="title" aria-label="Large" aria-describedby="inputGroup-sizing-sm" value={this.state.name} onChange={this.changeInput}/>
+                                <FormControl autoComplete="off" id="name" aria-label="Large" aria-describedby="inputGroup-sizing-sm" value={this.state.name} onChange={this.changeInput}/>
                             </InputGroup>
                             <hr/>
                             <h6>{StringSelector.getString(this.props.callback.state.language).addGroupVis}</h6>
@@ -86,9 +169,13 @@ export default class EditGroup extends React.Component {
                                 <InputGroup.Prepend>
                                     <InputGroup.Text id="inputGroup-sizing-sm">{StringSelector.getString(this.props.callback.state.language).username}</InputGroup.Text>
                                 </InputGroup.Prepend>
-                                <Form.Control autoComplete="off" id="userGroupAdd" aria-label="Small" aria-describedby="inputGroup-sizing-sm" value={this.state.userGroupAdd} placeholder={StringSelector.getString(this.props.callback.state.language).addGroupUserInpPlaceholder} onChange={this.changeInput}/>
+                                { this.state.popUpGroupError ?
+                                    <Form.Control autoComplete="off" id="userGroupAdd" className="is-invalid" aria-label="Small" aria-describedby="inputGroup-sizing-sm" value={this.state.userGroupAdd} placeholder={StringSelector.getString(this.props.callback.state.language).addGroupUserInpPlaceholder} onChange={this.changeInput}/>
+                                    :
+                                    <Form.Control autoComplete="off" id="userGroupAdd" aria-label="Small" aria-describedby="inputGroup-sizing-sm" value={this.state.userGroupAdd} placeholder={StringSelector.getString(this.props.callback.state.language).addGroupUserInpPlaceholder} onChange={this.changeInput}/>
+                                }
                                 <InputGroup.Append>
-                                    <Button variant="dark" className="buttonSpaceInline" >
+                                    <Button variant="dark" className="buttonSpaceInline" onClick={this.addToGroupAdd}>
                                         <img
                                             src={AddTag}
                                             alt=""
@@ -99,12 +186,12 @@ export default class EditGroup extends React.Component {
                                     </Button>
                                 </InputGroup.Append>
                             </InputGroup>
-                            {this.props.callback.getVisibilityTable(this.state.userGroupList)}
+                            {this.props.callback.getVisibilityTable(this.state.userGroupList, this)}
                             {this.props.callback.getGroupErrorMsg(this.state.popUpGroupError, this.state.groupErrTyp)}
                         </Card.Body>
                     </Modal.Body>
                     <Modal.Footer>
-                        <Button variant={"danger"} onClick={this.addGroup}>{StringSelector.getString(this.props.callback.state.language).addGroupBut}</Button>
+                        <Button variant={"danger"} onClick={this.saveEdit}>{StringSelector.getString(this.props.callback.state.language).addGroupBut}</Button>
                     </Modal.Footer>
                 </Modal>
             </>

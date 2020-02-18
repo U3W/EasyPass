@@ -57,7 +57,7 @@ export default class SingleGroup extends React.Component {
                                     placement={placement}
                                     overlay={
                                         <Tooltip id={`tooltip-${placement}`}>
-                                            {StringSelector.getString(this.state.language).cardDel}
+                                            {StringSelector.getString(this.props.callback.state.language).cardDel}
                                         </Tooltip>
                                     }
                                 >
@@ -76,7 +76,7 @@ export default class SingleGroup extends React.Component {
                                     placement={placement}
                                     overlay={
                                         <Tooltip id={`tooltip-${placement}`}>
-                                            {StringSelector.getString(this.state.language).cardEdit}
+                                            {StringSelector.getString(this.props.callback.state.language).cardEdit}
                                         </Tooltip>
                                     }
                                 >
@@ -95,7 +95,7 @@ export default class SingleGroup extends React.Component {
                                     placement={placement}
                                     overlay={
                                         <Tooltip id={`tooltip-${placement}`}>
-                                            {StringSelector.getString(this.state.language).cardReturn}
+                                            {StringSelector.getString(this.props.callback.state.language).cardReturn}
                                         </Tooltip>
                                     }
                                 >
@@ -114,10 +114,11 @@ export default class SingleGroup extends React.Component {
                 </Row>
                 <Row className="groupPadding">
                     <Col>
-                        <b>{StringSelector.getString(this.state.language).cardGroupMembers}</b>
+                        <b>{StringSelector.getString(this.props.callback.state.language).cardGroupMembers}</b>
                     </Col>
                 </Row>
                 <hr/>
+                {this.props.callback.renderGroupCat()}
             </>
         )
     }

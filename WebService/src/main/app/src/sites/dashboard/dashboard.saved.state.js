@@ -1,4 +1,4 @@
-import {authConstants} from "../../authentification/auth.const.localstorage";
+import {authConstants} from "../../authentification/auth.const.sessionstorage";
 import {dashboardConst} from "./const/dashboard.enum";
 
 class dashboardState {

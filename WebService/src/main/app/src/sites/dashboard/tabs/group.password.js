@@ -17,7 +17,7 @@ class GroupPassword extends React.Component {
     render() {
         return (
             <>
-               <h1 className="fixHeader">{StringSelector.getString(this.props.callback.language).groupPass}</h1>
+               <h1 className="fixHeader">{StringSelector.getString(this.props.callback.state.language).groupPass}</h1>
                 <hr/>
                 <Container>
                     <Accordion id="passwords">

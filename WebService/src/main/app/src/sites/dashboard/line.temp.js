@@ -726,9 +726,11 @@ export default class PassLine extends React.Component {
                 </Button>
             </>
         );
+        /* <input id="..." type="hidden" value="..." />: Must be at the first position, otherwise the search function wont find it -> exception */
         return (
-            <Card className="pass-card" name="GroupCard">
+            <Card className="pass-card">
                 <input id="searchInput" type="hidden" value={this.props.title}/>
+                <input id="searchInput2" type="hidden" value={this.props.user}/>
                 <Accordion.Toggle as={Card.Header} className="clickable center-vert" eventKey={this.props.id}>
                     <Row>
                         <Col sm={1} md={1} lg={1} xs={1} className="fixLogoCol">

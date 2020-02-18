@@ -1,4 +1,4 @@
-import {authConstants as dashboardConst} from "../authentification/auth.const.localstorage";
+import {authConstants as dashboardConst} from "../authentification/auth.const.sessionstorage";
 
 export const SAVE_TAB = "SAVE_TAB";
 export const SAVE_CAT = "SAVE_CAT";

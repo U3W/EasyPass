@@ -40,6 +40,11 @@ export function getCatsFromTab(tabSelected) {
     return this.state.entries.categories.filter(cat => cat.tabID === tabSelected);
 }
 
+export function getCatsFromGroup(groupSelected) {
+    // ToDo @Kacper
+    return [{_id: "testCat", _rev: "1", desc: "Name", name: "Test", tabID: 1, type: "cat"}];
+}
+
 /**
  * Returns the password entries from a category and selected tab in an array.
  */

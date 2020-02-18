@@ -31,6 +31,7 @@ export default class AddGroup extends React.Component {
         this.changeInput = this.changeInput.bind(this);
         this.addToGroupAdd = this.addToGroupAdd.bind(this);
         this.removeUserFromGroup = this.removeUserFromGroup.bind(this);
+        this.addGroup = this.addGroup.bind(this);
     }
 
     resetState() {
@@ -66,8 +67,13 @@ export default class AddGroup extends React.Component {
     handleKeyevent(event) {
         if (event.keyCode === 13 )
         {
-            // Enter
-            this.addGroup();
+            if ( event.target.id === "userGroupAdd" ) {
+                this.addToGroupAdd();
+            }
+            else {
+                // Enter
+                this.addGroup();
+            }
         }
     }
 
@@ -126,7 +132,7 @@ export default class AddGroup extends React.Component {
     render() {
         return (
             <>
-                <Modal onKeyDown={this.handleKeyevent} show={this.props.callback.getGroupAddShow()} onHide={() => {this.props.callback.disableEditGroup(); this.resetState();}} className="ep-modal-dialog addPassPopUp">
+                <Modal onKeyDown={this.handleKeyevent} show={this.props.callback.getGroupAddShow()} onHide={() => {this.props.callback.dismissAddGroup(); this.resetState();}} className="ep-modal-dialog addPassPopUp">
                     <Modal.Header closeButton>
                         <Modal.Title>{StringSelector.getString(this.props.callback.state.language).addGroup}:</Modal.Title>
                     </Modal.Header>
@@ -148,7 +154,7 @@ export default class AddGroup extends React.Component {
                                 <InputGroup.Prepend>
                                     <InputGroup.Text id="inputGroup-sizing-sm">{StringSelector.getString(this.props.callback.state.language).username}</InputGroup.Text>
                                 </InputGroup.Prepend>
-                                { this.state.userGroupAddError ?
+                                { this.state.popUpGroupError ?
                                     <Form.Control autoComplete="off" id="userGroupAdd" className="is-invalid" aria-label="Small" aria-describedby="inputGroup-sizing-sm" value={this.state.userGroupAdd} placeholder={StringSelector.getString(this.props.callback.state.language).addGroupUserInpPlaceholder} onChange={this.changeInput}/>
                                     :
                                     <Form.Control autoComplete="off" id="userGroupAdd" aria-label="Small" aria-describedby="inputGroup-sizing-sm" value={this.state.userGroupAdd} placeholder={StringSelector.getString(this.props.callback.state.language).addGroupUserInpPlaceholder} onChange={this.changeInput}/>

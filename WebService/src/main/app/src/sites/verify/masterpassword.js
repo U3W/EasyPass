@@ -25,6 +25,7 @@ import InputGroup from "react-bootstrap/InputGroup";
 
 import * as animation from "../../animation/fadeOutGradient"
 import indexState from "../../index.saved.state";
+import MasterpasswordState from "./masterpassword.saved.state";
 
 class Masterpassword extends React.Component {
 
@@ -41,7 +42,7 @@ class Masterpassword extends React.Component {
             inpFile: null,
             fileName: "",
 
-            inpRadio: "" + VerifyAuth.getRadioState(),
+                inpRadio: "" + MasterpasswordState.getRadioState(),
             error: false,
             missingMasterpassword: false,
             missingFile: false,

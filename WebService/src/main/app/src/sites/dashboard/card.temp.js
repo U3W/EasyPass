@@ -31,11 +31,11 @@ export default class GroupCard extends React.Component {
 
     }
 
-    /* <input type="hidden" value={title}/>: Must be at the first position, otherwise the search function wont find it -> exception */
+    /* <input id="..." type="hidden" value="..."/>: Must be at the first position, otherwise the search function wont find it -> exception */
     render() {
         return (
             <Card className="pass-card groupCard">
-                <input type="hidden" value={"0"}/>
+                <input id="searchInput" type="hidden" value={this.props.name}/>
                 <Card.Body>
                     <Card.Title>
                         {this.props.name}
@@ -76,7 +76,7 @@ export default class GroupCard extends React.Component {
                                             </Tooltip>
                                         }
                                     >
-                                        <Button variant="dark" className="groupButton" onClick={() => this.props.callback.triggerEditGroup( this.state.id, this.state.name, this.state.userGroupList, false)}>
+                                        <Button variant="dark" className="groupButton" onClick={() => this.props.callback.triggerEditGroup( this.state.id, this.state.name, this.state.userGroupList)}>
                                             <img
                                                 src={EditIcon}
                                                 alt=""

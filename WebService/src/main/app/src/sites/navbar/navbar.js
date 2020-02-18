@@ -21,6 +21,7 @@ import StringSelector from "../../strings/stings";
 import dashboardState from "../dashboard/dashboard.saved.state";
 import CopyIcon from "../../img/icons/password_copy_white.svg";
 import ResetPass from "./resetPass";
+import tabs from "../dashboard/tabs/tab.enum";
 
 class NavbarEP extends React.Component {
     constructor(props) {
@@ -276,7 +277,11 @@ class NavbarEP extends React.Component {
                             </div>
                             <Navbar.Collapse id="basic-navbar-nav" className="search-bar">
                                 <div className="search-bar-size">
-                                    <FormControl id="search" type="text" placeholder={StringSelector.getString(this.props.callback.state.language).searchPlaceholder} autoComplete="off" className="search" onChange={this.props.callback.handleSearch}/>
+                                    { (this.props.callback.state.tabselected === tabs.GROUPPASS && this.props.callback.state.groupselected === "0") ?
+                                        <FormControl id="search" type="text" placeholder={StringSelector.getString(this.props.callback.state.language).searchPlaceholderGroup} autoComplete="off" className="search" onChange={this.props.callback.handleSearchGroup}/>
+                                        :
+                                        <FormControl id="search" type="text" placeholder={StringSelector.getString(this.props.callback.state.language).searchPlaceholder} autoComplete="off" className="search" onChange={this.props.callback.handleSearch}/>
+                                    }
                                 </div>
                                 <Nav className="mr-auto">
                                     <NavDropdown title={this.props.callback.state.username} onClick={this.setSettingExpanded} className="settingsPopUp dropDown" id="basic-nav-dropdown">

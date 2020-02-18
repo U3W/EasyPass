@@ -1,18 +1,14 @@
-import {authConstants} from "./auth.const.localstorage";
+import {authConstants} from "./auth.const.sessionstorage";
 import {masterpasswordConst} from "../sites/verify/masterpassword.enum";
 
 
 class VerifyAuth {
 
     getVerified() {
-        return localStorage.getItem(authConstants.verified) === "true";
-    }
-
-    getRadioState() {
-        if ( localStorage.getItem(masterpasswordConst.radioSelected) === null ) {
-            return "file";
+        if ( sessionStorage.getItem(authConstants.verified) === null ) {
+            return false;
         }
-        return localStorage.getItem(masterpasswordConst.radioSelected);
+        return sessionStorage.getItem(authConstants.verified) === "true";
     }
 
 }

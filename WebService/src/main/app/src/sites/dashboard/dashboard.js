@@ -127,6 +127,7 @@ class Dashboard extends React.Component {
             currentPassDelete: -1,
             currentGroupDelete: -1,
             // for edit group
+            editCallback: null,
             currGroupEditId: -1,
             currGroupEditName: "",
             currGroupEditUserGroupList: [],
@@ -151,6 +152,7 @@ class Dashboard extends React.Component {
         this.setErrorText = this.setErrorText.bind(this);
 
         this.handleSearch = this.handleSearch.bind(this);
+        this.handleSearchGroup = this.handleSearchGroup.bind(this);
         this.setExpanded = this.setExpanded.bind(this);
         this.logoutDash = this.logoutDash.bind(this);
         this.getTab = this.getTab.bind(this);
@@ -178,6 +180,7 @@ class Dashboard extends React.Component {
         this.renderLinesSonstige = this.renderLinesSonstige.bind(this);
         this.renderLines = this.renderLines.bind(this);
         this.addGroup = that.addGroup.bind(this);
+        this.editGroup = that.editGroup.bind(this);
         this.addPass = that.addPass.bind(this);
         this.deletePass = that.deletePass.bind(this);
         this.getPass = that.getPass.bind(this);
@@ -191,6 +194,7 @@ class Dashboard extends React.Component {
         this.updateCat = that.updateCat.bind(this);
         this.deleteCats = that.deleteCats.bind(this);
 
+
         this.triggerEditGroup = this.triggerEditGroup.bind(this);
 
         // WindowDimensions
@@ -200,6 +204,7 @@ class Dashboard extends React.Component {
         // Entry functions
         this.loadEntries = dashboardEntries.loadEntries.bind(this);
         this.getCatsFromTab = dashboardEntries.getCatsFromTab.bind(this);
+        this.getCatsFromGroup = dashboardEntries.getCatsFromGroup.bind(this);
         this.getCatData = dashboardEntries.getCatData.bind(this);
 
     }
@@ -281,17 +286,7 @@ class Dashboard extends React.Component {
         } else return undefined;
     }
 
-    countGroupMembers( id ) {
-        // ToDO with Kacpers method
-        return 2;
-    }
 
-    getSelectedGroupName() {
-        // ToDo with Kacpers method
-        return "Test";
-    }
-
-    // delete & edit
     deleteGroup( id, dashboard) {
         // change to group menu
         this.changeGroup("0");
@@ -302,6 +297,7 @@ class Dashboard extends React.Component {
         // ToDo call Kacpers method
         this.setState({
             showDeleteGroup: true,
+            alertState: "success",
             currentGroupDelete: toDel
         });
         this.dismissCopy(dashboardAlerts.showDeleteGroup);
@@ -318,17 +314,20 @@ class Dashboard extends React.Component {
     }
 
     triggerEditGroup( id, name, userGroupList) {
+        this.state.editCallback(id,name,userGroupList);
         this.setState({
             showEditGroupPopUp: true,
-            currGroupEditId: id,
-            currGroupEditName: name,
-            currGroupEditUserGroupList: userGroupList,
-        })
+        });
     }
 
-
-    editGroup( id, name, userGroupList) {
-
+    /**
+     * Callback to set editData
+     * @param callback
+     */
+    setEditCallback( callback ) {
+        this.setState({
+            editCallback: callback,
+        });
     }
 
     renderGroup() {
@@ -345,15 +344,24 @@ class Dashboard extends React.Component {
         ];
         if ( this.state.groupselected === "0") {
             // Group menu
-            let i = -1;
-            let groupsRend = groups.map(singleGroup => {
-                i++;
-                return (
-                    <Col key={i} xs={12} sm={6} md={4}>
-                        <GroupCard callback={this} name={singleGroup.name} userGroupList={singleGroup.userGroupList} id={singleGroup.id}/>
-                    </Col>
+            let groupsRend;
+            if ( groups.length === 0 ) {
+                groupsRend = (
+                    <p>{StringSelector.getString(this.state.language).noCatsNoPass}</p>
                 );
-            });
+            }
+            else {
+                let i = -1;
+                groupsRend = groups.map(singleGroup => {
+                    i++;
+                    return (
+                        <Col key={i} xs={12} sm={6} md={4}>
+                            <GroupCard callback={this} name={singleGroup.name} userGroupList={singleGroup.userGroupList} id={singleGroup.id}/>
+                        </Col>
+                    );
+                });
+            }
+
             rend = (
                 <>
                     <h5>{StringSelector.getString(this.state.language).cardMenu}</h5>
@@ -449,14 +457,116 @@ class Dashboard extends React.Component {
 
     getGroupErrorMsg( popUpGroupError, groupErrTyp) {
         if ( popUpGroupError ) {
-            let err = StringSelector.getString(this.state.language).addPassUserNotFound;
+            let err = StringSelector.getString(this.state.language).addGroupUserNotFound;
             if ( groupErrTyp === 1 ) {
-                err = StringSelector.getString(this.state.language).addPassUserAlready;
+                err = StringSelector.getString(this.state.language).addGroupUserAlready;
             }
+            console.log("Aha, returning", err, groupErrTyp);
             return (
                 <p className="text-danger fixErrorMsg">{err}</p>
             );
         }
+    }
+
+    getCatsForGroup() {
+        return this.sortCatsAlph(this.getCatsFromGroup(this.state.groupselected));
+    }
+
+    renderGroupCat() {
+        // ToDo implements group cat render
+        let cats = this.getCatsForGroup();
+        console.log("AhA", cats);
+        let passwordsWithCats = this.renderLinesGroup(cats);
+        let passwordsWithout = this.renderLinesGroupSonstige();
+
+        let renderWithCats = "";
+        let renderWithout = "";
+
+        let catselected = this.state.catselected;
+        let language = this.state.language;
+
+        let nothingAdded = "";
+        let i = -1;
+        if (passwordsWithCats !== undefined) {
+            renderWithCats = cats.map(function (cat) {
+                if ( cat._id === catselected || catselected === "0") {
+                    i++;
+                    return (
+                        <div key={i}>
+                            <strong>{cat.name}</strong>
+                            {cat.desc.length === 0 ?
+                                ""
+                                :
+                                <br/>
+                            }
+                            {cat.desc}
+                            <hr/>
+                            { passwordsWithCats[cat._id].length === 0 ?
+                                <>
+                                    <p>{StringSelector.getString(language).noPassToCat}</p>
+                                </>
+                                :
+                                passwordsWithCats[cat._id]
+                            }
+                        </div>
+                    )
+                }
+                else {
+                    return (
+                        ""
+                    )
+                }
+
+            });
+        }
+        else if (passwordsWithout === undefined) {
+            // If there are no cats and pass
+            nothingAdded = StringSelector.getString(this.state.language).noCatsNoPass;
+            // ToDo vielleicht noch eine schönere Lösung finden
+            if ( this.state.catselected !== "0" ) {
+                this.setState({
+                    catselected: "0",
+                });
+            }
+        }
+
+
+        if (passwordsWithout !== undefined) {
+            renderWithout = (
+                <div>
+                    <strong>{StringSelector.getString(this.state.language).mainNotAddedToCat}</strong>
+                    <br/>
+                    {StringSelector.getString(this.state.language).mainNotAddedToCatInfo}
+                    <hr/>
+                    {passwordsWithout[0]}
+                </div>
+            );
+        }
+
+
+        return (
+            <>
+                { this.state.catselected === "0" &&
+                <>
+                    <h5>{StringSelector.getString(this.state.language).mainAllCat}</h5>
+                    <hr/>
+                </>
+                }
+                {renderWithCats}
+                { this.state.catselected === "0" &&
+                renderWithout
+                }
+                {nothingAdded}
+            </>
+        );
+    }
+
+    renderLinesGroup( cats ) {
+
+    }
+
+    renderLinesGroupSonstige() {
+
     }
 
     renderCat() {
@@ -815,8 +925,8 @@ class Dashboard extends React.Component {
 
     printEditGroup() {
         const show = this.state.showEditedGroup;
-        let succ = StringSelector.getString(this.state.language).cardAddSuc;
-        let err = StringSelector.getString(this.state.language).cardAddErr;
+        let succ = StringSelector.getString(this.state.language).cardEditSuc;
+        let err = StringSelector.getString(this.state.language).cardEditErr;
         return (
             <Alert show={show} variant={this.state.alertState} className="center-horz center-vert error fixed-top-easypass in-front">
                 <p className="center-horz center-vert center-text">
@@ -986,12 +1096,46 @@ class Dashboard extends React.Component {
         }
     }
 
-    handleSearch = (e) => {
+    handleSearchGroup(e) {
+        this.setState({
+            [e.target.id]: e.target.value
+        });
+        let input, filter, passwords, div, inp, inp2, txtValue, txtValue2;
+        input = e.target.value;
+
+        filter = input.toUpperCase();
+        passwords = document.getElementById("passwords");
+        //console.log("Passwords", passwords);
+        div = passwords.children;
+        for (let j = 0; j < div.length; j++) {
+            if (div[j].tagName === "DIV") {
+                //console.log(div[j]);
+                let editDiv = div[j].children;
+                for (let i = 0; i < editDiv.length; i++) {
+                    if ( editDiv[i].tagName === "DIV" ) {
+                        inp = editDiv[i].children[0].children[0];
+                        txtValue = inp.value;
+                        if (input.length === 0) {
+                            editDiv[i].style.display = "";
+                        } else {
+                            if (txtValue.toUpperCase().indexOf(filter) > -1){
+                                editDiv[i].style.display = "";
+                            } else {
+                                editDiv[i].style.display = "none";
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    handleSearch(e) {
         //console.log("Key Down:" + e.target.value);
         this.setState({
             [e.target.id]: e.target.value
         });
-        let input, filter, passwords, div, inp, txtValue;
+        let input, filter, passwords, div, inp, inp2, txtValue, txtValue2;
         input = e.target.value;
 
         filter = input.toUpperCase();
@@ -1006,11 +1150,13 @@ class Dashboard extends React.Component {
                     if ( editDiv[i].tagName === "DIV" ) {
 
                         inp = editDiv[i].children[0];
+                        inp2 = editDiv[i].children[1];
                         txtValue = inp.value;
+                        txtValue2 = inp2.value;
                         if (input.length === 0) {
                             editDiv[i].style.display = "";
                         } else {
-                            if (txtValue.toUpperCase().indexOf(filter) > -1) {
+                            if (txtValue.toUpperCase().indexOf(filter) > -1 || txtValue2.toUpperCase().indexOf(filter) > -1) {
                                 editDiv[i].style.display = "";
                             } else {
                                 editDiv[i].style.display = "none";
@@ -1325,26 +1471,40 @@ class Dashboard extends React.Component {
                             </div>
                         </Button>
                     }
-                    <Button className={fabPassClass} variant="danger" onClick={this.showAddPass}>
-                        <img
-                            src={AddPass}
-                            alt=""
-                            width="20"
-                            height="20"
-                            className="d-inline-block addIcon"
-                        />
-                        <div className={langText}>
-                            <span>{StringSelector.getString(this.state.language).addPass}</span>
-                        </div>
-                    </Button>
-
+                    { (this.state.tabselected === tabs.GROUPPASS && this.state.groupselected === "0") ?
+                        <Button className={fabPassClass + " passOut"} variant="danger" onClick={this.showAddPass}>
+                            <img
+                                src={AddPass}
+                                alt=""
+                                width="20"
+                                height="20"
+                                className="d-inline-block addIcon"
+                            />
+                            <div className={langText}>
+                                <span>{StringSelector.getString(this.state.language).addPass}</span>
+                            </div>
+                        </Button>
+                        :
+                        <Button className={fabPassClass} variant="danger" onClick={this.showAddPass}>
+                            <img
+                                src={AddPass}
+                                alt=""
+                                width="20"
+                                height="20"
+                                className="d-inline-block addIcon"
+                            />
+                            <div className={langText}>
+                                <span>{StringSelector.getString(this.state.language).addPass}</span>
+                            </div>
+                        </Button>
+                    }
                 </div>
                 <AddPassword callback={this}/>
                 <AddGroup callback={this}/>
                 <AddCategory callback={this}/>
                 <EditCategory callback={this}/>
                 <DeleteCategory callback={this}/>
-                <EditGroup callback={this} id={this.state.currGroupEditId} name={this.state.currGroupEditName} userGroupList={this.state.currGroupEditUserGroupList}/>
+                <EditGroup callback={this}/>
                 {this.printResetPassPopUp()}
                 {this.printCopy()}
                 {this.printUser()}

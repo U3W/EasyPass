@@ -18,7 +18,7 @@ import LoginAuth from "../../authentification/auth.login"
 import Alert from "react-bootstrap/Alert";
 import { connect } from 'react-redux';
 import {login, logout} from "../../action/auth.action";
-import {authConstants} from "../../authentification/auth.const.localstorage";
+import {authConstants} from "../../authentification/auth.const.sessionstorage";
 import Indicator from "../../network/network.indicator";
 import {saveCat, saveTab} from "../../action/dashboard.action";
 import tabs from "../dashboard/tabs/tab.enum";
