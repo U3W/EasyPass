@@ -158,6 +158,7 @@ export const strings = {
     addPass: "Passwort hinzufügen",
 
     addPassTitle: "Titel",
+    addPassGroup: "Gruppen Name",
     addPassUser: "Benutzername",
 
     addPassPass: "Passwort",

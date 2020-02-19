@@ -238,13 +238,13 @@ class Dashboard extends React.Component {
         if (cats[0] !== undefined) {
             for (let i = 0; i < cats.length; i++) {
                 let catId = cats[i]._id;
-                let catData = this.getCatData(catId, this.state.tabselected);
+                let catData = this.getCatData(catId, this.state.tabselected, this.state.groupselected);
                 // add callback to array
                 if (catData !== undefined) {
                     catData = this.addCallback(catData);
                     passwords[catId] = catData.map(singlePass => {
                         return (
-                            <PassLine key={singlePass._id+singlePass._rev} tag={singlePass.tags} id={singlePass._id}
+                            <PassLine key={singlePass._id+singlePass._rev} tag={singlePass.tags} id={singlePass._id} groupId={singlePass.groupId}
                                       cat={singlePass.catID} rev={singlePass._rev} user={singlePass.user}
                                       pass={singlePass.passwd} title={singlePass.title}
                                       url={singlePass.url} callback={singlePass.callback}
@@ -263,7 +263,7 @@ class Dashboard extends React.Component {
     renderLinesSonstige() {
         let passwords = {};
         let selectedTab = this.state.tabselected;
-        let catData = this.getCatData("0", this.state.tabselected);
+        let catData = this.getCatData("0", this.state.tabselected, this.state.groupselected);
 
         // add callback to array
         if (catData !== undefined && catData.length > 0) {
@@ -271,7 +271,7 @@ class Dashboard extends React.Component {
             passwords[0] = catData.map(singlePass => {
                 //if (singlePass.tabID === selectedTab) {
                     return (
-                        <PassLine key={singlePass._id+singlePass._rev} tag={singlePass.tags} id={singlePass._id}
+                        <PassLine key={singlePass._id+singlePass._rev} tag={singlePass.tags} id={singlePass._id} groupId={singlePass.groupId}
                                   cat={singlePass.catID} rev={singlePass._rev} user={singlePass.user}
                                   pass={singlePass.passwd} title={singlePass.title}
                                   url={singlePass.url} callback={singlePass.callback}
@@ -287,18 +287,14 @@ class Dashboard extends React.Component {
     }
 
 
-    deleteGroup( id, dashboard) {
+    deleteGroup( id, ref) {
         // change to group menu
         this.changeGroup("0");
-        let toDel = id;
-        if ( dashboard ) {
-            toDel = this.state.groupselected;
-        }
         // ToDo call Kacpers method
         this.setState({
             showDeleteGroup: true,
             alertState: "success",
-            currentGroupDelete: toDel
+            currentGroupDelete: id,
         });
         this.dismissCopy(dashboardAlerts.showDeleteGroup);
     }
@@ -313,8 +309,8 @@ class Dashboard extends React.Component {
         });
     }
 
-    triggerEditGroup( id, name, userGroupList) {
-        this.state.editCallback(id,name,userGroupList);
+    triggerEditGroup( id, ref, name, userGroupList) {
+        this.state.editCallback(id, ref,name,userGroupList);
         this.setState({
             showEditGroupPopUp: true,
         });
@@ -330,17 +326,22 @@ class Dashboard extends React.Component {
         });
     }
 
+    getSelectedGroupName() {
+        // ToDo Kacpers method
+        return "Temp Name";
+    }
+
     renderGroup() {
         let rend;
         // ToDo kacpers method
         const groups = [
-            {name: "Test1", userGroupList:["Aha", "huhu"], id:"1"},
-            {name: "Test2", userGroupList:["Aha", "huhu"], id:"2"},
-            {name: "Test3", userGroupList:["Aha", "huhu"], id:"3"},
-            {name: "Test4", userGroupList:["Aha", "huhu"], id:"4"},
-            {name: "Test5", userGroupList:["Aha", "huhu"], id:"5"},
-            {name: "Test6", userGroupList:["Aha", "huhu"], id:"6"},
-            {name: "Test7", userGroupList:["Aha", "huhu"], id:"7"},
+            {name: "Test1", userGroupList:["Aha", "huhu", "haha", "hihi", "huuuuuh", "haskdad"], id:"1", ref:"1"},
+            {name: "Test2", userGroupList:["Aha", "huhu", "lasdald", "akhakjsd"], id:"2", ref:"2"},
+            {name: "Test3", userGroupList:["Aha", "huhu", "asdads"], id:"3", ref:"3"},
+            {name: "Test4", userGroupList:["Aha", "huhu", "asdsada"], id:"4", ref:"4"},
+            {name: "Test5", userGroupList:["Aha", "huhu"], id:"5", ref:"5"},
+            {name: "Test6", userGroupList:["Aha", "huhu"], id:"6", ref:"6"},
+            {name: "Test7", userGroupList:["Aha", "huhu"], id:"7", ref:"7"},
         ];
         if ( this.state.groupselected === "0") {
             // Group menu
@@ -356,7 +357,7 @@ class Dashboard extends React.Component {
                     i++;
                     return (
                         <Col key={i} xs={12} sm={6} md={4}>
-                            <GroupCard callback={this} name={singleGroup.name} userGroupList={singleGroup.userGroupList} id={singleGroup.id}/>
+                            <GroupCard callback={this} name={singleGroup.name} userGroupList={singleGroup.userGroupList} _id={singleGroup.id} _ref={singleGroup.ref}/>
                         </Col>
                     );
                 });
@@ -376,7 +377,6 @@ class Dashboard extends React.Component {
             // Single Group
             let singleInd = -1;
             for ( let i = 0; i < groups.length; i++ ) {
-                console.log("Aha", groups[i].id, this.state.groupselected);
                 if ( groups[i].id === this.state.groupselected ) {
                     singleInd = i;
                     break;
@@ -384,7 +384,7 @@ class Dashboard extends React.Component {
             }
             rend = (
                 <>
-                    <SingleGroup callback={this} name={groups[singleInd].name} userGroupList={groups[singleInd].userGroupList} id={groups[singleInd].id}/>
+                    <SingleGroup callback={this} name={groups[singleInd].name} userGroupList={groups[singleInd].userGroupList} id={groups[singleInd]._id} ref={groups[singleInd]._ref}/>
                 </>
             );
         }
@@ -461,7 +461,6 @@ class Dashboard extends React.Component {
             if ( groupErrTyp === 1 ) {
                 err = StringSelector.getString(this.state.language).addGroupUserAlready;
             }
-            console.log("Aha, returning", err, groupErrTyp);
             return (
                 <p className="text-danger fixErrorMsg">{err}</p>
             );
@@ -473,23 +472,22 @@ class Dashboard extends React.Component {
     }
 
     renderGroupCat() {
-        // ToDo implements group cat render
         let cats = this.getCatsForGroup();
-        console.log("AhA", cats);
-        let passwordsWithCats = this.renderLinesGroup(cats);
-        let passwordsWithout = this.renderLinesGroupSonstige();
+        let passwordsWithCats = this.renderLines(cats);
+        let passwordsWithout = this.renderLinesSonstige();
 
         let renderWithCats = "";
         let renderWithout = "";
 
         let catselected = this.state.catselected;
+        let groupselected = this.state.groupselected;
         let language = this.state.language;
 
         let nothingAdded = "";
         let i = -1;
         if (passwordsWithCats !== undefined) {
             renderWithCats = cats.map(function (cat) {
-                if ( cat._id === catselected || catselected === "0") {
+                if ( cat.groupId === groupselected && cat._id === catselected || catselected === "0") {
                     i++;
                     return (
                         <div key={i}>
@@ -519,14 +517,12 @@ class Dashboard extends React.Component {
 
             });
         }
-        else if (passwordsWithout === undefined) {
+        else if (passwordsWithout === undefined && cats.length === 0) {
             // If there are no cats and pass
             nothingAdded = StringSelector.getString(this.state.language).noCatsNoPass;
             // ToDo vielleicht noch eine schönere Lösung finden
             if ( this.state.catselected !== "0" ) {
-                this.setState({
-                    catselected: "0",
-                });
+                this.changeCat("0")
             }
         }
 
@@ -561,13 +557,6 @@ class Dashboard extends React.Component {
         );
     }
 
-    renderLinesGroup( cats ) {
-
-    }
-
-    renderLinesGroupSonstige() {
-
-    }
 
     renderCat() {
         let cats = this.getCats();
@@ -1273,12 +1262,16 @@ class Dashboard extends React.Component {
             return StringSelector.getString(this.state.language).catsAllCat
         }
         let cats = this.getCats();
+        if ( this.state.tabselected === tabs.GROUPPASS ){
+            cats = this.getCatsForGroup();
+        }
         for ( let i = 0; i < cats.length; i++ )
         {
             if ( cats[i]._id === selected ) {
                 return cats[i].name;
             }
         }
+
     }
 
     generateKeyfile() {

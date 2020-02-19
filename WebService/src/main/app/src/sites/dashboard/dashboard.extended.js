@@ -94,7 +94,7 @@ export function workerCall( e ) {
 /**
  * Saves a edited group the group
  */
-export function editGroup( id, name, userGroupList) {
+export function editGroup( id, ref, name, userGroupList) {
     // ToDO @Kacper
     // needs to be put in workerCall
     this.setState({
@@ -122,7 +122,7 @@ export function addGroup(name, userGroupList) {
  * Adds a new password entry.
  */
 export function addPass(user, passwd, url, title, tags, catID, groupID) {
-    if ( groupID !== null ) {
+    if ( groupID !== undefined ) {
         // add password to group
         // ToDO @Kacper
     }
@@ -138,7 +138,8 @@ export function addPass(user, passwd, url, title, tags, catID, groupID) {
 /**
  * Updates a password entry.
  */
-export function saveEdit(id, rev, userNew, passwdNew, urlNew, titleNew, tagsNew, catNew) {
+export function saveEdit(id, rev, groupId, userNew, passwdNew, urlNew, titleNew, tagsNew, catNew) {
+    // if groupId === null => priv pass
     const tabID = this.state.tabselected;
     console.log("saveEdit " + id + ":" + rev);
     console.log("saveEdit " + catNew);

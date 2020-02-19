@@ -76,6 +76,13 @@ body {
         flex: 0 0 100%;
         max-width: 100%;
         height: calc(100vh - 197px);
+        padding-left: 5px;
+        padding-right: 5px;
+    }
+
+    .fixContainer {
+        padding-left: 10px;
+        padding-right: 10px;
     }
 
     .expanded {
@@ -494,4 +501,14 @@ userRemove {
 }
 .groupPadding {
     padding-top: 0.5em;
+}
+
+/* Single Group CSS */
+.doubleHrTop {
+    margin-bottom: 0.1rem !important;
+    margin-top: 0 !important;
+}
+
+.doubleHrBottom {
+    margin-top: 0.1rem !important
 }

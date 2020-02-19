@@ -388,7 +388,7 @@ export default class AddPassword extends React.Component {
         if ( this.state.user.length > 0 && this.state.title.length > 0 && this.state.pass.length > 0) {
             if ( this.props.callback.state.tabselected === tabs.PRIVPASS ) {
                 this.props.callback.addPass(this.state.user, this.state.pass, this.state.url, this.state.title,
-                    this.state.tag, this.state.catID, null);
+                    this.state.tag, this.state.catID, undefined);
             }
             else {
                 this.props.callback.addPass(this.state.user, this.state.pass, this.state.url, this.state.title,
@@ -426,6 +426,17 @@ export default class AddPassword extends React.Component {
                     </Modal.Header>
                     <Modal.Body className="ep-modal-body">
                         <Card.Body>
+                            { this.props.callback.state.tabselected === tabs.GROUPPASS &&
+                                <>
+                                    <InputGroup size="sm" className="mb-3">
+                                        <InputGroup.Prepend>
+                                            <InputGroup.Text id="inputGroup-sizing-sm">{StringSelector.getString(this.props.callback.state.language).addPassGroup}</InputGroup.Text>
+                                        </InputGroup.Prepend>
+                                        <FormControl autoComplete="off" id="title" aria-label="Large" aria-describedby="inputGroup-sizing-sm" value={this.props.callback.getSelectedGroupName()} disabled={true}/>
+                                    </InputGroup>
+                                    <hr/>
+                                </>
+                            }
                             <InputGroup size="lg" className="mb-3">
                                 <InputGroup.Prepend>
                                     <InputGroup.Text id="inputGroup-sizing-lg">{StringSelector.getString(this.props.callback.state.language).addPassTitle}</InputGroup.Text>

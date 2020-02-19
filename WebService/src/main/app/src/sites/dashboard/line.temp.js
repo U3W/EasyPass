@@ -54,6 +54,7 @@ export default class PassLine extends React.Component {
             showCopyAlert: false,
             edit: false,
             editRequest: false,
+            groupId: this.props.groupId,
             id: this.props.id,
             rev: this.props.rev,
             passwordNew: undefined,
@@ -357,7 +358,7 @@ export default class PassLine extends React.Component {
     saveEdit() {
         this.setEdit(false, true);
         this.props.callback.saveEdit(
-            this.state.id, this.state.rev, this.state.userNew, this.state.passwordNew,
+            this.state.id, this.state.rev, this.state.groupId, this.state.userNew, this.state.passwordNew,
             this.state.urlNew, this.state.titleNew, this.state.tagNew, this.state.catIdNew);
     }
 
@@ -922,7 +923,6 @@ export default class PassLine extends React.Component {
                                         </Button>
                                         :
                                         <Button variant="dark" className="buttonSpaceInline " disabled={false} onClick={() => {
-                                            console.log("Aha", this.props, this.state);
                                             this.props.callback.copyPass(this.state.id, this.state.rev);
                                         }}>
                                             <img

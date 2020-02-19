@@ -74,8 +74,9 @@ class NavbarVerticalEP2 extends React.Component {
         this.props.callback.changeCat(changeTo);
     }
 
-    returnCatBase ( id, name) {
+    returnCatBase ( id, name, catselected) {
         let getActive = "nav-link-kat sec";
+        console.log("In return base", this.props.callback.state.catselected, id);
         if ( this.props.callback.state.catselected === id)
         {
             getActive = "nav-link-kat sec active";
@@ -92,8 +93,12 @@ class NavbarVerticalEP2 extends React.Component {
 
 
     getCat() {
+        let catselected = this.props.callback.state.catselected;
+        if ( this.props.callback.state.tabselected === tabs.GROUPPASS ) {
+            catselected = dashboardState.getCatGroup();
+        }
         let getActive = "nav-link-kat fitparentWidth";
-        if ( this.props.callback.state.catselected === "0")
+        if ( catselected === "0")
         {
             getActive = "nav-link-kat fitparentWidth active";
         }
@@ -105,6 +110,9 @@ class NavbarVerticalEP2 extends React.Component {
                     </li>);
         // single cat.
         let cats = this.props.callback.getCats();
+        if ( this.props.callback.state.tabselected === tabs.GROUPPASS ) {
+            cats = this.props.callback.getCatsForGroup(this.props.callback.state.groupselected);
+        }
         /*
         for ( let i = 0; i < cats.length; i++ )
         {
@@ -112,7 +120,7 @@ class NavbarVerticalEP2 extends React.Component {
         }*/
         // counter for the cats
         let finalCats = cats.map((item) =>
-            this.returnCatBase(item._id, item.name)
+            this.returnCatBase(item._id, item.name, catselected)
         );
         // loop with onClick={() => this.catChange(i)}> --> i++
         return (

@@ -140,7 +140,7 @@ export const strings = {
 
     // Add Password
     addPass: "Add password",
-
+    addPassGroup: "Group name",
     addPassTitle: "Title",
     addPassUser: "Username",
 

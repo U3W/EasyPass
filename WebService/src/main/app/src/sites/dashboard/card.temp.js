@@ -26,7 +26,8 @@ export default class GroupCard extends React.Component {
         this.state = {
             name: this.props.name,
             userGroupList: this.props.userGroupList,
-            id: this.props.id,
+            id: this.props._id,
+            ref: this.props._ref,
         };
 
     }
@@ -55,7 +56,7 @@ export default class GroupCard extends React.Component {
                                             </Tooltip>
                                         }
                                     >
-                                        <Button variant="dark" className="groupButton" onClick={() => this.props.callback.deleteGroup(this.state.id, false)}>
+                                        <Button variant="dark" className="groupButton" onClick={() => this.props.callback.deleteGroup(this.state.id, this.state.ref, false)}>
                                             <img
                                                 src={DeleteIcon}
                                                 alt=""
@@ -76,7 +77,7 @@ export default class GroupCard extends React.Component {
                                             </Tooltip>
                                         }
                                     >
-                                        <Button variant="dark" className="groupButton" onClick={() => this.props.callback.triggerEditGroup( this.state.id, this.state.name, this.state.userGroupList)}>
+                                        <Button variant="dark" className="groupButton" onClick={() => this.props.callback.triggerEditGroup( this.state.id, this.state.ref, this.state.name, this.state.userGroupList)}>
                                             <img
                                                 src={EditIcon}
                                                 alt=""

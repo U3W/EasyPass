@@ -17,6 +17,7 @@ export default class EditGroup extends React.Component {
         super(props);
         this.state = {
             id: "-1",
+            ref: "-1",
             name: "",
 
             // visibility
@@ -40,10 +41,10 @@ export default class EditGroup extends React.Component {
         this.props.callback.setEditCallback(this.setEditValues.bind(this))
     }
 
-    setEditValues( id, name, userGroupList) {
-        console.log("Aha", id, name, userGroupList);
+    setEditValues( id, ref, name, userGroupList) {
         this.setState({
             id: id,
+            ref: ref,
             name: name,
 
             // visibility
@@ -64,6 +65,7 @@ export default class EditGroup extends React.Component {
     resetState() {
         this.setState({
             id: "-1",
+            ref: "-1",
             name: "",
 
             // visibility
@@ -83,6 +85,7 @@ export default class EditGroup extends React.Component {
         });
         if ( e.target.id === "userGroupAdd" && e.target.length > 0 ) {
             this.setState({
+                userGroupAddError: false,
                 popUpGroupError: false,
             })
         }
@@ -143,7 +146,7 @@ export default class EditGroup extends React.Component {
 
 
     saveEdit() {
-        this.props.callback.editGroup(this.state.id, this.state.name, this.deepCopy(this.state.userGroupList));
+        this.props.callback.editGroup(this.state.id, this.state.ref, this.state.name, this.deepCopy(this.state.userGroupList));
         this.props.callback.disableEditGroup();
         this.resetState();
     }
@@ -169,7 +172,7 @@ export default class EditGroup extends React.Component {
                                 <InputGroup.Prepend>
                                     <InputGroup.Text id="inputGroup-sizing-sm">{StringSelector.getString(this.props.callback.state.language).username}</InputGroup.Text>
                                 </InputGroup.Prepend>
-                                { this.state.popUpGroupError ?
+                                { this.state.popUpGroupError || this.state.userGroupAddError ?
                                     <Form.Control autoComplete="off" id="userGroupAdd" className="is-invalid" aria-label="Small" aria-describedby="inputGroup-sizing-sm" value={this.state.userGroupAdd} placeholder={StringSelector.getString(this.props.callback.state.language).addGroupUserInpPlaceholder} onChange={this.changeInput}/>
                                     :
                                     <Form.Control autoComplete="off" id="userGroupAdd" aria-label="Small" aria-describedby="inputGroup-sizing-sm" value={this.state.userGroupAdd} placeholder={StringSelector.getString(this.props.callback.state.language).addGroupUserInpPlaceholder} onChange={this.changeInput}/>

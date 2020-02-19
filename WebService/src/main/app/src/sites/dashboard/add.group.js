@@ -60,6 +60,7 @@ export default class AddGroup extends React.Component {
         if ( e.target.id === "userGroupAdd" && e.target.value.length > 0 ) {
             this.setState({
                 userGroupAddError: false,
+                popUpGroupError: false,
             })
         }
     }
@@ -154,7 +155,7 @@ export default class AddGroup extends React.Component {
                                 <InputGroup.Prepend>
                                     <InputGroup.Text id="inputGroup-sizing-sm">{StringSelector.getString(this.props.callback.state.language).username}</InputGroup.Text>
                                 </InputGroup.Prepend>
-                                { this.state.popUpGroupError ?
+                                { this.state.popUpGroupError || this.state.userGroupAddError ?
                                     <Form.Control autoComplete="off" id="userGroupAdd" className="is-invalid" aria-label="Small" aria-describedby="inputGroup-sizing-sm" value={this.state.userGroupAdd} placeholder={StringSelector.getString(this.props.callback.state.language).addGroupUserInpPlaceholder} onChange={this.changeInput}/>
                                     :
                                     <Form.Control autoComplete="off" id="userGroupAdd" aria-label="Small" aria-describedby="inputGroup-sizing-sm" value={this.state.userGroupAdd} placeholder={StringSelector.getString(this.props.callback.state.language).addGroupUserInpPlaceholder} onChange={this.changeInput}/>
