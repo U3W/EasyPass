@@ -9,6 +9,7 @@ import org.ektorp.*
 import org.springframework.security.core.*
 import org.springframework.security.core.authority.AuthorityUtils.*
 import org.springframework.web.bind.annotation.*
+import java.lang.Exception
 import java.util.*
 import javax.servlet.http.*
 import kotlin.collections.ArrayList
@@ -74,6 +75,15 @@ class UserRestController(private val couchDBConnectionProvider: CouchDBConnectio
         response.status = HttpServletResponse.SC_OK
     } catch (ex: AuthenticationException) {
         response.status = HttpServletResponse.SC_UNAUTHORIZED
+    }
+
+    @PostMapping("/my_keys")
+    fun getPubK(response: HttpServletResponse, authentication: Authentication): KeyPair? = try {
+        val hash = getUserHash(authentication)
+        KeyPair(userRepository.findOneByUid(hash!!).pubK, userRepository.findOneByUid(hash).privK)
+    } catch (ex: Exception) {
+        response.status = HttpServletResponse.SC_UNAUTHORIZED
+        null
     }
 
     /**

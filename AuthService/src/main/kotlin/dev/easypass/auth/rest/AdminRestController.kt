@@ -29,16 +29,6 @@ class AdminRestController(private val couchDBConnectionProvider: CouchDBConnecti
         couchDBConnectionProvider.deleteCouchDbDatabase(gid)
     }
 
-    @PostMapping("/{gid}/pubK")
-    fun getPubK(@PathVariable gid: String, response: HttpServletResponse): String {
-        try {
-            return groupRepository.findOneByGid(gid).pubK
-        } catch (ex: DbAccessException) {
-            response.sendError(HttpServletResponse.SC_CONFLICT, "Requested group not found!")
-        }
-        return ""
-    }
-
     @PostMapping("/{gid}/add_user")
     fun addUser(@PathVariable gid: String, response: HttpServletResponse) {
         //TODO
