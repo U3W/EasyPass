@@ -1,6 +1,7 @@
 package dev.easypass.auth.security.challenge
 
 import dev.easypass.auth.security.*
+import org.springframework.security.crypto.bcrypt.*
 import java.time.*
 import java.util.*
 
@@ -10,8 +11,9 @@ import java.util.*
  * @param properties: the application.properties as java bean
  */
 class InternalChallenge(private val encryptionLibrary: EncryptionLibrary, private val properties: Properties) {
-    private val decryptedChallenge: String = encryptionLibrary.generateAuthenticationChallenge()
+    private val bCryptPasswordEncoder = BCryptPasswordEncoder()
     private val timeCreated: LocalDateTime = LocalDateTime.now()
+    private var decryptedChallenge: String = ""
 
     /**
      * Checks if the passed [challenge] is the same as the [decryptedChallenge], also takes the timestamp into account
@@ -20,7 +22,7 @@ class InternalChallenge(private val encryptionLibrary: EncryptionLibrary, privat
      */
     fun checkChallenge(challenge: String): Boolean {
         if (isActive()) {
-            return this.decryptedChallenge == challenge
+            return bCryptPasswordEncoder.matches(challenge, this.decryptedChallenge)
         }
         return false
     }
@@ -31,7 +33,9 @@ class InternalChallenge(private val encryptionLibrary: EncryptionLibrary, privat
      * @return the encrypted challenge
      */
     fun getChallengeEncryptedByPubK(pubK: String): String {
-        return encryptionLibrary.encrypt(decryptedChallenge, pubK)
+        val challenge = encryptionLibrary.generateAuthenticationChallenge()
+        decryptedChallenge = bCryptPasswordEncoder.encode(challenge)
+        return encryptionLibrary.encrypt(challenge, pubK)
     }
 
     /**

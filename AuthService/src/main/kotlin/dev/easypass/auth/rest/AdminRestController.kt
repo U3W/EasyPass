@@ -24,10 +24,9 @@ class AdminRestController(private val couchDBConnectionProvider: CouchDBConnecti
      * @param authentication: an instance of the class [Authentication]
      */
     @PostMapping("/{gid}/remove")
-    fun removeGroup(@PathVariable gid: String, request: HttpServletRequest, authentication: Authentication) {
+    fun removeGroup(@PathVariable gid: String, authentication: Authentication) {
         groupRepository.removeAllByGid(gid)
         couchDBConnectionProvider.deleteCouchDbDatabase(gid)
-        request.logout()
     }
 
     @PostMapping("/{gid}/pubK")
