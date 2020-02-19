@@ -59,6 +59,21 @@ extern {
 
     #[wasm_bindgen(js_name = removeEventListenerWorker)]
     fn remove_message_listener(name: &str, closure: &Closure<dyn FnMut(MessageEvent)>);
+
+    /**
+    #[wasm_bindgen(js_name = addEventListenerWorker)]
+    fn add_online_listener(name: &str, closure: &Closure<dyn FnMut()>);
+
+    #[wasm_bindgen(js_name = addEventListenerWorker)]
+    fn add_offline_listener(name: &str, closure: &Closure<dyn FnMut()>);
+
+    #[wasm_bindgen(js_name = removeEventListenerWorker)]
+    fn remove_online_listener(name: &str, closure: &Closure<dyn FnMut()>);
+
+    #[wasm_bindgen(js_name = removeEventListenerWorker)]
+    fn remove_offline_listener(name: &str, closure: &Closure<dyn FnMut()>);*/
+    #[wasm_bindgen(js_name = addNetworkListener)]
+    fn add_network_listener(closure: &Closure<dyn FnMut()>);
 }
 
 /// Represents the Backend - logic functionalities - of the Web-App.

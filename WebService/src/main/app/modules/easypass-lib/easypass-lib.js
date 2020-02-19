@@ -90,11 +90,14 @@ const removeEventListenerWorker = (name, f) => {
 };
 
 /**
- * Check if application is online.
+ * Custom method to add a function as a network listener.
  * Used in WebAssembly code.
  */
-const isOnline = () => {
-    return navigator.onLine;
+const addNetworkListener = (f) => {
+    self.ononline = function() {
+        f();
+    };
+    self.onoffline = f;
 };
 
 let nodeMode = undefined;
@@ -105,6 +108,14 @@ const setNodeMode = (mode) => {
 
 const getNodeMode = () => {
     return nodeMode;
+};
+
+/**
+ * Check if application is online.
+ * Used in WebAssembly code.
+ */
+const isOnline = () => {
+    return navigator.onLine;
 };
 
 /**

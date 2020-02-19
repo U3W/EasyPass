@@ -2,7 +2,7 @@
 use crate::easypass::easypass::*;
 use crate::easypass::timeout::*;
 use crate::pouchdb::pouchdb::*;
-use crate::utils;
+use crate::{utils, add_message_listener, add_network_listener};
 
 use wasm_bindgen::prelude::*;
 use wasm_bindgen_futures::{spawn_local, future_to_promise};
@@ -26,6 +26,7 @@ extern crate rand;
 use rand::Rng;
 use wasm_bindgen::__rt::Ref;
 use wasm_bindgen::__rt::core::borrow::{BorrowMut, Borrow};
+use crate::easypass::worker_events::WorkerEvents;
 
 
 #[wasm_bindgen]
@@ -52,16 +53,16 @@ extern {
     fn get_node_mode() -> String;
 }
 
-
 /// Manages databases and performs CRUD-operations.
 pub struct Worker {
     private: Connection,
     service_status: RefCell<String>,
+    service_closure: RefCell<Option<Closure<dyn FnMut()>>>,
     database_url: RefCell<Option<String>>,
     category_cache: RefCell<HashMap<String, RecoverCategory>>,
     category_clear: RefCell<HashMap<u16, Timeout>>,
     password_cache: RefCell<HashMap<String, RecoverPassword>>,
-    password_clear: RefCell<HashMap<u16, Timeout>>
+    password_clear: RefCell<HashMap<u16, Timeout>>,
 }
 
 /// Holds one logical databases with references to the local and remote one.
@@ -86,7 +87,6 @@ pub struct Sync {
     change: Closure<dyn FnMut(JsValue)>,
     error: Closure<dyn FnMut(JsValue)>
 }
-
 
 impl Worker {
     /// Creates a new Worker that manages databases.
@@ -127,6 +127,7 @@ impl Worker {
         let worker = Rc::new(Worker {
             private,
             service_status: RefCell::new(String::from("offline")),
+            service_closure: RefCell::new(None),
             database_url: RefCell::new(None),
             category_cache: RefCell::new(HashMap::new()),
             category_clear: RefCell::new(HashMap::new()),
@@ -162,18 +163,9 @@ impl Worker {
         }
         Ok(JsValue::from(true))
     }
-    fn baum() -> Closure<dyn FnMut()> {
-        Closure::new(|| { spawn_local(async move {
-            log("Baum");
-            log("Baum Baum");
-        })})
-    }
 
     /// Starts live replication for private password entries.
     pub fn hearbeat(self: Rc<Worker>) {
-
-        let kek = Worker::baum();
-
         // With the reference to the Worker the functionality
         // for database updates can be defined
         let worker_moved_change = self.clone();
@@ -229,7 +221,6 @@ impl Worker {
             };
             // And add it to the Worker
             self.private.sync.replace(Some(sync));
-
         }
 
         /**
@@ -264,7 +255,11 @@ impl Worker {
             self.private.sync = Some(sync);
         }
         */
-
+        // TODO network
+        // Add network listener
+        let network_closure = WorkerEvents::network(self.clone());
+        add_network_listener(&network_closure);
+        self.service_closure.replace(Some(network_closure));
         // Fetch all current docs and send result to UI
         self.clone().all_docs_without_passwords();
     }
@@ -505,7 +500,6 @@ impl Worker {
                 log(&format!("C. Cache-len {:?}", &cache.len()));
             }, 7500));
     }
-
 
     pub async fn undo_delete_categories(self: Rc<Worker>, categories: JsValue) {
         // Convert JsValue to Array, that its truly is

@@ -3,6 +3,10 @@ importScripts("modules/pouchdb/dist/pouchdb.find.min.js");
 importScripts("modules/easypass-lib/dist/easypass-lib.js");
 import("../../rust/pkg").then(wasm => {
 
+    /**self.ononline = () => {
+      console.log("WORKER_UI: " + navigator.onLine);
+    };*/
+
     // Set node mode
     setNodeMode(process.env.NODE_ENV);
     const kek = async () => {

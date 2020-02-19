@@ -147,8 +147,8 @@ class App extends React.Component {
         //  Function makes always a re-render, even though the state has not changed
         //  This results in flickering of data in the dashboard!!
         // this.handleConnectionChange();
-        // window.addEventListener('online', this.handleConnectionChange);
-        // window.addEventListener('offline', this.handleConnectionChange);
+        window.addEventListener('online', this.handleConnectionChange);
+        window.addEventListener('offline', this.handleConnectionChange);
     }
 
     componentWillUnmount() {
@@ -192,7 +192,7 @@ class App extends React.Component {
     }
 
     handleConnectionChange = () => {
-        const condition = navigator.onLine ? 'online' : 'offline';
+        /**const condition = navigator.onLine ? 'online' : 'offline';
         if (condition === 'online') {
             const webPing = setInterval(
                 () => {
@@ -208,7 +208,8 @@ class App extends React.Component {
             return;
         }
 
-        return this.setState({ isDisconnected: true });
+        return this.setState({ isDisconnected: true });*/
+        console.log("UI_NETWORK: " + navigator.onLine);
     };
 
     getApp() {
