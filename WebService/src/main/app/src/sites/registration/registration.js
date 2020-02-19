@@ -854,7 +854,7 @@ class Registration extends React.Component {
                     <div className="gradientDivLogin">
                         <Container>
                             <Row className="size-hole-window">
-                                <Col xs={11} sm={10} md={10} lg={6} className="center-vert center-horz">
+                                <Col xs={10} sm={10} md={8} lg={6} className="center-vert center-horz">
                                     <Card className="card-login login">
                                         <div className="close closeButt" onClick={this.exit}>
                                             <span aria-hidden="true">×</span>

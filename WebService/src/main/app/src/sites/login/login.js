@@ -281,7 +281,9 @@ class Login extends React.Component {
                                 <Row className="size-hole-window">
                                     <Col xs={12} sm={8} md={6} lg={5} className="center-vert center-horz">
                                         <Card className="card-login login">
-                                            <Card.Img variant="top" src={Logo} />
+                                            <Card.Header>
+                                                <h2>Login</h2>
+                                            </Card.Header>
                                             <Card.Body>
                                                 <Form autoComplete="off">
                                                     {this.getInputUsername()}

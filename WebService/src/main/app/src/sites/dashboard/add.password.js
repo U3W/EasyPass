@@ -13,6 +13,8 @@ import RemoveTag from "../../img/icons/password_add_remove_user.svg";
 import GeneratePass from "./generatepass";
 import StringSelector from "../../strings/stings";
 import tabs from "./tabs/tab.enum";
+import ShowIcon from "../../img/icons/password_show_white.svg";
+import HideIcon from "../../img/icons/password_hide_white.svg";
 
 export default class AddPassword extends React.Component {
 
@@ -23,6 +25,7 @@ export default class AddPassword extends React.Component {
             title: "",
             user: "",
             pass: "",
+            showPass: false,
             url: "",
             tagAdded: false,
             tag: [],
@@ -89,6 +92,7 @@ export default class AddPassword extends React.Component {
             title: "",
             user: "",
             pass: "",
+            showPass: false,
             url: "",
             tagAdded: false,
             tag: [],
@@ -416,8 +420,18 @@ export default class AddPassword extends React.Component {
         }
     }
 
+    setShowPass() {
+        this.setState({
+            showPass: !this.state.showPass,
+        });
+    }
+
 
     render() {
+        let error = "";
+        if ( this.state.missingPass ) {
+            error = "text-danger is-invalid";
+        }
         return (
             <>
                 <Modal onKeyDown={this.handleKeyevent} show={this.props.callback.getPassAddShow()} onHide={this.dismissPopUp} className="ep-modal-dialog addPassPopUp">
@@ -463,11 +477,33 @@ export default class AddPassword extends React.Component {
                                 <InputGroup.Prepend>
                                     <InputGroup.Text id="inputGroup-sizing-sm">{StringSelector.getString(this.props.callback.state.language).addPassPass}</InputGroup.Text>
                                 </InputGroup.Prepend>
-                                { this.state.missingPass ?
-                                    <FormControl className="text-danger is-invalid" autoComplete="off" id="password" aria-label="Small" aria-describedby="inputGroup-sizing-sm" value={this.state.pass} onChange={this.changeInput}/>
+                                { this.state.showPass ?
+                                    <FormControl className={error} type="text" autoComplete="off" id="password" aria-label="Small" aria-describedby="inputGroup-sizing-sm" value={this.state.pass} onChange={this.changeInput}/>
                                     :
-                                    <FormControl autoComplete="off" id="password" aria-label="Small" aria-describedby="inputGroup-sizing-sm" value={this.state.pass} onChange={this.changeInput}/>
+                                    <FormControl className={error} type="password" autoComplete="off" id="password" aria-label="Small" aria-describedby="inputGroup-sizing-sm" value={this.state.pass} onChange={this.changeInput}/>
                                 }
+                                {this.state.showPass ?
+                                    <Button variant="dark" className="notRound buttonSpaceInline" onClick={() => this.setShowPass()}>
+                                        <img
+                                            src={HideIcon}
+                                            alt=""
+                                            width="14"
+                                            height="14"
+                                            className="d-inline-block"
+                                        />
+                                    </Button>
+                                    :
+                                    <Button variant="dark" className="notRound buttonSpaceInline" onClick={() => this.setShowPass()}>
+                                        <img
+                                            src={ShowIcon}
+                                            alt=""
+                                            width="14"
+                                            height="14"
+                                            className="d-inline-block"
+                                        />
+                                    </Button>
+                                }
+                                <hr className="vertical-button-sep"/>
                                 <Button variant="dark" className="buttonSpaceInline" onClick={() => this.openGeneratePass()}>
                                     <img
                                         src={GeneratePassIcon}

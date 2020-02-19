@@ -42,7 +42,7 @@ class Masterpassword extends React.Component {
             inpFile: null,
             fileName: "",
 
-                inpRadio: "" + MasterpasswordState.getRadioState(),
+            inpRadio: "" + MasterpasswordState.getRadioState(),
             error: false,
             missingMasterpassword: false,
             missingFile: false,
