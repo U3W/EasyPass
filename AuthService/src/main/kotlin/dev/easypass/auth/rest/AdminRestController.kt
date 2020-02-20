@@ -7,7 +7,9 @@ import dev.easypass.auth.security.mapper.*
 import org.ektorp.*
 import org.springframework.security.core.*
 import org.springframework.web.bind.annotation.*
+import java.util.*
 import javax.servlet.http.*
+import kotlin.collections.ArrayList
 
 /**
  * This [RestController] provides the Rest-Api for the admin features
@@ -30,7 +32,12 @@ class AdminRestController(private val couchDBConnectionProvider: CouchDBConnecti
     }
 
     @PostMapping("/{gid}/add_user")
-    fun addUser(@PathVariable gid: String, response: HttpServletResponse) {
+    fun addUser(@PathVariable gid: String, @RequestBody data: Map<String, Any>, response: HttpServletResponse) {
+        data["uid"]
+    }
+
+    @PostMapping("/{gid}/add_admin")
+    fun addAdmin(@PathVariable gid: String, @RequestBody data: Map<String, Any>, response: HttpServletResponse) {
         //TODO
     }
 
