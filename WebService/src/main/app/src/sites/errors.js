@@ -3,7 +3,7 @@ import NoMatchPic from "../img/PageNotFound.svg"
 
  export const NoMatch = porps => {
     return(
-        <div className="fitparentWidth fitparentHeight">
+        <div className="fixHeight">
             <img
                 alt=""
                 src={NoMatchPic}

@@ -9,14 +9,18 @@
 
 .noMatchPic {
     position: absolute;
-    top: 25%;
-    bottom: 25%;
+    top: 5%;
+    bottom: 5%;
+    left: 5%;
+    right: 5%;
+    height: 80%;
+    width: 80%;
 }
 .noMatchGrad {
     position: absolute;
     z-index: -1;
-    height: 100%;
-    width: 100%;
+    height: 110%;
+    width: 110%;
     background: linear-gradient(to right, rgba(157, 212, 241, 0.7), rgba(157, 212, 241, 0.2));
     opacity: 1.0;
 }
