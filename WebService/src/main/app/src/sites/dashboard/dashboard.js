@@ -206,7 +206,6 @@ class Dashboard extends React.Component {
         this.getCatsFromTab = dashboardEntries.getCatsFromTab.bind(this);
         this.getCatsFromGroup = dashboardEntries.getCatsFromGroup.bind(this);
         this.getCatData = dashboardEntries.getCatData.bind(this);
-
     }
 
     componentDidMount() {
@@ -1435,7 +1434,11 @@ class Dashboard extends React.Component {
                             </Col>
                         }
                         <hr/>
-                        <IndicatorSide className={indicatorClass} />
+                        { this.state.width > 425 ?
+                            <IndicatorSide className={indicatorClass} ref={this.props.callback.ref}/>
+                            :
+                            <IndicatorSide className={indicatorClass}/>
+                        }
                     </Row>
                     { (this.state.tabselected === tabs.GROUPPASS && this.state.groupselected === "0") ?
                         <Button className={fabGroupClass} variant="danger" onClick={this.showAddGroup}>

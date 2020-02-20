@@ -82,7 +82,6 @@ class Login extends React.Component {
 
     handleFile( e ) {
         let file = e.target.files[0];
-        console.log("Hold up", file);
         if ( file !== undefined ) {
             this.setState({
                 missingFile: false,
@@ -92,7 +91,6 @@ class Login extends React.Component {
                     fileName: file.name,
                     inpFile: file,
                 });
-                console.log("True");
             }
             else {
                 this.setState({
@@ -100,7 +98,6 @@ class Login extends React.Component {
                     inpFile: null,
                     missingFile: true,
                 });
-                console.log("False");
             }
         }
     }
@@ -528,6 +525,7 @@ class Login extends React.Component {
 
                                                     {this.getInputAuthn()}
                                                     {this.getInputFile()}
+                                                    <hr/>
                                                     <Form.Group>
                                                         { this.state.saveUserState ?
                                                             <Form.Check type="checkbox" id="inpKeepLoggedIn" checked={true} onChange={() => this.setSaveUser(false)} label={StringSelector.getString(this.state.language).rememberUsername} />
@@ -547,7 +545,7 @@ class Login extends React.Component {
                                         {this.printError()}
                                         {this.printRegistered()}
                                     </div>
-                                    <Indicator />
+                                    <Indicator ref={this.props.callback.ref}/>
                                 </Row>
                             </Container>
                         </div>

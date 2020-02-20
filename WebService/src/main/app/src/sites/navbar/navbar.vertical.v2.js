@@ -76,7 +76,6 @@ class NavbarVerticalEP2 extends React.Component {
 
     returnCatBase ( id, name, catselected) {
         let getActive = "nav-link-kat sec";
-        console.log("In return base", this.props.callback.state.catselected, id);
         if ( this.props.callback.state.catselected === id)
         {
             getActive = "nav-link-kat sec active";
@@ -261,8 +260,12 @@ class NavbarVerticalEP2 extends React.Component {
                     </div>
                 </nav>
                 {/* Bottom Navbar */}
+                { this.props.callback.state.width > 425 ?
+                    <IndicatorBot width={this.props.callback.state.width}/>
+                    :
+                    <IndicatorBot ref={this.props.callback.props.callback.ref} width={this.props.callback.state.width}/>
+                }
                 <nav id="navbar-bot" className="bottom navbar fixed-bottom navbar-expand-sm navbar-dark bg-dark">
-                    <IndicatorBot />
                     <Row>
                         {tabselected === tabs.PRIVPASS ?
                             (<Col id="privPassword" className="active" align="center" onClick={() => this.tabChange(tabs.PRIVPASS)}>

@@ -38,7 +38,6 @@ const saveReducer = ( state, action) => {
             localStorage.setItem(loginConst.saveUsernameState, action.user);
             return {};
         case SAVE_USERNAME:
-            console.log("Aha", action.username);
             localStorage.setItem(loginConst.saveUsername, action.username);
             return {};
         case SAVE_GROUP:

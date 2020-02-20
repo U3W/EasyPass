@@ -158,7 +158,6 @@ export default class PassLine extends React.Component {
         });*/
         if ( this.state.urlNew.length > 0 ) {
             new Ping(this.correctUrl(this.state.urlNew)  + "favicon.ico", 400, ( status, e ) => {
-                console.log("Status", status, e);
                 if ( status !== "timeout" ) {
                     this.setState({
                         imgSucc: true,
@@ -182,7 +181,6 @@ export default class PassLine extends React.Component {
                                 imgNew: new Image().src = NotAvailable,
                             });
                         }
-                        console.log("Status 2", status, e);
                         if ( e !== undefined && e.type === "error") {
                             this.setState({
                                 imgSucc: true,
@@ -729,7 +727,7 @@ export default class PassLine extends React.Component {
         );
         /* <input id="..." type="hidden" value="..." />: Must be at the first position, otherwise the search function wont find it -> exception */
         return (
-            <Card className="pass-card">
+            <Card className="pass-card" id={this.state.id}>
                 <input id="searchInput" type="hidden" value={this.props.title}/>
                 <input id="searchInput2" type="hidden" value={this.props.user}/>
                 <Accordion.Toggle as={Card.Header} className="clickable center-vert" eventKey={this.props.id}>
@@ -853,7 +851,6 @@ export default class PassLine extends React.Component {
                 <Accordion.Collapse eventKey={this.props.id}>
                     <>
                         <Card.Body onChange={(e) => {
-                            console.log("COLLAPSE: ", e);
                         }}>
                             <Card.Title>
                             {this.state.edit === true ? // Title
