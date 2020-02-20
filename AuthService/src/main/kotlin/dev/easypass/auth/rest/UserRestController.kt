@@ -78,11 +78,19 @@ class UserRestController(private val couchDBConnectionProvider: CouchDBConnectio
     }
 
     @PostMapping("/my_keys")
-    fun getPubK(response: HttpServletResponse, authentication: Authentication): KeyPair? = try {
+    fun getOwnPubK(response: HttpServletResponse, authentication: Authentication): KeyPair? = try {
         val hash = getUserHash(authentication)
         KeyPair(userRepository.findOneByUid(hash!!).pubK, userRepository.findOneByUid(hash).privK)
     } catch (ex: Exception) {
-        response.status = HttpServletResponse.SC_UNAUTHORIZED
+        response.status = HttpServletResponse.SC_CONFLICT
+        null
+    }
+
+    @PostMapping("/pubkey")
+    fun getPubK(uid: String, response: HttpServletResponse, authentication: Authentication): String? = try {
+        userRepository.findOneByUid(uid).pubK
+    } catch (ex: Exception) {
+        response.status = HttpServletResponse.SC_CONFLICT
         null
     }
 
