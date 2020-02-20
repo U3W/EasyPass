@@ -519,7 +519,6 @@ class Dashboard extends React.Component {
         else if (passwordsWithout === undefined && cats.length === 0) {
             // If there are no cats and pass
             nothingAdded = StringSelector.getString(this.state.language).noCatsNoPass;
-            // ToDo vielleicht noch eine schönere Lösung finden
             if ( this.state.catselected !== "0" ) {
                 this.changeCat("0")
             }
@@ -606,7 +605,6 @@ class Dashboard extends React.Component {
         else if (passwordsWithout === undefined) {
             // If there are no cats and pass
             nothingAdded = StringSelector.getString(this.state.language).noCatsNoPass;
-            // ToDo vielleicht noch eine schönere Lösung finden
             if ( this.state.catselected !== "0" ) {
                 this.setState({
                     catselected: "0",

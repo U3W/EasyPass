@@ -245,7 +245,6 @@ class App extends React.Component {
                 </div>
             );
         } else {
-            // TODO @Seb Please make a cool loading page!
             let styleType = styles.logo;
             let styleCloud1 = styles.cloud1LeftIn;
             let styleCloud2 = styles.cloud2RightIn;

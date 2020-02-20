@@ -406,7 +406,6 @@ class Login extends React.Component {
         document.getElementById("fakeFileInput").click();
     }
 
-    // TODO input für das Keyfile schreiben
     getInputFile() {
         if ( this.state.inpRadio === "file" )
         {
