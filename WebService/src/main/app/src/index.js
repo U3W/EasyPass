@@ -10,10 +10,9 @@ import {
 import history from './routing/history';
 
 import "./index.css";
+import "../src/sites/all.css"
 import {NoMatch} from "./sites/errors";
 import Login from "./sites/login/login";
-import Masterpassword from "./sites/verify/masterpassword";
-import Registration from "./sites/registration/registration";
 import 'bootstrap/dist/css/bootstrap.min.css';
 import {ProtectedRoute} from "./routing/ProtectedRoute"
 import {createStore, applyMiddleware} from "redux";
@@ -22,10 +21,8 @@ import {Provider} from "react-redux"
 import thunk from "redux-thunk";
 import Dashboard from "./sites/dashboard/dashboard";
 import * as serviceWorker from "./service-worker/sw-handler";
-import * as that from "./sites/dashboard/dashboard.extended";
 
 
-import { ReactComponent as LogoComp } from './img/logo/Logo_Single_Big.svg';
 import Logo from './img/logo/Logo_Single_Big.svg'
 import Cloud1 from './img/logo/Cloud1.svg'
 import Cloud2 from './img/logo/Cloud2.svg'
@@ -220,10 +217,6 @@ class App extends React.Component {
                 <div className="App">
                     <Switch>
                         <Route exact path="/" component={() => <Login worker={this.state.worker}/>}/>
-                        <Route exact path="/registration"
-                               component={() => <Registration worker={this.state.worker}/>}/>
-                        <ProtectedRoute exact path="/verify" component={() =>
-                            <Masterpassword worker={this.state.worker} />} netState="online" type="auth"/>
                         {/*<ProtectedRoute exact path="/dashboard" component={() =>
                             <Dashboard worker={this.state.worker} workerInitialized={this.state.workerInitialized}
                                 workerIsInitialized={this.workerIsInitialized}/>}
@@ -231,7 +224,7 @@ class App extends React.Component {
                         {/*<ProtectedRoute exact path="/dashboard" render={() =>
                             <h1>Hey</h1>}/>*/}
                         <ProtectedRoute exact path="/dashboard" component={() =>
-                            <Dashboard worker={this.state.worker} />} netState="online" type="verify"/>
+                            <Dashboard worker={this.state.worker} />} type="auth"/>
                         <Route path="*" component={NoMatch}/>
                     </Switch>
                 </div>

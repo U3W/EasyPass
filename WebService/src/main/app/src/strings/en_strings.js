@@ -6,12 +6,12 @@ export const strings = {
     password: "Password",
     passwordPlaceholder: "Please enter password",
 
-    keepLoggedIn: "Keep logged in",
+    rememberUsername: "Save username",
 
     loginButton: "Login",
 
     wrongLoginHeader: "Login failed!",
-    wrongLogin: "Username or password is incorrect!",
+    wrongLogin: "Username, password, masterpassword or 2-FA is incorrect!",
 
     registrationButton: "No account yet? Register here",
     registrationAlertSucc: "Account created!",

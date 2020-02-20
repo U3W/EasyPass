@@ -27,8 +27,4 @@ export const mlogout = () => {
     }
 };
 
-export const save2FA = (twoFactorOpt) => ({
-    type: SAVE_MAUTH_STATE,
-    twoFactorOpt,
-});
 

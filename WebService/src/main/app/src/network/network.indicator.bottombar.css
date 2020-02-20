@@ -48,7 +48,14 @@
     color: #888888;
     bottom: 65px;
     left: 0;
+    transition: all 0.3s ease-in-out;
 }
+
+.offline-ui-bot-out {
+    z-index: 0;
+    bottom: -20px;
+}
+
 /* line 19, ../sass/offline-theme-chrome-indicator.sass */
 .offline-ui-bot .offline-ui-bot-content {
     padding-left: 16px;

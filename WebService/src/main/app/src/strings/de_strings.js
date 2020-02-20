@@ -19,12 +19,12 @@ export const strings = {
     password: "Passwort",
     passwordPlaceholder: "Bitte Ihr Passwort eingeben",
 
-    keepLoggedIn: "Angemeldet bleiben",
+    rememberUsername: "Benutzernamen merken",
 
     loginButton: "Anmelden",
 
     wrongLoginHeader: "Anmeldung fehgeschlagen!",
-    wrongLogin: "Username oder Passwort sind falsch!",
+    wrongLogin: "Username, Passwort, Masterpasswort oder 2-FA sind falsch!",
 
     registrationButton: "Noch kein Account? Hier registrieren",
     registrationAlertSucc: "Account hinzugefügt!",
