@@ -115,6 +115,7 @@ class Login extends React.Component {
 
     componentDidMount() {
         this.props.worker.addEventListener("message", this.workerCall, true);
+        this.props.worker.postMessage(['login', undefined]);
         // end animation thing
         setTimeout(() => {
             this.setState({
@@ -125,6 +126,7 @@ class Login extends React.Component {
 
     componentWillUnmount() {
         this.props.worker.removeEventListener("message", this.workerCall, true);
+        this.props.worker.postMessage(['unregister', undefined]);
     }
 
     workerCall( e ) {

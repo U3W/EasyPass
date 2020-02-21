@@ -147,12 +147,9 @@ class App extends React.Component {
             this.state.worker.addEventListener("message", this.workerInit);
             indexState.setLoadingState(true);
         }
-
-
-        // TODO Fix HandleConnection
-        //  Function makes always a re-render, even though the state has not changed
-        //  This results in flickering of data in the dashboard!!
-        // this.handleConnectionChange();
+        // Network listeners are bound in the UI-Thread, because it is not
+        // supported in the Web Worker in all major browsers
+        //this.handleConnectionChange();
         window.addEventListener('online', this.handleConnectionChange);
         window.addEventListener('offline', this.handleConnectionChange);
     }
@@ -198,13 +195,21 @@ class App extends React.Component {
     }
 
     handleConnectionChange = () => {
-        const condition = navigator.onLine ? 'online' : 'offline';
+        const network = navigator.onLine;
+        // ToDO @Kacper worker call with this.state.isDisconnected
+        if (this.state.workerInitialized) {
+            this.state.worker.postMessage(['network', network]);
+        }
+
+        /**console.log("baumi");
+        const condition = !navigator.onLine ? 'online' : 'offline';
         let isConn = false;
         if (condition === 'online') {
             console.log("Online");
             isConn = true;
             const webPing = setInterval(
                 () => {
+                    console.log("here");
                     fetch('//google.com', {
                         mode: 'no-cors',
                     })
@@ -217,9 +222,10 @@ class App extends React.Component {
                 }, 500);
             return;
         }
+       this.ref.current.setOnline(this.state.isDisconnected);*/
 
-        // ToDO @Kacper worker call with this.state.isDisconnected
-        this.ref.current.setOnline(this.state.isDisconnected);
+        // TODO @Seb Online/Offline UI Change
+        this.ref.current.setOnline(network);
     };
 
 

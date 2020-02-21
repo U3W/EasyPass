@@ -76,6 +76,12 @@ extern {
     fn add_network_listener(closure: &Closure<dyn FnMut()>);
 }
 
+macro_rules! console_log {
+    // Note that this is using the `log` function imported above during
+    // `bare_bones`
+    ($($t:tt)*) => (log(&format_args!($($t)*).to_string()))
+}
+
 /// Represents the Backend - logic functionalities - of the Web-App.
 #[wasm_bindgen]
 pub struct Backend {
@@ -171,12 +177,30 @@ impl Backend {
                     }
                 } else {
                     match state.mode_as_string().as_ref() {
+                        "login" => Backend::login_call(cmd, data, state.clone()).await,
                         "dashboard" => Backend::dashboard_call(cmd, data, state.clone()).await,
                         _ => {}
                     }
                 }
             });
         })
+    }
+
+    /// Process calls on the login page.
+    async fn login_call(cmd: String, data: JsValue, mut state: Rc<State>) {
+        log("LOGIN_CALL");
+        // Bind worker to local variable
+        let worker = state.worker();
+        // Perform operation
+        match cmd.as_ref() {
+            "network" => {
+                console_log!("NETWORK: {:?}", &data);
+            },
+            "unregister" => {
+                state.set_mode(None);
+            }
+            _ => {}
+        }
     }
 
     /// Process calls on the dashboard page.
@@ -213,6 +237,9 @@ impl Backend {
             }
             "undoDeleteCategories" => {
                 worker.undo_delete_categories(data).await;
+            },
+            "network" => {
+                console_log!("NETWORK: {:?}", &data);
             }
             "unregister" => {
                 state.set_mode(None);
