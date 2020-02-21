@@ -8,6 +8,7 @@ mod easypass;
 use easypass::easypass::*;
 use easypass::timeout::*;
 use easypass::worker::*;
+use easypass::worker_login::*;
 mod pouchdb;
 use pouchdb::pouchdb::*;
 use wasm_bindgen_futures::{spawn_local, future_to_promise};
@@ -194,10 +195,7 @@ impl Backend {
         // Perform operation
         match cmd.as_ref() {
             "login" => {
-                let msg = Array::new_with_length(2);
-                msg.set(0, JsValue::from_str("login"));
-                msg.set(1, JsValue::from(true));
-                post_message(&msg);
+                worker.login().await;
             },
             "network" => {
                 console_log!("NETWORK: {:?}", &data);

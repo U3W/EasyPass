@@ -55,7 +55,9 @@ extern {
 
 /// Manages databases and performs CRUD-operations.
 pub struct Worker {
-    private: Connection,
+    pub user: RefCell<Option<String>>,
+    pub mkey: RefCell<Option<String>>,
+    pub private: Connection,
     service_status: RefCell<String>,
     service_closure: RefCell<Option<Closure<dyn FnMut()>>>,
     database_url: RefCell<Option<String>>,
@@ -68,7 +70,7 @@ pub struct Worker {
 /// Holds one logical databases with references to the local and remote one.
 /// Also contains the changes-feed and sync-handler and their used closures.
 pub struct Connection {
-    local_db: PouchDB,
+    pub local_db: PouchDB,
     remote_db: RefCell<Option<PouchDB>>,
     changes: Changes,
     sync: RefCell<Option<Sync>>
@@ -92,6 +94,9 @@ impl Worker {
     /// Creates a new Worker that manages databases.
     /// This includes live syncing and methods for CRUD-operations.
     pub fn new(url: String) -> Rc<Worker> {
+        // User hash and masterkey are not known at initialization
+        let user = RefCell::new(None);
+        let mkey = RefCell::new(None);
         // Setup new local database for private password entries
         let settings = Settings { adapter: "idb".to_string() };
         let local_db = PouchDB::new("Local", &JsValue::from_serde(&settings).unwrap());
@@ -125,6 +130,8 @@ impl Worker {
         // Create worker with reference counting to enable its usage
         // in multiple parts in the application
         let worker = Rc::new(Worker {
+            user,
+            mkey,
             private,
             service_status: RefCell::new(String::from("offline")),
             service_closure: RefCell::new(None),

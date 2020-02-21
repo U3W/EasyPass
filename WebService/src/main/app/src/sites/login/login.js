@@ -288,6 +288,7 @@ class Login extends React.Component {
 
             // TODO @Kacper @Seb @Moritz Adapt credentials to final strucuture
             // const {inpPassword, inpUsername, inpMasterpassword, inpKeyFile, inpWebAuhtn} = credentials
+
             const credentials = {
                 uname: this.state.inpUsername,
                 passwd: this.state.inpPassword,
