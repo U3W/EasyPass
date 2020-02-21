@@ -1,4 +1,4 @@
-import React from "react";
+import React, {useReducer} from "react";
 import Modal from "react-bootstrap/Modal";
 import StringSelector from "../../strings/stings";
 import {Card, Form} from "react-bootstrap";
@@ -12,39 +12,70 @@ import GeneratePass from "./generatepass";
 import Table from "react-bootstrap/Table";
 
 
-export default class AddGroup extends React.Component {
+export default class EditGroup extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
+            id: "-1",
+            ref: "-1",
             name: "",
-            nameError: false,
 
             // visibility
             userGroupAdd: "",
-            userGroupAddError: false,
             userGroupList: [],
             popUpGroupError: false,
             groupErrTyp: 0,
+
+            // update
+            updated: false,
         };
 
         this.handleKeyevent = this.handleKeyevent.bind(this);
         this.changeInput = this.changeInput.bind(this);
         this.addToGroupAdd = this.addToGroupAdd.bind(this);
-        this.removeUserFromGroup = this.removeUserFromGroup.bind(this);
-        this.addGroup = this.addGroup.bind(this);
+        this.saveEdit = this.saveEdit.bind(this);
+    }
+
+    componentDidMount() {
+        // Test with multiple callbacks
+        this.props.callback.setEditCallback(this.setEditValues.bind(this))
+    }
+
+    setEditValues( id, ref, name, userGroupList) {
+        this.setState({
+            id: id,
+            ref: ref,
+            name: name,
+
+            // visibility
+            userGroupList: userGroupList,
+        });
+    }
+
+    deepCopy( toCopy ) {
+        let out = [];
+        if ( toCopy !== undefined ) {
+            for ( let i = 0; i < toCopy.length; i++ ) {
+                out[i] = JSON.parse(JSON.stringify(toCopy[i]));
+            }
+        }
+        return out;
     }
 
     resetState() {
         this.setState({
+            id: "-1",
+            ref: "-1",
             name: "",
-            nameError: false,
 
             // visibility
             userGroupAdd: "",
-            userGroupAddError: false,
             userGroupList: [],
             popUpGroupError: false,
             groupErrTyp: 0,
+
+            // update
+            updated: false,
         })
     }
 
@@ -52,12 +83,7 @@ export default class AddGroup extends React.Component {
         this.setState({
             [e.target.id]: e.target.value,
         });
-        if ( e.target.id === "name" && e.target.value.length > 0 ) {
-            this.setState({
-                nameError: false,
-            })
-        }
-        if ( e.target.id === "userGroupAdd" && e.target.value.length > 0 ) {
+        if ( e.target.id === "userGroupAdd" && e.target.length > 0 ) {
             this.setState({
                 userGroupAddError: false,
                 popUpGroupError: false,
@@ -73,23 +99,11 @@ export default class AddGroup extends React.Component {
             }
             else {
                 // Enter
-                this.addGroup();
+                this.saveEdit();
             }
         }
     }
 
-    addGroup() {
-        if ( this.state.name.length === 0 ) {
-            this.setState({
-                nameError: true,
-            });
-        }
-        else {
-            this.props.callback.addGroup(this.state.name, this.state.userGroupList);
-            this.props.callback.dismissAddGroup();
-            this.resetState();
-        }
-    }
 
     removeUserFromGroup( ind ) {
         let arr = this.state.userGroupList;
@@ -130,12 +144,19 @@ export default class AddGroup extends React.Component {
         }
     }
 
+
+    saveEdit() {
+        this.props.callback.editGroup(this.state.id, this.state.ref, this.state.name, this.deepCopy(this.state.userGroupList));
+        this.props.callback.disableEditGroup();
+        this.resetState();
+    }
+
     render() {
         return (
             <>
-                <Modal onKeyDown={this.handleKeyevent} show={this.props.callback.getGroupAddShow()} onHide={() => {this.props.callback.dismissAddGroup(); this.resetState();}} className="ep-modal-dialog addPassPopUp">
+                <Modal onKeyDown={this.handleKeyevent} show={this.props.callback.getEditGroup()} onHide={() => {this.props.callback.disableEditGroup(); this.resetState();}} className="ep-modal-dialog addPassPopUp">
                     <Modal.Header closeButton>
-                        <Modal.Title>{StringSelector.getString(this.props.callback.state.language).addGroup}:</Modal.Title>
+                        <Modal.Title>{StringSelector.getString(this.props.callback.state.language).editGroup}:</Modal.Title>
                     </Modal.Header>
                     <Modal.Body className="ep-modal-body">
                         <Card.Body>
@@ -143,11 +164,7 @@ export default class AddGroup extends React.Component {
                                 <InputGroup.Prepend>
                                     <InputGroup.Text id="inputGroup-sizing-lg">{StringSelector.getString(this.props.callback.state.language).addGroupName}</InputGroup.Text>
                                 </InputGroup.Prepend>
-                                { this.state.nameError === true ?
-                                    <FormControl autoComplete="off" id="name" aria-label="Large" className="is-invalid" aria-describedby="inputGroup-sizing-sm" value={this.state.name} onChange={this.changeInput}/>
-                                    :
-                                    <FormControl autoComplete="off" id="name" aria-label="Large" aria-describedby="inputGroup-sizing-sm" value={this.state.name} onChange={this.changeInput}/>
-                                }
+                                <FormControl autoComplete="off" id="name" aria-label="Large" aria-describedby="inputGroup-sizing-sm" value={this.state.name} onChange={this.changeInput}/>
                             </InputGroup>
                             <hr/>
                             <h6>{StringSelector.getString(this.props.callback.state.language).addGroupVis}</h6>
@@ -177,7 +194,7 @@ export default class AddGroup extends React.Component {
                         </Card.Body>
                     </Modal.Body>
                     <Modal.Footer>
-                        <Button variant={"danger"} onClick={this.addGroup}>{StringSelector.getString(this.props.callback.state.language).addGroupBut}</Button>
+                        <Button variant={"danger"} onClick={this.saveEdit}>{StringSelector.getString(this.props.callback.state.language).addGroupBut}</Button>
                     </Modal.Footer>
                 </Modal>
             </>

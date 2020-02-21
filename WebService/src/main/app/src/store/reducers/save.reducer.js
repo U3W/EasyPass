@@ -1,14 +1,12 @@
 import {
-    GET_CAT_GROUP,
-    GET_CAT_PRIV,
-    GET_TAB,
-    SAVE_CAT, SAVE_LANGUAGE, SAVE_SIDEBAR,
+    SAVE_CAT, SAVE_GROUP, SAVE_LANGUAGE, SAVE_SIDEBAR,
     SAVE_TAB
 } from "../../action/dashboard.action";
 import {dashboardConst} from "../../sites/dashboard/const/dashboard.enum";
 import tabs from "../../sites/dashboard/tabs/tab.enum";
 import {SAVE_MAUTH_STATE} from "../../action/mauth.action";
-import {masterpasswordConst} from "../../sites/verify/masterpassword.enum";
+import {SAVE_USER, SAVE_USERNAME} from "../../action/auth.action";
+import {loginConst} from "../../sites/login/login.enum";
 
 
 const saveReducer = ( state, action) => {
@@ -34,7 +32,16 @@ const saveReducer = ( state, action) => {
             localStorage.setItem(dashboardConst.languageSelected, JSON.stringify(action.language));
             return {};
         case SAVE_MAUTH_STATE:
-            localStorage.setItem(masterpasswordConst.radioSelected, action.twoFactorOpt);
+            localStorage.setItem(loginConst.radioSelected, action.twoFactorOpt);
+            return {};
+        case SAVE_USER:
+            localStorage.setItem(loginConst.saveUsernameState, action.user);
+            return {};
+        case SAVE_USERNAME:
+            localStorage.setItem(loginConst.saveUsername, action.username);
+            return {};
+        case SAVE_GROUP:
+            localStorage.setItem(dashboardConst.groupSelected, JSON.stringify(action.groupselected));
             return {};
         default:
             return {};

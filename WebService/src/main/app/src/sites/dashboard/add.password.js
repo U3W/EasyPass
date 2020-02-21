@@ -13,6 +13,8 @@ import RemoveTag from "../../img/icons/password_add_remove_user.svg";
 import GeneratePass from "./generatepass";
 import StringSelector from "../../strings/stings";
 import tabs from "./tabs/tab.enum";
+import ShowIcon from "../../img/icons/password_show_white.svg";
+import HideIcon from "../../img/icons/password_hide_white.svg";
 
 export default class AddPassword extends React.Component {
 
@@ -23,6 +25,7 @@ export default class AddPassword extends React.Component {
             title: "",
             user: "",
             pass: "",
+            showPass: false,
             url: "",
             tagAdded: false,
             tag: [],
@@ -89,6 +92,7 @@ export default class AddPassword extends React.Component {
             title: "",
             user: "",
             pass: "",
+            showPass: false,
             url: "",
             tagAdded: false,
             tag: [],
@@ -105,12 +109,10 @@ export default class AddPassword extends React.Component {
 
 
     changeTagListener (key, value, i, e ) {
-        console.log("aha key:", key, "value:", value, i);
         if ( this.state.tagAdded ) {
             // just tags
             let tagNew = this.state.tag;
 
-            console.log("aha Thisss", tagNew, "key", key);
             if (e.target.id.length > 8) {
                 // tagValue + i
                 if (e.target.id.includes("tagValue")) {
@@ -184,7 +186,6 @@ export default class AddPassword extends React.Component {
             for ( let i = 0; i < tag.length; i++ )
             {
                 let tagKeys = Object.keys(tag[i]);
-                console.log("Aha key", tagKeys, tag);
                 let andBut = "";
                 if ( i < tag.length-1) {
                     andBut = (
@@ -389,8 +390,14 @@ export default class AddPassword extends React.Component {
     addPass() {
         console.log("add.password.js: catID: " + this.state.catID);
         if ( this.state.user.length > 0 && this.state.title.length > 0 && this.state.pass.length > 0) {
-            this.props.callback.addPass(this.state.user, this.state.pass, this.state.url, this.state.title,
-                this.state.tag, this.state.catID);
+            if ( this.props.callback.state.tabselected === tabs.PRIVPASS ) {
+                this.props.callback.addPass(this.state.user, this.state.pass, this.state.url, this.state.title,
+                    this.state.tag, this.state.catID, undefined);
+            }
+            else {
+                this.props.callback.addPass(this.state.user, this.state.pass, this.state.url, this.state.title,
+                    this.state.tag, this.state.catID, this.props.callback.state.groupselected);
+            }
             this.resetState();
         }
         else {
@@ -413,8 +420,18 @@ export default class AddPassword extends React.Component {
         }
     }
 
+    setShowPass() {
+        this.setState({
+            showPass: !this.state.showPass,
+        });
+    }
+
 
     render() {
+        let error = "";
+        if ( this.state.missingPass ) {
+            error = "text-danger is-invalid";
+        }
         return (
             <>
                 <Modal onKeyDown={this.handleKeyevent} show={this.props.callback.getPassAddShow()} onHide={this.dismissPopUp} className="ep-modal-dialog addPassPopUp">
@@ -423,6 +440,17 @@ export default class AddPassword extends React.Component {
                     </Modal.Header>
                     <Modal.Body className="ep-modal-body">
                         <Card.Body>
+                            { this.props.callback.state.tabselected === tabs.GROUPPASS &&
+                                <>
+                                    <InputGroup size="sm" className="mb-3">
+                                        <InputGroup.Prepend>
+                                            <InputGroup.Text id="inputGroup-sizing-sm">{StringSelector.getString(this.props.callback.state.language).addPassGroup}</InputGroup.Text>
+                                        </InputGroup.Prepend>
+                                        <FormControl autoComplete="off" id="title" aria-label="Large" aria-describedby="inputGroup-sizing-sm" value={this.props.callback.getSelectedGroupName()} disabled={true}/>
+                                    </InputGroup>
+                                    <hr/>
+                                </>
+                            }
                             <InputGroup size="lg" className="mb-3">
                                 <InputGroup.Prepend>
                                     <InputGroup.Text id="inputGroup-sizing-lg">{StringSelector.getString(this.props.callback.state.language).addPassTitle}</InputGroup.Text>
@@ -449,11 +477,33 @@ export default class AddPassword extends React.Component {
                                 <InputGroup.Prepend>
                                     <InputGroup.Text id="inputGroup-sizing-sm">{StringSelector.getString(this.props.callback.state.language).addPassPass}</InputGroup.Text>
                                 </InputGroup.Prepend>
-                                { this.state.missingPass ?
-                                    <FormControl className="text-danger is-invalid" autoComplete="off" id="password" aria-label="Small" aria-describedby="inputGroup-sizing-sm" value={this.state.pass} onChange={this.changeInput}/>
+                                { this.state.showPass ?
+                                    <FormControl className={error} type="text" autoComplete="off" id="password" aria-label="Small" aria-describedby="inputGroup-sizing-sm" value={this.state.pass} onChange={this.changeInput}/>
                                     :
-                                    <FormControl autoComplete="off" id="password" aria-label="Small" aria-describedby="inputGroup-sizing-sm" value={this.state.pass} onChange={this.changeInput}/>
+                                    <FormControl className={error} type="password" autoComplete="off" id="password" aria-label="Small" aria-describedby="inputGroup-sizing-sm" value={this.state.pass} onChange={this.changeInput}/>
                                 }
+                                {this.state.showPass ?
+                                    <Button variant="dark" className="notRound buttonSpaceInline" onClick={() => this.setShowPass()}>
+                                        <img
+                                            src={HideIcon}
+                                            alt=""
+                                            width="14"
+                                            height="14"
+                                            className="d-inline-block"
+                                        />
+                                    </Button>
+                                    :
+                                    <Button variant="dark" className="notRound buttonSpaceInline" onClick={() => this.setShowPass()}>
+                                        <img
+                                            src={ShowIcon}
+                                            alt=""
+                                            width="14"
+                                            height="14"
+                                            className="d-inline-block"
+                                        />
+                                    </Button>
+                                }
+                                <hr className="vertical-button-sep"/>
                                 <Button variant="dark" className="buttonSpaceInline" onClick={() => this.openGeneratePass()}>
                                     <img
                                         src={GeneratePassIcon}

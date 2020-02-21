@@ -46,12 +46,20 @@
     padding: 7px;
     background: #343a40;
     color: #888888;
-    bottom: 65px;
+    bottom: 64px;
     left: 0;
+    z-index: 1020 !important;
+    transition: all 0.3s ease-in-out;
 }
+
+.offline-ui-bot-out {
+    bottom: -50px;
+}
+
 /* line 19, ../sass/offline-theme-chrome-indicator.sass */
 .offline-ui-bot .offline-ui-bot-content {
     padding-left: 16px;
+    z-index: -1 !important;
 }
 /* line 22, ../sass/offline-theme-chrome-indicator.sass */
 .offline-ui-bot .offline-ui-bot-content:after {

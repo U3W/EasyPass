@@ -19,12 +19,12 @@ export const strings = {
     password: "Passwort",
     passwordPlaceholder: "Bitte Ihr Passwort eingeben",
 
-    keepLoggedIn: "Angemeldet bleiben",
+    rememberUsername: "Benutzernamen merken",
 
     loginButton: "Anmelden",
 
     wrongLoginHeader: "Anmeldung fehgeschlagen!",
-    wrongLogin: "Username oder Passwort sind falsch!",
+    wrongLogin: "Username, Passwort, Masterpasswort oder 2-FA sind falsch!",
 
     registrationButton: "Noch kein Account? Hier registrieren",
     registrationAlertSucc: "Account hinzugefügt!",
@@ -80,6 +80,7 @@ export const strings = {
 
     // Navbar Top
     searchPlaceholder: "Passwörter filtern",
+    searchPlaceholderGroup: "Gruppen filtern",
     // Settings
     settings: "Einstellungen",
     language: "Sprache",
@@ -104,6 +105,7 @@ export const strings = {
     menu: "Menü",
     privPass: "Private Passwörter",
     groupPass: "Gruppen Passwörter",
+
     cats: "Kategorien",
     catsAllCat: "Alle Kategorien",
 
@@ -145,14 +147,18 @@ export const strings = {
     addGroupUserVis2: "Nutzer, die Einsicht in das Passwort haben",
     addGroupUserVisNon: "Noch keine Nutzer hinzugefügt",
 
-    addGroupUserAlready: "Benutzername existiert nicht!",
-    addGroupUserNotFound: "Benutzer bereits hinzugefügt!",
+    addGroupUserAlready: "Benutzer bereits hinzugefügt!",
+    addGroupUserNotFound: "Benutzername existiert nicht!",
+
+    // Edit Group
+    editGroup: "Gruppe bearbeiten",
 
 
     // Add Password
     addPass: "Passwort hinzufügen",
 
     addPassTitle: "Titel",
+    addPassGroup: "Gruppen Name",
     addPassUser: "Benutzername",
 
     addPassPass: "Passwort",
@@ -179,11 +185,34 @@ export const strings = {
     mainAllCat: "Alle Kategorien",
 
     noPassToCat: "Zu dieser Kategorie wurden noch keine Passwörter nicht hinzugefügt.",
-    noCatsNoPass: "Noch keine Einträge.",
+    noCatsNoPass: "Noch keine Einträge!",
 
     mainNotAddedToCat: "Nicht zugeordnet",
     mainNotAddedToCatInfo: "Hier befinden sich alle Passwörter, die keine Kategorie zugeordnet wurden",
 
+    // Group Card
+    cardMenu: "Gruppen Menü - Alle Gruppen",
+
+    cardGroupMembers: "Gruppenmitglieder:",
+
+    cardEdit: "Diese Gruppe bearbeiten",
+    cardDel: "Diese Gruppe löschen",
+    cardOpen: "Diese Gruppe öffnen",
+    cardReturn: "Zum Gruppemenü zurückkehren",
+
+    // Delete Alert
+    cardDelSuc: "Gruppe wurde gelöscht!",
+    cardDelSuc2: "Rückgängig",
+
+    cardDelErr: "Beim Löschen der Gruppe ist ein Fehler aufgetreten. Bitte versuchen Sie es erneut!",
+
+    // Edit Alerts
+    cardEditSuc: "Bearbeitete Gruppe gespeichert!",
+    cardEditErr: "Beim Bearbeiten der Gruppe ist ein Fehler aufgetreten. Bitte versuchen Sie es erneut!",
+
+    // Add Alert
+    cardAddSuc: "Gruppe hinzugefügt!",
+    cardAddErr: "Beim Hinzufügen der Gruppe ist ein Fehler aufgetreten. Bitte versuchen Sie es erneut!",
 
     // Pass Line
 

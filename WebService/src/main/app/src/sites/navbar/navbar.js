@@ -21,6 +21,7 @@ import StringSelector from "../../strings/stings";
 import dashboardState from "../dashboard/dashboard.saved.state";
 import CopyIcon from "../../img/icons/password_copy_white.svg";
 import ResetPass from "./resetPass";
+import tabs from "../dashboard/tabs/tab.enum";
 
 class NavbarEP extends React.Component {
     constructor(props) {
@@ -142,7 +143,9 @@ class NavbarEP extends React.Component {
 
     getPopUpCat()  {
         let cats = this.props.callback.getCats();
-
+        if ( this.props.callback.state.tabselected === tabs.GROUPPASS ) {
+            cats = this.props.callback.getCatsForGroup();
+        }
         let finalCats = cats.map((item) =>
             this.returnCatBase(item._id, item.name)
         );
@@ -157,7 +160,7 @@ class NavbarEP extends React.Component {
                         <Table striped bordered hover className="ep-modal-table">
                             <tbody>
                                 <tr key={0}>
-                                    <td onClick={() => this.changeCat(0)}>
+                                    <td onClick={() => this.changeCat("0")}>
                                         {StringSelector.getString(this.props.callback.state.language).catsAllCat}
                                     </td>
                                 </tr>
@@ -276,7 +279,11 @@ class NavbarEP extends React.Component {
                             </div>
                             <Navbar.Collapse id="basic-navbar-nav" className="search-bar">
                                 <div className="search-bar-size">
-                                    <FormControl id="search" type="text" placeholder={StringSelector.getString(this.props.callback.state.language).searchPlaceholder} autoComplete="off" className="search" onChange={this.props.callback.handleSearch}/>
+                                    { (this.props.callback.state.tabselected === tabs.GROUPPASS && this.props.callback.state.groupselected === "0") ?
+                                        <FormControl id="search" type="text" placeholder={StringSelector.getString(this.props.callback.state.language).searchPlaceholderGroup} autoComplete="off" className="search" onChange={this.props.callback.handleSearchGroup}/>
+                                        :
+                                        <FormControl id="search" type="text" placeholder={StringSelector.getString(this.props.callback.state.language).searchPlaceholder} autoComplete="off" className="search" onChange={this.props.callback.handleSearch}/>
+                                    }
                                 </div>
                                 <Nav className="mr-auto">
                                     <NavDropdown title={this.props.callback.state.username} onClick={this.setSettingExpanded} className="settingsPopUp dropDown" id="basic-nav-dropdown">
@@ -285,40 +292,42 @@ class NavbarEP extends React.Component {
                                 </Nav>
                             </Navbar.Collapse>
                         </Navbar>
-                        <Navbar collapseOnSelect className="catnav catselectSize" expand="lg" bg="dark" variant="dark">
-                            <Navbar.Brand className="catName" href="#home">{this.props.callback.getSelectedCatName()}</Navbar.Brand>
-                            <Button variant="light" className="catButton round editBut" onClick={() => this.props.callback.showEditCat()}>
-                                <img
-                                    src={EditCat}
-                                    alt=""
-                                    width="15"
-                                    height="15"
-                                    className="d-inline-block"
-                                />
-                            </Button>
-                            <Button variant="light" className="catButton round addBut" onClick={() => this.props.callback.showAddCat()}>
-                                <img
-                                    src={AddCat}
-                                    alt=""
-                                    width="15"
-                                    height="15"
-                                    className="d-inline-block"
-                                />
-                            </Button>
-                            <Button variant="light" className="catButton round delBut" onClick={() => this.props.callback.showDeleteCat()}>
-                                <img
-                                    src={DeleteCat}
-                                    alt=""
-                                    width="15"
-                                    height="15"
-                                    className="d-inline-block"
-                                />
-                            </Button>
-                            <button type="button" aria-label="Toggle navigation" className="toggler navbar-toggler collapsed" onClick={this.setPopUpCatEnabled}>
-                                <span className="navbar-toggler-icon"/>
-                            </button>
-                            {this.getPopUpCat()}
-                        </Navbar>
+                        { (this.props.callback.state.tabselected !== tabs.GROUPPASS || this.props.callback.state.groupselected !== "0") &&
+                            <Navbar collapseOnSelect className="catnav catselectSize" expand="lg" bg="dark" variant="dark">
+                                <Navbar.Brand className="catName" href="#home">{this.props.callback.getSelectedCatName()}</Navbar.Brand>
+                                <Button variant="light" className="catButton round editBut" onClick={() => this.props.callback.showEditCat()}>
+                                    <img
+                                        src={EditCat}
+                                        alt=""
+                                        width="15"
+                                        height="15"
+                                        className="d-inline-block"
+                                    />
+                                </Button>
+                                <Button variant="light" className="catButton round addBut" onClick={() => this.props.callback.showAddCat()}>
+                                    <img
+                                        src={AddCat}
+                                        alt=""
+                                        width="15"
+                                        height="15"
+                                        className="d-inline-block"
+                                    />
+                                </Button>
+                                <Button variant="light" className="catButton round delBut" onClick={() => this.props.callback.showDeleteCat()}>
+                                    <img
+                                        src={DeleteCat}
+                                        alt=""
+                                        width="15"
+                                        height="15"
+                                        className="d-inline-block"
+                                    />
+                                </Button>
+                                <button type="button" aria-label="Toggle navigation" className="toggler navbar-toggler collapsed" onClick={this.setPopUpCatEnabled}>
+                                    <span className="navbar-toggler-icon"/>
+                                </button>
+                                {this.getPopUpCat()}
+                            </Navbar>
+                        }
                     </div>
                 </div>
                 {this.getPopUp()}

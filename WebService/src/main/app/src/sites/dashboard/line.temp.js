@@ -54,6 +54,7 @@ export default class PassLine extends React.Component {
             showCopyAlert: false,
             edit: false,
             editRequest: false,
+            groupId: this.props.groupId,
             id: this.props.id,
             rev: this.props.rev,
             passwordNew: undefined,
@@ -70,11 +71,6 @@ export default class PassLine extends React.Component {
             generatePassShow: false,
 
 
-            // Group Visibility
-            userGroupAdd: "",
-            /*userGroupListNew: [{name: "Huan"}],*/ userGroupListNew: this.deepCopyTags(this.props.userGroupList),
-            popUpGroupError: false,
-            groupErrTyp: 0,
         };
 
         this.dismissGeneratePass = this.dismissGeneratePass.bind(this);
@@ -162,7 +158,6 @@ export default class PassLine extends React.Component {
         });*/
         if ( this.state.urlNew.length > 0 ) {
             new Ping(this.correctUrl(this.state.urlNew)  + "favicon.ico", 400, ( status, e ) => {
-                console.log("Status", status, e);
                 if ( status !== "timeout" ) {
                     this.setState({
                         imgSucc: true,
@@ -186,7 +181,6 @@ export default class PassLine extends React.Component {
                                 imgNew: new Image().src = NotAvailable,
                             });
                         }
-                        console.log("Status 2", status, e);
                         if ( e !== undefined && e.type === "error") {
                             this.setState({
                                 imgSucc: true,
@@ -362,7 +356,7 @@ export default class PassLine extends React.Component {
     saveEdit() {
         this.setEdit(false, true);
         this.props.callback.saveEdit(
-            this.state.id, this.state.rev, this.state.userNew, this.state.passwordNew,
+            this.state.id, this.state.rev, this.state.groupId, this.state.userNew, this.state.passwordNew,
             this.state.urlNew, this.state.titleNew, this.state.tagNew, this.state.catIdNew);
     }
 
@@ -668,84 +662,6 @@ export default class PassLine extends React.Component {
         );
     }
 
-    getGroupErrorMsg() {
-        if ( this.state.popUpGroupError ) {
-            let err = StringSelector.getString(this.props.callback.state.language).addPassUserNotFound;
-            if ( this.state.groupErrTyp === 1 ) {
-                err = StringSelector.getString(this.props.callback.state.language).addPassUserAlready;
-            }
-            return (
-                <p className="text-danger fixErrorMsg">{err}</p>
-            );
-        }
-    }
-
-    getVisibilityTable() {
-        let key = -1;
-        let elms;
-        if ( this.state.userGroupListNew.length === 0 ) {
-            elms = StringSelector.getString(this.props.callback.state.language).addPassUserVisNon;
-            return (
-                <>
-                    <div className="visMargin">
-                        <h6 className="noMarginBottom">{StringSelector.getString(this.props.callback.state.language).addPassUserVis}</h6>
-                        <i>{StringSelector.getString(this.props.callback.state.language).addPassUserVis2}</i>
-                    </div>
-                    - {elms}
-                </>
-            );
-        }
-        else {
-            let elmsArray = [];
-            for ( let i = 0; i < this.state.userGroupListNew.length; i++ ) {
-                const item = this.state.userGroupListNew[i];
-                let tdClass = "";
-                if ( i === 0 ) {
-                    tdClass += "topRound";
-                }
-                if ( i === this.state.userGroupListNew.length-1) {
-                    tdClass += " botRound";
-                }
-                elmsArray[i] = (
-                    <td className={tdClass}>
-                        {item.name}
-                        { this.state.edit &&
-                        <button type="button" className="close userRemove" onClick={() => this.removeUserFromGroup(item.id)}>
-                            <span aria-hidden="true" >×</span>
-                            <span className="sr-only">Close</span>
-                        </button>
-                        }
-                    </td>
-                );
-            }
-
-            elms = elmsArray.map(function(item) {
-                key++;
-                return (
-                    <tr key={key}>
-                        {item}
-                    </tr>
-                );
-            });
-
-            return (
-                <>
-                    <div className="visMargin">
-                        <h6 className="noMarginBottom">{StringSelector.getString(this.props.callback.state.language).addPassUserVis}</h6>
-                        <i>{StringSelector.getString(this.props.callback.state.language).addPassUserVis2}</i>
-                    </div>
-                    <div className="roundDiv">
-                        <Table striped hover size="sm" className="noMarginBottom roundtable">
-                            <tbody>
-                            {elms}
-                            </tbody>
-                        </Table>
-                    </div>
-                </>
-            );
-        }
-    }
-
     render() {
 
         //console.log("Start of render", this.state.urlNew);
@@ -809,9 +725,11 @@ export default class PassLine extends React.Component {
                 </Button>
             </>
         );
+        /* <input id="..." type="hidden" value="..." />: Must be at the first position, otherwise the search function wont find it -> exception */
         return (
-            <Card className="pass-card" name="passCard">
+            <Card className="pass-card" id={this.state.id}>
                 <input id="searchInput" type="hidden" value={this.props.title}/>
+                <input id="searchInput2" type="hidden" value={this.props.user}/>
                 <Accordion.Toggle as={Card.Header} className="clickable center-vert" eventKey={this.props.id}>
                     <Row>
                         <Col sm={1} md={1} lg={1} xs={1} className="fixLogoCol">
@@ -933,7 +851,6 @@ export default class PassLine extends React.Component {
                 <Accordion.Collapse eventKey={this.props.id}>
                     <>
                         <Card.Body onChange={(e) => {
-                            console.log("COLLAPSE: ", e);
                         }}>
                             <Card.Title>
                             {this.state.edit === true ? // Title
@@ -1003,7 +920,6 @@ export default class PassLine extends React.Component {
                                         </Button>
                                         :
                                         <Button variant="dark" className="buttonSpaceInline " disabled={false} onClick={() => {
-                                            console.log("Aha", this.props, this.state);
                                             this.props.callback.copyPass(this.state.id, this.state.rev);
                                         }}>
                                             <img
