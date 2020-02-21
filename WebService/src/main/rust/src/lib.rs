@@ -24,7 +24,6 @@ use web_sys::{MessageEvent, FileReaderSync};
 extern crate rand;
 use rand::Rng;
 use wasm_bindgen::__rt::Ref;
-use wasm_bindgen::__rt::core::borrow::{BorrowMut, Borrow};
 use wasm_bindgen::__rt::std::net::Shutdown::Read;
 use crate::state::State;
 
@@ -80,11 +79,8 @@ macro_rules! console_log {
 // Import all project modules.
 // Import is done here to allow usage of macros in all modules
 mod easypass;
-use easypass::easypass::*;
-use easypass::timeout::*;
 use easypass::worker::*;
 mod pouchdb;
-use pouchdb::pouchdb::*;
 
 
 
@@ -194,7 +190,7 @@ impl Backend {
     }
 
     /// Process calls on the login page.
-    async fn login_call(cmd: String, data: JsValue, mut state: Rc<State>) {
+    async fn login_call(cmd: String, data: JsValue, state: Rc<State>) {
         log("LOGIN_CALL");
         // Bind worker to local variable
         let worker = state.worker();
@@ -214,7 +210,7 @@ impl Backend {
     }
 
     /// Process calls on the dashboard page.
-    async fn dashboard_call(cmd: String, data: JsValue, mut state: Rc<State>) {
+    async fn dashboard_call(cmd: String, data: JsValue, state: Rc<State>) {
         log("DASHBOARD_CALL");
         // Bind worker to local variable
         let worker = state.worker();

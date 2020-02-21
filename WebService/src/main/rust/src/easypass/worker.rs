@@ -24,7 +24,6 @@ use web_sys::{MessageEvent};
 extern crate rand;
 use rand::Rng;
 use wasm_bindgen::__rt::Ref;
-use wasm_bindgen::__rt::core::borrow::{BorrowMut, Borrow};
 
 // Add other modules that define Worker functionality
 // Allows to split Worker logic
@@ -309,7 +308,7 @@ impl Worker {
         // Clear is a hashmap which stores deletion routines (closures)
         let mut clear = self.password_clear.borrow_mut();
         // Parse received password entry
-        let mut entry: Value = data.into_serde().unwrap();
+        let entry: Value = data.into_serde().unwrap();
         // Stores id of password entry that is used to get fully and later for deletion
         let id = String::from(entry["_id"].as_str().unwrap());
         // Get revision which is needed for deletion
@@ -371,7 +370,7 @@ impl Worker {
         // Get full backup data
         let mut cache = self.password_cache.borrow_mut();
         // Parse received password entry
-        let mut entry: Value = data.into_serde().unwrap();
+        let entry: Value = data.into_serde().unwrap();
         // Get id of entry to recover
         let id = String::from(entry["_id"].as_str().unwrap());
         // Check if cache still contains this password entry
@@ -489,7 +488,7 @@ impl Worker {
                 let mut clear = worker.category_clear.borrow_mut();
                 // Fixes: "cannot move out of `this_clear_ids`, a captured variable in an
                 // `FnMut` closure" error
-                let mut clear_ids = clear_ids.to_vec();
+                let clear_ids = clear_ids.to_vec();
                 // Lock and get backup data
                 let mut cache = worker.category_cache.borrow_mut();
                 log(&format!("C. Cache {:?}", &cache));
