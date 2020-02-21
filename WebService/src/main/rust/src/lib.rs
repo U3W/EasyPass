@@ -18,7 +18,8 @@ use wasm_bindgen::__rt::std::sync::{Arc, Mutex, PoisonError, MutexGuard};
 use wasm_bindgen::JsCast;
 use serde_json::value::Value::Bool;
 use wasm_bindgen::__rt::std::collections::HashMap;
-use web_sys::{MessageEvent};
+//use web_sys::{MessageEvent, FileReader};
+use web_sys::{MessageEvent, FileReaderSync};
 
 extern crate rand;
 use rand::Rng;
@@ -200,7 +201,7 @@ impl Backend {
         // Perform operation
         match cmd.as_ref() {
             "login" => {
-                worker.login().await;
+                worker.login(data).await;
             },
             "network" => {
                 console_log!("NETWORK: {:?}", &data);

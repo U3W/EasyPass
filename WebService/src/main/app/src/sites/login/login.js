@@ -294,6 +294,7 @@ class Login extends React.Component {
                 passwd: this.state.inpPassword,
                 twofa: this.state.inpFile,
             };
+            console.log("TWOFA", credentials.twofa);
 
             this.loginProcess(credentials);
             /**this.props.login(this.state);
