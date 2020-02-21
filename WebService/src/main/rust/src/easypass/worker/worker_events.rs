@@ -1,4 +1,3 @@
-use crate::easypass::worker::Worker;
 use wasm_bindgen::prelude::*;
 use wasm_bindgen_futures::{spawn_local, future_to_promise};
 use wasm_bindgen_futures::JsFuture;
@@ -17,18 +16,8 @@ use wasm_bindgen::__rt::std::collections::HashMap;
 
 use web_sys::{MessageEvent};
 use crate::log;
+use crate::easypass::worker::Worker;
 
-pub struct WorkerEvents {}
+impl Worker {
 
-impl WorkerEvents {
-    pub fn network(worker: Rc<Worker>) -> Closure<dyn FnMut()> {
-        log("network moi");
-        Closure::new(move || {
-            log("kek!");
-            let worker = worker.clone();
-            spawn_local(async move {
-                log("network moi");
-            });
-        })
-    }
 }

@@ -2,7 +2,6 @@
 use crate::easypass::easypass::*;
 use crate::easypass::timeout::*;
 use crate::pouchdb::pouchdb::*;
-use crate::{utils, add_message_listener, add_network_listener};
 
 use wasm_bindgen::prelude::*;
 use wasm_bindgen_futures::{spawn_local, future_to_promise};
@@ -26,7 +25,11 @@ extern crate rand;
 use rand::Rng;
 use wasm_bindgen::__rt::Ref;
 use wasm_bindgen::__rt::core::borrow::{BorrowMut, Borrow};
-use crate::easypass::worker_events::WorkerEvents;
+
+// Add other modules that define Worker functionality
+// Allows to split Worker logic
+mod worker_login;
+mod worker_events;
 
 
 #[wasm_bindgen]
@@ -55,9 +58,9 @@ extern {
 
 /// Manages databases and performs CRUD-operations.
 pub struct Worker {
-    pub user: RefCell<Option<String>>,
-    pub mkey: RefCell<Option<String>>,
-    pub private: Connection,
+    user: RefCell<Option<String>>,
+    mkey: RefCell<Option<String>>,
+    private: Connection,
     service_status: RefCell<String>,
     service_closure: RefCell<Option<Closure<dyn FnMut()>>>,
     database_url: RefCell<Option<String>>,
@@ -70,7 +73,7 @@ pub struct Worker {
 /// Holds one logical databases with references to the local and remote one.
 /// Also contains the changes-feed and sync-handler and their used closures.
 pub struct Connection {
-    pub local_db: PouchDB,
+    local_db: PouchDB,
     remote_db: RefCell<Option<PouchDB>>,
     changes: Changes,
     sync: RefCell<Option<Sync>>
@@ -262,12 +265,6 @@ impl Worker {
             self.private.sync = Some(sync);
         }
         */
-        // TODO network
-        // Add network listener
-        let network_closure = WorkerEvents::network(self.clone());
-        //add_network_listener(&network_closure);
-        self.service_closure.replace(Some(network_closure));
-        // Fetch all current docs and send result to UI
         self.clone().all_docs_without_passwords();
     }
 

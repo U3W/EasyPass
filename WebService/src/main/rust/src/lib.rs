@@ -1,16 +1,9 @@
 #![feature(in_band_lifetimes)]
 #![feature(async_closure)]
 
+// Import wasm_bindgen, js_sys, web_sys dependencies and more
 mod utils;
-
 use wasm_bindgen::prelude::*;
-mod easypass;
-use easypass::easypass::*;
-use easypass::timeout::*;
-use easypass::worker::*;
-use easypass::worker_login::*;
-mod pouchdb;
-use pouchdb::pouchdb::*;
 use wasm_bindgen_futures::{spawn_local, future_to_promise};
 use wasm_bindgen_futures::JsFuture;
 
@@ -27,7 +20,6 @@ use serde_json::value::Value::Bool;
 use wasm_bindgen::__rt::std::collections::HashMap;
 use web_sys::{MessageEvent};
 
-
 extern crate rand;
 use rand::Rng;
 use wasm_bindgen::__rt::Ref;
@@ -35,12 +27,12 @@ use wasm_bindgen::__rt::core::borrow::{BorrowMut, Borrow};
 use wasm_bindgen::__rt::std::net::Shutdown::Read;
 use crate::state::State;
 
-
+// Use wee_alloc as the memory allocator for the WebAssembly Module
 #[cfg(feature = "wee_alloc")]
 #[global_allocator]
 static ALLOC: wee_alloc::WeeAlloc = wee_alloc::WeeAlloc::INIT;
 
-
+// Bind JavaScript functions for invocation in WebAssembly
 #[wasm_bindgen]
 extern {
     #[wasm_bindgen(js_namespace = console)]
@@ -79,9 +71,22 @@ extern {
 
 // Combination of imported "log" function with "println!" like behaviour.
 // Taken from Rust-Wasm documentation.
+#[macro_use]
 macro_rules! console_log {
     ($($t:tt)*) => (log(&format_args!($($t)*).to_string()))
 }
+
+// Import all project modules.
+// Import is done here to allow usage of macros in all modules
+mod easypass;
+use easypass::easypass::*;
+use easypass::timeout::*;
+use easypass::worker::*;
+mod pouchdb;
+use pouchdb::pouchdb::*;
+
+
+
 
 /// Represents the Backend - logic functionalities - of the Web-App.
 #[wasm_bindgen]
