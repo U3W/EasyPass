@@ -77,8 +77,53 @@ class Login extends React.Component {
         this.switchToRegister = this.switchToRegister.bind(this);
 
         this.printRegistered = this.printRegistered.bind(this);
+        // Login & Registration Worker calls
+        this.workerCall = this.workerCall.bind(this);
+        this.loginProcess = this.loginProcess.bind(this);
+        this.registrationProcess = this.registrationProcess.bind(this);
     }
 
+    componentDidMount() {
+        this.props.worker.addEventListener('message', this.workerCall, true);
+        this.props.worker.postMessage(['login', undefined]);
+        // end animation thing
+        setTimeout(() => {
+            this.setState({
+                loading: false,
+            });
+        }, 500)
+    }
+
+    componentWillUnmount() {
+        this.props.worker.removeEventListener('message', this.workerCall, true);
+        this.props.worker.postMessage(['unregister', undefined]);
+    }
+
+    workerCall( e ) {
+        const cmd = e.data[0];
+        const data = e.data[1];
+        switch (cmd) {
+            case 'login':
+                console.log("LOGIN!!!");
+                this.props.login(data);
+                if (LoginAuth.getLoggedIn()) {
+                    history.push("/dashboard");
+                } else {
+                    // Fehlermeldung
+                    this.setState({error: true});
+                    this.dismissError();
+                }
+                break;
+        }
+    }
+
+    loginProcess(credentials) {
+        this.props.worker.postMessage(['login', credentials]);
+    }
+
+    registrationProcess(credentials) {
+
+    }
 
     handleFile( e ) {
         let file = e.target.files[0];
@@ -113,26 +158,7 @@ class Login extends React.Component {
     }
 
 
-    componentDidMount() {
-        this.props.worker.addEventListener("message", this.workerCall, true);
-        this.props.worker.postMessage(['login', undefined]);
-        // end animation thing
-        setTimeout(() => {
-            this.setState({
-                loading: false,
-            });
-        }, 500)
-    }
 
-    componentWillUnmount() {
-        this.props.worker.removeEventListener("message", this.workerCall, true);
-        this.props.worker.postMessage(['unregister', undefined]);
-    }
-
-    workerCall( e ) {
-        const cmd = e.data[0];
-        const data = e.data[1];
-    }
 
     handleChange = (e) => {
         this.setState({
@@ -260,7 +286,16 @@ class Login extends React.Component {
                 missingFile: false
             });
 
-            this.props.login(this.state);
+            // TODO @Kacper @Seb @Moritz Adapt credentials to final strucuture
+            // const {inpPassword, inpUsername, inpMasterpassword, inpKeyFile, inpWebAuhtn} = credentials
+            const credentials = {
+                uname: this.state.inpUsername,
+                passwd: this.state.inpPassword,
+                twofa: this.state.inpFile,
+            };
+
+            this.loginProcess(credentials);
+            /**this.props.login(this.state);
             this.props.saveUser(this.state.inpUsername);
 
             if (LoginAuth.getLoggedIn()) {
@@ -269,7 +304,7 @@ class Login extends React.Component {
                 // Fehlermeldung
                 this.setState({error: true});
                 this.dismissError();
-            }
+            }*/
 
 
             this.setState({

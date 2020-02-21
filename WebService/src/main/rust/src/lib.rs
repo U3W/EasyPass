@@ -76,9 +76,9 @@ extern {
     fn add_network_listener(closure: &Closure<dyn FnMut()>);
 }
 
+// Combination of imported "log" function with "println!" like behaviour.
+// Taken from Rust-Wasm documentation.
 macro_rules! console_log {
-    // Note that this is using the `log` function imported above during
-    // `bare_bones`
     ($($t:tt)*) => (log(&format_args!($($t)*).to_string()))
 }
 
@@ -193,6 +193,12 @@ impl Backend {
         let worker = state.worker();
         // Perform operation
         match cmd.as_ref() {
+            "login" => {
+                let msg = Array::new_with_length(2);
+                msg.set(0, JsValue::from_str("login"));
+                msg.set(1, JsValue::from(true));
+                post_message(&msg);
+            },
             "network" => {
                 console_log!("NETWORK: {:?}", &data);
             },
