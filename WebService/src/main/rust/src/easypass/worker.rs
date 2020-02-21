@@ -258,7 +258,7 @@ impl Worker {
         // TODO network
         // Add network listener
         let network_closure = WorkerEvents::network(self.clone());
-        add_network_listener(&network_closure);
+        //add_network_listener(&network_closure);
         self.service_closure.replace(Some(network_closure));
         // Fetch all current docs and send result to UI
         self.clone().all_docs_without_passwords();

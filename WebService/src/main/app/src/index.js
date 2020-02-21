@@ -141,14 +141,12 @@ class App extends React.Component {
             this.state.worker.addEventListener("message", this.workerInit);
             indexState.setLoadingState(true);
         }
-
-
         // TODO Fix HandleConnection
         //  Function makes always a re-render, even though the state has not changed
         //  This results in flickering of data in the dashboard!!
         // this.handleConnectionChange();
-        window.addEventListener('online', this.handleConnectionChange);
-        window.addEventListener('offline', this.handleConnectionChange);
+        // window.addEventListener('online', this.handleConnectionChange);
+        // window.addEventListener('offline', this.handleConnectionChange);
     }
 
     componentWillUnmount() {

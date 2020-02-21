@@ -90,15 +90,15 @@ const removeEventListenerWorker = (name, f) => {
 };
 
 /**
+ * Note: On hold, because of no support in Chromium
  * Custom method to add a function as a network listener.
  * Used in WebAssembly code.
  */
+/**
 const addNetworkListener = (f) => {
-    self.ononline = function() {
-        f();
-    };
+    self.ononline = f;
     self.onoffline = f;
-};
+};*/
 
 let nodeMode = undefined;
 
