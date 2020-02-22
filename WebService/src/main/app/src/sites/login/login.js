@@ -108,6 +108,7 @@ class Login extends React.Component {
                 this.props.login(data);
                 if (LoginAuth.getLoggedIn()) {
                     history.push("/dashboard");
+                    LoginAuth.clear();
                 } else {
                     // Fehlermeldung
                     this.setState({error: true});
@@ -297,6 +298,7 @@ class Login extends React.Component {
             console.log("TWOFA", credentials.twofa);
 
             this.loginProcess(credentials);
+            this.props.saveUser(credentials.uname);
             /**this.props.login(this.state);
             this.props.saveUser(this.state.inpUsername);
 

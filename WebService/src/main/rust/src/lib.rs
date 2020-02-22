@@ -145,8 +145,9 @@ impl Backend {
         let _ = future_to_promise(async move {
             // Bind state to local variable
             let state = state_here;
+            // TODO is this future needed? Init is done in login now
             // Initialize worker
-            let _ = state.worker().init().await;
+            // let _ = state.worker().init().await;
             // Tell UI initialization is done
             post_message(&JsValue::from("initDone"));
             Ok(JsValue::from(true))

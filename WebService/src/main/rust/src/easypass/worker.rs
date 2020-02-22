@@ -13,7 +13,7 @@ use serde::{Deserialize, Serialize};
 use serde_json::json;
 use wasm_bindgen::__rt::std::future::Future;
 use wasm_bindgen::__rt::std::rc::Rc;
-use wasm_bindgen::__rt::core::cell::RefCell;
+use wasm_bindgen::__rt::core::cell::{RefCell, Ref};
 use wasm_bindgen::__rt::std::sync::{Arc, Mutex, PoisonError};
 use wasm_bindgen::JsCast;
 use serde_json::value::Value::Bool;
@@ -23,7 +23,6 @@ use web_sys::{MessageEvent};
 
 extern crate rand;
 use rand::Rng;
-use wasm_bindgen::__rt::Ref;
 
 // Add other modules that define Worker functionality
 // Allows to split Worker logic
@@ -59,7 +58,7 @@ extern {
 pub struct Worker {
     user: RefCell<Option<String>>,
     mkey: RefCell<Option<String>>,
-    private: Connection,
+    private: RefCell<Option<Connection>>,
     service_status: RefCell<String>,
     service_closure: RefCell<Option<Closure<dyn FnMut()>>>,
     database_url: RefCell<Option<String>>,
@@ -73,16 +72,16 @@ pub struct Worker {
 /// Also contains the changes-feed and sync-handler and their used closures.
 pub struct Connection {
     local_db: PouchDB,
-    remote_db: RefCell<Option<PouchDB>>,
+    remote_db: Option<PouchDB>,
     changes: Changes,
-    sync: RefCell<Option<Sync>>
+    sync: Option<Sync>
 }
 
 /// Holds the changes-feed of the database and its used closures.
 pub struct Changes {
     changes_feed: ChangesFeed,
-    change: RefCell<Option<Closure<dyn FnMut(JsValue)>>>,
-    error: RefCell<Option<Closure<dyn FnMut(JsValue)>>>
+    change: Closure<dyn FnMut(JsValue)>,
+    error: Closure<dyn FnMut(JsValue)>
 }
 
 /// Holds the sync-handler of the database and its used closures.
@@ -96,39 +95,12 @@ impl Worker {
     /// Creates a new Worker that manages databases.
     /// This includes live syncing and methods for CRUD-operations.
     pub fn new(url: String) -> Rc<Worker> {
+        // TODO is url needed? Init is done later...
         // User hash and masterkey are not known at initialization
         let user = RefCell::new(None);
         let mkey = RefCell::new(None);
-        // Setup new local database for private password entries
-        let settings = Settings { adapter: "idb".to_string() };
-        let local_db = PouchDB::new("Local", &JsValue::from_serde(&settings).unwrap());
-        // Setup new remote database for private password entries
-        // If offline, do not create remote connection
-        let remote_db = if url.len() == 0 {
-            RefCell::new(None)
-        } else {
-            RefCell::new(Some(PouchDB::new_with_name(&url)))
-        };
-        // Setup changes feed for database of private entries
-        let changes_feed = local_db.changes();
-        // Closures for the changes-feed will be initialized later properly
-        let change = RefCell::new(None);
-        let error = RefCell::new(None);
-        // Create struct that holds everything relevant to changes
-        let changes = Changes {
-            changes_feed,
-            change,
-            error
-        };
-        // Create temporary sync struct
-        let sync = RefCell::new(None);
-        // Create struct that holds everything relevant to database of private entries
-        let private = Connection {
-            local_db,
-            remote_db,
-            changes,
-            sync
-        };
+        // Databases will be setup later on
+        let private = RefCell::new(None);
         // Create worker with reference counting to enable its usage
         // in multiple parts in the application
         let worker = Rc::new(Worker {
@@ -147,9 +119,10 @@ impl Worker {
         worker
     }
 
-    pub async fn init(self: Rc<Worker>) -> Result<JsValue, JsValue> {
+    pub async fn init(self: Rc<Worker>) {
         log("init");
         log(&get_node_mode());
+
         if is_online() {
             let worker = self.clone();
             let result = JsFuture::from(get_database_url()).await;
@@ -170,11 +143,18 @@ impl Worker {
             log("offline");
             self.service_status.replace(String::from("offline"));
         }
-        Ok(JsValue::from(true))
     }
 
     /// Starts live replication for private password entries.
     pub fn hearbeat(self: Rc<Worker>) {
+        // Setup new local database for private password entries
+        let settings = Settings { adapter: "idb".to_string() };
+        // TODO get name dynamically!
+        let local_db_name = &format!("{}-local", self.user.borrow().as_ref().unwrap());
+
+        let local_db = PouchDB::new(local_db_name, &JsValue::from_serde(&settings).unwrap());
+        // Setup changes feed for database of private entries
+        let changes_feed = local_db.changes();
         // With the reference to the Worker the functionality
         // for database updates can be defined
         let worker_moved_change = self.clone();
@@ -194,23 +174,32 @@ impl Worker {
             let worker = &worker_moved_error;
             log("EEEEEEEEEEEERRRRRRRRROOOOOOOOOOORRRRRRRRR!");
         });
-        // On change functions need to be bound to the changes feed
-        self.private.changes.changes_feed.on_change(&change);
-        self.private.changes.changes_feed.on_error(&error);
-        self.private.changes.change.replace(Some(change));
-        self.private.changes.error.replace(Some(error));
 
+        // On change functions need to be bound to the changes feed
+        changes_feed.on_change(&change);
+        changes_feed.on_error(&error);
+        //changes.change.replace(Some(change));
+        //changes.error.replace(Some(error));
+
+        // Create struct that holds everything relevant to changes
+        let changes = Changes {
+            changes_feed,
+            change,
+            error
+        };
+
+        // Create temporary remote_db
+        let mut remote_db_done = None;
+
+        // Create sync struct
         log("heart 1");
-        if self.service_status.borrow().as_str() == "online" {
+        let sync = if self.service_status.borrow().as_str() == "online" {
             log("Heart 2");
             // Init remote databases
-            self.private.remote_db.replace(
-                Some(PouchDB::new_with_name(&format!("{}/testdb",
-                     &self.database_url.borrow().as_ref().unwrap())))
-            );
+            let remote_db = PouchDB::new_with_name(&format!("{}/testdb",
+                     &self.database_url.borrow().as_ref().unwrap()));
             // Get Sync Handler
-            let sync_handler: SyncHandler
-                = self.private.local_db.sync(&self.private.remote_db.borrow().as_ref().unwrap());
+            let sync_handler: SyncHandler = local_db.sync(&remote_db);
             // Define functionality on change when syncing
             let change_closure = Closure::new(move |val: JsValue| {
                 log("Sync Change!");
@@ -222,15 +211,26 @@ impl Worker {
             // Bind on change functions
             sync_handler.on_change(&change_closure);
             sync_handler.on_error(&error_closure);
+
+            remote_db_done = Some(remote_db);
             // Create struct that holds everything relevant to syncing
-            let sync = Sync {
+            Some(Sync {
                 sync_handler,
                 change: change_closure,
                 error: error_closure
-            };
-            // And add it to the Worker
-            self.private.sync.replace(Some(sync));
-        }
+            })
+        } else {
+            None
+        };
+        // Create struct that holds everything relevant to database of private entries
+        let private = Some(Connection {
+            local_db,
+            remote_db: remote_db_done,
+            changes,
+            sync
+        });
+        // Add it to the worker
+        self.private.replace(private);
 
         /**
         // Establish remote connection and sync only when online
@@ -277,7 +277,7 @@ impl Worker {
 
     pub fn all_docs_without_passwords(self: Rc<Worker>) {
         let _ = future_to_promise(async move {
-            let action = JsFuture::from(self.private.local_db.all_docs_without_passwords());
+            let action = JsFuture::from(self.private.borrow().as_ref().unwrap().local_db.all_docs_without_passwords());
             let result = action.await;
             let msg = Array::new_with_length(2);
             msg.set(0, JsValue::from_str("allEntries"));
@@ -291,19 +291,19 @@ impl Worker {
     pub async fn save_password(self: Rc<Worker>, data: JsValue) {
         // TODO Worker Decrypt Password
         let result
-            = JsFuture::from(self.private.local_db.post(&data)).await;
+            = JsFuture::from(self.private.borrow().as_ref().unwrap().local_db.post(&data)).await;
         Worker::build_and_post_message("savePassword", result.unwrap());
     }
 
     pub async fn update_password(self: Rc<Worker>, data: JsValue) {
         let result
-            = JsFuture::from(self.private.local_db.put(&data)).await;
+            = JsFuture::from(self.private.borrow().as_ref().unwrap().local_db.put(&data)).await;
         Worker::build_and_post_message("updatePassword", result.unwrap());
     }
 
     pub async fn delete_password(self: Rc<Worker>, data: JsValue) {
         // Bind private database and cache for deleted password entries
-        let private_db = &self.private.local_db;
+        let private_db = self.get_private_local_db();
         let cache = &self.password_cache;
         // Clear is a hashmap which stores deletion routines (closures)
         let mut clear = self.password_clear.borrow_mut();
@@ -366,7 +366,7 @@ impl Worker {
 
     pub async fn undo_delete_password(self: Rc<Worker>, data: JsValue) {
         // Bind private database
-        let private_db = &self.private.local_db;
+        let private_db = self.get_private_local_db();
         // Get full backup data
         let mut cache = self.password_cache.borrow_mut();
         // Parse received password entry
@@ -401,13 +401,13 @@ impl Worker {
     pub async fn save_category(self: Rc<Worker>, data: JsValue) {
         // TODO Worker Decrypt Password
         let result
-            = JsFuture::from(self.private.local_db.post(&data)).await;
+            = JsFuture::from(self.private.borrow().as_ref().unwrap().local_db.post(&data)).await;
         Worker::build_and_post_message("saveCategory", result.unwrap());
     }
 
     pub async fn update_category(self: Rc<Worker>, data: JsValue) {
         let result
-            = JsFuture::from(self.private.local_db.put(&data)).await;
+            = JsFuture::from(self.private.borrow().as_ref().unwrap().local_db.put(&data)).await;
         Worker::build_and_post_message("updateCategory", result.unwrap());
     }
 
@@ -415,7 +415,7 @@ impl Worker {
         // Convert JsValue to Array, that its truly is
         let categories = Array::from(&categories);
         // Bind private database and cache for deleted password entries
-        let private_db = &self.private.local_db;
+        let private_db = self.get_private_local_db();
         let mut cache = self.category_cache.borrow_mut();
         // Clear is a hashmap which stores deletion routines (closures)
         let mut clear = self.category_clear.borrow_mut();
@@ -508,7 +508,7 @@ impl Worker {
         // Convert JsValue to Array, that its truly is
         let categories = Array::from(&categories);
         // Bind private database and cache for deleted password entries
-        let private_db = &self.private.local_db;
+        let private_db = self.get_private_local_db();
         let mut cache = self.category_cache.borrow_mut();
         // Convert received category data to vec
         let categories: Vec<Value> = categories.into_serde().unwrap();
@@ -547,7 +547,7 @@ impl Worker {
 
     pub async fn get_password(self: Rc<Worker>, cmd: String, data: JsValue) {
         // Bind private database
-        let private_db = &self.private.local_db;
+        let private_db = self.get_private_local_db();
         // Parse data to make it readable from Rust
         let data_parsed = data.into_serde::<Value>().unwrap();
         // Search for received entry
@@ -582,36 +582,41 @@ impl Worker {
 
     pub fn find(self: Rc<Worker>, data: JsValue) -> Promise {
         future_to_promise(async move {
-            JsFuture::from(self.private.local_db.find(&data)).await
+            JsFuture::from(self.private.borrow().as_ref().unwrap().local_db.find(&data)).await
         })
     }
 
     pub fn all_docs(self: Rc<Worker>) -> Promise {
         future_to_promise(async move {
-            JsFuture::from(self.private.local_db.all_docs_included()).await
+            JsFuture::from(self.private.borrow().as_ref().unwrap().local_db.all_docs_included()).await
         })
     }
 
     pub fn remove_with_element(self: Rc<Worker>, data: JsValue) -> Promise {
         future_to_promise(async move {
-            JsFuture::from(self.private.local_db.remove_with_element(&data)).await
+            JsFuture::from(self.private.borrow().as_ref().unwrap().local_db.remove_with_element(&data)).await
         })
     }
 
     pub fn remove(self: Rc<Worker>, doc_id: JsValue, doc_rev: JsValue) -> Promise {
         future_to_promise(async move {
-            JsFuture::from(self.private.local_db.remove(&doc_id, &doc_rev)).await
+            JsFuture::from(self.private.borrow().as_ref().unwrap().local_db.remove(&doc_id, &doc_rev)).await
         })
     }
 }
 
 /// Functions that return or alter Worker state
 impl Worker {
-    pub fn get_private_local_db(&self) -> &PouchDB {
-        &self.private.local_db
+
+    /// Return a reference to the local database for private password entries
+    pub fn get_private_local_db(&self) -> Ref<PouchDB> {
+        let conn = self.private.borrow();
+        Ref::map(conn, |t| {
+          &t.as_ref().unwrap().local_db
+        })
     }
 
-    // TODO refactor?
+    /// Returns service/network status of the app
     pub fn get_service_status(self: Rc<Worker>) -> RefCell<String> {
         self.service_status.clone()
     }

@@ -36,6 +36,8 @@ impl Worker {
             // Attach credentials to worker
             self.user.replace(Some(user_hash));
             self.mkey.replace(Some(mkey));
+            // Init databases in worker
+            self.clone().init().await;
             true
         } else {
             // Unsuccessful check
