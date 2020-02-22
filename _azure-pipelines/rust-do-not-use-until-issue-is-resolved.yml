@@ -6,7 +6,7 @@ steps:
       set -e
       if command -v rustup; then
         rustup update $TOOLCHAIN
-        rustup default nightly-2020-02-07
+        rustup default $TOOLCHAIN
       else
         curl https://sh.rustup.rs -sSf | sh -s -- -y --default-toolchain $TOOLCHAIN
         echo "##vso[task.prependpath]$HOME/.cargo/bin"

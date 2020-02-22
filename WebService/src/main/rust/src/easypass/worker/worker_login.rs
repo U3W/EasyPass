@@ -4,9 +4,10 @@ use js_sys::{Array, Object};
 use web_sys::{FileReaderSync, Blob, File};
 use serde_json::Value;
 use crate::easypass::worker::Worker;
-use crate::{post_message, log};
+use crate::{post_message, log, is_online};
 
 impl Worker {
+    /// Checks the user credentials for authentication in the app.
     pub async fn login(self: Rc<Worker>, credentials: JsValue) {
         // Get credential values
         let obj = Object::try_from(&credentials).unwrap();
@@ -28,7 +29,21 @@ impl Worker {
         // TODO @Moritz build masterkey from password + 2FA
         let mkey = passwd;
         // TODO Remove this dummy code
-        // Check credentials
+        // Check credentials depending on network status
+        let check = if is_online() {
+            self.clone().login_online(user, mkey).await
+        } else {
+            self.clone().login_offline(user, mkey).await
+        };
+        // Send response to UI thread
+        Worker::build_and_post_message(&"login", JsValue::from(check));
+    }
+
+    /// This authentication method is used when the client is online.
+    /// The credentials are checked with the Easypass-Service.
+    pub async fn login_online(self: Rc<Worker>, user: String, mkey: String) -> bool {
+        // TODO @Martin Define Login API...
+        //  Remove this dummy implementation later on
         let check = if user == "test" && mkey == "test" {
             // Successful check
             // TODO @Moritz build userhash
@@ -43,10 +58,13 @@ impl Worker {
             // Unsuccessful check
             false
         };
-        let msg = Array::new_with_length(2);
-        msg.set(0, JsValue::from_str("login"));
-        msg.set(1, JsValue::from(check));
-        post_message(&msg);
+        check
+    }
+
+    /// This authentication method is used when the client is offline.
+    /// The credentials are checked through hashes in the local database.
+    pub async fn login_offline(self: Rc<Worker>, user: String, mkey: String) -> bool {
+        true
     }
 }
 

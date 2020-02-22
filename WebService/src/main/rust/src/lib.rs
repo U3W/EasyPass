@@ -67,6 +67,9 @@ extern {
     fn remove_offline_listener(name: &str, closure: &Closure<dyn FnMut()>);*/
     #[wasm_bindgen(js_name = addNetworkListener)]
     fn add_network_listener(closure: &Closure<dyn FnMut()>);
+
+    #[wasm_bindgen(js_name = isOnline)]
+    fn is_online() -> bool;
 }
 
 // Combination of imported "log" function with "println!" like behaviour.

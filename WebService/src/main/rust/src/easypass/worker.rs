@@ -2,27 +2,26 @@
 use crate::easypass::easypass::*;
 use crate::easypass::timeout::*;
 use crate::pouchdb::pouchdb::*;
+use crate::is_online;
 
 use wasm_bindgen::prelude::*;
 use wasm_bindgen_futures::{spawn_local, future_to_promise};
 use wasm_bindgen_futures::JsFuture;
-
-use serde_json::{Value};
-use js_sys::{Promise, Array, ArrayBuffer};
-use serde::{Deserialize, Serialize};
-use serde_json::json;
 use wasm_bindgen::__rt::std::future::Future;
 use wasm_bindgen::__rt::std::rc::Rc;
 use wasm_bindgen::__rt::core::cell::{RefCell, Ref};
 use wasm_bindgen::__rt::std::sync::{Arc, Mutex, PoisonError};
-use wasm_bindgen::JsCast;
-use serde_json::value::Value::Bool;
 use wasm_bindgen::__rt::std::collections::HashMap;
-
+use js_sys::{Promise, Array, ArrayBuffer};
 use web_sys::{MessageEvent};
+use serde::{Deserialize, Serialize};
+use serde_json::json;
+use serde_json::{Value};
+use serde_json::value::Value::Bool;
 
 extern crate rand;
 use rand::Rng;
+
 
 // Add other modules that define Worker functionality
 // Allows to split Worker logic
@@ -43,9 +42,6 @@ extern {
 
     #[wasm_bindgen(js_name = sleep)]
     fn sleep(timeout: u64);
-
-    #[wasm_bindgen(js_name = isOnline)]
-    fn is_online() -> bool;
 
     #[wasm_bindgen(js_name = getDatabaseURL)]
     fn get_database_url() -> Promise;
