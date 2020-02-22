@@ -189,6 +189,7 @@ impl Worker {
 
         // Check/Write meta-data
         let user = String::from(self.user.borrow().as_ref().unwrap().as_str());
+        // TODO @moritz encrypt mkey with itself
         let mkey = String::from(self.mkey.borrow().as_ref().unwrap().as_str());
         Worker::write_meta_data(&meta.local_db, user, mkey).await;
 
@@ -263,9 +264,9 @@ impl Worker {
         }
     }
 
+    /// Writes and updates metadata.
+    /// Meta-data consist of the hash of the username and the encrypted masterkey.
     async fn write_meta_data(meta_db: &PouchDB, user: String, mkey: String) {
-        // TODO refactor
-
         let result_raw = JsFuture::from(meta_db.find(&JsValue::from_serde(&json!({
             "selector": {
                 "$or": [
@@ -281,72 +282,124 @@ impl Worker {
         console_log!("META1!: {:?}", &result_1);
         console_log!("META2!: {:?}", &result_2);
 
-        let result = if result_1.is_null() && result_2.is_null() {
-            // No meta data saved
+        if result_1.is_null() && result_2.is_null() {
+            // No meta-data saved
             let meta_data = JsValue::from_serde(&json!([
                 {"type": "mkey", "mkey": String::from(mkey)},
                 {"type": "user", "user": String::from(user)}
             ])).unwrap();
-            JsFuture::from(meta_db.bulk_docs(&meta_data)).await.unwrap()
+            JsFuture::from(meta_db.bulk_docs(&meta_data)).await.unwrap();
         } else if result_1.is_object() && result_2.is_object() {
-            // Both meta data is saved
-            let meta_data = if result_1["mkey"].is_string() {
+            // Both meta-data is saved
+            let mut user_val = &Value::Null;
+            let mut mkey_val = &Value::Null;
+            if result_1["mkey"].is_string() {
                 // result_1 is mkey, result_2 is user
-                JsValue::from_serde(&json!([
-                    {"type": "mkey", "mkey": String::from(mkey),
-                    "_id": result_1["_id"], "_rev": result_1["_rev"]},
-                    {"type": "user", "user": String::from(user),
-                    "_id": result_2["_id"], "_rev": result_2["_rev"]}
-                ])).unwrap()
+                mkey_val = result_1;
+                user_val = result_2;
             } else {
-                // result_1 is user, result_2 is mkey
-                JsValue::from_serde(&json!([
-                    {"type": "mkey", "mkey": String::from(mkey),
-                    "_id": result_2["_id"], "_rev": result_2["_rev"]},
-                    {"type": "user", "user": String::from(user),
-                    "_id": result_1["_id"], "_rev": result_1["_rev"]}
-                ])).unwrap()
-            };
-            JsFuture::from(meta_db.bulk_docs(&meta_data)).await.unwrap()
+                mkey_val = result_2;
+                user_val = result_1;
+            }
+            // Check if meta-data changed
+            if mkey_val["mkey"].as_str().unwrap() != &mkey || user_val["user"].as_str().unwrap() != &user {
+                let meta_data =
+                if mkey_val["mkey"].as_str().unwrap() != &mkey && user_val["user"].as_str().unwrap() != &user {
+                    // Meta-data must be updated
+                    JsValue::from_serde(&json!([
+                        {"type": "mkey", "mkey": String::from(mkey),
+                        "_id": mkey_val["_id"], "_rev": mkey_val["_rev"]},
+                        {"type": "user", "user": String::from(user),
+                        "_id": user_val["_id"], "_rev": user_val["_rev"]}
+                    ])).unwrap()
+                } else if mkey_val["mkey"].as_str().unwrap() == &mkey && user_val["user"].as_str().unwrap() != &user {
+                    // User meta-data must be updated
+                    JsValue::from_serde(&json!([
+                        {"type": "user", "user": String::from(user),
+                        "_id": user_val["_id"], "_rev": user_val["_rev"]}
+                    ])).unwrap()
+                } else {
+                    // Mkey meta-data must be updated
+                    JsValue::from_serde(&json!([
+                        {"type": "mkey", "mkey": String::from(mkey),
+                        "_id": mkey_val["_id"], "_rev": mkey_val["_rev"]},
+                    ])).unwrap()
+                };
+                JsFuture::from(meta_db.bulk_docs(&meta_data)).await.unwrap();
+            }
         } else if result_1.is_object() && result_2.is_null() {
             // One field is missing
             let meta_data = if result_1["mkey"].is_string() {
                 // result_1 is mkey, user meta-data is missing
-                JsValue::from_serde(&json!([
-                    {"type": "mkey", "mkey": String::from(mkey),
-                    "_id": result_1["_id"], "_rev": result_1["_rev"]},
-                    {"type": "user", "user": String::from(user)}
-                ])).unwrap()
+                let meta_data = if result_1["mkey"].as_str().unwrap() == &mkey {
+                    // mkey does not need to be updated
+                    JsValue::from_serde(&json!([
+                        {"type": "user", "user": String::from(user)}
+                    ])).unwrap()
+                } else {
+                    // mkey needs update
+                    JsValue::from_serde(&json!([
+                        {"type": "mkey", "mkey": String::from(mkey),
+                        "_id": result_1["_id"], "_rev": result_1["_rev"]},
+                        {"type": "user", "user": String::from(user)}
+                    ])).unwrap()
+                };
+                meta_data
             } else {
                 // result_1 is user, mkey meta-data is missing
-                JsValue::from_serde(&json!([
-                    {"type": "mkey", "mkey": String::from(mkey)},
-                    {"type": "user", "user": String::from(user),
-                    "_id": result_1["_id"], "_rev": result_1["_rev"]}
-                ])).unwrap()
+                let meta_data = if result_1["user"].as_str().unwrap() == &user {
+                    // user does not need to be updated
+                    JsValue::from_serde(&json!([
+                        {"type": "mkey", "mkey": String::from(mkey)},
+                    ])).unwrap()
+                } else {
+                    // user needs update
+                    JsValue::from_serde(&json!([
+                        {"type": "mkey", "mkey": String::from(mkey)},
+                        {"type": "user", "user": String::from(user),
+                        "_id": result_1["_id"], "_rev": result_1["_rev"]}
+                    ])).unwrap()
+                };
+                meta_data
             };
-            JsFuture::from(meta_db.bulk_docs(&meta_data)).await.unwrap()
+            JsFuture::from(meta_db.bulk_docs(&meta_data)).await.unwrap();
         } else {
             // Other filed is missing
             let meta_data = if result_2["mkey"].is_string() {
                 // result_2 is mkey, user meta-data is missing
-                JsValue::from_serde(&json!([
-                    {"type": "mkey", "mkey": String::from(mkey),
-                    "_id": result_2["_id"], "_rev": result_2["_rev"]},
-                    {"type": "user", "user": String::from(user)}
-                ])).unwrap()
+                let meta_data = if result_2["mkey"].as_str().unwrap() == &mkey {
+                    // mkey does not need to be updated
+                    JsValue::from_serde(&json!([
+                        {"type": "user", "user": String::from(user)}
+                    ])).unwrap()
+                } else {
+                    // mkey needs update
+                    JsValue::from_serde(&json!([
+                        {"type": "mkey", "mkey": String::from(mkey),
+                        "_id": result_2["_id"], "_rev": result_2["_rev"]},
+                        {"type": "user", "user": String::from(user)}
+                    ])).unwrap()
+                };
+                meta_data
             } else {
                 // result_2 is user, mkey meta-data is missing
-                JsValue::from_serde(&json!([
-                    {"type": "mkey", "mkey": String::from(mkey)},
-                    {"type": "user", "user": String::from(user),
-                    "_id": result_2["_id"], "_rev": result_2["_rev"]}
-                ])).unwrap()
+                let meta_data = if result_2["user"].as_str().unwrap() == &user {
+                    // user does not need to be updated
+                    JsValue::from_serde(&json!([
+                        {"type": "mkey", "mkey": String::from(mkey)},
+                    ])).unwrap()
+                } else {
+                    // user needs update
+                    JsValue::from_serde(&json!([
+                        {"type": "mkey", "mkey": String::from(mkey)},
+                        {"type": "user", "user": String::from(user),
+                        "_id": result_2["_id"], "_rev": result_2["_rev"]}
+                    ])).unwrap()
+                };
+                meta_data
             };
-            JsFuture::from(meta_db.bulk_docs(&meta_data)).await.unwrap()
+            JsFuture::from(meta_db.bulk_docs(&meta_data)).await.unwrap();
         };
-
-        console_log!("Save result {:?}", &result);
     }
 
     fn build_and_post_message(cmd: &str, data: JsValue) {

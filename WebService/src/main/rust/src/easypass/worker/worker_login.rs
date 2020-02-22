@@ -86,6 +86,9 @@ impl Worker {
     }
 
     async fn check_credentials(meta_db: &PouchDB, user_hash: &str, mkey: &str) -> bool {
+        // TODO @Kacper check credentials in metadb.
+        // TODO @Moritz encrypt mkey with itself
+        let mkey = mkey;
         true
     }
 }
