@@ -180,7 +180,7 @@ impl Backend {
                     if state.mode_as_string() == "dashboard" {
                         // Start live replication and send all data to UI
                         log("dashboard init 2");
-                        state.worker().hearbeat();
+                        state.worker().hearbeat().await;
                     }
                 } else {
                     match state.mode_as_string().as_ref() {

@@ -54,6 +54,7 @@ extern {
 pub struct Worker {
     user: RefCell<Option<String>>,
     mkey: RefCell<Option<String>>,
+    meta: RefCell<Option<Connection>>,
     private: RefCell<Option<Connection>>,
     closures: RefCell<Option<ClosureStorage>>,
     service_status: RefCell<String>,
@@ -79,10 +80,11 @@ struct Connection {
 /// Sync closures are called, when synchronization happens between local and
 /// remote database.
 struct ClosureStorage {
-    change: Closure<dyn FnMut(JsValue)>,
-    change_error: Closure<dyn FnMut(JsValue)>,
-    sync: Closure<dyn FnMut(JsValue)>,
-    sync_error: Closure<dyn FnMut(JsValue)>
+    change_closure: Closure<dyn FnMut(JsValue)>,
+    change_error_closure: Closure<dyn FnMut(JsValue)>,
+    sync_closure: Closure<dyn FnMut(JsValue)>,
+    sync_error_closure: Closure<dyn FnMut(JsValue)>,
+    meta_closure: Closure<dyn FnMut(JsValue)>
 }
 
 impl Worker {
@@ -94,12 +96,14 @@ impl Worker {
         let user = RefCell::new(None);
         let mkey = RefCell::new(None);
         // Databases will be setup later on
+        let meta = RefCell::new(None);
         let private = RefCell::new(None);
         // Create worker with reference counting to enable its usage
         // in multiple parts in the application
         let worker = Rc::new(Worker {
             user,
             mkey,
+            meta,
             private,
             closures: RefCell::new(None),
             service_status: RefCell::new(String::from("offline")),
@@ -141,13 +145,13 @@ impl Worker {
     }
 
     /// Starts live replication for private password entries.
-    pub fn hearbeat(self: Rc<Worker>) {
+    pub async fn hearbeat(self: Rc<Worker>) {
         // With the reference to the Worker the functionality for
         // database events can be defined through closures
         //
         // Define functionality for local changes
         let worker_moved_change = self.clone();
-        let change = Closure::new(move |val: JsValue| {
+        let change_closure = Closure::new(move |val: JsValue| {
             let worker = worker_moved_change.clone();
             spawn_local(async move {
                 //let worker = &worker_moved_change;
@@ -158,45 +162,91 @@ impl Worker {
         });
         // Define functionality for error cases on local changes
         let worker_moved_error = self.clone();
-        let change_error = Closure::new(move |val: JsValue| {
+        let change_error_closure = Closure::new(move |val: JsValue| {
             let worker = &worker_moved_error;
             log("EEEEEEEEEEEERRRRRRRRROOOOOOOOOOORRRRRRRRR!");
         });
         // Define functionality for remote-sync changes
-        let sync = Closure::new(move |val: JsValue| {
+        let sync_closure = Closure::new(move |val: JsValue| {
             log("Sync Change!");
         });
         // Define functionality for error cases on remote changes
-        let sync_error = Closure::new(move |val: JsValue| {
+        let sync_error_closure = Closure::new(move |val: JsValue| {
             log(&format!("Error {:?}", &val));
         });
+        // Define functionality for on change on meta database
+        let meta_closure = Closure::new(move |val: JsValue| {
+            log("META CHANGE!");
+        });
 
-        // Setup new local database for private password entries
+        // Define databases
+        //
+        // Setup meta database
+        let meta
+            = self.build_connection(String::from("meta"),
+        &meta_closure, &change_error_closure,
+        &sync_closure, &sync_error_closure);
+
+        // Check/Write meta-data
+        let user = String::from(self.user.borrow().as_ref().unwrap().as_str());
+        let mkey = String::from(self.mkey.borrow().as_ref().unwrap().as_str());
+        Worker::write_meta_data(&meta.local_db, user, mkey).await;
+
+        // Add it to the worker
+        let meta = Some(meta);
+        self.meta.replace(meta);
+
+        // Setup database for private password entries
+        let private
+            = self.build_connection(String::from("local"),
+        &change_closure, &change_error_closure,
+        &sync_closure, &sync_error_closure);
+        // Add it to the worker
+        let private = Some(private);
+        self.private.replace(private);
+
+        // Create struct that holds all database relevant closures
+        let closures = Some(ClosureStorage {
+            change_closure,
+            change_error_closure,
+            sync_closure,
+            sync_error_closure,
+            meta_closure
+        });
+        self.closures.replace(closures);
+
+        // Send all password entries to UI
+        self.clone().all_docs_without_passwords();
+    }
+
+    /// Setups local and remote database and returns them as one Connection struct.
+    /// Also, binds on change events of the database to the given closures.
+    fn build_connection(
+        &self, name: String,
+        change: &Closure<dyn FnMut(JsValue)>, change_error: &Closure<dyn FnMut(JsValue)>,
+        sync: &Closure<dyn FnMut(JsValue)>, sync_error: &Closure<dyn FnMut(JsValue)>
+    ) -> Connection {
+        // Setup local database
         let settings = Settings { adapter: "idb".to_string() };
-        // TODO get name dynamically!
-        let local_db_name = &format!("{}-local", self.user.borrow().as_ref().unwrap());
+        let local_db_name = &format!("{}-{}", self.user.borrow().as_ref().unwrap(), &name);
         let local_db = PouchDB::new(local_db_name, &JsValue::from_serde(&settings).unwrap());
-
-        // Setup changes feed for database of private entries
+        // Setup changes feed for database
         let changes_feed = local_db.changes();
         // On change functions need to be bound to the changes feed
-        changes_feed.on_change(&change);
-        changes_feed.on_error(&change_error);
-
+        changes_feed.on_change(change);
+        changes_feed.on_error(change_error);
         // Create variable that contains the remote database or none
         let mut remote_db = None;
         // When online, setup remote database and sync handler
-        log("heart 1");
         let sync_handler = if self.service_status.borrow().as_str() == "online" {
-            log("Heart 2");
             // Init remote databases
-            let remote_db_here = PouchDB::new_with_name(&format!("{}/testdb",
-                     &self.database_url.borrow().as_ref().unwrap()));
+            let remote_db_here = PouchDB::new_with_name(&format!("{}/-{}",
+                 &self.database_url.borrow().as_ref().unwrap(), &name));
             // Get Sync Handler
             let sync_handler: SyncHandler = local_db.sync(&remote_db_here);
             // Bind on change functions
-            sync_handler.on_change(&sync);
-            sync_handler.on_error(&sync_error);
+            sync_handler.on_change(sync);
+            sync_handler.on_error(sync_error);
             // Save new remote database
             remote_db = Some(remote_db_here);
             // Return sync handler
@@ -204,58 +254,99 @@ impl Worker {
         } else {
             None
         };
-
-        // Create struct that holds everything relevant to database of private entries
-        let private = Some(Connection {
+        // Create struct that holds connection information and return it
+        Connection {
             local_db,
             remote_db,
             changes_feed,
             sync_handler
-        });
-        // Add it to the worker
-        self.private.replace(private);
-        // Create struct that holds all database relevant closures
-        let closures = Some(ClosureStorage {
-            change,
-            change_error,
-            sync,
-            sync_error
-        });
-        self.closures.replace(closures);
-
-        /**
-        // Establish remote connection and sync only when online
-        if self.private.remote.is_some() {
-            // Get Sync Handler
-            let sync_handler: SyncHandler
-                = self.private.local.sync(&self.private.remote.as_ref().unwrap());
-            // Define functionality on change when syncing
-            let service_status = Arc::clone(&self.service_status);
-            let private_db = Arc::clone(&self.private.local);
-            let change_closure = Closure::new(move |val: JsValue| {
-                log("Sync Change!");
-                // Worker::all_docs_without_passwords(&private_db);
-            });
-            // Define functionality on error when syncing
-            let service_status = Arc::clone(&self.service_status);
-            let error_closure = Closure::new(move |val: JsValue| {
-                log(&format!("Error {:?}", &val));
-                log(&format!("Error!! {}", &service_status.lock().unwrap()));
-            });
-            // Bind on change functions
-            sync_handler.on_change(&change_closure);
-            sync_handler.on_error(&error_closure);
-            // Create struct that holds everything relevant to syncing
-            let sync = Sync {
-                sync_handler,
-                change: change_closure,
-                error: error_closure
-            };
-            // And add it to the Worker
-            self.private.sync = Some(sync);
         }
-        */
-        self.clone().all_docs_without_passwords();
+    }
+
+    async fn write_meta_data(meta_db: &PouchDB, user: String, mkey: String) {
+        // TODO refactor
+
+        let result_raw = JsFuture::from(meta_db.find(&JsValue::from_serde(&json!({
+            "selector": {
+                "$or": [
+                    {"type": "user"},
+                    {"type": "mkey"}
+                ]
+            }
+        })).unwrap())).await.unwrap();
+        // Parse received entry
+        let result_raw = result_raw.into_serde::<Value>().unwrap();
+        let result_1 = &result_raw["docs"][0];
+        let result_2 = &result_raw["docs"][1];
+        console_log!("META1!: {:?}", &result_1);
+        console_log!("META2!: {:?}", &result_2);
+
+        let result = if result_1.is_null() && result_2.is_null() {
+            // No meta data saved
+            let meta_data = JsValue::from_serde(&json!([
+                {"type": "mkey", "mkey": String::from(mkey)},
+                {"type": "user", "user": String::from(user)}
+            ])).unwrap();
+            JsFuture::from(meta_db.bulk_docs(&meta_data)).await.unwrap()
+        } else if result_1.is_object() && result_2.is_object() {
+            // Both meta data is saved
+            let meta_data = if result_1["mkey"].is_string() {
+                // result_1 is mkey, result_2 is user
+                JsValue::from_serde(&json!([
+                    {"type": "mkey", "mkey": String::from(mkey),
+                    "_id": result_1["_id"], "_rev": result_1["_rev"]},
+                    {"type": "user", "user": String::from(user),
+                    "_id": result_2["_id"], "_rev": result_2["_rev"]}
+                ])).unwrap()
+            } else {
+                // result_1 is user, result_2 is mkey
+                JsValue::from_serde(&json!([
+                    {"type": "mkey", "mkey": String::from(mkey),
+                    "_id": result_2["_id"], "_rev": result_2["_rev"]},
+                    {"type": "user", "user": String::from(user),
+                    "_id": result_1["_id"], "_rev": result_1["_rev"]}
+                ])).unwrap()
+            };
+            JsFuture::from(meta_db.bulk_docs(&meta_data)).await.unwrap()
+        } else if result_1.is_object() && result_2.is_null() {
+            // One field is missing
+            let meta_data = if result_1["mkey"].is_string() {
+                // result_1 is mkey, user meta-data is missing
+                JsValue::from_serde(&json!([
+                    {"type": "mkey", "mkey": String::from(mkey),
+                    "_id": result_1["_id"], "_rev": result_1["_rev"]},
+                    {"type": "user", "user": String::from(user)}
+                ])).unwrap()
+            } else {
+                // result_1 is user, mkey meta-data is missing
+                JsValue::from_serde(&json!([
+                    {"type": "mkey", "mkey": String::from(mkey)},
+                    {"type": "user", "user": String::from(user),
+                    "_id": result_1["_id"], "_rev": result_1["_rev"]}
+                ])).unwrap()
+            };
+            JsFuture::from(meta_db.bulk_docs(&meta_data)).await.unwrap()
+        } else {
+            // Other filed is missing
+            let meta_data = if result_2["mkey"].is_string() {
+                // result_2 is mkey, user meta-data is missing
+                JsValue::from_serde(&json!([
+                    {"type": "mkey", "mkey": String::from(mkey),
+                    "_id": result_2["_id"], "_rev": result_2["_rev"]},
+                    {"type": "user", "user": String::from(user)}
+                ])).unwrap()
+            } else {
+                // result_2 is user, mkey meta-data is missing
+                JsValue::from_serde(&json!([
+                    {"type": "mkey", "mkey": String::from(mkey)},
+                    {"type": "user", "user": String::from(user),
+                    "_id": result_2["_id"], "_rev": result_2["_rev"]}
+                ])).unwrap()
+            };
+            JsFuture::from(meta_db.bulk_docs(&meta_data)).await.unwrap()
+        };
+
+        console_log!("Save result {:?}", &result);
     }
 
     fn build_and_post_message(cmd: &str, data: JsValue) {
@@ -268,13 +359,22 @@ impl Worker {
 
     pub fn all_docs_without_passwords(self: Rc<Worker>) {
         let _ = future_to_promise(async move {
+            console_log!("all here1");
             let action = JsFuture::from(self.private.borrow().as_ref().unwrap().local_db.all_docs_without_passwords());
             let result = action.await;
-            let msg = Array::new_with_length(2);
-            msg.set(0, JsValue::from_str("allEntries"));
-            // TODO error handling
-            msg.set(1, result.unwrap());
-            post_message(&msg);
+            console_log!("all here2");
+            match result {
+                Ok(data) => {
+                    let msg = Array::new_with_length(2);
+                    msg.set(0, JsValue::from_str("allEntries"));
+                    // TODO error handling
+                    msg.set(1, data);
+                    post_message(&msg);
+                },
+                Err(e) => {
+                    console_log!("SEND ERROR {:?}", e);
+                }
+            }
             Ok(JsValue::undefined())
         });
     }
