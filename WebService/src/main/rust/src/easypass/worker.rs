@@ -55,6 +55,7 @@ pub struct Worker {
     user: RefCell<Option<String>>,
     mkey: RefCell<Option<String>>,
     private: RefCell<Option<Connection>>,
+    closures: RefCell<Option<ClosureStorage>>,
     service_status: RefCell<String>,
     service_closure: RefCell<Option<Closure<dyn FnMut()>>>,
     database_url: RefCell<Option<String>>,
@@ -65,26 +66,23 @@ pub struct Worker {
 }
 
 /// Holds one logical databases with references to the local and remote one.
-/// Also contains the changes-feed and sync-handler and their used closures.
-pub struct Connection {
+/// Also, contains the changes-feed and sync-handler.
+struct Connection {
     local_db: PouchDB,
     remote_db: Option<PouchDB>,
-    changes: Changes,
-    sync: Option<Sync>
-}
-
-/// Holds the changes-feed of the database and its used closures.
-pub struct Changes {
     changes_feed: ChangesFeed,
-    change: Closure<dyn FnMut(JsValue)>,
-    error: Closure<dyn FnMut(JsValue)>
+    sync_handler: Option<SyncHandler>
 }
 
-/// Holds the sync-handler of the database and its used closures.
-pub struct Sync {
-    sync_handler: SyncHandler,
+/// Holds all database-relevant closures used by the Worker
+/// Change closures are called, when somethings changes in the local database.
+/// Sync closures are called, when synchronization happens between local and
+/// remote database.
+struct ClosureStorage {
     change: Closure<dyn FnMut(JsValue)>,
-    error: Closure<dyn FnMut(JsValue)>
+    change_error: Closure<dyn FnMut(JsValue)>,
+    sync: Closure<dyn FnMut(JsValue)>,
+    sync_error: Closure<dyn FnMut(JsValue)>
 }
 
 impl Worker {
@@ -103,6 +101,7 @@ impl Worker {
             user,
             mkey,
             private,
+            closures: RefCell::new(None),
             service_status: RefCell::new(String::from("offline")),
             service_closure: RefCell::new(None),
             database_url: RefCell::new(None),
@@ -143,16 +142,10 @@ impl Worker {
 
     /// Starts live replication for private password entries.
     pub fn hearbeat(self: Rc<Worker>) {
-        // Setup new local database for private password entries
-        let settings = Settings { adapter: "idb".to_string() };
-        // TODO get name dynamically!
-        let local_db_name = &format!("{}-local", self.user.borrow().as_ref().unwrap());
-
-        let local_db = PouchDB::new(local_db_name, &JsValue::from_serde(&settings).unwrap());
-        // Setup changes feed for database of private entries
-        let changes_feed = local_db.changes();
-        // With the reference to the Worker the functionality
-        // for database updates can be defined
+        // With the reference to the Worker the functionality for
+        // database events can be defined through closures
+        //
+        // Define functionality for local changes
         let worker_moved_change = self.clone();
         let change = Closure::new(move |val: JsValue| {
             let worker = worker_moved_change.clone();
@@ -163,70 +156,72 @@ impl Worker {
                 worker.clone().all_docs_without_passwords();
             });
         });
-        // With the reference to the Worker the functionality
-        // for database errors can be defined
+        // Define functionality for error cases on local changes
         let worker_moved_error = self.clone();
-        let error = Closure::new(move |val: JsValue| {
+        let change_error = Closure::new(move |val: JsValue| {
             let worker = &worker_moved_error;
             log("EEEEEEEEEEEERRRRRRRRROOOOOOOOOOORRRRRRRRR!");
         });
+        // Define functionality for remote-sync changes
+        let sync = Closure::new(move |val: JsValue| {
+            log("Sync Change!");
+        });
+        // Define functionality for error cases on remote changes
+        let sync_error = Closure::new(move |val: JsValue| {
+            log(&format!("Error {:?}", &val));
+        });
 
+        // Setup new local database for private password entries
+        let settings = Settings { adapter: "idb".to_string() };
+        // TODO get name dynamically!
+        let local_db_name = &format!("{}-local", self.user.borrow().as_ref().unwrap());
+        let local_db = PouchDB::new(local_db_name, &JsValue::from_serde(&settings).unwrap());
+
+        // Setup changes feed for database of private entries
+        let changes_feed = local_db.changes();
         // On change functions need to be bound to the changes feed
         changes_feed.on_change(&change);
-        changes_feed.on_error(&error);
-        //changes.change.replace(Some(change));
-        //changes.error.replace(Some(error));
+        changes_feed.on_error(&change_error);
 
-        // Create struct that holds everything relevant to changes
-        let changes = Changes {
-            changes_feed,
-            change,
-            error
-        };
-
-        // Create temporary remote_db
-        let mut remote_db_done = None;
-
-        // Create sync struct
+        // Create variable that contains the remote database or none
+        let mut remote_db = None;
+        // When online, setup remote database and sync handler
         log("heart 1");
-        let sync = if self.service_status.borrow().as_str() == "online" {
+        let sync_handler = if self.service_status.borrow().as_str() == "online" {
             log("Heart 2");
             // Init remote databases
-            let remote_db = PouchDB::new_with_name(&format!("{}/testdb",
+            let remote_db_here = PouchDB::new_with_name(&format!("{}/testdb",
                      &self.database_url.borrow().as_ref().unwrap()));
             // Get Sync Handler
-            let sync_handler: SyncHandler = local_db.sync(&remote_db);
-            // Define functionality on change when syncing
-            let change_closure = Closure::new(move |val: JsValue| {
-                log("Sync Change!");
-            });
-            // Define functionality on error when syncing
-            let error_closure = Closure::new(move |val: JsValue| {
-                log(&format!("Error {:?}", &val));
-            });
+            let sync_handler: SyncHandler = local_db.sync(&remote_db_here);
             // Bind on change functions
-            sync_handler.on_change(&change_closure);
-            sync_handler.on_error(&error_closure);
-
-            remote_db_done = Some(remote_db);
-            // Create struct that holds everything relevant to syncing
-            Some(Sync {
-                sync_handler,
-                change: change_closure,
-                error: error_closure
-            })
+            sync_handler.on_change(&sync);
+            sync_handler.on_error(&sync_error);
+            // Save new remote database
+            remote_db = Some(remote_db_here);
+            // Return sync handler
+            Some(sync_handler)
         } else {
             None
         };
+
         // Create struct that holds everything relevant to database of private entries
         let private = Some(Connection {
             local_db,
-            remote_db: remote_db_done,
-            changes,
-            sync
+            remote_db,
+            changes_feed,
+            sync_handler
         });
         // Add it to the worker
         self.private.replace(private);
+        // Create struct that holds all database relevant closures
+        let closures = Some(ClosureStorage {
+            change,
+            change_error,
+            sync,
+            sync_error
+        });
+        self.closures.replace(closures);
 
         /**
         // Establish remote connection and sync only when online

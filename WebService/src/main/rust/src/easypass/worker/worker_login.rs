@@ -5,6 +5,8 @@ use web_sys::{FileReaderSync, Blob, File};
 use serde_json::Value;
 use crate::easypass::worker::Worker;
 use crate::{post_message, log, is_online};
+use crate::pouchdb::pouchdb::{PouchDB, Settings};
+
 
 impl Worker {
     /// Checks the user credentials for authentication in the app.
@@ -41,7 +43,7 @@ impl Worker {
 
     /// This authentication method is used when the client is online.
     /// The credentials are checked with the Easypass-Service.
-    pub async fn login_online(self: Rc<Worker>, user: String, mkey: String) -> bool {
+    async fn login_online(self: Rc<Worker>, user: String, mkey: String) -> bool {
         // TODO @Martin Define Login API...
         //  Remove this dummy implementation later on
         let check = if user == "test" && mkey == "test" {
@@ -63,7 +65,27 @@ impl Worker {
 
     /// This authentication method is used when the client is offline.
     /// The credentials are checked through hashes in the local database.
-    pub async fn login_offline(self: Rc<Worker>, user: String, mkey: String) -> bool {
+    async fn login_offline(self: Rc<Worker>, user: String, mkey: String) -> bool {
+        // TODO @Moritz build userhash
+        let user_hash = user;
+
+        let settings = Settings { adapter: "idb".to_string() };
+        let db_name = format!("{}-meta", &user_hash);
+
+        let meta_db = PouchDB::new(&db_name, &JsValue::from_serde(&settings).unwrap());
+
+        let check = Worker::check_credentials(&meta_db, &user_hash, &mkey).await;
+        if check {
+            // Attach credentials to worker
+            self.user.replace(Some(user_hash));
+            self.mkey.replace(Some(mkey));
+            // Init databases in worker
+            self.clone().init().await;
+        }
+        check
+    }
+
+    async fn check_credentials(meta_db: &PouchDB, user_hash: &str, mkey: &str) -> bool {
         true
     }
 }

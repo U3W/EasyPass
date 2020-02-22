@@ -6,9 +6,10 @@ steps:
       set -e
       if command -v rustup; then
         rustup update $TOOLCHAIN
-        rustup default nightly-2020-02-07
+        rustup default 1.43.0-nightly
       else
         curl https://sh.rustup.rs -sSf | sh -s -- -y --default-toolchain $TOOLCHAIN
+        rustup default 1.43.0-nightly
         echo "##vso[task.prependpath]$HOME/.cargo/bin"
       fi
     displayName: Install rust - Unix
@@ -16,7 +17,7 @@ steps:
     env:
       TOOLCHAIN: ${{ parameters.toolchain }}
 
-  - bash: rustup update --no-self-update $TOOLCHAIN && rustup default $TOOLCHAIN
+  - bash: rustup update --no-self-update $TOOLCHAIN && rustup default 1.43.0-nightly
     displayName: Install rust - Windows
     condition: eq( variables['Agent.OS'], 'Windows_NT' )
     env:
