@@ -22,7 +22,6 @@ class AuthRestController(private val challengeAuthenticationProvider: ChallengeA
                          private val userRepository: UserRepository) {
     /**
      * A request creates a new challenge in the [ChallengeAuthenticationProvider]
-     * @param challenge: an instance of the class [RequestChallenge] which specifies the challenge credentials
      * @param request: an instance of the class [HttpServletRequest]
      */
     @PostMapping("/challenge")

@@ -18,8 +18,8 @@ import org.springframework.security.web.authentication.logout.*
 @Configuration
 @EnableWebSecurity
 class SecurityConfiguration(private val authProvider: ChallengeAuthenticationProvider,
-                            private val isGroupFilter: IsGroupFilter,
-                            private val isAdminFilter: IsAdminFilter,
+                            private val groupFilter: GroupFilter,
+                            private val adminFilter: AdminFilter,
                             private val storeFilter: StoreFilter) : WebSecurityConfigurerAdapter() {
     /**
      * This method is used to add the [ChallengeAuthenticationProvider] to Spring-Security
@@ -60,8 +60,8 @@ class SecurityConfiguration(private val authProvider: ChallengeAuthenticationPro
                 .antMatchers("/store/**").authenticated()
                 .anyRequest().denyAll()
                 .and()
-                .addFilterBefore(isGroupFilter, AnonymousAuthenticationFilter::class.java)
-                .addFilterBefore(isAdminFilter, AnonymousAuthenticationFilter::class.java)
+                .addFilterBefore(groupFilter, AnonymousAuthenticationFilter::class.java)
+                .addFilterBefore(adminFilter, AnonymousAuthenticationFilter::class.java)
                 .addFilterBefore(storeFilter, AnonymousAuthenticationFilter::class.java)
     }
 }

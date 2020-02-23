@@ -12,7 +12,7 @@ import javax.servlet.http.*
  * Checks each request and sends an UNAUTHORIZED 401 ERROR, if the authorities don't contain the String ROLE_ADMIN
  */
 @Component
-class IsAdminFilter : OncePerRequestFilter() {
+class AdminFilter : OncePerRequestFilter() {
     /**
      * Validates the authorities of the [request]
      * @param request: an instance of the class [HttpServletRequest]
