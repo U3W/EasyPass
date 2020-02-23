@@ -14,8 +14,8 @@ curl -i -X GET -H "Accept:application/json" -b cookie.txt http://localhost:7000/
 curl -i -X GET -H "Accept:application/json" -b cookie.txt http://localhost:7000/store/mwustinger-meta
 
 
-curl -i -X POST -b cookie.txt http://localhost:7000/auth/logout
 curl -i -X POST -b cookie.txt http://localhost:7000/user/remove
+curl -i -X POST -b cookie.txt http://localhost:7000/auth/logout
 ```
 
 Test for Group:

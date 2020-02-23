@@ -30,7 +30,7 @@ class UserRepository(db: CouchDbConnector) : CouchDbRepositorySupport<User>(User
      * @return a list of objects of the class [User]
      */
     @GenerateView
-    fun findByUid(uid: String?): List<User> {
+    private fun findByUid(uid: String?): List<User> {
         return queryView("by_uid", uid)
     }
 

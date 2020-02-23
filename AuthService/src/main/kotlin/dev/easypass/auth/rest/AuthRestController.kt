@@ -38,12 +38,18 @@ class AuthRestController(private val challengeAuthenticationProvider: ChallengeA
      * @param response: an instance of the class [HttpServletResponse]
      */
     @PostMapping("/register")
-    fun register(@RequestBody user: User, response: HttpServletResponse) = try {
+    fun register(@RequestBody data: Map<String, String>, response: HttpServletResponse) = try {
+        val uid = data["uid"]!!
+        val pubK = data["pubK"]!!
+        val privK = data["privK"]!!
+        val user = User(uid, pubK, privK)
         userRepository.add(user)
         couchDBConnectionProvider.createCouchDbConnector(user.uid)
         couchDBConnectionProvider.createCouchDbConnector("${user.uid}-meta")
         response.status = HttpServletResponse.SC_OK
+    } catch (ex: NullPointerException) {
+        response.sendError(HttpServletResponse.SC_CONFLICT, "Wrong parameters provided!")
     } catch (ex: DbAccessException) {
-        response.sendError(HttpServletResponse.SC_CONFLICT, "${user.uid} was not registered!")
+        response.sendError(HttpServletResponse.SC_CONFLICT, "User already exists!")
     }
 }

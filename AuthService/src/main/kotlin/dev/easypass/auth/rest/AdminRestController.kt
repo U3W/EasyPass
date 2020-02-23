@@ -3,11 +3,9 @@ package dev.easypass.auth.rest
 import dev.easypass.auth.datstore.*
 import dev.easypass.auth.datstore.document.*
 import dev.easypass.auth.datstore.repository.*
-import dev.easypass.auth.security.mapper.*
 import org.ektorp.*
 import org.springframework.security.core.*
 import org.springframework.web.bind.annotation.*
-import java.lang.Exception
 import javax.servlet.http.*
 
 /**
@@ -42,28 +40,11 @@ class AdminRestController(private val couchDBConnectionProvider: CouchDBConnecti
         val uid = data["uid"] as String
         val euid = data["euid"] as String
         val gmk = data["gmk"] as String
-        groupRepository.findOneByGid(gid).members.add(euid)
-        if (userRepository.findByUid(uid).isNotEmpty())
-            couchDBConnectionProvider.createCouchDbConnector("${uid}-meta").create(GroupAccessCredentials("GROUP", gid, gmk, ""))
-        else
-            throw DocumentNotFoundException("")
-    } catch (ex: NullPointerException) {
-        response.sendError(HttpServletResponse.SC_CONFLICT, "Wrong parameters provided!")
-    } catch (ex: DbAccessException) {
-        response.sendError(HttpServletResponse.SC_CONFLICT, "Wrong id provided!")
-    }
-
-    @PostMapping("/{gid}/add_admin")
-    fun addAdmin(@PathVariable gid: String, @RequestBody data: Map<String, Any>, response: HttpServletResponse) = try {
-        val uid = data["uid"] as String
-        val euid = data["euid"] as String
-        val gmk = data["gmk"] as String
         val amk = data["amk"] as String
         groupRepository.findOneByGid(gid).members.add(euid)
-        if (userRepository.findByUid(uid).isNotEmpty())
-            couchDBConnectionProvider.createCouchDbConnector("${uid}-meta").create(GroupAccessCredentials("GROUP", gid, gmk, amk))
-        else
-            throw DocumentNotFoundException("")
+        userRepository.findOneByUid(uid)
+        couchDBConnectionProvider.createCouchDbConnector("${uid}-meta").create(GroupAccessCredentials("GROUP", gid, gmk, amk))
+        response.status = HttpServletResponse.SC_OK
     } catch (ex: NullPointerException) {
         response.sendError(HttpServletResponse.SC_CONFLICT, "Wrong parameters provided!")
     } catch (ex: DbAccessException) {
@@ -71,13 +52,14 @@ class AdminRestController(private val couchDBConnectionProvider: CouchDBConnecti
     }
 
     @PostMapping("/{gid}/change_cred")
-    fun changeCredentials(@PathVariable gid: String, @RequestBody data: Map<String, Any>, response: HttpServletResponse)  = try {
+    fun changeCredentials(@PathVariable gid: String, @RequestBody data: Map<String, Any>, response: HttpServletResponse) = try {
         val gpubK = data["gpubK"] as String
         val gprivK = data["gprivK"] as String
         val apubK = data["apubK"] as String
         val aprivK = data["aprivK"] as String
         groupRepository.removeAllByGid(gid)
         groupRepository.add(Group(gid, gpubK, gprivK, apubK, aprivK, ArrayList()))
+        response.status = HttpServletResponse.SC_OK
     } catch (ex: NullPointerException) {
         response.sendError(HttpServletResponse.SC_CONFLICT, "Wrong parameters provided!")
     }

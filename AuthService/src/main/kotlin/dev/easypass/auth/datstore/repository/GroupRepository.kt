@@ -30,7 +30,7 @@ class GroupRepository(db: CouchDbConnector) : CouchDbRepositorySupport<Group>(Gr
      * @return a list of objects of the class [Group]
      */
     @GenerateView
-    fun findByGid(gid: String?): List<Group> {
+    private fun findByGid(gid: String?): List<Group> {
         return queryView("by_gid", gid)
     }
 
