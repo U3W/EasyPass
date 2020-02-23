@@ -29,11 +29,10 @@ class AuthRestController(private val challengeAuthenticationProvider: ChallengeA
     fun unlockChallenge(@RequestBody data: Map<String, String>, request: HttpServletRequest, response: HttpServletResponse): Map<String, Any>  = try {
         val uid = data["uid"]!!
         val role = data["role"]!!
-        return challengeAuthenticationProvider.addChallenge(Pair(request.remoteAddr, uid), role)
+        challengeAuthenticationProvider.addChallenge(Pair(request.remoteAddr, uid), role)
     } catch (ex: NullPointerException) {
         response.sendError(HttpServletResponse.SC_CONFLICT, "Wrong parameters provided!")
-    } catch (ex: DbAccessException) {
-        response.sendError(HttpServletResponse.SC_CONFLICT, "User already exists!")
+        HashMap()
     }
 
     /**
