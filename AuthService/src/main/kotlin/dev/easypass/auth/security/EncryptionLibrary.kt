@@ -4,6 +4,7 @@ import dev.easypass.auth.datstore.document.*
 import dev.easypass.auth.security.challenge.*
 import org.springframework.stereotype.*
 import java.util.*
+import kotlin.collections.HashMap
 
 /**
  * Provides a variety of different security methods
@@ -22,11 +23,7 @@ class EncryptionLibrary(private val properties: Properties) {
      * Generates an object of the class [User] with random values
      */
     fun generateDummyUser(hash: String): User {
-        //TODO Ein wirkliches Keypair hinzufügen
-        var pubK = "DUMMY_PUBKEY"
-        var privK = "DUMMY_PRIVKEY"
-
-        return User(hash, pubK, privK)
+        return User(hash, randomString(15), randomString(15))
     }
 
     /**
@@ -34,10 +31,7 @@ class EncryptionLibrary(private val properties: Properties) {
      */
     fun generateAuthenticationChallenge(): String {
         //TODO Challenge auswählen
-        /*val allowedChars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890"
-        return (1..512)
-                .map { allowedChars.random() }
-                .joinToString("")*/
+        //return randomString(properties.getProperty("auth.challengeLength").toInt())
         return "Challenge"
     }
 
@@ -51,5 +45,12 @@ class EncryptionLibrary(private val properties: Properties) {
         var encrypted = "ENCRYPTED_${text}_WITH_${key}"
 
         return encrypted
+    }
+
+    fun randomString(len: Int): String {
+        val allowedChars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890"
+        return (1..len)
+                .map { allowedChars.random() }
+                .joinToString("")
     }
 }

@@ -31,7 +31,7 @@ class AuthRestController(private val challengeAuthenticationProvider: ChallengeA
         val role = data["role"]!!
         challengeAuthenticationProvider.addChallenge(Pair(request.remoteAddr, uid), role)
     } catch (ex: NullPointerException) {
-        response.sendError(HttpServletResponse.SC_CONFLICT, "Wrong parameters provided!")
+        response.sendError(HttpServletResponse.SC_CONFLICT, "Insufficient parameters provided!")
         HashMap()
     }
 
@@ -53,8 +53,8 @@ class AuthRestController(private val challengeAuthenticationProvider: ChallengeA
         couchDBConnectionProvider.createCouchDbConnector("${user.uid}-meta")
         response.status = HttpServletResponse.SC_OK
     } catch (ex: NullPointerException) {
-        response.sendError(HttpServletResponse.SC_CONFLICT, "Wrong parameters provided!")
+        response.sendError(HttpServletResponse.SC_CONFLICT, "Insufficient parameters provided!")
     } catch (ex: DbAccessException) {
-        response.sendError(HttpServletResponse.SC_CONFLICT, "User already exists!")
+        response.sendError(HttpServletResponse.SC_FORBIDDEN, "User already exists!")
     }
 }

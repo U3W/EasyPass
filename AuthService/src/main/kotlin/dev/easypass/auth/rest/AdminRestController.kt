@@ -36,31 +36,31 @@ class AdminRestController(private val couchDBConnectionProvider: CouchDBConnecti
      * @param response: required the return a http-errorcode
      */
     @PostMapping("/{gid}/add_user")
-    fun addUser(@PathVariable gid: String, @RequestBody data: Map<String, Any>, response: HttpServletResponse) = try {
-        val uid = data["uid"] as String
-        val euid = data["euid"] as String
-        val gmk = data["gmk"] as String
-        val amk = data["amk"] as String
+    fun addUser(@PathVariable gid: String, @RequestBody data: Map<String, String>, response: HttpServletResponse) = try {
+        val uid = data["uid"]!!
+        val euid = data["euid"]!!
+        val gmk = data["gmk"]!!
+        val amk = data["amk"]!!
         groupRepository.findOneByGid(gid).members.add(euid)
         userRepository.findOneByUid(uid)
         couchDBConnectionProvider.createCouchDbConnector("${uid}-meta").create(GroupAccessCredentials("GROUP", gid, gmk, amk))
         response.status = HttpServletResponse.SC_OK
     } catch (ex: NullPointerException) {
-        response.sendError(HttpServletResponse.SC_CONFLICT, "Wrong parameters provided!")
+        response.sendError(HttpServletResponse.SC_CONFLICT, "Insufficient parameters provided!")
     } catch (ex: DbAccessException) {
-        response.sendError(HttpServletResponse.SC_CONFLICT, "Wrong id provided!")
+        response.sendError(HttpServletResponse.SC_FORBIDDEN, "Wrong id provided!")
     }
 
     @PostMapping("/{gid}/change_cred")
-    fun changeCredentials(@PathVariable gid: String, @RequestBody data: Map<String, Any>, response: HttpServletResponse) = try {
-        val gpubK = data["gpubK"] as String
-        val gprivK = data["gprivK"] as String
-        val apubK = data["apubK"] as String
-        val aprivK = data["aprivK"] as String
+    fun changeCredentials(@PathVariable gid: String, @RequestBody data: Map<String, String>, response: HttpServletResponse) = try {
+        val gpubK = data["gpubK"]!!
+        val gprivK = data["gprivK"]!!
+        val apubK = data["apubK"]!!
+        val aprivK = data["aprivK"]!!
         groupRepository.removeAllByGid(gid)
         groupRepository.add(Group(gid, gpubK, gprivK, apubK, aprivK, ArrayList()))
         response.status = HttpServletResponse.SC_OK
     } catch (ex: NullPointerException) {
-        response.sendError(HttpServletResponse.SC_CONFLICT, "Wrong parameters provided!")
+        response.sendError(HttpServletResponse.SC_CONFLICT, "Insufficient parameters provided!")
     }
 }

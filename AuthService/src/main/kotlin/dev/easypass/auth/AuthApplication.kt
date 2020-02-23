@@ -12,17 +12,7 @@ import java.util.*
 @SpringBootApplication
 @EnableZuulProxy
 @EnableDiscoveryClient
-class AuthApplication {
-    @Bean
-    @Primary
-    fun ApplicationProperties(): Properties {
-        val properties = Properties()
-        val file = ResourceUtils.getFile("classpath:application.properties")
-        val stream = FileInputStream(file)
-        properties.load(stream)
-        return properties
-    }
-}
+class AuthApplication
 
 fun main(args: Array<String>) {
     runApplication<AuthApplication>(*args)
