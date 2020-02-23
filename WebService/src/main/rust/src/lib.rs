@@ -53,23 +53,17 @@ extern {
     #[wasm_bindgen(js_name = removeEventListenerWorker)]
     fn remove_message_listener(name: &str, closure: &Closure<dyn FnMut(MessageEvent)>);
 
-    /**
-    #[wasm_bindgen(js_name = addEventListenerWorker)]
-    fn add_online_listener(name: &str, closure: &Closure<dyn FnMut()>);
-
-    #[wasm_bindgen(js_name = addEventListenerWorker)]
-    fn add_offline_listener(name: &str, closure: &Closure<dyn FnMut()>);
-
-    #[wasm_bindgen(js_name = removeEventListenerWorker)]
-    fn remove_online_listener(name: &str, closure: &Closure<dyn FnMut()>);
-
-    #[wasm_bindgen(js_name = removeEventListenerWorker)]
-    fn remove_offline_listener(name: &str, closure: &Closure<dyn FnMut()>);*/
     #[wasm_bindgen(js_name = addNetworkListener)]
     fn add_network_listener(closure: &Closure<dyn FnMut()>);
 
     #[wasm_bindgen(js_name = isOnline)]
     fn is_online() -> bool;
+
+    #[wasm_bindgen(js_name = getDatabaseURL)]
+    fn get_database_url() -> Promise;
+
+    #[wasm_bindgen(js_name = getNodeMode)]
+    fn get_node_mode() -> String;
 }
 
 // Combination of imported "log" function with "println!" like behaviour.
@@ -84,9 +78,6 @@ macro_rules! console_log {
 mod easypass;
 use easypass::worker::*;
 mod pouchdb;
-
-
-
 
 /// Represents the Backend - logic functionalities - of the Web-App.
 #[wasm_bindgen]
@@ -252,6 +243,7 @@ impl Backend {
                 console_log!("NETWORK: {:?}", &data);
             }
             "unregister" => {
+                // TODO @Kacper reset Worker
                 state.set_mode(None);
             }
             _ => {}
