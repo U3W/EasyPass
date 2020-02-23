@@ -37,7 +37,6 @@ class GroupFilter : OncePerRequestFilter() {
      */
     override fun shouldNotFilter(request: HttpServletRequest): Boolean {
         val path = request.servletPath
-        println(path)
         return !path.startsWith("/group/")
     }
 
@@ -47,7 +46,6 @@ class GroupFilter : OncePerRequestFilter() {
             hashes.add(authority.toString().substringAfter("GROUP_", ""))
             hashes.add(authority.toString().substringAfter("ADMIN_", ""))
         }
-        println(hashes)
         return hashes
     }
 }

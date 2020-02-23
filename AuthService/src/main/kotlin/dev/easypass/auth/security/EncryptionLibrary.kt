@@ -39,7 +39,7 @@ class EncryptionLibrary(private val properties: Properties) {
      */
     fun encrypt(text: String, key: String): String {
         //TODO Gescheite Encryption machen
-        var encrypted = "ENCRYPTED_${text}_WITH_${key}"
+        var encrypted = "${text}_ENC_${key}"
 
         return encrypted
     }

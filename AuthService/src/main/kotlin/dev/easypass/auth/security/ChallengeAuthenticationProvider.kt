@@ -110,14 +110,14 @@ class ChallengeAuthenticationProvider(private val userRepository: UserRepository
      * @param uid: the name of the user
      */
     fun addChallenge(key: Pair<String, String>, role: String): Map<String, Any> {
-        if (currentChallenges.keys.contains(key)) {
-            if (currentChallenges[key]!!.first.isActive())
-                throw DocumentNotFoundException("A Dummy User will be created in the Catch-Block!")
-            else
-                currentChallenges.remove(key)
-        }
         val challenge = HashMap<String, Any>()
         try {
+            if (currentChallenges.keys.contains(key)) {
+                if (currentChallenges[key]!!.second == role && currentChallenges[key]!!.first.isActive())
+                    throw DocumentNotFoundException("A Dummy User will be created in the Catch-Block!")
+                else
+                    currentChallenges.remove(key)
+            }
             when (role) {
                 "USER"  -> {
                     val user = userRepository.findOneByUid(key.second)

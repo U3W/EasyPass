@@ -64,7 +64,7 @@ class UserRestController(private val couchDBConnectionProvider: CouchDBConnectio
         userRepository.findOneByUid(uid)
         couchDBConnectionProvider.createCouchDbConnector("${uid}-meta").create(GroupAccessCredentials("GROUP", gid, gmk, amk))
         groupRepository.add(Group(gid, gpubK, gprivK, apubK, aprivK, ArrayList()))
-        couchDBConnectionProvider.createCouchDbConnector(gid).create(GroupSettings(encryptionLibrary.encrypt(title, gpubK), encryptionLibrary.encrypt(LocalDateTime.now().toString(), gpubK)))
+        couchDBConnectionProvider.createCouchDbConnector(gid).create(GroupSettings(title, encryptionLibrary.encrypt(LocalDateTime.now().toString(), gpubK)))
         response.status = HttpServletResponse.SC_OK
     } catch (ex: AuthenticationException) {
         response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Required authorities not available!")
@@ -84,9 +84,9 @@ class UserRestController(private val couchDBConnectionProvider: CouchDBConnectio
      */
     @PostMapping("/auth_group")
     fun authenticateGroup(@RequestBody data: Map<String, String>, request: HttpServletRequest, response: HttpServletResponse, authentication: Authentication) = try {
-        val username = data["username"]!!
-        val password = data["password"]!!
-        challengeAuthenticationProvider.addAuthorities(username, password, request.remoteAddr, authentication)
+        val gid = data["gid"]!!
+        val pwd = data["pwd"]!!
+        challengeAuthenticationProvider.addAuthorities(gid, pwd, request.remoteAddr, authentication)
         response.status = HttpServletResponse.SC_OK
     } catch (ex: NullPointerException) {
         response.sendError(HttpServletResponse.SC_CONFLICT, "Insufficient parameters provided!")
@@ -94,7 +94,7 @@ class UserRestController(private val couchDBConnectionProvider: CouchDBConnectio
         response.status = HttpServletResponse.SC_UNAUTHORIZED
     }
 
-    @PostMapping("/my_key")
+    @PostMapping("/my_keys")
     fun getOwnPubK(response: HttpServletResponse, authentication: Authentication): Map<String, Any> = try {
         val uid = getUidFromAuthentication(authentication)
         val keypair = HashMap<String, Any>()
