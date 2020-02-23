@@ -7,9 +7,8 @@ import dev.easypass.auth.security.mapper.*
 import org.ektorp.*
 import org.springframework.security.core.*
 import org.springframework.web.bind.annotation.*
-import java.util.*
+import java.lang.Exception
 import javax.servlet.http.*
-import kotlin.collections.ArrayList
 
 /**
  * This [RestController] provides the Rest-Api for the admin features
@@ -19,10 +18,11 @@ import kotlin.collections.ArrayList
 @RestController
 @RequestMapping("/admin")
 class AdminRestController(private val couchDBConnectionProvider: CouchDBConnectionProvider,
+                          private val userRepository: UserRepository,
                           private val groupRepository: GroupRepository) {
     /**
      * A Request removes the current [Group] from the CouchDB-Datastore and deletes the corresponding database
-     * @param request: an instance of the class [HttpServletRequest]
+     * @param gid: the unique identifier of the [Group]
      * @param authentication: an instance of the class [Authentication]
      */
     @PostMapping("/{gid}/remove")
@@ -31,19 +31,54 @@ class AdminRestController(private val couchDBConnectionProvider: CouchDBConnecti
         couchDBConnectionProvider.deleteCouchDbDatabase(gid)
     }
 
+    /**
+     * Adds a regular [User] to the [Group], specified by the [gid]
+     * @param gid: the unique identifier of the [Group]
+     * @param data: the body of the rest-request, has to contain a "uid", "euid", "gmk"
+     * @param response: required the return a http-errorcode
+     */
     @PostMapping("/{gid}/add_user")
-    fun addUser(@PathVariable gid: String, @RequestBody data: Map<String, Any>, response: HttpServletResponse) {
-        data["uid"]
+    fun addUser(@PathVariable gid: String, @RequestBody data: Map<String, Any>, response: HttpServletResponse) = try {
+        val uid = data["uid"] as String
+        val euid = data["euid"] as String
+        val gmk = data["gmk"] as String
+        groupRepository.findOneByGid(gid).members.add(euid)
+        if (userRepository.findByUid(uid).isNotEmpty())
+            couchDBConnectionProvider.createCouchDbConnector("${uid}-meta").create(GroupAccessCredentials("GROUP", gid, gmk, ""))
+        else
+            throw DocumentNotFoundException("")
+    } catch (ex: NullPointerException) {
+        response.sendError(HttpServletResponse.SC_CONFLICT, "Wrong parameters provided!")
+    } catch (ex: DbAccessException) {
+        response.sendError(HttpServletResponse.SC_CONFLICT, "Wrong id provided!")
     }
 
     @PostMapping("/{gid}/add_admin")
-    fun addAdmin(@PathVariable gid: String, @RequestBody data: Map<String, Any>, response: HttpServletResponse) {
-        //TODO
+    fun addAdmin(@PathVariable gid: String, @RequestBody data: Map<String, Any>, response: HttpServletResponse) = try {
+        val uid = data["uid"] as String
+        val euid = data["euid"] as String
+        val gmk = data["gmk"] as String
+        val amk = data["amk"] as String
+        groupRepository.findOneByGid(gid).members.add(euid)
+        if (userRepository.findByUid(uid).isNotEmpty())
+            couchDBConnectionProvider.createCouchDbConnector("${uid}-meta").create(GroupAccessCredentials("GROUP", gid, gmk, amk))
+        else
+            throw DocumentNotFoundException("")
+    } catch (ex: NullPointerException) {
+        response.sendError(HttpServletResponse.SC_CONFLICT, "Wrong parameters provided!")
+    } catch (ex: DbAccessException) {
+        response.sendError(HttpServletResponse.SC_CONFLICT, "Wrong id provided!")
     }
 
     @PostMapping("/{gid}/change_cred")
-    fun changeCredentials(@PathVariable gid: String, @RequestBody cred: GroupCredentials, response: HttpServletResponse) {
+    fun changeCredentials(@PathVariable gid: String, @RequestBody data: Map<String, Any>, response: HttpServletResponse)  = try {
+        val gpubK = data["gpubK"] as String
+        val gprivK = data["gprivK"] as String
+        val apubK = data["apubK"] as String
+        val aprivK = data["aprivK"] as String
         groupRepository.removeAllByGid(gid)
-        groupRepository.add(Group(gid, cred.pubK, cred.privK, cred.apubK, cred.aprivK, ArrayList()))
+        groupRepository.add(Group(gid, gpubK, gprivK, apubK, aprivK, ArrayList()))
+    } catch (ex: NullPointerException) {
+        response.sendError(HttpServletResponse.SC_CONFLICT, "Wrong parameters provided!")
     }
 }

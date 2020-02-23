@@ -126,7 +126,7 @@ class ChallengeAuthenticationProvider(private val userRepository: UserRepository
             "GROUP", "ADMIN" -> {
                 val group = groupRepository.findOneByGid(key.second)
                 currentChallenges[key] = Pair(encryptionLibrary.generateInternalAdministrationChallenge(), role)
-                ResponseChallenge(currentChallenges[key]!!.first.getChallengeEncryptedByPubK(group.pubK), group.privK)
+                ResponseChallenge(currentChallenges[key]!!.first.getChallengeEncryptedByPubK(group.gpubK), group.gprivK)
             }
             else             -> {
                 throw DocumentNotFoundException("A Dummy User will be created in the Catch-Block!")
