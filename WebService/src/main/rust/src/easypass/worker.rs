@@ -200,6 +200,42 @@ impl Worker {
         self.clone().all_docs_without_passwords();
     }
 
+    /// Reset Worker to initial state.
+    pub async fn reset(self: Rc<Worker>) {
+        // Block is needed to drop borrowed values in order to use the replace method
+        // which uses borrow_mut under the hood
+        {
+            // Stop changes feeds and syncs
+            let private = Ref::map(self.private.borrow(), |t| {
+                t.as_ref().unwrap()
+            });
+            private.changes_feed.cancel_changes();
+            if private.sync_handler.is_some() {
+                private.sync_handler.as_ref().unwrap().cancel_sync();
+            }
+            let meta = Ref::map(self.meta.borrow(), |t| {
+                t.as_ref().unwrap()
+            });
+            meta.changes_feed.cancel_changes();
+            if meta.sync_handler.is_some() {
+                meta.sync_handler.as_ref().unwrap().cancel_sync();
+            }
+        }
+        // Reset state
+        self.user.replace(None);
+        self.mkey.replace(None);
+        self.private.replace(None);
+        self.closures.replace(None);
+    }
+
+    fn build_and_post_message(cmd: &str, data: JsValue) {
+        let msg = Array::new_with_length(2);
+        msg.set(0, JsValue::from_str(cmd));
+        // TODO error handling
+        msg.set(1, data);
+        post_message(&msg);
+    }
+
     /// Setups local and remote database and returns them as one Connection struct.
     /// Also, binds on change events of the database to the given closures.
     fn build_connection(
@@ -380,14 +416,6 @@ impl Worker {
             };
             JsFuture::from(meta_db.bulk_docs(&meta_data)).await.unwrap();
         };
-    }
-
-    fn build_and_post_message(cmd: &str, data: JsValue) {
-        let msg = Array::new_with_length(2);
-        msg.set(0, JsValue::from_str(cmd));
-        // TODO error handling
-        msg.set(1, data);
-        post_message(&msg);
     }
 }
 

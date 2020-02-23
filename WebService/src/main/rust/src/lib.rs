@@ -243,7 +243,7 @@ impl Backend {
                 console_log!("NETWORK: {:?}", &data);
             }
             "unregister" => {
-                // TODO @Kacper reset Worker
+                worker.reset().await;
                 state.set_mode(None);
             }
             _ => {}
