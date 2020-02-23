@@ -3,7 +3,6 @@ package dev.easypass.auth.security
 import dev.easypass.auth.datstore.repository.*
 import dev.easypass.auth.security.challenge.*
 import dev.easypass.auth.security.exception.*
-import dev.easypass.auth.security.mapper.*
 import org.ektorp.*
 import org.springframework.security.authentication.*
 import org.springframework.security.core.*
@@ -110,31 +109,44 @@ class ChallengeAuthenticationProvider(private val userRepository: UserRepository
      * Adds a new [InternalChallenge] to the [currentChallenges]
      * @param uid: the name of the user
      */
-    fun addChallenge(key: Pair<String, String>, role: String): ResponseChallenge = try {
+    fun addChallenge(key: Pair<String, String>, role: String): Map<String, Any> {
         if (currentChallenges.keys.contains(key)) {
             if (currentChallenges[key]!!.first.isActive())
                 throw DocumentNotFoundException("A Dummy User will be created in the Catch-Block!")
             else
                 currentChallenges.remove(key)
         }
-        when (role) {
-            "USER"           -> {
-                val user = userRepository.findOneByUid(key.second)
-                currentChallenges[key] = Pair(encryptionLibrary.generateInternalAdministrationChallenge(), role)
-                ResponseChallenge(currentChallenges[key]!!.first.getChallengeEncryptedByPubK(user.pubK), user.privK)
+        val challenge = HashMap<String, Any>()
+        try {
+            when (role) {
+                "USER"  -> {
+                    val user = userRepository.findOneByUid(key.second)
+                    currentChallenges[key] = Pair(encryptionLibrary.generateInternalAdministrationChallenge(), role)
+                    challenge["challenge"] = currentChallenges[key]!!.first.getChallengeEncryptedByPubK(user.pubK)
+                    challenge["privK"] = user.privK
+                }
+                "GROUP" -> {
+                    val group = groupRepository.findOneByGid(key.second)
+                    currentChallenges[key] = Pair(encryptionLibrary.generateInternalAdministrationChallenge(), role)
+                    challenge["challenge"] = currentChallenges[key]!!.first.getChallengeEncryptedByPubK(group.gpubK)
+                    challenge["privK"] = group.gprivK
+                }
+                "ADMIN" -> {
+                    val group = groupRepository.findOneByGid(key.second)
+                    currentChallenges[key] = Pair(encryptionLibrary.generateInternalAdministrationChallenge(), role)
+                    challenge["challenge"] = currentChallenges[key]!!.first.getChallengeEncryptedByPubK(group.apubK)
+                    challenge["privK"] = group.aprivK
+                }
+                else    -> {
+                    throw DocumentNotFoundException("")
+                }
             }
-            "GROUP", "ADMIN" -> {
-                val group = groupRepository.findOneByGid(key.second)
-                currentChallenges[key] = Pair(encryptionLibrary.generateInternalAdministrationChallenge(), role)
-                ResponseChallenge(currentChallenges[key]!!.first.getChallengeEncryptedByPubK(group.gpubK), group.gprivK)
-            }
-            else             -> {
-                throw DocumentNotFoundException("A Dummy User will be created in the Catch-Block!")
-            }
+        } catch (ex: DbAccessException) {
+            val user = encryptionLibrary.generateDummyUser(key.second)
+            challenge["challenge"] = currentChallenges[key]!!.first.getChallengeEncryptedByPubK(user.pubK)
+            challenge["privK"] = user.privK
         }
-    } catch (ex: DbAccessException) {
-        val user = encryptionLibrary.generateDummyUser(key.second)
-        ResponseChallenge(encryptionLibrary.generateInternalAdministrationChallenge().getChallengeEncryptedByPubK(user.pubK), user.privK)
+        return challenge
     }
 }
 
