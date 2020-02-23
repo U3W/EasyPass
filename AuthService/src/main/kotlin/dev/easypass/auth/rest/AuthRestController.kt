@@ -26,7 +26,7 @@ class AuthRestController(private val challengeAuthenticationProvider: ChallengeA
      * @param request: an instance of the class [HttpServletRequest]
      */
     @PostMapping("/challenge")
-    fun unlockChallenge(@RequestBody data: Map<String, String>, request: HttpServletRequest, response: HttpServletResponse): Map<String, Any>  = try {
+    fun unlockChallenge(@RequestBody data: Map<String, String>, request: HttpServletRequest, response: HttpServletResponse): Map<String, Any> = try {
         val uid = data["uid"]!!
         val role = data["role"]!!
         challengeAuthenticationProvider.addChallenge(Pair(request.remoteAddr, uid), role)

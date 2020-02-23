@@ -4,7 +4,6 @@ import dev.easypass.auth.datstore.document.*
 import dev.easypass.auth.security.challenge.*
 import org.springframework.stereotype.*
 import java.util.*
-import kotlin.collections.HashMap
 
 /**
  * Provides a variety of different security methods
