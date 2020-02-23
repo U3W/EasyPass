@@ -10,10 +10,9 @@ import {
 import history from './routing/history';
 
 import "./index.css";
+import "../src/sites/all.css"
 import {NoMatch} from "./sites/errors";
 import Login from "./sites/login/login";
-import Masterpassword from "./sites/verify/masterpassword";
-import Registration from "./sites/registration/registration";
 import 'bootstrap/dist/css/bootstrap.min.css';
 import {ProtectedRoute} from "./routing/ProtectedRoute"
 import {createStore, applyMiddleware} from "redux";
@@ -22,10 +21,8 @@ import {Provider} from "react-redux"
 import thunk from "redux-thunk";
 import Dashboard from "./sites/dashboard/dashboard";
 import * as serviceWorker from "./service-worker/sw-handler";
-import * as that from "./sites/dashboard/dashboard.extended";
 
 
-import { ReactComponent as LogoComp } from './img/logo/Logo_Single_Big.svg';
 import Logo from './img/logo/Logo_Single_Big.svg'
 import Cloud1 from './img/logo/Cloud1.svg'
 import Cloud2 from './img/logo/Cloud2.svg'
@@ -46,6 +43,12 @@ import Radium, {StyleRoot} from 'radium';
 import dashboardState from "./sites/dashboard/dashboard.saved.state";
 import indexState from "./index.saved.state";
 
+// IndicatorEnum
+export const IndicatorEnum = {
+    Main: "Main",
+    Side: "Side",
+    Bot: "Bot",
+};
 
 
 // Load service worker
@@ -129,10 +132,13 @@ class App extends React.Component {
             isDisconnected: false,
             // Load backend with WebAssembly
             worker: new Worker('worker.js'),
-            workerInitialized: false
+            workerInitialized: false,
         };
 
         this.workerInit = this.workerInit.bind(this);
+
+
+        this.ref = React.createRef();
     }
 
     componentDidMount() {
@@ -141,14 +147,11 @@ class App extends React.Component {
             this.state.worker.addEventListener("message", this.workerInit);
             indexState.setLoadingState(true);
         }
-
-
-        // TODO Fix HandleConnection
-        //  Function makes always a re-render, even though the state has not changed
-        //  This results in flickering of data in the dashboard!!
-        // this.handleConnectionChange();
-        // window.addEventListener('online', this.handleConnectionChange);
-        // window.addEventListener('offline', this.handleConnectionChange);
+        // Network listeners are bound in the UI-Thread, because it is not
+        // supported in the Web Worker in all major browsers
+        //this.handleConnectionChange();
+        window.addEventListener('online', this.handleConnectionChange);
+        window.addEventListener('offline', this.handleConnectionChange);
     }
 
     componentWillUnmount() {
@@ -159,8 +162,8 @@ class App extends React.Component {
             indexState.setLoadingState(true);
         }
 
-        // window.removeEventListener('online', this.handleConnectionChange);
-        // window.removeEventListener('offline', this.handleConnectionChange);
+        window.removeEventListener('online', this.handleConnectionChange);
+        window.removeEventListener('offline', this.handleConnectionChange);
     }
 
     workerInit( e ) {
@@ -192,24 +195,39 @@ class App extends React.Component {
     }
 
     handleConnectionChange = () => {
-        const condition = navigator.onLine ? 'online' : 'offline';
+        const network = navigator.onLine;
+        // ToDO @Kacper worker call with this.state.isDisconnected
+        if (this.state.workerInitialized) {
+            this.state.worker.postMessage(['network', network]);
+        }
+
+        /**console.log("baumi");
+        const condition = !navigator.onLine ? 'online' : 'offline';
+        let isConn = false;
         if (condition === 'online') {
+            console.log("Online");
+            isConn = true;
             const webPing = setInterval(
                 () => {
+                    console.log("here");
                     fetch('//google.com', {
                         mode: 'no-cors',
                     })
                         .then(() => {
+                            isConn = true;
                             this.setState({ isDisconnected: false }, () => {
                                 return clearInterval(webPing)
                             });
-                        }).catch(() => this.setState({ isDisconnected: true }) )
-                }, 1000);
+                        }).catch(() => {this.setState({ isDisconnected: true }); isConn = false; console.log("Offline")})
+                }, 500);
             return;
         }
+       this.ref.current.setOnline(this.state.isDisconnected);*/
 
-        return this.setState({ isDisconnected: true });
+        // TODO @Seb Online/Offline UI Change
+        this.ref.current.setOnline(network);
     };
+
 
     getApp() {
         console.log("Worker state: " + this.state.workerInitialized);
@@ -219,11 +237,7 @@ class App extends React.Component {
             return (
                 <div className="App">
                     <Switch>
-                        <Route exact path="/" component={() => <Login worker={this.state.worker}/>}/>
-                        <Route exact path="/registration"
-                               component={() => <Registration worker={this.state.worker}/>}/>
-                        <ProtectedRoute exact path="/verify" component={() =>
-                            <Masterpassword worker={this.state.worker} />} netState="online" type="auth"/>
+                        <Route exact path="/" component={() => <Login worker={this.state.worker} callback={this}/>}/>
                         {/*<ProtectedRoute exact path="/dashboard" component={() =>
                             <Dashboard worker={this.state.worker} workerInitialized={this.state.workerInitialized}
                                 workerIsInitialized={this.workerIsInitialized}/>}
@@ -231,13 +245,12 @@ class App extends React.Component {
                         {/*<ProtectedRoute exact path="/dashboard" render={() =>
                             <h1>Hey</h1>}/>*/}
                         <ProtectedRoute exact path="/dashboard" component={() =>
-                            <Dashboard worker={this.state.worker} />} netState="online" type="verify"/>
+                            <Dashboard worker={this.state.worker} callback={this} />} type="auth"/>
                         <Route path="*" component={NoMatch}/>
                     </Switch>
                 </div>
             );
         } else {
-            // TODO @Seb Please make a cool loading page!
             let styleType = styles.logo;
             let styleCloud1 = styles.cloud1LeftIn;
             let styleCloud2 = styles.cloud2RightIn;
@@ -252,7 +265,6 @@ class App extends React.Component {
                 styleCloud4 = styles.cloud4RightOut;
                 styleCloud5 = styles.cloud5LeftOut;
             }
-            console.log("Curr", this.state.currentLogoAnimation);
             return (
                 <div className="fixHeight">
                     <StyleRoot className="topPositioning">

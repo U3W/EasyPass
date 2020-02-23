@@ -89,4 +89,48 @@ const removeEventListenerWorker = (name, f) => {
     self.removeEventListener(name, f, true);
 };
 
+/**
+ * Note: On hold, because of no support in Chromium
+ * Custom method to add a function as a network listener.
+ * Used in WebAssembly code.
+ */
+/**
+const addNetworkListener = (f) => {
+    self.ononline = f;
+    self.onoffline = f;
+};*/
+
+let nodeMode = undefined;
+
+const setNodeMode = (mode) => {
+    nodeMode = mode;
+};
+
+const getNodeMode = () => {
+    return nodeMode;
+};
+
+/**
+ * Check if application is online.
+ * Used in WebAssembly code.
+ */
+const isOnline = () => {
+    return navigator.onLine;
+};
+
+/**
+ * Get URL of database server.
+ * Used in WebAssembly code.
+ */
+const getDatabaseURL = async () => {
+    if (nodeMode === "production") {
+        const fullResponse = await fetch("/database");
+        const response = await fullResponse.json();
+        return response.db;
+    } else {
+        return "http://localhost:5984/";
+    }
+};
+
+
 

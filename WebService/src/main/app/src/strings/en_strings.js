@@ -6,12 +6,12 @@ export const strings = {
     password: "Password",
     passwordPlaceholder: "Please enter password",
 
-    keepLoggedIn: "Keep logged in",
+    rememberUsername: "Save username",
 
     loginButton: "Login",
 
     wrongLoginHeader: "Login failed!",
-    wrongLogin: "Username or password is incorrect!",
+    wrongLogin: "Username, password, masterpassword or 2-FA is incorrect!",
 
     registrationButton: "No account yet? Register here",
     registrationAlertSucc: "Account created!",
@@ -65,6 +65,8 @@ export const strings = {
 
     // Navbar Top
     searchPlaceholder: "Filter passwords",
+    searchPlaceholderGroup: "Filter groups",
+
     // Settings
     settings: "Settings",
     language: "Language",
@@ -89,6 +91,7 @@ export const strings = {
     menu: "Menu",
     privPass: "Private passwords",
     groupPass: "Group passwords",
+
     cats: "Categories",
     catsAllCat: "All categories",
 
@@ -132,12 +135,12 @@ export const strings = {
     addGroupUserVis2: "Users who have access to the password",
     addGroupUserVisNon: "No users added yet",
 
-    addGroupUserAlready: "Username does not exist!",
-    addGroupUserNotFound: "User already added!",
+    addGroupUserAlready: "User already added!",
+    addGroupUserNotFound: "Username does not exist!",
 
     // Add Password
     addPass: "Add password",
-
+    addPassGroup: "Group name",
     addPassTitle: "Title",
     addPassUser: "Username",
 
@@ -165,11 +168,34 @@ export const strings = {
     mainAllCat: "All categories",
 
     noPassToCat: "No passwords have not yet been added to this category.",
-    noCatsNoPass: "No entries yet.",
+    noCatsNoPass: "No entries yet!",
 
     mainNotAddedToCat: "Not assigned",
     mainNotAddedToCatInfo: "Here are all passwords that are not assigned to a category",
 
+    // Group Card
+    cardMenu: "Group menu - all groups",
+
+    cardGroupMembers: "Group members:",
+
+    cardEdit: "Edit this group",
+    cardDel: "Delete this group",
+    cardOpen: "Open this group",
+    cardReturn: "Return to the group menu",
+
+    // Delete Alert
+    cardDelSuc: "Group deleted!",
+    cardDelSuc2: "Undo",
+
+    cardDelErr: "An error occurred when deleting the group. Please try again!",
+
+    // Edit Alerts
+    cardEditSuc: "Edited group saved!",
+    cardEditErr: "An error occurred while editing the group. Please try again!",
+
+    // Add Alert
+    cardAddSuc: "Group added!",
+    cardAddErr: "An error occurred while adding the group. Please try again!",
 
     // Pass Line
 

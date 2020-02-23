@@ -11,7 +11,7 @@ crate-type = ["cdylib", "rlib"]
 default = ["console_error_panic_hook"]
 
 [dependencies]
-wasm-bindgen = {version = "0.2.54", features = ["serde-serialize", "nightly"] }
+wasm-bindgen = {version = "0.2.58", features = ["serde-serialize", "nightly"] }
 #wasm-bindgen-futures = {version = "0.3.27", features = ["futures_0_3"] }
 wasm-bindgen-futures = "0.4.4"
 # futures = "0.1.20"
@@ -37,9 +37,12 @@ wee_alloc = { version = "0.4.2", optional = true }
 rand = { version = "0.7.3", features = ["wasm-bindgen"]}
 
 [dependencies.web-sys]
-version = "0.3"
+version = "0.3.35"
 features = [
-  "Window"
+  "Window",
+  "FileReaderSync",
+  "Blob",
+  "File",
 ]
 
 [dev-dependencies]

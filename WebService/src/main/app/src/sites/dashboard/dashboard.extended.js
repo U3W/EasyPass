@@ -53,15 +53,16 @@ export function workerCall( e ) {
             });
             break;
         case 'getPasswordAndRedirect':
-            this.clipboardCopy(data.passwd);
-            function correctUrl(url) {
-                let out = url;
-                if (!( url.includes("http://") || url.includes("https://") )) {
-                    out = "https://" + url;
+            this.clipboardCopy(data.passwd).then(() => {
+                function correctUrl(url) {
+                    let out = url;
+                    if (!( url.includes("http://") || url.includes("https://") )) {
+                        out = "https://" + url;
+                    }
+                    return out;
                 }
-                return out;
-            }
-            window.open(correctUrl(data.url), "_blank");
+                window.open(correctUrl(data.url), "_blank");
+            }).catch();
             break;
         case 'saveCategory':
             this.copy("", dashboardAlerts.showAddedCat, data.ok);
@@ -72,11 +73,6 @@ export function workerCall( e ) {
             this.dismissEditCat();
             break;
         case 'deleteCategories':
-            // ToDo call Kacpers method
-            /**
-            this.setState({
-                currentCatDelete: id,
-            });*/
             let success = true;
             for (let i = 0; i < data.length; i++) {
                 if (data[i].ok === false) {
@@ -92,19 +88,54 @@ export function workerCall( e ) {
 }
 
 /**
+ * Saves a edited group the group
+ */
+export function editGroup( id, ref, name, userGroupList) {
+    // ToDO @Kacper
+    // needs to be put in workerCall
+    this.setState({
+        showEditedGroup: true,
+        alertState: "success",
+    }, () => {
+        this.dismissCopy(dashboardAlerts.showEditedGroup);
+    });
+}
+
+/**
+ * Adds a group
+ */
+export function addGroup(name, userGroupList) {
+    // ToDO @Kacper
+    // needs to be put in workerCall
+    this.setState({
+        showAddedGroup: true,
+        alertState: "success",
+    },() => {
+        this.dismissCopy(dashboardAlerts.showAddedGroup);
+    });
+}
+/**
  * Adds a new password entry.
  */
-export function addPass(user, passwd, url, title, tags, catID) {
-    console.log("Add pass", tags);
-    const tabID = this.state.tabselected;
-    this.props.worker.postMessage(['savePassword',
-        {type: 'passwd', user: user, passwd: passwd, url: url, title: title, tags: tags, tabID: tabID, catID: catID, }]);
+export function addPass(user, passwd, url, title, tags, catID, groupID) {
+    if ( groupID !== undefined ) {
+        // add password to group
+        // ToDO @Kacper
+    }
+    else {
+        // add password to private passwords
+        const tabID = this.state.tabselected;
+        this.props.worker.postMessage(['savePassword',
+            {type: 'passwd', user: user, passwd: passwd, url: url, title: title, tags: tags, tabID: tabID, catID: catID, }]);
+    }
+
 }
 
 /**
  * Updates a password entry.
  */
-export function saveEdit(id, rev, userNew, passwdNew, urlNew, titleNew, tagsNew, catNew) {
+export function saveEdit(id, rev, groupId, userNew, passwdNew, urlNew, titleNew, tagsNew, catNew) {
+    // if groupId === null => priv pass
     const tabID = this.state.tabselected;
     console.log("saveEdit " + id + ":" + rev);
     console.log("saveEdit " + catNew);
@@ -178,6 +209,12 @@ export function undoDelete(which, id) {
             this.props.worker.postMessage(['undoDeletePassword', {_id: id}]);
             this.setState({
                 showDeletePassAlert: false,
+            });
+            break;
+        case dashboardAlerts.showDeleteGroup:
+            //this.props.worker.postMessage(['undoDeleteGroup', {_id: id}]);
+            this.setState({
+                showDeleteGroup: false,
             });
             break;
     }

@@ -1,6 +1,7 @@
 import "./network.indicator.css"
 import React from "react"
 import {Online, Offline} from "react-detect-offline";
+import {IndicatorEnum} from "../index";
 class Indicator extends React.Component {
 
     constructor(props) {
@@ -11,6 +12,7 @@ class Indicator extends React.Component {
         };
 
         this.setOnline = this.setOnline.bind(this);
+
     }
 
     setOnline( state ) {

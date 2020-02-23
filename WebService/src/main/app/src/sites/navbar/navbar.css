@@ -55,6 +55,9 @@
 .noMarginBottom {
     margin-bottom: 0;
 }
+.noMarginTop {
+    margin-top: 0;
+}
 
 .rowMargin{
     margin-top: 15px;
@@ -227,6 +230,7 @@
     color: rgba(0,0,0,.7);
     font-size: 0.85em;
 }
+
 
 
 /*

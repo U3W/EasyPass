@@ -1,11 +1,18 @@
 import {connect} from "react-redux";
-import {authConstants} from "./auth.const.localstorage";
+import {authConstants} from "./auth.const.sessionstorage";
 
 
 class LoginAuth {
 
     getLoggedIn() {
-        return localStorage.getItem(authConstants.loggedIn) === "true";
+        if ( sessionStorage.getItem(authConstants.loggedIn) === null ) {
+            return false;
+        }
+        return sessionStorage.getItem(authConstants.loggedIn) === "true";
+    }
+
+    clear() {
+        sessionStorage.setItem(authConstants.loggedIn, null);
     }
 }
 

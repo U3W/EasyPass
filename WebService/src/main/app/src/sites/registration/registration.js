@@ -18,7 +18,7 @@ import LoginAuth from "../../authentification/auth.login"
 import Alert from "react-bootstrap/Alert";
 import { connect } from 'react-redux';
 import {login, logout} from "../../action/auth.action";
-import {authConstants} from "../../authentification/auth.const.localstorage";
+import {authConstants} from "../../authentification/auth.const.sessionstorage";
 import Indicator from "../../network/network.indicator";
 import {saveCat, saveTab} from "../../action/dashboard.action";
 import tabs from "../dashboard/tabs/tab.enum";
@@ -854,7 +854,7 @@ class Registration extends React.Component {
                     <div className="gradientDivLogin">
                         <Container>
                             <Row className="size-hole-window">
-                                <Col xs={11} sm={10} md={10} lg={6} className="center-vert center-horz">
+                                <Col xs={10} sm={10} md={8} lg={6} className="center-vert center-horz">
                                     <Card className="card-login login">
                                         <div className="close closeButt" onClick={this.exit}>
                                             <span aria-hidden="true">×</span>

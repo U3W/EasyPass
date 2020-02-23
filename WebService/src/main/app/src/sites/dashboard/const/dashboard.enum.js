@@ -4,6 +4,7 @@ export const dashboardConst = {
     catselectedGroup: "2",
     sidebarClosed: "3",
     languageSelected: "4",
+    groupSelected: "5",
 };
 
 export const dashboardLanguage  = {
@@ -22,6 +23,10 @@ export const dashboardAlerts = {
     showEditedCat: "showEditedCat",
     showDeletePassAlert: "showDeletePassAlert",
     showDeleteCatAlert: "showDeleteCatAlert",
+
+    showAddedGroup: "showAddedGroup",
+    showEditedGroup: "showEditedGroup",
+    showDeleteGroup: "showDeleteGroup",
 
     alertState: "alertState",
 };

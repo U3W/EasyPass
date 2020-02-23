@@ -2,6 +2,7 @@ import "./network.indicator.sidebar.css"
 import React from "react"
 import {Online, Offline} from "react-detect-offline";
 import Col from "react-bootstrap/Col";
+import {IndicatorEnum} from "../index";
 
 class IndicatorSide extends React.Component {
 
@@ -13,6 +14,7 @@ class IndicatorSide extends React.Component {
         };
 
         this.setOnline = this.setOnline.bind(this);
+
     }
 
     setOnline( state ) {
