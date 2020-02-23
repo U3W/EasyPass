@@ -1,8 +1,10 @@
 use wasm_bindgen::prelude::*;
+use wasm_bindgen_futures::JsFuture;
 use wasm_bindgen::__rt::std::rc::Rc;
 use js_sys::{Array, Object};
 use web_sys::{FileReaderSync, Blob, File};
 use serde_json::Value;
+use serde_json::json;
 use crate::easypass::worker::Worker;
 use crate::{post_message, log, is_online};
 use crate::pouchdb::pouchdb::{PouchDB, Settings};
@@ -68,12 +70,11 @@ impl Worker {
     async fn login_offline(self: Rc<Worker>, user: String, mkey: String) -> bool {
         // TODO @Moritz build userhash
         let user_hash = user;
-
+        // Setup meta-database
         let settings = Settings { adapter: "idb".to_string() };
         let db_name = format!("{}-meta", &user_hash);
-
         let meta_db = PouchDB::new(&db_name, &JsValue::from_serde(&settings).unwrap());
-
+        // Perform check
         let check = Worker::check_credentials(&meta_db, &user_hash, &mkey).await;
         if check {
             // Attach credentials to worker
@@ -85,11 +86,46 @@ impl Worker {
         check
     }
 
+    /// Performs the credential check between the given user input and stored local data.
     async fn check_credentials(meta_db: &PouchDB, user_hash: &str, mkey: &str) -> bool {
-        // TODO @Kacper check credentials in metadb.
-        // TODO @Moritz encrypt mkey with itself
-        let mkey = mkey;
-        true
+        // Query meta-data
+        let result_raw = JsFuture::from(meta_db.find(&JsValue::from_serde(&json!({
+            "selector": {
+                "$or": [
+                    {"type": "user"},
+                    {"type": "mkey"}
+                ]
+            }
+        })).unwrap())).await.unwrap();
+        // Parse received entry
+        let result_raw = result_raw.into_serde::<Value>().unwrap();
+        let result_1 = &result_raw["docs"][0];
+        let result_2 = &result_raw["docs"][1];
+        if result_1.is_object() && result_2.is_object() {
+            // Meta-data was found in the database
+            // Assign it correctly
+            let mut user_val = &Value::Null;
+            let mut mkey_val = &Value::Null;
+            if result_1["mkey"].is_string() {
+                // result_1 is mkey, result_2 is user
+                mkey_val = result_1;
+                user_val = result_2;
+            } else {
+                mkey_val = result_2;
+                user_val = result_1;
+            }
+            // Check credentials
+            if user_val["user"].as_str().unwrap() == user_hash &&
+                mkey_val["mkey"].as_str().unwrap() == mkey {
+                true
+            } else {
+                false
+            }
+        } else {
+            // Full meta-data not found in the database
+            // Check cannot be done
+            false
+        }
     }
 }
 
