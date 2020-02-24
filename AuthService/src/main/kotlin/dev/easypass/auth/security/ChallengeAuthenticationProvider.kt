@@ -57,6 +57,7 @@ class ChallengeAuthenticationProvider(private val userRepository: UserRepository
     @Throws(AuthenticationException::class)
     fun addAuthorities(username: String, password: String, remoteAddress: String, authentication: Authentication) {
         val key = Pair(remoteAddress, username)
+        println("key: $key $password ${currentChallenges[key]}")
         if (isAuthenticated(key, password)) {
             val authorities = ArrayList<GrantedAuthority>(authentication.authorities)
             authorities.add(SimpleGrantedAuthority("${currentChallenges[key]?.second}_${key.second}"))
@@ -143,7 +144,7 @@ class ChallengeAuthenticationProvider(private val userRepository: UserRepository
             }
         } catch (ex: DbAccessException) {
             val user = encryptionLibrary.generateDummyUser(key.second)
-            challenge["challenge"] = currentChallenges[key]!!.first.getChallengeEncryptedByPubK(user.pubK)
+            challenge["challenge"] = encryptionLibrary.encrypt(encryptionLibrary.generateAuthenticationChallenge(), user.pubK)
             challenge["privK"] = user.privK
         }
         return challenge

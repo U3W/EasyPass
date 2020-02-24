@@ -1,6 +1,6 @@
 # Auth-Service
 
-## Rest-Calls AuthRestController
+## Rest-Calls AuthRestController /auth
 
 ### /register
 
@@ -36,7 +36,7 @@ Fill in the right challenge obtained by the call above
 curl -i ^
 -X POST ^
 -d username=mwustinger ^
--d password=Zra2K8ZOfI ^
+-d password=Qe3JwM54dN ^
 -c cookie.txt ^
 http://localhost:7000/auth/login
 ```
@@ -50,9 +50,9 @@ curl -i ^
 http://localhost:7000/auth/logout
 ```
 
-## Rest-Calls CouchDB-Store
+## Rest-Calls CouchDB-Store /store
 
-### /store/{dbname}
+### /{dbname}
 
 ```
 curl -i ^
@@ -68,7 +68,7 @@ curl -i ^
 http://localhost:7000/store/mwustinger-meta
 ```
 
-## Rest-Calls UserRestController
+## Rest-Calls UserRestController /user
 
 ### /remove
 
@@ -92,8 +92,6 @@ http://localhost:7000/user/create_group
 
 ### /auth_group
 
-# ISSUE DOESNT QUITE WORK
-
 #### as regular user
 
 Fill in the right gid saved in the meta-database
@@ -102,7 +100,7 @@ Fill in the right gid saved in the meta-database
 curl -i ^
 -X POST ^
 -H "Content-Type: application/json" ^
--d "{\"uid\": \"gab9c9e4373e94a059a829f8e17ee20ab\", \"role\": \"GROUP\"}" ^
+-d "{\"uid\": \"g2e6153824c9642a09150f2f8d06a33a8\", \"role\": \"GROUP\"}" ^
 http://localhost:7000/auth/challenge
 ```
 
@@ -112,7 +110,7 @@ Fill in the right challenge obtained by the call above
 curl -i ^
 -X POST ^
 -H "Content-Type: application/json" ^
--d "{\"gid\": \"gcf0dee7533ef4a50a998dc1f71573e48\", \"pwd\": \"VF8Jw5aSQu\"}" ^
+-d "{\"gid\": \"g2e6153824c9642a09150f2f8d06a33a8\", \"pwd\": \"Tsn4tHv8eP\"}" ^
 -b cookie.txt ^
 http://localhost:7000/user/auth_group
 ```
@@ -125,7 +123,7 @@ Fill in the right gid saved in the meta-database
 curl -i ^
 -X POST ^
 -H "Content-Type: application/json" ^
--d "{\"uid\": \"gab9c9e4373e94a059a829f8e17ee20ab\", \"role\": \"ADMIN\"}" ^
+-d "{\"uid\": \"g2e6153824c9642a09150f2f8d06a33a8\", \"role\": \"ADMIN\"}" ^
 http://localhost:7000/auth/challenge
 ```
 
@@ -135,7 +133,7 @@ Fill in the right challenge obtained by the call above
 curl -i ^
 -X POST ^
 -H "Content-Type: application/json" ^
--d "{\"gid\": \"gcf0dee7533ef4a50a998dc1f71573e48\", \"pwd\": \"kZc4d8USy1\"}" ^
+-d "{\"gid\": \"g2e6153824c9642a09150f2f8d06a33a8\", \"pwd\": \"NzZCh4QCn3\"}" ^
 -b cookie.txt ^
 http://localhost:7000/user/auth_group
 ```
@@ -160,54 +158,47 @@ curl -i ^
 http://localhost:7000/user/pubkey
 ```
 
+## Rest-Calls GroupRestController /group
 
-
-
-
-Test for User:
+### /members
 
 ```
-curl -i -X POST -H "Content-Type: application/json" -d "{\"uid\": \"mwustinger\", \"pubK\": \"PUBKEY\", \"privK\": \"PRIVKEY\"}" http://localhost:7000/auth/register
-
-
-curl -i -X POST -H "Content-Type: application/json" -d "{\"hash\": \"mwustinger\", \"role\": \"USER\"}" http://localhost:7000/auth/challenge
-curl -i -X POST -d username=mwustinger -d password=Challenge -c cookie.txt http://localhost:7000/auth/login
-
-
-curl -i -X GET -H "Accept:application/json" -b cookie.txt http://localhost:7000/store/mwustinger
-curl -i -X GET -H "Accept:application/json" -b cookie.txt http://localhost:7000/store/mwustinger-meta
-
-
-curl -i -X POST -b cookie.txt http://localhost:7000/user/remove
-curl -i -X POST -b cookie.txt http://localhost:7000/auth/logout
+curl -i ^
+-X POST ^
+-H "Accept:application/json" ^
+-b cookie.txt ^
+http://localhost:7000/group/g2e6153824c9642a09150f2f8d06a33a8/members
 ```
 
-Test for Group:
+## Rest-Calls AdminRestController /admin
+
+### /{gid}/remove
 
 ```
-curl -i -X POST -H "Content-Type: application/json" -d "{\"pubK\": \"PUBKEY\", \"privK\": \"PRIVKEY\", \"apubK\": \"APUBKEY\", \"aprivK\": \"APRIVKEY\"}" -b cookie.txt http://localhost:7000/user/create_group
-
-
-curl -i -X POST -H "Content-Type: application/json" -d "{\"hash\": \"gcf0dee7533ef4a50a998dc1f71573e48\", \"role\": \"GROUP\"}" http://localhost:7000/auth/challenge
-curl -i -X POST -d username=gcf0dee7533ef4a50a998dc1f71573e48 -d password=Challenge -b cookie.txt http://localhost:7000/user/auth_group
-
-
-curl -i -X POST -H "Content-Type: application/json" -d "{\"hash\": \"gcf0dee7533ef4a50a998dc1f71573e48\", \"role\": \"ADMIN\"}" http://localhost:7000/auth/challenge
-curl -i -X POST -d username=gcf0dee7533ef4a50a998dc1f71573e48 -d password=Challenge -b cookie.txt http://localhost:7000/user/auth_group
-
-
-curl -i -X GET -H "Accept:application/json" -b cookie.txt http://localhost:7000/store/gcf0dee7533ef4a50a998dc1f71573e48
-curl -i -X POST -H "Accept:application/json" -b cookie.txt http://localhost:7000/group/gcf0dee7533ef4a50a998dc1f71573e48/members
-
-
-curl -i -X POST -H "Accept:application/json" -b cookie.txt http://localhost:7000/admin/gcf0dee7533ef4a50a998dc1f71573e48/pubK
-curl -i -X POST -H "Content-Type: application/json" -d "{\"pubK\": \"Geaendert\", \"privK\": \"Geaendert\", \"apubK\": \"Geaendert\", \"aprivK\": \"Geaendert\"}" -b cookie.txt http://localhost:7000/admin/gcf0dee7533ef4a50a998dc1f71573e48/change_cred
-curl -i -X POST -H "Accept:application/json" -b cookie.txt http://localhost:7000/admin/gcf0dee7533ef4a50a998dc1f71573e48/pubK
-
-
-curl -i -X POST -H "Content-Type: application/json" -d "{\"text\": \"Hallo\"}" -b cookie.txt http://localhost:7000/admin/gcf0dee7533ef4a50a998dc1f71573e48/add_user
-
-curl -i -X POST -b cookie.txt http://localhost:7000/admin/gcf0dee7533ef4a50a998dc1f71573e48/remove
+curl -i ^
+-X POST ^
+-b cookie.txt ^
+http://localhost:7000/admin/g2e6153824c9642a09150f2f8d06a33a8/remove
 ```
 
-## 
+### /{gid}/add_user
+
+```
+curl -i ^
+-X POST ^
+-H "Content-Type: application/json" ^
+-d "{\"uid\": \"mwelsch\", \"euid\": \"mwelsch_ENC_GPUBK\", \"gmk\": \"GMK_ENC_PUBK\", \"amk\": \"AMK_ENC_PUBK\"}" ^
+-b cookie.txt ^
+http://localhost:7000/admin/g2e6153824c9642a09150f2f8d06a33a8/add_user
+```
+
+### /{gid}/change_cred
+
+```
+curl -i ^
+-X POST ^
+-H "Content-Type: application/json" ^
+-d "{\"gpubK\": \"GPUBK2\", \"gprivK\": \"GPRIVK2_ENC_GMK\", \"apubK\": \"APUBK2\", \"aprivK\": \"APRIVK2_ENC_AMK\", \"gmk\": \"GMK_ENC_PUBK\", \"amk\": \"AMK_ENC_PUBK\"}" ^
+-b cookie.txt ^
+http://localhost:7000/admin/g2e6153824c9642a09150f2f8d06a33a8/change_cred
+```

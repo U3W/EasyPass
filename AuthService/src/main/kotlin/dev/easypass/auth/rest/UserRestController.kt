@@ -63,7 +63,9 @@ class UserRestController(private val couchDBConnectionProvider: CouchDBConnectio
         val gid = "g" + UUID.randomUUID().toString().replace("-", "")
         userRepository.findOneByUid(uid)
         couchDBConnectionProvider.createCouchDbConnector("${uid}-meta").create(GroupAccessCredentials("GROUP", gid, gmk, amk))
-        groupRepository.add(Group(gid, gpubK, gprivK, apubK, aprivK, ArrayList()))
+        val members = ArrayList<String>()
+        members.add(encryptionLibrary.encrypt(uid, gpubK))
+        groupRepository.add(Group(gid, gpubK, gprivK, apubK, aprivK, members))
         couchDBConnectionProvider.createCouchDbConnector(gid).create(GroupSettings(title, encryptionLibrary.encrypt(LocalDateTime.now().toString(), gpubK)))
         response.status = HttpServletResponse.SC_OK
     } catch (ex: AuthenticationException) {
@@ -123,19 +125,17 @@ class UserRestController(private val couchDBConnectionProvider: CouchDBConnectio
         response.sendError(HttpServletResponse.SC_FORBIDDEN, "Wrong id provided!")
         HashMap()
     }
-
-    /**
-     * Filters the uid from the authorities of the given [Authentication]
-     * @param authentication: an instance of the class [Authentication]
-     * @return the uid of the given [Authentication]
-     */
-    @Throws(AuthenticationException::class)
-    fun getUidFromAuthentication(authentication: Authentication): String {
-        for (authority in authorityListToSet(authentication.authorities)) {
-            if (authority.toString().startsWith("USER_"))
-                return authority.toString().substringAfter("USER_", "")
-        }
-        throw InsufficientAuthenticationException("UserHash not found!")
+}
+/**
+ * Filters the uid from the authorities of the given [Authentication]
+ * @param authentication: an instance of the class [Authentication]
+ * @return the uid of the given [Authentication]
+ */
+@Throws(AuthenticationException::class)
+fun getUidFromAuthentication(authentication: Authentication): String {
+    for (authority in authorityListToSet(authentication.authorities)) {
+        if (authority.toString().startsWith("USER_"))
+            return authority.toString().substringAfter("USER_", "")
     }
-
+    throw InsufficientAuthenticationException("UserHash not found!")
 }
