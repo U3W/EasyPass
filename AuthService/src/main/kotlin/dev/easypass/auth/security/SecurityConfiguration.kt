@@ -10,30 +10,17 @@ import org.springframework.security.config.annotation.web.configuration.*
 import org.springframework.security.web.authentication.*
 import org.springframework.security.web.authentication.logout.*
 
-
-/**
- * Contains the Security Configuration for the Authentication-Service  of the EasyPass-Application
- * @param authProvider: that contains the configuration for the custom Challenge-Authentication
- */
 @Configuration
 @EnableWebSecurity
 class SecurityConfiguration(private val authProvider: ChallengeAuthenticationProvider,
                             private val groupFilter: GroupFilter,
                             private val adminFilter: AdminFilter,
                             private val storeFilter: StoreFilter) : WebSecurityConfigurerAdapter() {
-    /**
-     * This method is used to add the [ChallengeAuthenticationProvider] to Spring-Security
-     * @param auth: the [AuthenticationManagerBuilder] were the [ChallengeAuthenticationProvider] is set
-     */
     @Throws(Exception::class)
     override fun configure(auth: AuthenticationManagerBuilder) {
         auth.authenticationProvider(authProvider)
     }
 
-    /**
-     * Defines the url access control
-     * @param http: the [HttpSecurity] were the configuration is set
-     */
     @Throws(Exception::class)
     override fun configure(http: HttpSecurity) {
         http

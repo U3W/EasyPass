@@ -7,24 +7,14 @@ import org.springframework.context.annotation.*
 import org.springframework.stereotype.*
 import java.util.*
 
-/**
- * Contains a bean, which
- * @param properties: the application.properties as java bean
- */
 @Component
 class CouchDBConnectionProvider(private val properties: Properties) {
-    /**
-     * Provides a [CouchDbConnector] to the database where the [User] and [Group] objects are saved
-     */
     @Bean
     @Primary
     fun UserDatabaseConnector(): CouchDbConnector {
         return createCouchDbConnector(properties.getProperty("couchDb.userDatabase"))
     }
 
-    /**
-     * Provides the [StdCouchDbInstance] described in the application.properties
-     */
     fun createCouchDbInstance(): StdCouchDbInstance {
         val url = properties.getProperty("couchDb.url")
         val uid = properties.getProperty("couchDb.username")
@@ -38,19 +28,10 @@ class CouchDBConnectionProvider(private val properties: Properties) {
         return StdCouchDbInstance(httpClient)
     }
 
-    /**
-     * Provides a [CouchDbConnector] to a CouchDB-Database
-     * @param dbname: the name of the database
-     * @return an instance of the class [CouchDbConnector]
-     */
     fun createCouchDbConnector(dbname: String): CouchDbConnector {
         return createCouchDbInstance().createConnector(dbname, true)
     }
 
-    /**
-     * Deletes a database in CouchDB, specified by the [dbname]
-     * @param dbname: the name of the database
-     */
     fun deleteCouchDbDatabase(dbname: String) {
         if (createCouchDbInstance().checkIfDbExists(dbname))
             createCouchDbInstance().deleteDatabase(dbname)

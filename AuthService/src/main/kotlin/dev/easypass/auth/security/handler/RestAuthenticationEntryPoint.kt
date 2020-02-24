@@ -5,7 +5,6 @@ import org.springframework.security.web.*
 import java.io.*
 import javax.servlet.http.*
 
-
 class RestAuthenticationEntryPoint : AuthenticationEntryPoint {
     @Throws(IOException::class)
     override fun commence(request: HttpServletRequest?, response: HttpServletResponse, authException: AuthenticationException?) {

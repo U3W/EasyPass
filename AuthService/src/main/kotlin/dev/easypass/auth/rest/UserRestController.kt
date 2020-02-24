@@ -15,12 +15,6 @@ import javax.servlet.http.*
 import kotlin.collections.ArrayList
 import kotlin.collections.HashMap
 
-/**
- * This [RestController] provides the Rest-Api for the user features
- * @param couchDBConnectionProvider: an instance of the class [CouchDBConnectionProvider] to access the CouchDB-Datastore
- * @param userRepository: an instance of the class [UserRepository] to gain CRUD operations for [User]s
- * @param groupRepository: an instance of the class [GroupRepository] to gain CRUD operations for [Group]s
- */
 @RestController
 @RequestMapping("/user")
 class UserRestController(private val couchDBConnectionProvider: CouchDBConnectionProvider,
@@ -28,11 +22,6 @@ class UserRestController(private val couchDBConnectionProvider: CouchDBConnectio
                          private val userRepository: UserRepository,
                          private val groupRepository: GroupRepository,
                          private val encryptionLibrary: EncryptionLibrary) {
-    /**
-     * A Request removes the current [User] from the CouchDB-Datastore and deletes the corresponding database
-     * @param request: an instance of the class [HttpServletRequest]
-     * @param authentication: an instance of the class [Authentication]
-     */
     @PostMapping("/remove")
     fun removeUser(request: HttpServletRequest, response: HttpServletResponse, authentication: Authentication) = try {
         val uid = getUidFromAuthentication(authentication)
@@ -44,12 +33,6 @@ class UserRestController(private val couchDBConnectionProvider: CouchDBConnectio
         response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Required authorities not available!")
     }
 
-    /**
-     * A request creates a new group and sets the current User as admin
-     * @param group: an instance of the class [Group] which specifies the group credentials
-     * @param response: an instance of the class [HttpServletResponse]
-     * @param authentication: an instance of the class [Authentication]
-     */
     @PostMapping("/create_group")
     fun createGroup(@RequestBody data: Map<String, String>, response: HttpServletResponse, authentication: Authentication) = try {
         val uid = getUidFromAuthentication(authentication)
@@ -76,14 +59,6 @@ class UserRestController(private val couchDBConnectionProvider: CouchDBConnectio
         response.sendError(HttpServletResponse.SC_FORBIDDEN, "Wrong id provided!")
     }
 
-    /**
-     * A request tries to obtain access to a group by adding the required authorities to the session cookie
-     * The authentication process similar to the regular user one
-     * @param username: the [Group.gid] of that [Group]
-     * @param password: the decrypted challenge earlier obtained by a request to [AuthRestController.unlockChallenge]
-     * @param response: an instance of the class [HttpServletResponse]
-     * @param authentication: an instance of the class [Authentication]
-     */
     @PostMapping("/auth_group")
     fun authenticateGroup(@RequestBody data: Map<String, String>, request: HttpServletRequest, response: HttpServletResponse, authentication: Authentication) = try {
         val gid = data["gid"]!!
@@ -126,11 +101,7 @@ class UserRestController(private val couchDBConnectionProvider: CouchDBConnectio
         HashMap()
     }
 }
-/**
- * Filters the uid from the authorities of the given [Authentication]
- * @param authentication: an instance of the class [Authentication]
- * @return the uid of the given [Authentication]
- */
+
 @Throws(AuthenticationException::class)
 fun getUidFromAuthentication(authentication: Authentication): String {
     for (authority in authorityListToSet(authentication.authorities)) {

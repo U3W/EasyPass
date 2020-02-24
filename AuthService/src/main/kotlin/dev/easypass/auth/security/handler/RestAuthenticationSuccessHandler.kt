@@ -8,7 +8,6 @@ import java.io.*
 import javax.servlet.*
 import javax.servlet.http.*
 
-
 class RestAuthenticationSuccessHandler : SimpleUrlAuthenticationSuccessHandler() {
     private var requestCache: RequestCache = HttpSessionRequestCache()
 

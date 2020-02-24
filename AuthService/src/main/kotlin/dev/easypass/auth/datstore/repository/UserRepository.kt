@@ -5,16 +5,9 @@ import org.ektorp.*
 import org.ektorp.support.*
 import org.springframework.stereotype.*
 
-/**
- * Provides Ektorp Repository Support for the class [User]
- * @param db: is initialized by the Bean [CouchDbConnector], the connection to the Database
- */
 @Component
 class UserRepository(db: CouchDbConnector) : CouchDbRepositorySupport<User>(User::class.java, db) {
 
-    /**
-     * Generates the views required by the repository
-     */
     init {
         //The initStandardDesignDocument-method throws a NullPointerException when a view already exists in the database
         for (doc in db.allDocIds) {
@@ -24,21 +17,11 @@ class UserRepository(db: CouchDbConnector) : CouchDbRepositorySupport<User>(User
         initStandardDesignDocument()
     }
 
-    /**
-     * returns a [List] of all the entries with the passed [uid], that are stored in the database
-     * @param uid: the name of the [User]
-     * @return a list of objects of the class [User]
-     */
     @GenerateView
     private fun findByUid(uid: String?): List<User> {
         return queryView("by_uid", uid)
     }
 
-    /**
-     * returns only the first entry of the [List] of all the entries with the passed [uid], that are stored in the database
-     * @param uid: the name of the [User]
-     * @return an object of the class [User]
-     */
     @Throws(DocumentNotFoundException::class, UpdateConflictException::class)
     fun findOneByUid(uid: String): User {
         val list = findByUid(uid)
@@ -49,11 +32,6 @@ class UserRepository(db: CouchDbConnector) : CouchDbRepositorySupport<User>(User
         return list[0]
     }
 
-    /**
-     * This methods overrides the add-method of [CouchDbRepositorySupport],
-     * throws an [UpdateConflictException], when an entity with the same uid as [entity] is already saved in the database
-     * @param entity: an object of the class [User]
-     */
     @Throws(UpdateConflictException::class)
     override fun add(entity: User) = if (findByUid(entity.uid).isEmpty()) {
         super.add(entity)
@@ -61,10 +39,6 @@ class UserRepository(db: CouchDbConnector) : CouchDbRepositorySupport<User>(User
         throw UpdateConflictException()
     }
 
-    /**
-     * Removes all [User]s with the given [uid]
-     * @param uid: the name of the [User]
-     */
     fun removeAllByUid(uid: String) {
         for (user in findByUid(uid))
             remove(user)

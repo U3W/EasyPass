@@ -15,7 +15,6 @@ class AdminRestController(private val couchDBConnectionProvider: CouchDBConnecti
                           private val userRepository: UserRepository,
                           private val groupRepository: GroupRepository,
                           private val encryptionLibrary: EncryptionLibrary) {
-
     @PostMapping("/{gid}/remove")
     fun removeGroup(@PathVariable gid: String, authentication: Authentication) {
         groupRepository.removeAllByGid(gid)
