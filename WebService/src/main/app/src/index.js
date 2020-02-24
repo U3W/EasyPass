@@ -133,6 +133,8 @@ class App extends React.Component {
             // Load backend with WebAssembly
             worker: new Worker('worker.js'),
             workerInitialized: false,
+
+            mounted: false,
         };
 
         this.workerInit = this.workerInit.bind(this);
@@ -147,6 +149,10 @@ class App extends React.Component {
             this.state.worker.addEventListener("message", this.workerInit);
             indexState.setLoadingState(true);
         }
+
+        this.setState({
+            mounted: true,
+        });
 
 
         // TODO Fix HandleConnection

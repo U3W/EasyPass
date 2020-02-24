@@ -4,7 +4,7 @@ import {
 } from "../../action/dashboard.action";
 import {dashboardConst} from "../../sites/dashboard/const/dashboard.enum";
 import tabs from "../../sites/dashboard/tabs/tab.enum";
-import {SAVE_MAUTH_STATE} from "../../action/mauth.action";
+import {SAVE_MAUTH_STATE} from "../../action/auth.action";
 import {SAVE_USER, SAVE_USERNAME} from "../../action/auth.action";
 import {loginConst} from "../../sites/login/login.enum";
 
