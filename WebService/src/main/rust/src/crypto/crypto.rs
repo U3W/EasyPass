@@ -5,11 +5,10 @@ use poly1305::{universal_hash::UniversalHash, Poly1305, KEY_SIZE};
 extern crate base64;
 use std::str;
 use rand::prelude::*;
+use std::hash::Hash;
 
 pub fn encrypt(msg: &str, key: &[u8]) -> String{
     let mut iv = get_random_string(8).to_owned();
-    println!("iv {:?}",iv);
-    println!("key {:?}",key);
     let encrypted = encrypt_manual(msg,key,iv.as_str()).to_owned();
     iv.push_str("$");
     iv.push_str(&encrypted);
@@ -18,43 +17,47 @@ pub fn encrypt(msg: &str, key: &[u8]) -> String{
 }
 pub fn decrypt(msg: &str, key: &[u8]) -> Result<String, i32>{
     let (iv, _right) = msg.split_at(8);
-    println!("iv {:?}",iv);
-    println!("key {:?}",key);
     let (_left, ciphertext) = msg.split_at(9);
     let decrypted = decrypt_manual(ciphertext,key,iv);
     return decrypted;
 }
-//returns base64 encoded buffer
-//TODO add hash somewhere and verify
+
 pub fn encrypt_manual(msg: &str, key: &[u8], iv: &str) -> String {
     let mut c2 = ChaCha20Poly1305::new(key,iv);
     c2.set_message(msg);
     c2.encryption();
     let buffer = c2.get_buffer();
-    return to_base64(buffer);
+    let hash = c2.get_hash();
+    let mut out = to_base64(hash);
+    out.push_str("$");
+    out.push_str(to_base64(buffer).as_str());
+    return out;
 }
-//TODO add hash somewhere and verify
+
 pub fn decrypt_manual(msg: &str, key: &[u8], iv: &str) -> Result<String, i32> {
     let mut c2 = ChaCha20Poly1305::new(key,iv);
-    let msg_vec = from_base64(msg);
+    let v: Vec<&str> = msg.split("$").collect();
+    let hash = v[0];
+    let msg_vec = v[1];
+    let hash = from_base64(hash);
+    let msg_vec = from_base64(msg_vec);
     c2.set_buffer_vec(msg_vec);
     c2.decrypt();
     let mut buffer: Vec<u8> = c2.get_buffer();
-    let msg_vec = from_base64(msg);
-    if msg_vec.as_slice().eq(buffer.as_slice()) {
+    let msg_vec = v[1];
+    let msg_vec = from_base64(msg_vec);
+    if msg_vec.as_slice().eq(buffer.as_slice()) || c2.get_hash().ne(&hash) {
         let res : Result<String, i32> = Err(-1);
         return res;
     }
-    println!("BUffer {:?}",buffer);
     let buffer2 = String::from_utf8(buffer);
     let buffer2 = buffer2.unwrap();
     let res : Result<String, i32> = Ok(buffer2);
     return res;
 }
-//ma
 pub fn get_random_string<'a>(length: usize) -> String {
     let mut alphabet = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890".as_bytes().to_vec(); //this should be random enough
-    let mut rng = rand::thread_rng();
+    let mut rng = rand::thread_rng();let msg_vec = from_base64(msg_vec);
     alphabet.shuffle(&mut rng);
     let (left, _right) = alphabet.split_at(length);
     let iv = String::from_utf8(Vec::from(left)).unwrap();
@@ -76,7 +79,6 @@ pub struct ChaCha20Poly1305{
     poly1305: Poly1305,
     hash: Vec<u8>,
 }
-//TODO handle keys which are longer than 32 chars, we do want to limit useres at 64 chars or not limit them at all
 impl ChaCha20Poly1305{
     pub fn new(key: &[u8], iv: &str) -> ChaCha20Poly1305{
         let (key, _right) = key.split_at(32);
