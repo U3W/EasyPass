@@ -107,11 +107,17 @@ extern "C" {
     #[wasm_bindgen(method, js_class = "PouchDB", js_name = on)]
     pub fn on(this: &ChangesFeed, method: &str, f: &Closure<dyn FnMut(JsValue)>) -> ChangesFeed;
 
+    #[wasm_bindgen(method, js_class = "PouchDB", js_name = cancel)]
+    pub fn cancel_changes(this: &ChangesFeed);
+
     #[wasm_bindgen(method, js_class = "PouchDB", js_name = sync)]
     pub fn sync_with_options(this: &PouchDB, target: &PouchDB, options: JsValue) -> SyncHandler;
 
     #[wasm_bindgen(method, js_class = "PouchDB", js_name = on)]
     pub fn on_sync(this: &SyncHandler, method: &str, f: &Closure<dyn FnMut(JsValue)>) -> SyncHandler;
+
+    #[wasm_bindgen(method, js_class = "PouchDB", js_name = cancel)]
+    pub fn cancel_sync(this: &SyncHandler);
 }
 
 impl PouchDB {

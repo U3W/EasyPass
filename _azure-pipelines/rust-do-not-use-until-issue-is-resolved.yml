@@ -5,12 +5,10 @@ steps:
   - bash: |
       set -e
       if command -v rustup; then
-        rustup install nightly-2020-02-16
-        rustup default nightly-2020-02-16
+        rustup update $TOOLCHAIN
+        rustup default $TOOLCHAIN
       else
         curl https://sh.rustup.rs -sSf | sh -s -- -y --default-toolchain $TOOLCHAIN
-        rustup install nightly-2020-02-16
-        rustup default nightly-2020-02-16
         echo "##vso[task.prependpath]$HOME/.cargo/bin"
       fi
     displayName: Install rust - Unix

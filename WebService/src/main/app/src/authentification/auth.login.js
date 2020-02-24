@@ -10,6 +10,10 @@ class LoginAuth {
         }
         return sessionStorage.getItem(authConstants.loggedIn) === "true";
     }
+
+    clear() {
+        sessionStorage.setItem(authConstants.loggedIn, null);
+    }
 }
 
 
