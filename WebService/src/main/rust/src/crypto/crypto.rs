@@ -1,23 +1,40 @@
 use c2_chacha::ChaCha20;
 use c2_chacha::stream_cipher::{NewStreamCipher, SyncStreamCipher, SyncStreamCipherSeek};
 use c2_chacha::stream_cipher::generic_array::GenericArray;
-use wasm_bindgen::prelude::*;
 use poly1305::{universal_hash::UniversalHash, Poly1305, KEY_SIZE};
 extern crate base64;
 use std::str;
 use rand::prelude::*;
 
-pub fn encrypt(msg: &str, key: &str, iv: &str) -> String {
+pub fn encrypt(msg: &str, key: &[u8]) -> String{
+    let mut iv = get_random_string(8).to_owned();
+    println!("iv {:?}",iv);
+    println!("key {:?}",key);
+    let encrypted = encrypt_manual(msg,key,iv.as_str()).to_owned();
+    iv.push_str("$");
+    iv.push_str(&encrypted);
+
+    return iv;
+}
+pub fn decrypt(msg: &str, key: &[u8]) -> Result<String, i32>{
+    let (iv, _right) = msg.split_at(8);
+    println!("iv {:?}",iv);
+    println!("key {:?}",key);
+    let (_left, ciphertext) = msg.split_at(9);
+    let decrypted = decrypt_manual(ciphertext,key,iv);
+    return decrypted;
+}
+//returns base64 encoded buffer
+//TODO add hash somewhere and verify
+pub fn encrypt_manual(msg: &str, key: &[u8], iv: &str) -> String {
     let mut c2 = ChaCha20Poly1305::new(key,iv);
-    c2.set_plaintext(msg);
+    c2.set_message(msg);
     c2.encryption();
     let buffer = c2.get_buffer();
-    return to_bas64(buffer);
+    return to_base64(buffer);
 }
-
-pub fn decrypt(msg: &str, key: &str, iv: &str) -> Result<String, i32> {
-    let key = "";
-    let iv = "";
+//TODO add hash somewhere and verify
+pub fn decrypt_manual(msg: &str, key: &[u8], iv: &str) -> Result<String, i32> {
     let mut c2 = ChaCha20Poly1305::new(key,iv);
     let msg_vec = from_base64(msg);
     c2.set_buffer_vec(msg_vec);
@@ -28,14 +45,15 @@ pub fn decrypt(msg: &str, key: &str, iv: &str) -> Result<String, i32> {
         let res : Result<String, i32> = Err(-1);
         return res;
     }
+    println!("BUffer {:?}",buffer);
     let buffer2 = String::from_utf8(buffer);
     let buffer2 = buffer2.unwrap();
     let res : Result<String, i32> = Ok(buffer2);
     return res;
 }
 //ma
-pub fn get_random_string<'a>(length: i32) -> String {
-    let mut alphabet = "abcdefghijklmnopqrstuvwxyzäöüßABCDEFGHIJKLMNOPQRSTUVWXYZÄÖÜ1234567890!\"#$%&'()*+,-./:;<=>?@[\\]^_`{|}~ ".as_bytes().to_vec();
+pub fn get_random_string<'a>(length: usize) -> String {
+    let mut alphabet = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890".as_bytes().to_vec(); //this should be random enough
     let mut rng = rand::thread_rng();
     alphabet.shuffle(&mut rng);
     let (left, _right) = alphabet.split_at(length);
@@ -47,7 +65,7 @@ pub fn from_base64(message: &str) -> Vec<u8>{
     let original = base64::decode(message).unwrap();
     return original;
 }
-pub fn to_bas64(message: Vec<u8>) -> String {
+pub fn to_base64(message: Vec<u8>) -> String {
     let encoded =  base64::encode(message.as_slice());
     return encoded;
 }
@@ -56,62 +74,61 @@ pub struct ChaCha20Poly1305{
     c2chacha20: ChaCha20,
     buffer: Vec<u8>,
     poly1305: Poly1305,
+    hash: Vec<u8>,
 }
 //TODO handle keys which are longer than 32 chars, we do want to limit useres at 64 chars or not limit them at all
 impl ChaCha20Poly1305{
-    pub fn new(key: &str, iv: &str) -> ChaCha20Poly1305{
-        let key = key.as_bytes();
+    pub fn new(key: &[u8], iv: &str) -> ChaCha20Poly1305{
         let (key, _right) = key.split_at(32);
         let iv = iv.as_bytes();
         let (iv, _right) = iv.split_at(8);
         let mut buffer = iv.to_vec();
         let c2chacha20 = ChaCha20::new_var(key, iv).unwrap();
         let key = GenericArray::from_slice(key);
-        let poly1305 =  Poly1305::new(key);
+        let poly1305 = Poly1305::new(key);
+        let hash ="".as_bytes().to_vec();
         let encryption = ChaCha20Poly1305 {
             c2chacha20,
             buffer,
-            poly1305
+            poly1305,
+            hash
         };
         return encryption;
     }
 
-    pub fn set_plaintext(&mut self, message: &str) {
-        let buffer = message.as_bytes();
-        let buffer = buffer.to_vec();
+    pub fn set_message(&mut self, message: &str) -> Vec<u8>{
+        let mut buffer = message.as_bytes();
+        let mut buffer = buffer.to_vec();
         self.buffer = buffer;
-    }
-
-    pub fn set_buffer_vec(&mut self, vector: Vec<u8>){
-        self.buffer = vector;
-    }
-
-    pub fn get_buffer(&mut self) -> Vec<u8>{
         return self.buffer.clone();
+    }
+
+    pub fn get_hash(&mut self) -> Vec<u8> {
+        return self.hash.clone();
+    }
+
+    pub fn get_buffer(&mut self) -> Vec<u8> {
+        return self.buffer.clone();
+    }
+
+    pub fn set_buffer_vec(&mut self, ciphertext: Vec<u8>){
+        self.buffer = ciphertext;
     }
 
     pub fn encryption(&mut self) {
         self.c2chacha20.apply_keystream(&mut self.buffer);
         self.poly1305.reset();
         self.poly1305.update(&mut self.buffer);
-        let mut hash = self.poly1305.clone().result().into_bytes().to_vec();
-        self.buffer.append(&mut hash);
+        let hash = self.poly1305.clone().result().into_bytes().to_vec();
+        self.hash = hash.clone();
     }
 
-    pub fn decrypt(&mut self){
-
-        let (ciphertext, _right) = self.buffer.split_at(self.buffer.len()-16);
-        self.buffer  = ciphertext.to_vec().clone();
-        let (_left, mac) = self.buffer.split_at(self.buffer.len()-16);
-        let mac = mac.to_vec();
+    pub fn decrypt(&mut self) {
         self.poly1305.reset();
         self.poly1305.update(&mut self.buffer);
-        let mut hash = self.poly1305.clone().result().into_bytes().to_vec();
-
-        if hash.as_slice().eq(mac.as_slice()) {
-            self.c2chacha20.seek(0);
-            self.c2chacha20.apply_keystream(&mut self.buffer);
-        }
-
+        let hash = self.poly1305.clone().result().into_bytes().to_vec();
+        self.hash = hash.clone();
+        self.c2chacha20.seek(0);
+        self.c2chacha20.apply_keystream(&mut self.buffer);
     }
 }
