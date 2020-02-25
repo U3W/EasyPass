@@ -1,0 +1,19 @@
+package dev.easypass.auth.rest
+
+import dev.easypass.auth.datstore.repository.*
+import org.ektorp.*
+import org.springframework.security.core.*
+import org.springframework.web.bind.annotation.*
+import javax.servlet.http.*
+
+@RestController
+@RequestMapping("/group")
+class GroupRestController(private val groupRepository: GroupRepository) {
+    @PostMapping("/{gid}/members")
+    fun getMembers(@PathVariable gid: String, response: HttpServletResponse, authentication: Authentication): List<String> = try {
+        groupRepository.findOneByGid(gid).members
+    } catch (ex: DbAccessException) {
+        response.sendError(HttpServletResponse.SC_CONFLICT, "Requested group not found!")
+        ArrayList()
+    }
+}
