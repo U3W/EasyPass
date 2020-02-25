@@ -9,6 +9,7 @@ use base64::{encode_config, decode_config};
 use crate::symmetric::{decrypt, encrypt};
 use sha3::{Digest, Sha3_256};
 use crate::crypto::symmetric::{encrypt, decrypt};
+use crate::crypto::hashing::hash_sha3_256;
 
 pub struct Statisch{}
 impl Statisch{
@@ -25,6 +26,21 @@ impl Statisch{
         let key_hash = hasher.result();
         let key = key_hash.to_vec();
         return key;
+    }
+    pub fn decrypt_secret(encrypted_secret: &str, key: &[u8]) -> StaticSecret {
+        let secret = decrypt(encrypted_secret, key).unwrap();
+        let secret_vec = decode_config(&secret, base64::URL_SAFE).unwrap();
+        let mut secret : [u8; 32] = [0u8;32];
+        secret.copy_from_slice(&secret_vec);
+        let secret = StaticSecret::from(secret);
+        return secret;
+    }
+    pub fn encrypt_secret(secret: StaticSecret, key: &[u8]) -> String {
+        let secret = secret.to_bytes();
+        let secret = encode_config(&secret, base64::URL_SAFE);
+        let secret = secret.as_str();
+        let secret = encrypt(secret, key);
+        return secret;
     }
 }
 pub struct Empheral{}
@@ -44,14 +60,12 @@ impl Empheral{
         return key;
     }
 }
+
 pub fn newUser(key: &[u8]) -> (String, String){ // Returns  (encryptedPrivateKey, PublicKey)
     let (secret, public) = Statisch::create_keypair();
     let public = public.as_bytes();
     let public = encode_config(public, base64::URL_SAFE);
-    let secret = secret.to_bytes();
-    let secret = encode_config(&secret, base64::URL_SAFE);
-    let secret = secret.as_str();
-    let secret = encrypt(secret, key);
+    let secret = Statisch::encrypt_secret(secret, key);
     return (secret, public);
 }
 pub fn authenticateUser(secret: &str, challenge: &str, key: &[u8]) -> Result<String, i32>{
@@ -62,11 +76,7 @@ pub fn authenticateUser(secret: &str, challenge: &str, key: &[u8]) -> Result<Str
     let mut server_pub : [u8; 32] = [0u8;32];
     server_pub.copy_from_slice(&server_pub_vec);
     let server_pub = PublicKey::from(server_pub);
-    let secret = decrypt(secret, key).unwrap();
-    let secret_vec = decode_config(&secret, base64::URL_SAFE).unwrap();
-    let mut secret : [u8; 32] = [0u8;32];
-    secret.copy_from_slice(&secret_vec);
-    let secret = StaticSecret::from(secret);
+    let secret = Statisch::decrypt_secret(secret,key);
     let key = Statisch::get_key(secret, server_pub);
     let key = key.as_slice();
     return decrypt(challenge, key);

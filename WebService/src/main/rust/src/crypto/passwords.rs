@@ -34,13 +34,15 @@ pub fn decrypt_key(random_key_encrypted: &str, key: &[u8]) -> Result<Vec<u8>, i3
     let slice = decoded.unwrap();
     return Ok(slice);
 }
-
-pub fn password_to_new_key(password: &str) -> (&[u8], String){ //unencrypted, encrypted (encryoted: iv for argon§iv%hash$encrypted)
-    let rand_key: &[u8] = random_key();
-    let mut iv = get_random_iv(20);
+pub fn password_to_key(password: &str, iv: String) -> &[u8] {
     let argon_hash = hash_argon(password, iv);
     let hashed_hash = hash_sha3_256(&argon_hash);
     let key = hashed_hash.as_slice();
+}
+pub fn password_to_new_key(password: &str) -> (&[u8], String){ //unencrypted, encrypted (encryoted: iv for argon§iv%hash$encrypted)
+    let rand_key: &[u8] = random_key();
+    let mut iv = get_random_iv(20);
+    let key = password_to_key(password, iv);
     let encrypted_key = encrypt_key(rand_key, key);
     iv.push_str("§");
     iv.push_str(encrypted_key);
@@ -52,19 +54,15 @@ pub fn password_to_existing_key(password: &str, encrypted_key: &str) -> Vec<u8>{
     let vec: Vec<&str> = encrypted_key.split("§").collect();
     let iv = vec[0];
     let encrypted_key = vec[1];
-    let argon_hash = hash_argon(password, String::from(iv));
-    let hashed_hash = hash_sha3_256(&argon_hash);
-    let key = hashed_hash.as_slice();
+    let key = password_to_key(password, String::from(iv));
     let decrypted_key = decrypt_key(encrypted_key, key);
     let decrypted_key = decrypted_key.unwrap();
     return decrypted_key;
 }
 //returns encrypted 
 pub fn change_password(new_password: &str, master_key: &[u8]) -> String{
-	let mut iv = get_random_iv(20).to_owned();
-    let argon_hash = hash_argon(password, iv);
-    let hashed_hash = hash_sha3_256(&argon_hash);
-    let key = hashed_hash.as_slice();
+	let mut iv = get_random_iv(20);
+    let key = password_to_key(password, iv);
     let encrypted_key = encrypt_key(master_key, key);
     iv.push_str("§");
     iv.push_str(encrypted_key);
