@@ -6,6 +6,7 @@ import "./dashboard.css";
 import {connect} from "react-redux";
 import {login, logout} from "../../action/auth.action";
 import NavbarVerticalEP2 from "../navbar/navbar.vertical.v2";
+import LoginAuth from "../../authentification/auth.login"
 import IndicatorSide from "../../network/network.indicator.sidebar";
 import tabs from "./tabs/tab.enum";
 import PrivatePassword from "./tabs/private.password";
@@ -85,7 +86,7 @@ class Dashboard extends React.Component {
             language: dashboardState.getSelectedLanguage(), // 0 - Deutsch, 1 - English
 
             search: "",
-            username: "Username",
+            username: LoginAuth.getUsername(),
             tabselected: tab, // tabs.PRIVPASS
             catselected: cat, //JSON.parse(localStorage.getItem(dashboardConst.catselectedPriv)),
             groupselected: dashboardState.getSelectedGroup(),
@@ -1526,7 +1527,6 @@ class Dashboard extends React.Component {
 
 const mapDispatchToProps3 = (dispatch) => {
     return {
-        login: (creds) => dispatch(login(creds)),
         logout: () => dispatch(logout()),
         saveTab: (tabselected) => dispatch(saveTab(tabselected)),
         saveCat: (tabselected, catselected) => dispatch(saveCat(tabselected, catselected)),

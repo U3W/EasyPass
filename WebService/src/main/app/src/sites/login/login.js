@@ -23,7 +23,7 @@ import Logo from "../../img/logo/LogoV2.svg"
 import LoginAuth from "../../authentification/auth.login"
 import Alert from "react-bootstrap/Alert";
 import { connect } from 'react-redux';
-import {login, logout, save2FA, saveUser, saveUserState} from "../../action/auth.action";
+import {login, logout, save2FA, saveUser, saveUserState, setSessionUser} from "../../action/auth.action";
 import Indicator from "../../network/network.indicator";
 import {dashboardAlerts} from "../dashboard/const/dashboard.enum";
 import Registration from "../registration/registration";
@@ -54,8 +54,7 @@ class Login extends React.Component {
             showRegistered: false,
             alertState: "success",
 
-
-            inpMasterpassword: "",
+            networkState: navigator.onLine,
 
             inpFile: null,
             fileName: "",
@@ -75,12 +74,15 @@ class Login extends React.Component {
         this.handleKeyevent = this.handleKeyevent.bind(this);
         this.printError = this.printError.bind(this);
         this.switchToRegister = this.switchToRegister.bind(this);
-
+        this.handleConnectionChange = this.handleConnectionChange.bind(this);
         this.printRegistered = this.printRegistered.bind(this);
         // Login & Registration Worker calls
         this.workerCall = this.workerCall.bind(this);
         this.loginProcess = this.loginProcess.bind(this);
         this.registrationProcess = this.registrationProcess.bind(this);
+
+        // reset Dashboard username
+        this.props.setSessionUser(null);
     }
 
     componentDidMount() {
@@ -91,12 +93,18 @@ class Login extends React.Component {
             this.setState({
                 loading: false,
             });
-        }, 500)
+        }, 500);
+
+        window.addEventListener('online', this.handleConnectionChange);
+        window.addEventListener('offline', this.handleConnectionChange);
     }
 
     componentWillUnmount() {
         this.props.worker.removeEventListener('message', this.workerCall, true);
         this.props.worker.postMessage(['unregister', undefined]);
+
+        window.removeEventListener('online', this.handleConnectionChange);
+        window.removeEventListener('offline', this.handleConnectionChange);
     }
 
     workerCall( e ) {
@@ -106,6 +114,7 @@ class Login extends React.Component {
             case 'login':
                 console.log("LOGIN!!!");
                 this.props.login(data);
+                this.props.setSessionUser(this.state.inpUsername);
                 if (LoginAuth.getLoggedIn()) {
                     history.push("/dashboard");
                     LoginAuth.clear();
@@ -116,6 +125,12 @@ class Login extends React.Component {
                 }
                 break;
         }
+    }
+
+    handleConnectionChange() {
+        this.setState({
+            networkState: navigator.onLine,
+        });
     }
 
     loginProcess(credentials) {
@@ -562,7 +577,9 @@ class Login extends React.Component {
                                                             :
                                                             <Form.Check type="checkbox" id="inpKeepLoggedIn" checked={false} onChange={() => this.setSaveUser(true)} label={StringSelector.getString(this.state.language).rememberUsername} />
                                                         }
-                                                        <Nav.Link onClick={() => { this.switchToRegister(true, false, true)} }>{StringSelector.getString(this.state.language).registrationButton}</Nav.Link>
+                                                        { this.state.networkState &&
+                                                            <Nav.Link onClick={() => { this.switchToRegister(true, false, true)} }>{StringSelector.getString(this.state.language).registrationButton}</Nav.Link>
+                                                        }
                                                     </Form.Group>
                                                     <Button variant="danger" className={"float-right"} onClick={this.handleSubmit}>
                                                         {StringSelector.getString(this.state.language).loginButton}
@@ -597,6 +614,7 @@ const mapDispatchToProps = (dispatch) => {
         save2FA: (option) => dispatch(save2FA(option)),
         saveUserState: (to) => dispatch(saveUserState(to)),
         saveUser: (username) => dispatch(saveUser(username)),
+        setSessionUser: (username) => dispatch(setSessionUser(username)),
     }
 };
 
