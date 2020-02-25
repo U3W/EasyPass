@@ -26,6 +26,8 @@ serde = { version = "1.0.80", features = ["derive"] }
 base64 = "0.11.0"
 rand = "0.7.2"
 rust-argon2 = "0.7.0"
+x25519-dalek = "0.6.0"
+sha3 = "0.8.2"
 # The `console_error_panic_hook` crate provides better debugging of panics by
 # logging them with `console.error`. This is great for development, but requires
 # all the `std::fmt` and `std::panicking` infrastructure, so isn't great for

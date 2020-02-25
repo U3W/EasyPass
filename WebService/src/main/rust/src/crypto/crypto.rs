@@ -1,5 +1,8 @@
+use crate::crypto::{asymmetric, symmetric, passwords};
+// Here I provice all functionts to Kacper Urbaniec. Those functions will not be called by the crypto library
+
 pub fn newUser(key: &[u8]) -> (String, String){
-	return asymmetric::newUser(key);
+	return crate::asymmetric::newUser(key);
 }
 pub fn decryptChallenge(privateKey: &str, challenge: &str, key: &[u8]) -> Result<String, i32>{
 	return asymmetic::authenticateUser(privateKey, challenge, key);
@@ -19,4 +22,3 @@ pub fn password_to_existing_key(password: &str, encrypted_key: &str) -> &[u8]{
 pub fn change_password(new_password: &str, master_key: &[u8]) -> String{
 	return passwords::change_password(new_password, master_key);
 }
-pub fn decrypt_db() ->

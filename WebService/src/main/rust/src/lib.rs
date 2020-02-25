@@ -1,5 +1,5 @@
 #![feature(in_band_lifetimes)]
-
+mod crypto;
 mod utils;
 
 use wasm_bindgen::prelude::*;
