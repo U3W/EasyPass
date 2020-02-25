@@ -255,10 +255,13 @@ impl Worker {
         // Create variable that contains the remote database or none
         let mut remote_db = None;
         // When online, setup remote database and sync handler
+        // TODO use navigator.online?
         let sync_handler = if self.service_status.borrow().as_str() == "online" {
             // Init remote databases
-            let remote_db_here = PouchDB::new_with_name(&format!("{}/-{}",
-                 &self.database_url.borrow().as_ref().unwrap(), &name));
+            let remote_db_name = format!("DB-URL: {}{}-{}",
+                &self.database_url.borrow().as_ref().unwrap(),
+                &self.user.borrow().as_ref().unwrap(), &name);
+            let remote_db_here = PouchDB::new_with_name(&remote_db_name);
             // Get Sync Handler
             let sync_handler: SyncHandler = local_db.sync(&remote_db_here);
             // Bind on change functions
