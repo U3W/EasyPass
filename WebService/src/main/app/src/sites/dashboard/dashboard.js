@@ -1169,7 +1169,7 @@ class Dashboard extends React.Component {
 
     saveSettings() {
         this.props.changeLanguage(this.state.language);
-        location.reload();
+        //location.reload();
     }
 
     cancelSettings() {

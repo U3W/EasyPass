@@ -104,7 +104,9 @@ export const strings = {
     addCatErr: "An error occurred while adding the category. Please try again!",
 
     editCat: "Edit category",
+    editCatSave: "Save",
     editCatSelCat: "Select category",
+    editCatNoCat: "No categories added yet",
     // alerts
     editCatSucc: "Edited category saved!",
     editCatErr: "An error has occurred during editing. Please try again!",
@@ -137,6 +139,9 @@ export const strings = {
 
     addGroupUserAlready: "User already added!",
     addGroupUserNotFound: "Username does not exist!",
+
+    // Edit Group
+    editGroup: "Edit group",
 
     // Add Password
     addPass: "Add password",

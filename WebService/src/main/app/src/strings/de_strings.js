@@ -118,7 +118,9 @@ export const strings = {
     addCatErr: "Beim Hinzufügen der Kategorie ist ein Fehler aufgetreten. Bitte versuchen Sie es erneut!",
 
     editCat: "Kategorie bearbeiten",
+    editCatSave: "Speichern",
     editCatSelCat: "Kategorie auswählen",
+    editCatNoCat: "Noch keine Kategorien hinzugefügt",
     // alerts
     editCatSucc: "Bearbeitete Kategorie gespeichert!",
     editCatErr: "Beim Bearbeiten ist ein Fehler aufgetreten. Bitte versuchen Sie es erneut!",
