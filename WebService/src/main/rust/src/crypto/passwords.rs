@@ -4,15 +4,15 @@ use rand::RngCore;
 extern crate base64;
 use base64::encode_config;
 use base64::decode_config;
-
-use hashing::hash_argon;
-use hashing::hash_sha3_256;
-use crate::crypto::symmetric::{encrypt, decrypt};
+use crate::crypto::symmetric::{encrypt, decrypt, get_random_iv};
 use crate::crypto::hashing::{hash_argon, hash_sha3_256};
+use wasm_bindgen::__rt::std::borrow::Borrow;
 
-pub fn random_key() -> &[u8]{
+
+pub fn random_key() -> [u8;32]{
 	let mut key : [u8;32] = [0u8;32];
     OsRng::fill_bytes(&mut OsRng,&mut key);
+    return key;
 }
 
 pub fn encrypt_key(random_key: &[u8], key: &[u8]) -> String{
@@ -34,18 +34,20 @@ pub fn decrypt_key(random_key_encrypted: &str, key: &[u8]) -> Result<Vec<u8>, i3
     let slice = decoded.unwrap();
     return Ok(slice);
 }
-pub fn password_to_key(password: &str, iv: String) -> &[u8] {
+pub fn password_to_key<'a>(password: &str, iv: String) -> Vec<u8> {
     let argon_hash = hash_argon(password, iv);
     let hashed_hash = hash_sha3_256(&argon_hash);
-    let key = hashed_hash.as_slice();
+    return hashed_hash;
 }
-pub fn password_to_new_key(password: &str) -> (&[u8], String){ //unencrypted, encrypted (encryoted: iv for argon§iv%hash$encrypted)
-    let rand_key: &[u8] = random_key();
-    let mut iv = get_random_iv(20);
-    let key = password_to_key(password, iv);
+pub fn password_to_new_key<'a>(password: &str) -> (&'a[u8], String){ //unencrypted, encrypted (encryoted: iv for argon§iv%hash$encrypted)
+    let rand_key = random_key();
+    let rand_key = rand_key.as_ref();
+    let mut iv = get_random_iv(20).to_owned();
+    let key = password_to_key(password, iv.clone());
+    let key = key.as_slice();
     let encrypted_key = encrypt_key(rand_key, key);
     iv.push_str("§");
-    iv.push_str(encrypted_key);
+    iv.push_str(&encrypted_key);
     return (rand_key, iv);
 
 }
@@ -55,16 +57,18 @@ pub fn password_to_existing_key(password: &str, encrypted_key: &str) -> Vec<u8>{
     let iv = vec[0];
     let encrypted_key = vec[1];
     let key = password_to_key(password, String::from(iv));
+    let key = key.as_slice();
     let decrypted_key = decrypt_key(encrypted_key, key);
     let decrypted_key = decrypted_key.unwrap();
     return decrypted_key;
 }
 //returns encrypted 
 pub fn change_password(new_password: &str, master_key: &[u8]) -> String{
-	let mut iv = get_random_iv(20);
-    let key = password_to_key(password, iv);
+	let mut iv = get_random_iv(20).to_owned();
+    let key = password_to_key(new_password, iv.clone());
+    let key = key.as_slice();
     let encrypted_key = encrypt_key(master_key, key);
     iv.push_str("§");
-    iv.push_str(encrypted_key);
+    iv.push_str(&encrypted_key);
     return iv;
 }

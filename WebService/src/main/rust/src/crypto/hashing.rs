@@ -1,10 +1,10 @@
 extern crate argon2;
 extern crate base64;
-
+extern crate sha3;
 use self::argon2::Config;
-
+use sha3::{Digest, Sha3_256};
 pub fn hash_argon(string: &str, salt: String) -> String{
-    let salz = salt.get_byte;
+    let salz = salt.as_bytes();
     let mut config = Config::default();
     config.hash_length = 64;
     let mut hash = argon2::hash_encoded(string.as_bytes(), salt.as_bytes(), &config).unwrap();

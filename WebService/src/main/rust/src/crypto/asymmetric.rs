@@ -6,7 +6,6 @@ use rand::rngs::OsRng;
 use x25519_dalek::{EphemeralSecret, StaticSecret};
 use x25519_dalek::PublicKey;
 use base64::{encode_config, decode_config};
-use crate::symmetric::{decrypt, encrypt};
 use sha3::{Digest, Sha3_256};
 use crate::crypto::symmetric::{encrypt, decrypt};
 use crate::crypto::hashing::hash_sha3_256;

@@ -10,7 +10,7 @@ use base64::encode_config;
 use base64::decode_config;
 // iv%hash$encrypted
 pub fn encrypt(msg: &str, key: &[u8]) -> String{
-    let mut iv = get_random_string(8).to_owned();
+    let mut iv = get_random_iv(8).to_owned();
     let encrypted = encrypt_manual(msg,key,iv.as_str()).to_owned();
     iv.push_str("%");
     iv.push_str(&encrypted);
@@ -55,7 +55,7 @@ pub fn decrypt_manual(msg: &str, key: &[u8], iv: &str) -> Result<String, i32> {
     let res : Result<String, i32> = Ok(buffer2);
     return res;
 }
-pub fn get_random_string<'a>(length: usize) -> String {
+pub fn get_random_iv<'a>(length: usize) -> String {
     let mut alphabet = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890".as_bytes().to_vec(); //this should be random enough
     let mut rng = rand::thread_rng();
     alphabet.shuffle(&mut rng);
