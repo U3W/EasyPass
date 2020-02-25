@@ -5,6 +5,9 @@ extern crate base64;
 use base64::encode_config;
 use base64::decode_config;
 
+use hashing::hash_argon;
+use hashing::hash_sha3_256;
+
 pub fn random_key() -> &[u8]{
 	let mut key : [u8;32] = [0u8;32];
     OsRng::fill_bytes(&mut OsRng,&mut key);
