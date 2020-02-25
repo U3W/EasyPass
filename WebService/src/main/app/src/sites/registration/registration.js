@@ -156,138 +156,74 @@ class Registration extends React.Component {
 
     submit() {
         let err = false;
-        if ( this.state.step === 1 ) {
-            // schauen ob leer
-            if ( this.state.newPass === "" )
-            {
-                err = true;
-                this.setState({missingPassword: true});
-            }
-            if ( this.state.newPassSec === "" )
-            {
-                err = true;
-                this.setState({missingSecPassword: true})
-            }
-            if ( this.state.newUser === "" )
-            {
-                err = true;
-                this.setState({missingUsername: true});
-            }
-            else {
-                // TODO call Kascpers method, check if user already taken
-                /*if ( true ) {
-                    err = true;
-                    this.setState({
-                        userAlreadyTaken: true
-                    })
-                }*/
-
-            }
-            if ( this.state.newPass !== this.state.newPassSec ) {
-                err = true;
-                this.setState({passNoMatch: true});
-            }
-            else {
-                this.setState({
-                    passNoMatch: false,
-                });
-            }
-
-            if ( !err )
-            {
-                this.setState({
-                    missingUsername: false,
-                    missingPassword: false,
-                    missingSecPassword: false,
-                    passNoMatch: false,
-                    userAlreadyTaken: false,
-                    step: 2,
-                });
-            }
+        // schauen ob leer
+        if ( this.state.newPass === "" )
+        {
+            err = true;
+            this.setState({missingPassword: true});
+        }
+        if ( this.state.newPassSec === "" )
+        {
+            err = true;
+            this.setState({missingSecPassword: true})
+        }
+        if ( this.state.newUser === "" )
+        {
+            err = true;
+            this.setState({missingUsername: true});
         }
         else {
-            if ( this.state.newMasterpass === "" ) {
+            // TODO call Kascpers method, check if user already taken
+            /*if ( true ) {
                 err = true;
-                this.setState({missingMasterpassword: true});
-            }
-            if ( this.state.newMasterpassSec === "" ) {
-                err = true;
-                this.setState({missingSecMasterpassword: true});
-            }
-            if ( this.state.newMasterpass === this.state.newPass ) {
-                err = true;
-                this.setState({masterpassMatchPass: true});
-            }
-            if ( this.state.newMasterpass !== this.state.newMasterpassSec ) {
-                err = true;
-                this.setState({masterpassNoMatch: true})
-            }
-            if ( this.state.newMasterpass === this.state.newMasterpassSec ) {
                 this.setState({
-                    masterpassNoMatch: false,
-                });
-                if ( this.state.newMasterpass !== this.state.newPass) {
-                    this.setState({
-                        masterpassMatchPass: false,
-                    })
-                }
-                else {
-                    this.setState({
-                        masterpassMatchPass: true,
-                    })
-                }
-            }
-            else {
-                this.setState({
-                    masterpassNoMatch: true,
-                });
-                if ( this.state.newMasterpass !== this.state.newPass) {
-                    this.setState({
-                        masterpassMatchPass: false,
-                    })
-                }
-                else {
-                    this.setState({
-                        masterpassMatchPass: true,
-                    })
-                }
-            }
-
-            if ( !err )
-            {
-                this.setState({
-                    error: false,
-                    missingPassword: false,
-                    missingSecPassword: false,
-                    missingUsername: false,
-                    missingMasterpassword: false,
-                    missingMasterpasswordSec: false,
-                    passNoMatch: false,
-                    userAlreadyTaken: true,
-                    masterpassMatchPass: false,
-                    masterpassNoMatch: false,
-                });
-
-
-                // ToDo Kall Kaspers method
-                if (false) {
-                    this.props.callback.switchToRegister(false, true, false);
-                } else {
-                    this.props.callback.switchToRegister(false, false, false);
-                }
-
-
-                this.setState({
-                    newPass: "",
-                    newPassSec: "",
-                    newUser: "",
-                    newMasterpass: "",
-                    newMasterpassSec: "",
+                    userAlreadyTaken: true
                 })
-            }
-            else
-            {
-                this.render();
+            }*/
+
+        }
+        if ( this.state.newPass !== this.state.newPassSec ) {
+            err = true;
+            this.setState({passNoMatch: true});
+        }
+        else {
+            this.setState({
+                passNoMatch: false,
+            });
+        }
+
+        if ( !err )
+        {
+            this.setState({
+                error: false,
+                missingPassword: false,
+                missingSecPassword: false,
+                missingUsername: false,
+                passNoMatch: false,
+                userAlreadyTaken: true,
+            });
+
+
+            this.setState({
+                newPass: "",
+                newPassSec: "",
+                newUser: "",
+            });
+
+
+            this.setState({
+                missingUsername: false,
+                missingPassword: false,
+                missingSecPassword: false,
+                passNoMatch: false,
+                userAlreadyTaken: false,
+            });
+
+            // ToDo Kall Kaspers method
+            if (false) {
+                this.props.callback.switchToRegister(false, true, false);
+            } else {
+                this.props.callback.switchToRegister(false, false, false);
             }
         }
     }
@@ -829,25 +765,15 @@ class Registration extends React.Component {
 
 
     render() {
-        let formOut;
-        if ( this.state.step === 1 ) {
-            formOut = (
-                <>
-                    {this.getInputUsername()}
-                    <hr/>
-                    {this.getInputPassword()}
-                    {this.getInputSecPassword()}
-                </>
-            );
-        }
-        else {
-            formOut = (
-                <>
-                    {this.getInputMasterpass()}
-                    {this.getInputMasterpassSec()}
-                </>
-            );
-        }
+        let formOut = (
+            <>
+                {this.getInputUsername()}
+                <hr/>
+                {this.getInputPassword()}
+                {this.getInputSecPassword()}
+            </>
+        );
+
         return (
             <>
                 <div className="backgroundPicRegist">
@@ -863,21 +789,9 @@ class Registration extends React.Component {
                                         <Card.Body>
                                             <Form autoComplete="off">
                                                 {formOut}
-                                                <Form.Group>
-                                                    {StringSelector.getString(this.props.callback.state.language).registStep} {this.state.step}/2
-                                                </Form.Group>
-                                                {this.state.step === 2 &&
-                                                    <Button variant="danger" onClick={this.resetToFirst}>
-                                                        {StringSelector.getString(this.props.callback.state.language).registPrevButton}
-                                                    </Button>
-                                                }
 
                                                 <Button variant="danger" className={"float-right"} onClick={this.handleSubmit}>
-                                                    {this.state.step === 1 ?
-                                                        StringSelector.getString(this.props.callback.state.language).registNextButton
-                                                        :
-                                                        StringSelector.getString(this.props.callback.state.language).registButton
-                                                    }
+                                                    {StringSelector.getString(this.props.callback.state.language).registButton}
                                                 </Button>
                                             </Form>
                                         </Card.Body>

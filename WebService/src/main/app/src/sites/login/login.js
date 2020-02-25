@@ -167,11 +167,6 @@ class Login extends React.Component {
         });
         if ( e.target.value.length > 0 ) {
             switch ( e.target.id ) {
-                case "inpMasterpassword":
-                    this.setState({
-                        missingMasterpassword: false,
-                    });
-                    break;
                 case "inpUsername":
                     this.setState({
                         missingUsername: false,
@@ -264,11 +259,6 @@ class Login extends React.Component {
         {
             err = true;
             this.setState({missingUsername: true });
-        }
-        if ( this.state.inpMasterpassword ==="" )
-        {
-            err = true;
-            this.setState({missingMasterpassword: true});
         }
         if ( this.state.inpRadio === "file" )
         {
@@ -395,6 +385,7 @@ class Login extends React.Component {
 
 
     getInputMasterpassword() {
+        // ToDo Delete
         if ( this.state.missingMasterpassword )
         {
             return (
@@ -553,7 +544,6 @@ class Login extends React.Component {
                                                 <Form autoComplete="off">
                                                     {this.getInputUsername()}
                                                     {this.getInputPassword()}
-                                                    {this.getInputMasterpassword()}
                                                     <Row>
                                                         <Col sm={12}>
                                                             <Form.Label>

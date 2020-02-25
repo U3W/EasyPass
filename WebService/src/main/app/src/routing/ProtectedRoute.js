@@ -15,7 +15,6 @@ export const ProtectedRoute = ({component: Component, type: type, ...rest}) => {
                            }
                            else
                            {
-                               alert("Jetzt gehts wieder zurück");
                                return <Redirect to={
                                    {
                                        pathname: "/",
