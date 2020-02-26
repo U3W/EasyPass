@@ -24,7 +24,7 @@ export const strings = {
     loginButton: "Anmelden",
 
     wrongLoginHeader: "Anmeldung fehgeschlagen!",
-    wrongLogin: "Username, Passwort, Masterpasswort oder 2-FA sind falsch!",
+    wrongLogin: "Username, Passwort oder 2-FA sind falsch!",
 
     registrationButton: "Noch kein Account? Hier registrieren",
     registrationAlertSucc: "Account hinzugefügt!",
@@ -99,7 +99,14 @@ export const strings = {
     changePassAlertErr: "Passwort stimmt nicht mit dem ursprünglichen überein!",
     changePassAlertSucc: "Passwort geändert!",
 
+    genKeyfile: "Keyfile generieren",
+    genButton: "Generieren",
+
     saveSetting: "Änderungen speichern",
+
+    userKeyHead: "Öffentlicher userkey",
+    userKey: "Userkey",
+    userKeyClose: "Schließen",
 
     // Navbar Left
     menu: "Menü",
@@ -154,7 +161,7 @@ export const strings = {
 
     // Edit Group
     editGroup: "Gruppe bearbeiten",
-
+    editGroupButton: "Speichern",
 
     // Add Password
     addPass: "Passwort hinzufügen",

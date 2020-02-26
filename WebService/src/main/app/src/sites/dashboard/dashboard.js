@@ -103,6 +103,8 @@ class Dashboard extends React.Component {
             showEditedCat: false,
             // alert state
             alertState: "success",
+            // wrong creds popup
+            popUpWrongCreds: false,
             // cat add
             popUpAddCatShow: false,
             // cat edit
@@ -197,6 +199,7 @@ class Dashboard extends React.Component {
 
 
         this.triggerEditGroup = this.triggerEditGroup.bind(this);
+        this.setWrongCreds = this.setWrongCreds.bind(this);
 
         // WindowDimensions
         this.updateWindowDimensions = this.updateWindowDimensions.bind(this);
@@ -207,6 +210,7 @@ class Dashboard extends React.Component {
         this.getCatsFromTab = dashboardEntries.getCatsFromTab.bind(this);
         this.getCatsFromGroup = dashboardEntries.getCatsFromGroup.bind(this);
         this.getCatData = dashboardEntries.getCatData.bind(this);
+
     }
 
     componentDidMount() {
@@ -214,6 +218,8 @@ class Dashboard extends React.Component {
         window.addEventListener('resize', this.updateWindowDimensions);
         this.props.worker.addEventListener("message", this.workerCall);
         this.props.worker.postMessage(['dashboard', undefined]);
+
+        this.setWrongCreds();
     }
 
     componentWillUnmount() {
@@ -927,6 +933,16 @@ class Dashboard extends React.Component {
         );
     }
 
+    printWrongCreds() {
+        return (
+            <Alert show={this.state.popUpWrongCreds} variant="danger" className="center-horz center-vert error fixed-top-easypass in-front">
+                <p className="center-horz center-vert center-text">
+                    {StringSelector.getString(this.state.language).wrongLogin}
+                </p>
+            </Alert>
+        );
+    }
+
     dismissCopy( which ) {
         sleep(2125).then(() => {
                 switch (which) {
@@ -1280,7 +1296,7 @@ class Dashboard extends React.Component {
     }
 
     generateKeyfile() {
-        // ToDO call Moritz Method
+        // ToDO call Kacpers Method
         console.log("Hier keyfile")
     }
 
@@ -1331,6 +1347,18 @@ class Dashboard extends React.Component {
         this.setState({
             popUpAddCatShow: true,
         })
+    }
+
+    setWrongCreds() {
+        this.setState({
+            popUpWrongCreds: true,
+        });
+        setTimeout(() => {
+            this.setState({
+                popUpWrongCreds: false,
+            });
+            history.push("/");
+        }, 5000);
     }
 
     getCatAddShow() {
@@ -1520,6 +1548,7 @@ class Dashboard extends React.Component {
                 {this.printAddGroup()}
                 {this.printDeleteGroup()}
                 {this.printEditGroup()}
+                {this.printWrongCreds()}
             </div>
         );
     }

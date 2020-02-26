@@ -18,6 +18,14 @@
     padding-right: 1.2em;
 }
 
+/* Fix UserKeyPopUp */
+.popUpBehind {
+    z-index: 1030;
+}
+
+.noResize {
+    resize: none;
+}
 
 
 /* Navbar Settings */

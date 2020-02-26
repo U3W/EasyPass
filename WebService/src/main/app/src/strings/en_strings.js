@@ -1,3 +1,5 @@
+import InputGroup from "react-bootstrap/InputGroup";
+import React from "react";
 
 export const strings = {
     // Login
@@ -11,7 +13,7 @@ export const strings = {
     loginButton: "Login",
 
     wrongLoginHeader: "Login failed!",
-    wrongLogin: "Username, password, masterpassword or 2-FA is incorrect!",
+    wrongLogin: "Username, password or 2-FA is incorrect!",
 
     registrationButton: "No account yet? Register here",
     registrationAlertSucc: "Account created!",
@@ -85,7 +87,14 @@ export const strings = {
     changePassAlertErr: "Password does not match the original one!",
     changePassAlertSucc: "Password changed!",
 
+    genKeyfile: "Generate keyfile",
+    genButton: "Generate",
+
     saveSetting: "Save settings",
+
+    userKeyHead: "Public userkey",
+    userKey: "Userkey",
+    userKeyClose: "Close",
 
     // Navbar Left
     menu: "Menu",
@@ -142,6 +151,7 @@ export const strings = {
 
     // Edit Group
     editGroup: "Edit group",
+    editGroupButton: "Save",
 
     // Add Password
     addPass: "Add password",

@@ -3,13 +3,6 @@ import {loginConst} from "./login.enum";
 
 class LoginState {
 
-    getRadioState() {
-        if ( localStorage.getItem(loginConst.radioSelected) === null ) {
-            return "file";
-        }
-        return localStorage.getItem(loginConst.radioSelected);
-    }
-
     getSaveUsernameState() {
         if ( localStorage.getItem(loginConst.saveUsername) === null ) {
             return false;
