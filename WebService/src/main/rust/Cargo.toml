@@ -11,23 +11,22 @@ crate-type = ["cdylib", "rlib"]
 default = ["console_error_panic_hook"]
 
 [dependencies]
-c2-chacha = "0.2.2"
-poly1305 = "0.5.2"
-wasm-bindgen = {version = "0.2.54", features = ["serde-serialize"] }
+wasm-bindgen = {version = "0.2.58", features = ["serde-serialize", "nightly"] }
 #wasm-bindgen-futures = {version = "0.3.27", features = ["futures_0_3"] }
 wasm-bindgen-futures = "0.4.4"
 # futures = "0.1.20"
 futures-preview = { version = "=0.3.0-alpha.18", features = ["async-await", "nightly"] }
 #futures = "0.3.1"
-js-sys = "0.3.31"
+js-sys = "0.3.35"
 serde_json = "1.0.32"
 serde_derive = "^1.0.59"
 serde = { version = "1.0.80", features = ["derive"] }
 base64 = "0.11.0"
-rand = "0.7.2"
 rust-argon2 = "0.7.0"
 x25519-dalek = "0.6.0"
 sha3 = "0.8.2"
+c2-chacha = "0.2.2"
+poly1305 = "0.5.2"
 # The `console_error_panic_hook` crate provides better debugging of panics by
 # logging them with `console.error`. This is great for development, but requires
 # all the `std::fmt` and `std::panicking` infrastructure, so isn't great for
@@ -40,12 +39,15 @@ console_error_panic_hook = { version = "0.1.1", optional = true }
 #
 # Unfortunately, `wee_alloc` requires nightly Rust when targeting wasm for now.
 wee_alloc = { version = "0.4.2", optional = true }
-
+rand = { version = "0.7.3", features = ["wasm-bindgen"]}
 
 [dependencies.web-sys]
-version = "0.3"
+version = "0.3.35"
 features = [
-  "Window"
+  "Window",
+  "FileReaderSync",
+  "Blob",
+  "File",
 ]
 
 [dev-dependencies]
@@ -53,4 +55,8 @@ wasm-bindgen-test = "0.2"
 
 [profile.release]
 # Tell `rustc` to optimize for small code size.
-opt-level = "s"
+# TODO opt for speeeeed
+# opt for speed
+opt-level = 3
+# opt for size
+#opt-level = "s"

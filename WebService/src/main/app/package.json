@@ -65,7 +65,7 @@
     "webpack-cli": "^3.3.9",
     "webpack-dev-server": "^3.8.2",
     "workbox-webpack-plugin": "^4.3.1",
-    "combine-workbox-precaches-plugin": "^1.0.1"
+    "combine-workbox-precaches-plugin": "^1.0.2"
   },
   "jest": {
     "globals": {
@@ -76,6 +76,10 @@
   },
   "dependencies": {
     "@babel/runtime": "^7.7.7",
-    "dotenv": "latest"
+    "copy-to-clipboard": "^3.2.1",
+    "dotenv": "latest",
+    "history": "^4.10.1",
+    "radium": "^0.26.0",
+    "react-animations": "^1.0.0"
   }
 }

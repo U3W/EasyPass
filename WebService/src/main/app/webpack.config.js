@@ -39,8 +39,7 @@ module.exports = (args, options) => {
    */
   const appConfig = {
     entry: {
-      'index': './src/index.js',
-      'backendtest': './src/backendtest.js'
+      'index': './src/index.js'
     },
     module: {
       rules: [
@@ -72,16 +71,8 @@ module.exports = (args, options) => {
     plugins: [
       new HtmlWebPackPlugin({
         template: "./public/index.html",
-        filename: "index.html",
-        excludeAssets: [/backendtest.*.js/]
+        filename: "index.html"
       }),
-      new HtmlWebpackExcludeAssetsPlugin(),
-      new HtmlWebPackPlugin({
-        template: "./public/backendtest.html",
-        filename: "backendtest.html",
-        excludeAssets: [/index.*.js/]
-      }),
-      new HtmlWebpackExcludeAssetsPlugin(),
       new CopyWebPackPlugin([
         {from: "public", ignore: ["index.html"]}
       ]),
@@ -123,9 +114,9 @@ module.exports = (args, options) => {
     },
     plugins: [
       new CopyWebPackPlugin([
-        {from: "modules", to: "modules"}
+        {from: "modules/easypass-lib/dist/**"},
+        {from: "modules/pouchdb/dist/**"}
       ]),
-      // TODO exclude unnecessary bower components
       new WorkboxPlugin.InjectManifest({
         swSrc: './src/service-worker/service-worker.js',
         swDest: temporaryPrecache,

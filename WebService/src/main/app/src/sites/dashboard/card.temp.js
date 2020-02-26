@@ -1,29 +1,117 @@
 import React from "react"
 import Card from "react-bootstrap/Card";
 import Button from "react-bootstrap/Button";
+import OpenGroup from "../../img/icons/group_open.svg";
+import "./card.temp.css"
+import Row from "react-bootstrap/Row";
+import Col from "react-bootstrap/Col";
+import OverlayTrigger from "react-bootstrap/OverlayTrigger";
+import Tooltip from "react-bootstrap/Tooltip";
+import StringSelector from "../../strings/stings";
+import SaveChanges from "../../img/icons/password_savechanges_white.svg";
+import DeleteIcon from "../../img/icons/password_delete_white.svg";
+import ButtonToolbar from "react-bootstrap/ButtonToolbar";
+import EditIcon from "../../img/icons/password_edit_white.svg";
 
 // Nach dem machen --> https://www.youtube.com/watch?v=rH9jM-8hAD8
 /**
  * @param id: which element in a list f.e. (must be unique, because with this id the collapsible div will be opened then toggled)
- * @param img: a link to the website (f.e. "www.google.com/"). Note that the / at the end is necessary for getting the favicon (Icon on the beginning of the card)
- * @param title: title of this password
- * @param user: username of this password
- * @param pass: password
+ * @param name
  * @param rest
  */
-export const PassCard = ({img: img, title: title, user: user, pass: pass, ...rest}) => {
-    /* <input type="hidden" value={title}/>: Must be at the first position, otherwise the search function wont find it -> exception */
-    return (
-        <Card className="pass-card">
-            <input type="hidden" value={title}/>
-            <Card.Img variant="top" src={img} />
-            <Card.Body>
-                <Card.Title>{title}</Card.Title>
-                <Card.Text>
-                    User: {user}
-                </Card.Text>
-                <Button variant="primary">Go to Page</Button>
-            </Card.Body>
-        </Card>
-    )
+export default class GroupCard extends React.Component {
+    constructor(props) {
+        super(props);
+
+        this.state = {
+            name: this.props.name,
+            userGroupList: this.props.userGroupList,
+            id: this.props._id,
+            ref: this.props._ref,
+        };
+
+    }
+
+    /* <input id="..." type="hidden" value="..."/>: Must be at the first position, otherwise the search function wont find it -> exception */
+    render() {
+        return (
+            <Card className="pass-card groupCard">
+                <input id="searchInput" type="hidden" value={this.props.name}/>
+                <Card.Body>
+                    <Card.Title>
+                        {this.props.name}
+                    </Card.Title>
+                    <h6>{StringSelector.getString(this.props.callback.state.language).cardGroupMembers} {this.state.userGroupList.length}</h6>
+
+                    <Card.Footer className="spezFooter">
+                        <Row>
+                            <Col xs={4}>
+                                {['bottom'].map(placement => (
+                                    <OverlayTrigger
+                                        key={placement}
+                                        placement={placement}
+                                        overlay={
+                                            <Tooltip id={`tooltip-${placement}`}>
+                                                {StringSelector.getString(this.props.callback.state.language).cardDel}
+                                            </Tooltip>
+                                        }
+                                    >
+                                        <Button variant="dark" className="groupButton" onClick={() => this.props.callback.deleteGroup(this.state.id, this.state.ref, false)}>
+                                            <img
+                                                src={DeleteIcon}
+                                                alt=""
+                                                className="groupIcons"
+                                            />
+                                        </Button>
+                                    </OverlayTrigger>
+                                ))}
+                            </Col>
+                            <Col xs={4}>
+                                {['bottom'].map(placement => (
+                                    <OverlayTrigger
+                                        key={placement}
+                                        placement={placement}
+                                        overlay={
+                                            <Tooltip id={`tooltip-${placement}`}>
+                                                {StringSelector.getString(this.props.callback.state.language).cardEdit}
+                                            </Tooltip>
+                                        }
+                                    >
+                                        <Button variant="dark" className="groupButton" onClick={() => this.props.callback.triggerEditGroup( this.state.id, this.state.ref, this.state.name, this.state.userGroupList)}>
+                                            <img
+                                                src={EditIcon}
+                                                alt=""
+                                                className="groupIcons"
+                                            />
+                                        </Button>
+                                    </OverlayTrigger>
+                                ))}
+                            </Col>
+                            <Col xs={4}>
+                                {['bottom'].map(placement => (
+                                    <OverlayTrigger
+                                        key={placement}
+                                        placement={placement}
+                                        overlay={
+                                            <Tooltip id={`tooltip-${placement}`}>
+                                                {StringSelector.getString(this.props.callback.state.language).cardOpen}
+                                            </Tooltip>
+                                        }
+                                    >
+                                        <Button variant="dark" className="groupButton" onClick={() => this.props.callback.changeGroup(this.state.id)}>
+                                            <img
+                                                src={OpenGroup}
+                                                alt=""
+                                                className="groupIcons"
+                                            />
+                                        </Button>
+                                    </OverlayTrigger>
+                                ))}
+                            </Col>
+                        </Row>
+                    </Card.Footer>
+                </Card.Body>
+            </Card>
+        )
+    }
 };

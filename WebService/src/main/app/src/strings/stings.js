@@ -12,3 +12,8 @@ export default class StringSelector {
         }
     }
 }
+
+/**
+ * Noch zu machen:
+ *  - Add Password: Alles bei den neuen Gruppen fkt + Error Meldungen
+ */

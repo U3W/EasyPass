@@ -43,6 +43,25 @@
     width: 20px;
 }
 
+.hiddenRow {
+    display: none;
+}
+
+.errorText {
+    color: #dc3545!important;
+    margin: 0;
+}
+
+.noMarginBottom {
+    margin-bottom: 0;
+}
+.noMarginTop {
+    margin-top: 0;
+}
+
+.rowMargin{
+    margin-top: 15px;
+}
 
 .search {
     width: 100% !important;
@@ -213,6 +232,7 @@
 }
 
 
+
 /*
  * Sidebar
  */
@@ -234,7 +254,7 @@
 .sidebar-sticky {
     position: relative;
     top: 0;
-    height: calc(100% - 86px);
+    height: calc(100% - 32px);
     padding-top: .5rem;
     overflow-x: hidden;
     overflow-y: auto; /* Scrollable contents if viewport is shorter than content. */
@@ -469,6 +489,17 @@
 .del-modal-table td {
     cursor: pointer;
     border-radius: 0 !important;
+}
+
+.noLeftBorderRadius {
+    border-bottom-left-radius: 0 !important;
+    border-top-left-radius: 0 !important;
+}
+
+.fitHoleParent {
+    width: 110%;
+    border-top-right-radius: 0 !important;
+    border-bottom-right-radius: 0 !important;
 }
 
 

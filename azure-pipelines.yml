@@ -3,6 +3,8 @@ trigger:
   branches:
     include:
     - '*'
+    exclude:
+    - 'client-backend-experimental'
 
 pool:
   vmImage: 'ubuntu-latest'

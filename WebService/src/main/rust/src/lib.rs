@@ -1,152 +1,353 @@
 #![feature(in_band_lifetimes)]
+#![feature(async_closure)]
+// Import wasm_bindgen, js_sys, web_sys dependencies and more
 mod crypto;
 mod utils;
-
 use wasm_bindgen::prelude::*;
-mod pouchdb;
-use pouchdb::pouchdb::*;
 use wasm_bindgen_futures::{spawn_local, future_to_promise};
 use wasm_bindgen_futures::JsFuture;
 
 use serde_json::{Value};
-use js_sys::{Promise};
+use js_sys::{Promise, Array, ArrayBuffer};
 use serde::{Deserialize, Serialize};
+use serde_json::json;
 use wasm_bindgen::__rt::std::future::Future;
 use wasm_bindgen::__rt::std::rc::Rc;
-use wasm_bindgen::__rt::core::cell::RefCell;
-use wasm_bindgen::__rt::std::sync::Arc;
+use wasm_bindgen::__rt::core::cell::{RefCell, Cell};
+use wasm_bindgen::__rt::std::sync::{Arc, Mutex, PoisonError, MutexGuard};
+use wasm_bindgen::JsCast;
+use serde_json::value::Value::Bool;
+use wasm_bindgen::__rt::std::collections::HashMap;
+//use web_sys::{MessageEvent, FileReader};
+use web_sys::{MessageEvent, FileReaderSync};
 
+extern crate rand;
+use rand::Rng;
+use wasm_bindgen::__rt::Ref;
+use wasm_bindgen::__rt::std::net::Shutdown::Read;
+use crate::state::State;
 
+// Use wee_alloc as the memory allocator for the WebAssembly Module
 #[cfg(feature = "wee_alloc")]
 #[global_allocator]
 static ALLOC: wee_alloc::WeeAlloc = wee_alloc::WeeAlloc::INIT;
 
+// Bind JavaScript functions for invocation in WebAssembly
 #[wasm_bindgen]
 extern {
     #[wasm_bindgen(js_namespace = console)]
     fn log(s: &str);
+
+    #[wasm_bindgen(js_name = postMessage)]
+    fn post_message(message: &JsValue);
+
+    #[wasm_bindgen(js_name = postMessage)]
+    fn post_message_with_transfer(message: &JsValue, transfer: &JsValue);
+
+    #[wasm_bindgen(js_name = sleep)]
+    fn sleep(timeout: u64);
+
+    #[wasm_bindgen(js_name = addEventListenerWorker)]
+    fn add_message_listener(name: &str, closure: &Closure<dyn FnMut(MessageEvent)>);
+
+    #[wasm_bindgen(js_name = removeEventListenerWorker)]
+    fn remove_message_listener(name: &str, closure: &Closure<dyn FnMut(MessageEvent)>);
+
+    /**
+    #[wasm_bindgen(js_name = addEventListenerWorker)]
+    fn add_online_listener(name: &str, closure: &Closure<dyn FnMut()>);
+
+    #[wasm_bindgen(js_name = addEventListenerWorker)]
+    fn add_offline_listener(name: &str, closure: &Closure<dyn FnMut()>);
+
+    #[wasm_bindgen(js_name = removeEventListenerWorker)]
+    fn remove_online_listener(name: &str, closure: &Closure<dyn FnMut()>);
+
+    #[wasm_bindgen(js_name = removeEventListenerWorker)]
+    fn remove_offline_listener(name: &str, closure: &Closure<dyn FnMut()>);*/
+    #[wasm_bindgen(js_name = addNetworkListener)]
+    fn add_network_listener(closure: &Closure<dyn FnMut()>);
+
+    #[wasm_bindgen(js_name = isOnline)]
+    fn is_online() -> bool;
+}
+
+// Combination of imported "log" function with "println!" like behaviour.
+// Taken from Rust-Wasm documentation.
+#[macro_use]
+macro_rules! console_log {
+    ($($t:tt)*) => (log(&format_args!($($t)*).to_string()))
+}
+
+// Import all project modules.
+// Import is done here to allow usage of macros in all modules
+mod easypass;
+use easypass::worker::*;
+mod pouchdb;
+
+
+
+
+/// Represents the Backend - logic functionalities - of the Web-App.
+#[wasm_bindgen]
+pub struct Backend {
+    state: Rc<State>
 }
 
 #[wasm_bindgen]
-pub struct Worker {
-    local: PouchDB,
-    remote: PouchDB,
-    service_status: String,
-}
+impl Backend {
 
-#[wasm_bindgen]
-impl Worker {
+    /// Creates a new Backend.
     #[wasm_bindgen(constructor)]
-    pub fn new(url: String) -> Worker {
+    pub fn new() -> Backend {
+        // Setup panic hook for better warnings
         utils::set_panic_hook();
-        let settings = Settings { adapter: "idb".to_string() };
-        log(&format!("Length: {}", url.len()));
-        let remote = if url.len() == 0 {
-            let temporary = Temporary { adapter: "idb".to_string(), skip_setup: true };
-            PouchDB::new("Temporary", &JsValue::from_serde(&temporary).unwrap())
-        } else {
-            PouchDB::new_with_name(&url)
-        };
-        Worker {
-            local: PouchDB::new("Local", &JsValue::from_serde(&settings).unwrap()),
-            remote,
-            service_status: String::from("online")
+        // Build and setup internal state
+        let state = State::new(
+            None, Worker::new(String::from("")), None, None
+        );
+        // Rc is needed to use state in different parts of the application
+        let state = Rc::new(state);
+        Backend {
+            state
         }
     }
 
-    pub fn set_remote(&mut self, url: String) {
-        self.remote = PouchDB::new_with_name(&url);
-    }
-
-    pub fn set_service_status(&mut self, service_status: String) {
-        self.service_status = service_status;
-    }
-
-    // Error is thrown when remote is not established
-    pub fn check(&self) -> Promise {
-        let status = self.service_status.clone();
-        let local: PouchDB = self.local.clone();
-        let replicate = if status == "online" {
-            JsFuture::from(local.sync(&self.remote))
-        } else {
-            //JsFuture::from(PouchDB::replicate(&self.local, &self.remote))
-            JsFuture::from(Promise::resolve(&JsValue::undefined()))
-        };
-        future_to_promise(async move {
-            return if status == "online" {
-                //log(&format!("{:?}", &JsFuture::from(local.info()).await.unwrap().into_serde::<Info>().unwrap()));
-                //log(&format!("{:?}", &JsFuture::from(local.get_conflicts("4889f782-f945-427a-99f7-1e4b8d32c868")).await.unwrap().into_serde::<Value>().unwrap()));
-                replicate.await
-            } else {
-                replicate.await
+    /// Starts the whole Backend.
+    /// Creates message listeners for UI requests.
+    /// Also database are initialized and managed.
+    pub fn start(&mut self) {
+        // Clone and bind internal states
+        let state_here = self.state.clone();
+        let state_moved = self.state.clone();
+        // Create closure for startup process
+        let closure = Closure::new(move |e: MessageEvent| {
+            // Bind state to local variable
+            let state = state_moved.clone();
+            // Parse UI request
+            let check: String = e.data().as_string().unwrap();
+            // Check if UI is ready for further action
+            if check == "initAck" {
+                // If so, remove closure for startup process as listener
+                remove_message_listener(&"message", &state.init_closure().as_ref().unwrap());
+                state.set_init_closure(None);
+                // Create new closure for main process
+                let closure
+                    = Backend::build_main_closure(state_moved.clone());
+                // Bind closure for main process to message listener
+                add_message_listener(&"message", &closure);
+                // Save closure in state
+                state.set_main_closure(Some(closure));
             }
-        })
+        });
+        // Bind closure for startup process to message listener
+        add_message_listener(&"message", &closure);
+        // Save closure in state
+        state_here.set_init_closure(Some(closure));
+        // Finish initialization with worker setup
+        let _ = future_to_promise(async move {
+            // Bind state to local variable
+            let state = state_here;
+            // TODO is this future needed? Init is done in login now
+            // Initialize worker
+            // let _ = state.worker().init().await;
+            // Tell UI initialization is done
+            post_message(&JsValue::from("initDone"));
+            Ok(JsValue::from(true))
+        });
     }
 
-    pub fn save(&self, data: JsValue) -> Promise {
-        //log(&format!("Saved: {:?}", &data.into_serde::<Value>().unwrap()));
-        let action = JsFuture::from(self.local.post(&data));
-        future_to_promise(async move {
-            action.await
-        })
-    }
-
-    pub fn update(&self, data: JsValue) -> Promise {
-        let action = JsFuture::from(self.local.put(&data));
-        future_to_promise(async move {
-            action.await
-        })
-    }
-
-    pub fn find(&self, data: JsValue) -> Promise {
-        let action = JsFuture::from(self.local.find(&data));
-        future_to_promise(async move {
-            action.await
-        })
-    }
-
-    pub fn all_docs(&self) -> Promise {
-        let action = JsFuture::from(self.local.all_docs_included());
-        future_to_promise(async move {
-            action.await
-        })
-    }
-
-    pub fn remove(&self, data: JsValue) -> Promise {
-        let action = JsFuture::from(self.local.remove(&data));
-        future_to_promise(async move {
-            action.await
-        })
-    }
-
-    pub fn process(&self, command: String) -> Promise {
-        let info = JsFuture::from(self.local.info());
-        let adapter = self.local.adapter();
-
-        future_to_promise(async move {
-            let output = match command.as_str() {
-                "adapter" => adapter,
-                "info" => {
-                    match info.await {
-                        Ok(resolved) => {
-                            match resolved.into_serde::<Info>() {
-                                Ok(val) => format!("{:?}", &val),
-                                Err(_) => "Deserialize error".to_string(),
-                            }
-                        },
-                        Err(_) => "Promise error".to_string(),
+    /// Returns "main" closure that process UI requests.
+    fn build_main_closure(state: Rc<State>) -> Closure<dyn FnMut(MessageEvent)> {
+        Closure::new(move |e: MessageEvent| {
+            // Clone state for other needed move
+            let state = state.clone();
+            // Get command and additional data of UI request
+            let (cmd, data) = e.data().get_message();
+            // Execute code asynchronously
+            spawn_local(async move {
+                let why = data.clone();
+                // TODO remove this logs
+                log("Received data!");
+                log(&format!("CMD: {} | DATA: {:?}", &cmd, &data));
+                // Check which mode (= active page in UI) is and perform
+                // associated function
+                // If no mode is set, set it
+                if state.mode_is_none() {
+                    state.set_mode(Some(String::from(&cmd)));
+                    // If the dashboard page is called
+                    log("dashboard init 1");
+                    if state.mode_as_string() == "dashboard" {
+                        // Start live replication and send all data to UI
+                        log("dashboard init 2");
+                        state.worker().hearbeat().await;
+                    }
+                } else {
+                    match state.mode_as_string().as_ref() {
+                        "login" => Backend::login_call(cmd, data, state.clone()).await,
+                        "dashboard" => Backend::dashboard_call(cmd, data, state.clone()).await,
+                        _ => {}
                     }
                 }
-                _ => String::from("Unknown command")
-            };
-            Ok(JsValue::from(output))
+            });
         })
+    }
+
+    /// Process calls on the login page.
+    async fn login_call(cmd: String, data: JsValue, state: Rc<State>) {
+        log("LOGIN_CALL");
+        // Bind worker to local variable
+        let worker = state.worker();
+        // Perform operation
+        match cmd.as_ref() {
+            "login" => {
+                worker.login(data).await;
+            },
+            "network" => {
+                console_log!("NETWORK: {:?}", &data);
+            },
+            "unregister" => {
+                state.set_mode(None);
+            }
+            _ => {}
+        }
+    }
+
+    /// Process calls on the dashboard page.
+    async fn dashboard_call(cmd: String, data: JsValue, state: Rc<State>) {
+        log("DASHBOARD_CALL");
+        // Bind worker to local variable
+        let worker = state.worker();
+        // Perform operation
+        match cmd.as_ref() {
+            "savePassword" => {
+                worker.save_password(data).await;
+            }
+            "updatePassword" => {
+                worker.update_password(data).await;
+            }
+            "deletePassword" => {
+                worker.delete_password(data).await;
+            }
+            "undoDeletePassword" => {
+                worker.undo_delete_password(data).await;
+            }
+            "getPassword" | "getPasswordForUpdate" |
+            "getPasswordToClipboard" | "getPasswordAndRedirect" => {
+                worker.get_password(cmd, data).await;
+            }
+            "saveCategory" => {
+                worker.save_category(data).await;
+            }
+            "updateCategory" => {
+                worker.update_category(data).await;
+            }
+            "deleteCategories" => {
+                worker.delete_categories(data).await;
+            }
+            "undoDeleteCategories" => {
+                worker.undo_delete_categories(data).await;
+            },
+            "network" => {
+                console_log!("NETWORK: {:?}", &data);
+            }
+            "unregister" => {
+                state.set_mode(None);
+            }
+            _ => {}
+        }
     }
 }
 
+/// Represents the state of the Backend.
+/// State is its own struct allow usage in different parts of
+/// the application.
+mod state {
+    use wasm_bindgen::closure::Closure;
+    use web_sys::{MessageEvent};
+    use wasm_bindgen::__rt::core::cell::{RefCell, Ref};
+    use crate::easypass::worker::Worker;
+    use wasm_bindgen::__rt::core::borrow::Borrow;
+    use wasm_bindgen::__rt::std::rc::Rc;
 
+    /// Stores the internal state of the Backend of the Web-App.
+    pub struct State {
+        mode: RefCell<Option<String>>,
+        worker: Rc<Worker>,
+        init_closure: RefCell<Option<Closure<dyn FnMut(MessageEvent)>>>,
+        main_closure: RefCell<Option<Closure<dyn FnMut(MessageEvent)>>>
+    }
 
+    impl State {
+        pub fn new(
+            mode: Option<String>, worker: Rc<Worker>,
+            init_closure: Option<Closure<dyn FnMut(MessageEvent)>>,
+            main_closure: Option<Closure<dyn FnMut(MessageEvent)>>
+        ) -> State {
+            State {
+                mode: RefCell::new(mode),
+                worker,
+                init_closure: RefCell::new(init_closure),
+                main_closure: RefCell::new(main_closure)
+            }
+        }
 
+        pub fn mode(&self) -> Ref<Option<String>> {
+            self.mode.borrow()
+        }
 
+        pub fn set_mode(&self, mode: Option<String>) {
+            self.mode.replace(mode);
+        }
 
+        pub fn mode_is_none(&self) -> bool {
+            self.mode.borrow().is_none()
+        }
 
+        pub fn mode_as_string(&self) -> String {
+            if self.mode_is_none() {
+                String::from("")
+            } else {
+                String::from(self.mode.borrow().as_ref().unwrap())
+            }
+        }
+
+        pub fn worker(&self) -> Rc<Worker> {
+            self.worker.clone()
+        }
+
+        pub fn init_closure(&self) -> Ref<Option<Closure<dyn FnMut(MessageEvent)>>> {
+            self.init_closure.borrow()
+        }
+
+        pub fn set_init_closure(&self, init_closure: Option<Closure<dyn FnMut(MessageEvent)>>) {
+            self.init_closure.replace(init_closure);
+        }
+
+        pub fn main_closure(&self) -> Ref<Option<Closure<dyn FnMut(MessageEvent)>>> {
+            self.main_closure.borrow()
+        }
+
+        pub fn set_main_closure(&self, main_closure: Option<Closure<dyn FnMut(MessageEvent)>>) {
+            self.main_closure.replace(main_closure);
+        }
+    }
+}
+
+trait Utils {
+    /// Used to parse UI requests.
+    /// Returns command as an String, data is left untouched as JsValue
+    fn get_message(&self) -> (String, JsValue);
+}
+
+impl Utils for JsValue {
+    /// Used to parse UI requests.
+    /// Returns command as an String, data is left untouched as JsValue
+    fn get_message(&self) -> (String, JsValue) {
+        let array = Array::from(self);
+        let cmd = array.get(0).as_string().unwrap();
+        let data = array.get(1).clone();
+        //let data_parsed = data.clone().into_serde::<Value>().unwrap();
+        (cmd, data)
+    }
+}

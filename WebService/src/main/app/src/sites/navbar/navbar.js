@@ -17,6 +17,11 @@ import DeleteCat from "../../img/icons/dashboard_deleteCat.svg";
 import ButtonGroup from "react-bootstrap/ButtonGroup";
 import InputGroup from "react-bootstrap/InputGroup";
 import {dashboardAlerts, dashboardLanguage} from "../dashboard/const/dashboard.enum";
+import StringSelector from "../../strings/stings";
+import dashboardState from "../dashboard/dashboard.saved.state";
+import CopyIcon from "../../img/icons/password_copy_white.svg";
+import ResetPass from "./resetPass";
+import tabs from "../dashboard/tabs/tab.enum";
 
 class NavbarEP extends React.Component {
     constructor(props) {
@@ -25,6 +30,7 @@ class NavbarEP extends React.Component {
         this.state = {
             expanded: false,
             popUpShow: false,
+            changePassPopUpShow: false,
             popUpCatShow: false,
         };
 
@@ -39,11 +45,18 @@ class NavbarEP extends React.Component {
 
         this.setPopUpCatDisabled = this.setPopUpCatDisabled.bind(this);
         this.setPopUpCatEnabled = this.setPopUpCatEnabled.bind(this);
+
+        this.setChangePopUpDisabled = this.setChangePopUpDisabled.bind(this);
+        this.setChangePopUp = this.setChangePopUp.bind(this);
+
+        this.generateKeyFile = this.generateKeyFile.bind(this);
     }
 
 
+
+
     logoutFunc() {
-        console.log(this.props);
+        //console.log(this.props);
         this.props.callback.logoutDash();
     }
 
@@ -73,6 +86,28 @@ class NavbarEP extends React.Component {
         this.props.callback.setSettingExpandedFalse();
     }
 
+    resetPass(pass, newPass) {
+        if ( this.props.callback.resetPass(pass, newPass) ) {
+            this.setChangePopUpDisabled();
+            return true;
+        }
+        else {
+            return false;
+        }
+    }
+
+    setChangePopUpDisabled() {
+        this.setState({
+            changePassPopUpShow: false
+        });
+    }
+
+    setChangePopUp() {
+        this.setState({
+            changePassPopUpShow: true,
+        });
+    }
+
     setSettingExpanded() {
         this.props.callback.setSettingExpanded();
     }
@@ -92,7 +127,7 @@ class NavbarEP extends React.Component {
 
 
     returnCatBase ( id, name) {
-        console.log("Render: " + id + ", " + name);
+        //console.log("Render: " + id + ", " + name);
         return (
             <tr key={id}>
                 <td onClick={() => this.changeCat(id)}>
@@ -108,23 +143,25 @@ class NavbarEP extends React.Component {
 
     getPopUpCat()  {
         let cats = this.props.callback.getCats();
-
+        if ( this.props.callback.state.tabselected === tabs.GROUPPASS ) {
+            cats = this.props.callback.getCatsForGroup();
+        }
         let finalCats = cats.map((item) =>
-            this.returnCatBase(item.id, item.name)
+            this.returnCatBase(item._id, item.name)
         );
 
         return (
             <>
                 <Modal show={this.state.popUpCatShow} onHide={this.setPopUpCatDisabled} className="ep-modal-dialog">
                     <Modal.Header closeButton>
-                        <Modal.Title>Kategorie auswählen:</Modal.Title>
+                        <Modal.Title>{StringSelector.getString(this.props.callback.state.language).cats + ":"}</Modal.Title>
                     </Modal.Header>
                     <Modal.Body className="ep-modal-body">
                         <Table striped bordered hover className="ep-modal-table">
                             <tbody>
                                 <tr key={0}>
-                                    <td onClick={() => this.changeCat(0)}>
-                                        Alle Kateogrien
+                                    <td onClick={() => this.changeCat("0")}>
+                                        {StringSelector.getString(this.props.callback.state.language).catsAllCat}
                                     </td>
                                 </tr>
                                 {finalCats}
@@ -141,48 +178,72 @@ class NavbarEP extends React.Component {
         this.props.callback.changeLanguageTo(to);
     }
 
+    generateKeyFile() {
+        this.props.callback.generateKeyfile();
+    }
 
     getPopUp() {
         return (
             <>
                 <Modal show={this.state.popUpShow} onHide={this.setPopUpDisabled} className="ep-modal-dialog">
                     <Modal.Header closeButton>
-                        <Modal.Title>Einstellungen</Modal.Title>
+                        <Modal.Title>{StringSelector.getString(this.props.callback.state.language).settings}</Modal.Title>
                     </Modal.Header>
                     <Modal.Body>
                         <Card.Body>
                             <Row>
                                 <Col className="noPadding">
-                                    <InputGroup.Prepend className="stickRight">
-                                        <InputGroup.Text>Sprache</InputGroup.Text>
+                                    <InputGroup.Prepend>
+                                        <InputGroup.Text className="fitHoleParent">{StringSelector.getString(this.props.callback.state.language).language}</InputGroup.Text>
                                     </InputGroup.Prepend>
                                 </Col>
-                                <Col className="noPadding">
+                                <div className="noPadding">
                                     <div className="float-right">
                                         <ButtonGroup>
                                             { this.props.language === dashboardLanguage.german ?
                                                 <>
-                                                    <Button variant="danger" onClick={() => this.changeLanguageTo(dashboardLanguage.german)}>Deutsch</Button>
-                                                    <Button variant="secondary" onClick={() => this.changeLanguageTo(dashboardLanguage.english)}>English</Button>
+                                                    <Button className="noLeftBorderRadius" variant="danger" onClick={() => this.changeLanguageTo(dashboardLanguage.german)}>{StringSelector.getString(this.props.callback.state.language).german}</Button>
+                                                    <Button variant="secondary" onClick={() => this.changeLanguageTo(dashboardLanguage.english)}>{StringSelector.getString(this.props.callback.state.language).english}</Button>
                                                 </>
                                                 :
                                                 <>
-                                                    <Button variant="secondary" onClick={() => this.changeLanguageTo(dashboardLanguage.german)}>Deutsch</Button>
-                                                    <Button variant="danger" onClick={() => this.changeLanguageTo(dashboardLanguage.english)}>English</Button>
+                                                    <Button className="noLeftBorderRadius" variant="secondary" onClick={() => this.changeLanguageTo(dashboardLanguage.german)}>{StringSelector.getString(this.props.callback.state.language).german}</Button>
+                                                    <Button variant="danger" onClick={() => this.changeLanguageTo(dashboardLanguage.english)}>{StringSelector.getString(this.props.callback.state.language).english}</Button>
                                                 </>
                                             }
                                         </ButtonGroup>
                                     </div>
+                                </div>
+                            </Row>
+                            <Row className="rowMargin">
+                                <Col className="noPadding">
+                                    <InputGroup.Prepend>
+                                        <InputGroup.Text className="fitHoleParent">{StringSelector.getString(this.props.callback.state.language).changePass}</InputGroup.Text>
+                                    </InputGroup.Prepend>
                                 </Col>
+                                <div className="noPadding">
+                                    <div className="float-right">
+                                        <Button variant="danger" className="noLeftBorderRadius" onClick={this.setChangePopUp}>Change</Button>
+                                    </div>
+                                </div>
+                            </Row>
+                            <Row className="rowMargin">
+                                <Col className="noPadding">
+                                    <InputGroup.Prepend>
+                                        <InputGroup.Text className="fitHoleParent">Generate Keyfile</InputGroup.Text>
+                                    </InputGroup.Prepend>
+                                </Col>
+                                <div className="noPadding">
+                                    <div className="float-right">
+                                        <Button variant="danger" className="noLeftBorderRadius" onClick={this.generateKeyFile}>Generate</Button>
+                                    </div>
+                                </div>
                             </Row>
                         </Card.Body>
                     </Modal.Body>
                     <Modal.Footer>
-                        <Button variant="secondary" onClick={this.setPopUpDisabled}>
-                            Schließen
-                        </Button>
                         <Button variant="danger" onClick={this.setPopupSave}>
-                            Änderungen speichern
+                            {StringSelector.getString(this.props.callback.state.language).saveSetting}
                         </Button>
                     </Modal.Footer>
                 </Modal>
@@ -218,52 +279,59 @@ class NavbarEP extends React.Component {
                             </div>
                             <Navbar.Collapse id="basic-navbar-nav" className="search-bar">
                                 <div className="search-bar-size">
-                                    <FormControl id="search" type="text" placeholder="Search" autoComplete="off" className="search" onChange={this.props.callback.handleSearch}/>
+                                    { (this.props.callback.state.tabselected === tabs.GROUPPASS && this.props.callback.state.groupselected === "0") ?
+                                        <FormControl id="search" type="text" placeholder={StringSelector.getString(this.props.callback.state.language).searchPlaceholderGroup} autoComplete="off" className="search" onChange={this.props.callback.handleSearchGroup}/>
+                                        :
+                                        <FormControl id="search" type="text" placeholder={StringSelector.getString(this.props.callback.state.language).searchPlaceholder} autoComplete="off" className="search" onChange={this.props.callback.handleSearch}/>
+                                    }
                                 </div>
                                 <Nav className="mr-auto">
                                     <NavDropdown title={this.props.callback.state.username} onClick={this.setSettingExpanded} className="settingsPopUp dropDown" id="basic-nav-dropdown">
-                                        <NavDropdown.Item onClick={this.setPopUp} >Settings</NavDropdown.Item>
+                                        <NavDropdown.Item onClick={this.setPopUp} >{StringSelector.getString(this.props.callback.state.language).settings}</NavDropdown.Item>
                                     </NavDropdown>
                                 </Nav>
                             </Navbar.Collapse>
                         </Navbar>
-                        <Navbar collapseOnSelect className="catnav catselectSize" expand="lg" bg="dark" variant="dark">
-                            <Navbar.Brand className="catName" href="#home">{this.props.callback.getSelectedCatName()}</Navbar.Brand>
-                            <Button variant="light" className="catButton round editBut" onClick={() => this.props.callback.showEditCat()}>
-                                <img
-                                    src={EditCat}
-                                    alt=""
-                                    width="15"
-                                    height="15"
-                                    className="d-inline-block"
-                                />
-                            </Button>
-                            <Button variant="light" className="catButton round addBut" onClick={() => this.props.callback.showAddCat()}>
-                                <img
-                                    src={AddCat}
-                                    alt=""
-                                    width="15"
-                                    height="15"
-                                    className="d-inline-block"
-                                />
-                            </Button>
-                            <Button variant="light" className="catButton round delBut" onClick={() => this.props.callback.showDeleteCat()}>
-                                <img
-                                    src={DeleteCat}
-                                    alt=""
-                                    width="15"
-                                    height="15"
-                                    className="d-inline-block"
-                                />
-                            </Button>
-                            <button type="button" aria-label="Toggle navigation" className="toggler navbar-toggler collapsed" onClick={this.setPopUpCatEnabled}>
-                                <span className="navbar-toggler-icon"/>
-                            </button>
-                            {this.getPopUpCat()}
-                        </Navbar>
+                        { (this.props.callback.state.tabselected !== tabs.GROUPPASS || this.props.callback.state.groupselected !== "0") &&
+                            <Navbar collapseOnSelect className="catnav catselectSize" expand="lg" bg="dark" variant="dark">
+                                <Navbar.Brand className="catName" href="#home">{this.props.callback.getSelectedCatName()}</Navbar.Brand>
+                                <Button variant="light" className="catButton round editBut" onClick={() => this.props.callback.showEditCat()}>
+                                    <img
+                                        src={EditCat}
+                                        alt=""
+                                        width="15"
+                                        height="15"
+                                        className="d-inline-block"
+                                    />
+                                </Button>
+                                <Button variant="light" className="catButton round addBut" onClick={() => this.props.callback.showAddCat()}>
+                                    <img
+                                        src={AddCat}
+                                        alt=""
+                                        width="15"
+                                        height="15"
+                                        className="d-inline-block"
+                                    />
+                                </Button>
+                                <Button variant="light" className="catButton round delBut" onClick={() => this.props.callback.showDeleteCat()}>
+                                    <img
+                                        src={DeleteCat}
+                                        alt=""
+                                        width="15"
+                                        height="15"
+                                        className="d-inline-block"
+                                    />
+                                </Button>
+                                <button type="button" aria-label="Toggle navigation" className="toggler navbar-toggler collapsed" onClick={this.setPopUpCatEnabled}>
+                                    <span className="navbar-toggler-icon"/>
+                                </button>
+                                {this.getPopUpCat()}
+                            </Navbar>
+                        }
                     </div>
                 </div>
                 {this.getPopUp()}
+                <ResetPass callback={this} show={this.state.changePassPopUpShow}/>
             </>
         );
     }

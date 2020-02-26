@@ -6,6 +6,7 @@ import Button from "react-bootstrap/Button";
 import {Card} from "react-bootstrap";
 import Table from "react-bootstrap/Table";
 import Form from "react-bootstrap/Form";
+import StringSelector from "../../strings/stings";
 
 export default class DeleteCategory extends React.Component {
 
@@ -22,42 +23,63 @@ export default class DeleteCategory extends React.Component {
 
         this.handleKeyevent = this.handleKeyevent.bind(this);
 
+        this.dismissPopUp = this.dismissPopUp.bind(this);
+
         this.delCat = this.delCat.bind(this);
     }
 
 
-    setCatDel( id ) {
+    setCatDel( id, rev) {
         let catDelIds = this.state.catDelIds;
-        if ( catDelIds.indexOf(id) === -1 ) {
-            catDelIds.push(id);
+        if ( catDelIds.map((e) => {return e._id;}).indexOf(id) === -1 ) {
+            catDelIds.push({_id: id, _rev: rev});
         }
         else {
-            catDelIds.splice(catDelIds.indexOf(id), 1);
+            //catDelIds.splice(catDelIds.indexOf([id, rev]), 1);
+            catDelIds.splice(catDelIds.map((e) => {return e._id;}).indexOf(id), 1);
         }
+        this.setState({
+            catDelIds: catDelIds,
+        });
     };
 
-    returnCatBase ( id, name, desc) {
+    catDelIdsIncludesId( id ) {
+        for ( let i = 0; i < this.state.catDelIds.length; i++ ) {
+           let elm = this.state.catDelIds[i];
+           if ( elm._id === id ) {
+               return true;
+           }
+        }
+        return false;
+    }
+
+    returnCatBase ( id, rev, name, desc) {
         return (
-            <tr key={id}>
+            <tr key={id} onClick={() =>this.setCatDel(id, rev)}>
                 <td>
-                    {name}
+                    <b>{name}</b>
                 </td>
                 <td>
                     {desc}
                 </td>
                 <td>
-                    {['checkbox'].map(type => (
-                        <div key={`custom-inline-${type}`} className="float-center">
-                            <Form.Check
-                                custom
-                                inline
-                                label=""
-                                type={type}
-                                id={`custom-inline-${type}-${id}`}
-                                onClick={() =>this.setCatDel(id)}
-                            />
-                        </div>
-                    ))}
+                    {
+                        ['checkbox'].map(type => (
+                            <div key={`custom-inline-${type}`} className="float-center">
+                                <Form.Check
+                                    custom
+                                    checked={this.catDelIdsIncludesId(id)}
+                                    inline
+                                    readOnly={true}
+                                    label=""
+                                    type={type}
+                                    id={`custom-inline-${type}-${id}`}
+                                    className="clickable"
+                                    onClick={() =>this.setCatDel(id, rev)}
+                                />
+                            </div>
+                        ))
+                    }
                 </td>
             </tr>
         );
@@ -72,7 +94,7 @@ export default class DeleteCategory extends React.Component {
     }
 
     delCat() {
-        this.props.callback.deleteCat(this.state.catDelIds);
+        this.props.callback.deleteCats(this.state.catDelIds);
         this.resetState();
     }
 
@@ -85,14 +107,14 @@ export default class DeleteCategory extends React.Component {
         if (event.keyCode === 13 )
         {
             // Enter
-            this.editCat()
+            this.delCat()
         }
     }
 
 
     render() {
         let finalCats = this.props.callback.getCats().map((item) =>
-            this.returnCatBase(item.id, item.name, item.desc)
+            this.returnCatBase(item._id, item._rev, item.name, item.desc)
         );
 
 
@@ -100,15 +122,15 @@ export default class DeleteCategory extends React.Component {
             <>
                 <Modal onKeyDown={this.handleKeyevent} show={this.props.callback.getCatDeleteShow()} onHide={this.dismissPopUp} className="del-modal-dialog addPassPopUp">
                     <Modal.Header closeButton>
-                        <Modal.Title>Kategorie löschen:</Modal.Title>
+                        <Modal.Title>{StringSelector.getString(this.props.callback.state.language).delCat}:</Modal.Title>
                     </Modal.Header>
                     <Modal.Body className="del-modal-body">
                         <Table striped bordered hover className="del-modal-table">
                             <thead>
                             <tr>
-                                <th>Name</th>
-                                <th>Beschreibung</th>
-                                <th>Löschen</th>
+                                <th>{StringSelector.getString(this.props.callback.state.language).addCatName}</th>
+                                <th>{StringSelector.getString(this.props.callback.state.language).addCatDesc}</th>
+                                <th>{StringSelector.getString(this.props.callback.state.language).delCatDel}</th>
                             </tr>
                             </thead>
                             <tbody>
@@ -117,7 +139,7 @@ export default class DeleteCategory extends React.Component {
                         </Table>
                     </Modal.Body>
                     <Modal.Footer>
-                        <Button variant={"danger"} onClick={this.delCat}>Löschen</Button>
+                        <Button variant={"danger"} onClick={this.delCat}>{StringSelector.getString(this.props.callback.state.language).delCatDel}</Button>
                     </Modal.Footer>
                 </Modal>
             </>

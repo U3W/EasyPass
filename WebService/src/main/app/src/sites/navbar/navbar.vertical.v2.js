@@ -10,6 +10,7 @@ import EditCat from "../../img/icons/password_edit_white.svg";
 import DeleteCat from "../../img/icons/dashboard_deleteCat_white.svg";
 import OpenSidebar from "../../img/icons/sidebar_open.svg";
 import CloseSidebar from "../../img/icons/sidebar_close.svg";
+import StringSelector from "../../strings/stings";
 
 class NavbarVerticalEP2 extends React.Component {
     constructor(props) {
@@ -73,7 +74,7 @@ class NavbarVerticalEP2 extends React.Component {
         this.props.callback.changeCat(changeTo);
     }
 
-    returnCatBase ( id, name) {
+    returnCatBase ( id, name, catselected) {
         let getActive = "nav-link-kat sec";
         if ( this.props.callback.state.catselected === id)
         {
@@ -91,26 +92,34 @@ class NavbarVerticalEP2 extends React.Component {
 
 
     getCat() {
+        let catselected = this.props.callback.state.catselected;
+        if ( this.props.callback.state.tabselected === tabs.GROUPPASS ) {
+            catselected = dashboardState.getCatGroup();
+        }
         let getActive = "nav-link-kat fitparentWidth";
-        if ( this.props.callback.state.catselected === 0)
+        if ( catselected === "0")
         {
             getActive = "nav-link-kat fitparentWidth active";
         }
         // always
-        let start = (<li key={0} className="d-flex align-items-center text-muted clickable nav-link-kat-click" onClick={() => this.catChange(0)}>
+        let start = (<li key={0} className="d-flex align-items-center text-muted clickable nav-link-kat-click" onClick={() => this.catChange("0")}>
                         <div className={getActive}>
-                            Alle Kategorien
+                            {StringSelector.getString(this.props.callback.state.language).catsAllCat}
                         </div>
                     </li>);
         // single cat.
         let cats = this.props.callback.getCats();
+        if ( this.props.callback.state.tabselected === tabs.GROUPPASS ) {
+            cats = this.props.callback.getCatsForGroup(this.props.callback.state.groupselected);
+        }
+        /*
         for ( let i = 0; i < cats.length; i++ )
         {
             cats[i].idCat = i+1;
-        }
+        }*/
         // counter for the cats
         let finalCats = cats.map((item) =>
-            this.returnCatBase(item.idCat, item.name)
+            this.returnCatBase(item._id, item.name, catselected)
         );
         // loop with onClick={() => this.catChange(i)}> --> i++
         return (
@@ -127,7 +136,7 @@ class NavbarVerticalEP2 extends React.Component {
                 <li key={0} className="d-flex align-items-center text-muted clickable nav-link-kat-click"
                     onClick={() => this.props.callback.showAddCat()}>
                     <div className="nav-link-kat fitparentWidth">
-                        Kategorie hinzufügen
+                        {StringSelector.getString(this.props.callback.state.language).addCat}
                         <Button variant="dark" className="catButton round">
                             <img
                                 src={AddCat}
@@ -142,7 +151,7 @@ class NavbarVerticalEP2 extends React.Component {
                 <li key={1} className="d-flex align-items-center text-muted clickable nav-link-kat-click"
                     onClick={() => this.props.callback.showEditCat()}>
                     <div className="nav-link-kat fitparentWidth">
-                        Kategorie bearbeiten
+                        {StringSelector.getString(this.props.callback.state.language).editCat}
                         <Button variant="dark" className="catButton round">
                             <img
                                 src={EditCat}
@@ -157,7 +166,7 @@ class NavbarVerticalEP2 extends React.Component {
                 <li key={2} className="d-flex align-items-center text-muted clickable nav-link-kat-click"
                     onClick={() => this.props.callback.showDeleteCat()}>
                     <div className="nav-link-kat fitparentWidth">
-                        Kategorie löschen
+                        {StringSelector.getString(this.props.callback.state.language).delCat}
                         <Button variant="dark" className="catButton round">
                             <img
                                 src={DeleteCat}
@@ -202,21 +211,21 @@ class NavbarVerticalEP2 extends React.Component {
                     <div className={classesIntern}>
                         <ul className="nav flex-column">
                             <h1 className="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-1 mb-1 text-muted">
-                                <span>Menü</span>
+                                <span>{StringSelector.getString(this.props.callback.state.language).menu}</span>
                             </h1>
                             <hr />
                             {tabselected === tabs.PRIVPASS ?
                                     (<li className="d-flex align-items-center text-muted clickable nav-link-click active" id="privPassword" onClick={() => this.tabChange(tabs.PRIVPASS)}>
                                         <div className="nav-link active">
                                             <div className="d-inline-block feather" id="privPasswordIcon" />
-                                            Private Passwords
+                                            {StringSelector.getString(this.props.callback.state.language).privPass}
                                         </div>
                                     </li>)
                                     :
                                     (<li className="d-flex align-items-center text-muted clickable nav-link-click"  id="privPassword" onClick={() => this.tabChange(tabs.PRIVPASS)}>
                                         <div className="nav-link">
                                             <div className="d-inline-block feather" id="privPasswordIcon" />
-                                            Private Passwords
+                                            {StringSelector.getString(this.props.callback.state.language).privPass}
                                         </div>
                                     </li>)
                             }
@@ -225,32 +234,38 @@ class NavbarVerticalEP2 extends React.Component {
                                 (<li className="d-flex align-items-center text-muted clickable nav-link-click active" id="groupPassword" onClick={() => this.tabChange(tabs.GROUPPASS)}>
                                     <div className="nav-link active" >
                                         <div className="d-inline-block feather" id="groupPasswordIcon" />
-                                        Group Passwords
+                                        {StringSelector.getString(this.props.callback.state.language).groupPass}
                                     </div>
                                 </li>)
                                 :
                                 (<li className="d-flex align-items-center text-muted clickable nav-link-click" id="groupPassword" onClick={() => this.tabChange(tabs.GROUPPASS)}>
                                     <div className="nav-link" >
                                         <div className="d-inline-block feather" id="groupPasswordIcon" />
-                                        Group Passwords
+                                        {StringSelector.getString(this.props.callback.state.language).groupPass}
                                     </div>
                                 </li>)
                             }
                         </ul>
-
-                        <ul className="nav flex-column">
-                            <h6 className="d-flex justify-content-between align-items-center px-3 mt-1 mb-1 text-muted fixKat">
-                                <span>Kategorien</span>
-                            </h6>
-                            <hr />
-                            {this.getCat()}
-                            <hr />
-                            {this.getEditCat()}
-                        </ul>
+                        { (this.props.callback.state.groupselected !== "0" && this.props.callback.state.tabselected === tabs.GROUPPASS || this.props.callback.state.tabselected === tabs.PRIVPASS) &&
+                            <ul className="nav flex-column">
+                                <h6 className="d-flex justify-content-between align-items-center px-3 mt-1 mb-1 text-muted fixKat">
+                                    <span>{StringSelector.getString(this.props.callback.state.language).cats}</span>
+                                </h6>
+                                <hr />
+                                {this.getCat()}
+                                <hr />
+                                {this.getEditCat()}
+                            </ul>
+                        }
                     </div>
                 </nav>
+                {/* Bottom Navbar */}
+                { this.props.callback.state.width > 425 ?
+                    <IndicatorBot width={this.props.callback.state.width}/>
+                    :
+                    <IndicatorBot ref={this.props.callback.props.callback.ref} width={this.props.callback.state.width}/>
+                }
                 <nav id="navbar-bot" className="bottom navbar fixed-bottom navbar-expand-sm navbar-dark bg-dark">
-                    <IndicatorBot />
                     <Row>
                         {tabselected === tabs.PRIVPASS ?
                             (<Col id="privPassword" className="active" align="center" onClick={() => this.tabChange(tabs.PRIVPASS)}>
