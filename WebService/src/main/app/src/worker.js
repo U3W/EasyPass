@@ -1,6 +1,7 @@
 importScripts("modules/pouchdb/dist/pouchdb.min.js");
 importScripts("modules/pouchdb/dist/pouchdb.find.min.js");
 importScripts("modules/easypass-lib/dist/easypass-lib.js");
+importScripts("modules/kdbxweb/kdbxweb.min.js");
 import("../../rust/pkg").then(wasm => {
 
     // Set node mode
@@ -79,7 +80,4 @@ import("../../rust/pkg").then(wasm => {
     };
 
 
-
 });
-
-
