@@ -55,7 +55,7 @@ pub fn decrypt_manual(msg: &str, key: &[u8], iv: &str) -> Result<String, i32> {
     let res : Result<String, i32> = Ok(buffer2);
     return res;
 }
-pub fn get_random_iv<'a>(length: usize) -> String {
+pub fn get_random_iv(length: usize) -> String {
     let mut alphabet = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890".as_bytes().to_vec(); //this should be random enough
     let mut rng = rand::thread_rng();
     alphabet.shuffle(&mut rng);
