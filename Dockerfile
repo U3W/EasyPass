@@ -26,8 +26,8 @@ touch /etc/authbind/byport/80 && \
 touch /etc/authbind/byport/443 && \
 chmod 777 /etc/authbind/byport/80 && \
 chmod 777 /etc/authbind/byport/443 && \
-curl -sL https://deb.nodesource.com/setup_8.x | bash - &&\
-apt-get install -y nodejs build-essential && \
+curl -sL https://deb.nodesource.com/setup_12.x | bash - &&\
+apt-get install -y nodejs build-essential gcc g++ make && \
 npm install npm -g && \
 npm install -g add-cors-to-couchdb 
 
