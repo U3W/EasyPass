@@ -127,5 +127,17 @@ impl Worker {
             false
         }
     }
+
+    /// Checks the user credentials when the network changes from offline to online.
+    pub async fn network_login(self: Rc<Worker>, user: String, mkey: String) -> bool {
+        let check = if user == "test" && mkey == "test" {
+            // Successful check
+            true
+        } else {
+            // Unsuccessful check
+            false
+        };
+        check
+    }
 }
 

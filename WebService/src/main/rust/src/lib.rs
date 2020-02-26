@@ -240,8 +240,7 @@ impl Backend {
                 worker.undo_delete_categories(data).await;
             },
             "network" => {
-                console_log!("NETWORK: {:?}", &data);
-                worker.handle_network_change().await;
+                worker.handle_network_change(data).await;
             }
             "unregister" => {
                 worker.reset().await;

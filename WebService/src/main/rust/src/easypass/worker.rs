@@ -21,6 +21,7 @@ use serde::{Deserialize, Serialize};
 use serde_json::json;
 use serde_json::{Value};
 use serde_json::value::Value::Bool;
+use wasm_bindgen::__rt::RefMut;
 
 
 // Add other modules that define Worker functionality
@@ -51,6 +52,7 @@ pub struct Worker {
 /// Holds one logical databases with references to the local and remote one.
 /// Also, contains the changes-feed and sync-handler.
 struct Connection {
+    name: String,
     local_db: PouchDB,
     remote_db: Option<PouchDB>,
     changes_feed: ChangesFeed,
@@ -175,7 +177,7 @@ impl Worker {
 
         // Setup database for private password entries
         let private
-            = self.build_connection(String::from("local"),
+            = self.build_connection(String::from("private"),
         &change_closure, &change_error_closure,
         &sync_closure, &sync_error_closure);
         // Add it to the worker
@@ -272,6 +274,7 @@ impl Worker {
         };
         // Create struct that holds connection information and return it
         Connection {
+            name,
             local_db,
             remote_db,
             changes_feed,
@@ -432,5 +435,34 @@ impl Worker {
     /// Returns service/network status of the app
     pub fn get_service_status(self: Rc<Worker>) -> RefCell<String> {
         self.service_status.clone()
+    }
+}
+
+trait ConnectionPlus<'a> {
+    /// Sets the remote database and sync handler for the connection
+    fn set_remote_db(
+        &mut self, database_url: String, user: String,
+        sync: &Closure<dyn FnMut(JsValue)>, sync_error: &Closure<dyn FnMut(JsValue)>
+    );
+}
+
+impl ConnectionPlus<'_> for Connection {
+    fn set_remote_db(
+        &mut self, database_url: String, user: String,
+        sync: &Closure<dyn FnMut(JsValue)>, sync_error: &Closure<dyn FnMut(JsValue)>
+    ) {
+        // Init remote databases
+        let remote_db_name
+            = format!("DB-URL: {}{}-{}", &database_url, &user, &self.name);
+        let remote_db = PouchDB::new_with_name(&remote_db_name);
+        // Get Sync Handler
+        let sync_handler: SyncHandler = self.local_db.sync(&remote_db);
+        // Bind on change functions
+        sync_handler.on_change(sync);
+        sync_handler.on_error(sync_error);
+        // Set remote database
+        self.remote_db = Some(remote_db);
+        // Set sync handler
+        self.sync_handler = Some(sync_handler)
     }
 }
