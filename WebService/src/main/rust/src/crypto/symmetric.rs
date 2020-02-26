@@ -1,11 +1,10 @@
 use c2_chacha::ChaCha20;
 use c2_chacha::stream_cipher::{NewStreamCipher, SyncStreamCipher, SyncStreamCipherSeek};
 use c2_chacha::stream_cipher::generic_array::GenericArray;
-use poly1305::{universal_hash::UniversalHash, Poly1305, KEY_SIZE};
+use poly1305::{universal_hash::UniversalHash, Poly1305};
 extern crate base64;
 use std::str;
 use rand::prelude::*;
-use std::hash::Hash;
 use base64::encode_config;
 use base64::decode_config;
 // iv%hash$encrypted
@@ -43,7 +42,7 @@ pub fn decrypt_manual(msg: &str, key: &[u8], iv: &str) -> Result<String, i32> {
     let msg_vec = from_base64(msg_vec);
     c2.set_buffer_vec(msg_vec);
     c2.decrypt();
-    let mut buffer: Vec<u8> = c2.get_buffer();
+    let buffer: Vec<u8> = c2.get_buffer();
     let msg_vec = v[1];
     let msg_vec = from_base64(msg_vec);
     if msg_vec.as_slice().eq(buffer.as_slice()) || c2.get_hash().ne(&hash) {
@@ -84,7 +83,7 @@ impl ChaCha20Poly1305{
         let (key, _right) = key.split_at(32);
         let iv = iv.as_bytes();
         let (iv, _right) = iv.split_at(8);
-        let mut buffer = iv.to_vec();
+        let buffer = iv.to_vec();
         let c2chacha20 = ChaCha20::new_var(key, iv).unwrap();
         let key = GenericArray::from_slice(key);
         let poly1305 = Poly1305::new(key);
@@ -99,8 +98,8 @@ impl ChaCha20Poly1305{
     }
 
     pub fn set_message(&mut self, message: &str) -> Vec<u8>{
-        let mut buffer = message.as_bytes();
-        let mut buffer = buffer.to_vec();
+        let buffer = message.as_bytes();
+        let buffer = buffer.to_vec();
         self.buffer = buffer;
         return self.buffer.clone();
     }

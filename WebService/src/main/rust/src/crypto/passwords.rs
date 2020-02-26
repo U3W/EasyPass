@@ -16,7 +16,7 @@ pub fn generate_random_key() -> Vec<u8>{
 }
 
 pub fn encrypt_key(random_key: &[u8], key: &[u8]) -> String{
-    let mut encoded = encode_config(random_key, base64::URL_SAFE);
+    let encoded = encode_config(random_key, base64::URL_SAFE);
     return encrypt(encoded.as_str(), key);
 }
 pub fn decrypt_key(random_key_encrypted: &str, key: &[u8]) -> Result<Vec<u8>, i32>{

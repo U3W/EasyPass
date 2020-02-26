@@ -60,14 +60,14 @@ impl Empheral{
     }
 }
 
-pub fn newUser(key: &[u8]) -> (String, String){ // Returns  (encryptedPrivateKey, PublicKey)
+pub fn new_user(key: &[u8]) -> (String, String){ // Returns  (encryptedPrivateKey, PublicKey)
     let (secret, public) = Statisch::create_keypair();
     let public = public.as_bytes();
     let public = encode_config(public, base64::URL_SAFE);
     let secret = Statisch::encrypt_secret(secret, key);
     return (secret, public);
 }
-pub fn authenticateUser(secret: &str, challenge: &str, key: &[u8]) -> Result<String, i32>{
+pub fn authenticate_user(secret: &str, challenge: &str, key: &[u8]) -> Result<String, i32>{
     let vec: Vec<&str> = challenge.split("§").collect();
     let server_pub = vec[0];
     let challenge = vec[1];
@@ -80,7 +80,7 @@ pub fn authenticateUser(secret: &str, challenge: &str, key: &[u8]) -> Result<Str
     let key = key.as_slice();
     return decrypt(challenge, key);
 }
-pub fn encryptChallenge(challenge: &str, pub_key: String) -> String{ //encrypted challenge
+pub fn encrypt_challenge(challenge: &str, pub_key: String) -> String{ //encrypted challenge
     let pub_key_vec = decode_config(&pub_key, base64::URL_SAFE).unwrap();
     let mut pub_key : [u8; 32] = [0u8;32];
     pub_key.copy_from_slice(&pub_key_vec);

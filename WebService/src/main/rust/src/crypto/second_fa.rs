@@ -1,5 +1,4 @@
-use crate::crypto::{passwords, asymmetric};
-use base64::{encode_config, decode_config};
+use crate::crypto::{passwords};
 use crate::crypto::crypto::{encrypt, decrypt};
 use crate::crypto::asymmetric::{Statisch};
 use crate::crypto::symmetric::get_random_iv;
