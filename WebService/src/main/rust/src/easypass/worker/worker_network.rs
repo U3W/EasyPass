@@ -46,8 +46,9 @@ impl Worker {
                             &t.as_ref().unwrap().sync_error_closure
                         });
                         // Initialize remote database of private password entries
-                        let mut cell = self.private.borrow_mut();
-                        let private = cell.as_mut().unwrap();
+                        let mut private = RefMut::map(self.private.borrow_mut(), |t| {
+                            t.as_mut().unwrap()
+                        });
                         private.set_remote_db(
                             database_url.clone(), user.clone(),
                             &sync_closure, &sync_error_closure
