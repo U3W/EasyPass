@@ -19,14 +19,13 @@ ARG IPADDRESS
 
 WORKDIR /easylist/
 COPY --from=builder /easylist/ .
-
+USER root
 RUN apt update && \
-apt-get install authbind && \
-apt-get install sudo && \
-sudo touch /etc/authbind/byport/80 && \
-sudo touch /etc/authbind/byport/443 && \
-sudo chmod 777 /etc/authbind/byport/80 && \
-sudo chmod 777 /etc/authbind/byport/443 && \
+apt-get install authbind -y&& \
+touch /etc/authbind/byport/80 && \
+touch /etc/authbind/byport/443 && \
+chmod 777 /etc/authbind/byport/80 && \
+chmod 777 /etc/authbind/byport/443 && \
 curl -sL https://deb.nodesource.com/setup_8.x | bash - &&\
 apt-get install -y nodejs build-essential && \
 npm install npm -g && \
