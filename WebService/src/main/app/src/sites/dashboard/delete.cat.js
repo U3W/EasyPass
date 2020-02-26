@@ -94,8 +94,13 @@ export default class DeleteCategory extends React.Component {
     }
 
     delCat() {
-        this.props.callback.deleteCats(this.state.catDelIds);
-        this.resetState();
+        if (this.state.catDelIds.length === 0 ) {
+            this.dismissPopUp();
+        }
+        else {
+            this.props.callback.deleteCats(this.state.catDelIds);
+            this.resetState();
+        }
     }
 
     dismissPopUp() {
@@ -113,9 +118,26 @@ export default class DeleteCategory extends React.Component {
 
 
     render() {
-        let finalCats = this.props.callback.getCats().map((item) =>
-            this.returnCatBase(item._id, item._rev, item.name, item.desc)
-        );
+        let cats = this.props.callback.getCats();
+        let finalCats;
+        if ( cats.length === 0 ) {
+            finalCats = (
+                <tr>
+                    <td>
+                        <b>{StringSelector.getString(this.props.callback.state.language).editCatNoCat}</b>
+                    </td>
+                    <td>
+                    </td>
+                    <td>
+                    </td>
+                </tr>
+            );
+        }
+        else {
+            finalCats = cats.map((item) =>
+                this.returnCatBase(item._id, item._rev, item.name, item.desc)
+            );
+        }
 
 
         return (

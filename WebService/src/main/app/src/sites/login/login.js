@@ -23,7 +23,7 @@ import Logo from "../../img/logo/LogoV2.svg"
 import LoginAuth from "../../authentification/auth.login"
 import Alert from "react-bootstrap/Alert";
 import { connect } from 'react-redux';
-import {login, logout, save2FA, saveUser, saveUserState} from "../../action/auth.action";
+import {login, logout, saveUser, saveUserState, setSessionUser} from "../../action/auth.action";
 import Indicator from "../../network/network.indicator";
 import {dashboardAlerts} from "../dashboard/const/dashboard.enum";
 import Registration from "../registration/registration";
@@ -54,13 +54,11 @@ class Login extends React.Component {
             showRegistered: false,
             alertState: "success",
 
-
-            inpMasterpassword: "",
+            networkState: navigator.onLine,
 
             inpFile: null,
             fileName: "",
 
-            inpRadio: "" + LoginState.getRadioState(),
             saveUserState: "" + LoginState.getSaveUsernameState(),
             missingMasterpassword: false,
             missingFile: false,
@@ -75,12 +73,15 @@ class Login extends React.Component {
         this.handleKeyevent = this.handleKeyevent.bind(this);
         this.printError = this.printError.bind(this);
         this.switchToRegister = this.switchToRegister.bind(this);
-
+        this.handleConnectionChange = this.handleConnectionChange.bind(this);
         this.printRegistered = this.printRegistered.bind(this);
         // Login & Registration Worker calls
         this.workerCall = this.workerCall.bind(this);
         this.loginProcess = this.loginProcess.bind(this);
         this.registrationProcess = this.registrationProcess.bind(this);
+
+        // reset Dashboard username
+        this.props.setSessionUser(null);
     }
 
     componentDidMount() {
@@ -91,12 +92,18 @@ class Login extends React.Component {
             this.setState({
                 loading: false,
             });
-        }, 500)
+        }, 500);
+
+        window.addEventListener('online', this.handleConnectionChange);
+        window.addEventListener('offline', this.handleConnectionChange);
     }
 
     componentWillUnmount() {
         this.props.worker.removeEventListener('message', this.workerCall, true);
         this.props.worker.postMessage(['unregister', undefined]);
+
+        window.removeEventListener('online', this.handleConnectionChange);
+        window.removeEventListener('offline', this.handleConnectionChange);
     }
 
     workerCall( e ) {
@@ -106,6 +113,7 @@ class Login extends React.Component {
             case 'login':
                 console.log("LOGIN!!!");
                 this.props.login(data);
+                this.props.setSessionUser(this.state.inpUsername);
                 if (LoginAuth.getLoggedIn()) {
                     history.push("/dashboard");
                     LoginAuth.clear();
@@ -116,6 +124,12 @@ class Login extends React.Component {
                 }
                 break;
         }
+    }
+
+    handleConnectionChange() {
+        this.setState({
+            networkState: navigator.onLine,
+        });
     }
 
     loginProcess(credentials) {
@@ -155,7 +169,7 @@ class Login extends React.Component {
 
     isKeyFile(filename) {
         let ext = this.getExtension(filename);
-        return ext.toLowerCase() === "kdbx";
+        return ext.toLowerCase() === "easykey";
     }
 
 
@@ -167,11 +181,6 @@ class Login extends React.Component {
         });
         if ( e.target.value.length > 0 ) {
             switch ( e.target.id ) {
-                case "inpMasterpassword":
-                    this.setState({
-                        missingMasterpassword: false,
-                    });
-                    break;
                 case "inpUsername":
                     this.setState({
                         missingUsername: false,
@@ -265,18 +274,10 @@ class Login extends React.Component {
             err = true;
             this.setState({missingUsername: true });
         }
-        if ( this.state.inpMasterpassword ==="" )
+        if ( this.state.inpFile === null )
         {
             err = true;
-            this.setState({missingMasterpassword: true});
-        }
-        if ( this.state.inpRadio === "file" )
-        {
-            if ( this.state.inpFile === null )
-            {
-                err = true;
-                this.setState({missingFile: true });
-            }
+            this.setState({missingFile: true });
         }
         if ( !err )
         {
@@ -393,93 +394,25 @@ class Login extends React.Component {
         }
     }
 
-
-    getInputMasterpassword() {
-        if ( this.state.missingMasterpassword )
-        {
-            return (
-                <Form.Group>
-                    <Row>
-                        <Col sm={12}>
-                            <Form.Label className="text-danger">{StringSelector.getString(this.state.language).masterpassword}</Form.Label>
-                        </Col>
-                    </Row>
-                    <Row>
-                        <Col sm={12}>
-                            <Form.Control id="inpMasterpassword" className="is-invalid" type="password" onKeyDown={this.handleKeyevent} onChange={this.handleChange} value={this.state.inpMasterpassword} placeholder={StringSelector.getString(this.state.language).masterpasswordPlace} />
-                        </Col>
-                    </Row>
-                </Form.Group>
-            );
-        }
-        else
-        {
-            return (
-                <Form.Group>
-                    <Row>
-                        <Col sm={12}>
-                            <Form.Label>{StringSelector.getString(this.state.language).masterpassword}</Form.Label>
-                        </Col>
-                    </Row>
-                    <Row>
-                        <Col sm={12}>
-                            <Form.Control id="inpMasterpassword" type="password" onKeyDown={this.handleKeyevent} onChange={this.handleChange} value={this.state.inpMasterpassword} placeholder={StringSelector.getString(this.state.language).masterpasswordPlace} />
-                        </Col>
-                    </Row>
-                </Form.Group>
-            );
-        }
-
-    }
-
-    getInputAuthn() {
-        if ( !(this.state.inpRadio === "authn") )
-        {
-            return (
-                <>
-
-                </>
-            );
-        }
-    }
-
     rigInput() {
         document.getElementById("fakeFileInput").click();
     }
 
     getInputFile() {
-        if ( this.state.inpRadio === "file" )
-        {
-            if ( this.state.missingFile ) {
-                return (
-                    <InputGroup className="mb-3">
-                        <Form.Control disabled={true} className="notDisabled is-invalid" aria-describedby="inputGroup-sizing-default" placeholder={StringSelector.getString(this.state.language).masterpass2FAFileNoFile} value={this.state.fileName}/>
-                        <input id="fakeFileInput" type="file" name="file" className="hiddenFileInput" accept=".kdbx" onChange={this.handleFile}/>
-                        <Button variant={"dark"} className="fileButton" onClick={this.rigInput}>
-                            {StringSelector.getString(this.state.language).masterpass2FAFileSelect}
-                        </Button>
-                    </InputGroup>
-                );
-            }
-            else {
-                return (
-                    <InputGroup className="mb-3">
-                        <Form.Control disabled={true} className="notDisabled" aria-describedby="inputGroup-sizing-default" placeholder={StringSelector.getString(this.state.language).masterpass2FAFileNoFile} value={this.state.fileName}/>
-                        <input id="fakeFileInput" type="file" name="file" className="hiddenFileInput" accept=".kdbx" onChange={this.handleFile}/>
-                        <Button variant={"dark"} className="fileButton" onClick={this.rigInput}>
-                            {StringSelector.getString(this.state.language).masterpass2FAFileSelect}
-                        </Button>
-                    </InputGroup>
-                );
-            }
+        let cssClass = "notDisabled";
+        if ( this.state.missingFile ) {
+            cssClass = "notDisavled is-invalid";
         }
-    }
 
-    setRadioState( to ) {
-        this.setState({
-            inpRadio: to,
-        });
-        this.props.save2FA(to);
+        return (
+            <InputGroup className="mb-3">
+                <Form.Control disabled={true} className={cssClass} aria-describedby="inputGroup-sizing-default" placeholder={StringSelector.getString(this.state.language).masterpass2FAFileNoFile} value={this.state.fileName}/>
+                <input disabled={false} id="fakeFileInput" type="file" name="file" className="hiddenFileInput" accept=".easykey" onChange={this.handleFile}/>
+                <Button variant={"dark"} className="fileButton" onClick={this.rigInput}>
+                    {StringSelector.getString(this.state.language).masterpass2FAFileSelect}
+                </Button>
+            </InputGroup>
+        );
     }
 
     setSaveUser ( to ) {
@@ -490,36 +423,6 @@ class Login extends React.Component {
             saveUserState: to,
         });
         this.props.saveUserState(to);
-    }
-
-
-    getRadioButtons(){
-        return (
-            <Container>
-                {['radio'].map(type => (
-                    <Container key={`inline-${type}`} >
-                        <Row>
-                            <Col sm={12}>
-                                { this.state.inpRadio === "authn" ?
-                                    <Form.Check onChange={() => this.setRadioState("authn")} inline label={StringSelector.getString(this.state.language).masterpass2FAWebauthn} type={type} id={`inline-${type}-1`} checked={true} />
-                                    :
-                                    <Form.Check onChange={() => this.setRadioState("authn")} inline label={StringSelector.getString(this.state.language).masterpass2FAWebauthn} type={type} id={`inline-${type}-1`} checked={false}/>
-                                }
-                            </Col>
-                        </Row>
-                        <Row>
-                            <Col sm={12}>
-                                { this.state.inpRadio === "file" ?
-                                    <Form.Check onChange={() => this.setRadioState("file")} inline label={StringSelector.getString(this.state.language).masterpass2FAFile} type={type} id={`inline-${type}-3`} checked={true} />
-                                    :
-                                    <Form.Check onChange={() => this.setRadioState("file")} inline label={StringSelector.getString(this.state.language).masterpass2FAFile} type={type} id={`inline-${type}-3`} checked={false} />
-                                }
-                            </Col>
-                        </Row>
-                    </Container>
-                ))}
-            </Container>
-        )
     }
 
 
@@ -553,7 +456,6 @@ class Login extends React.Component {
                                                 <Form autoComplete="off">
                                                     {this.getInputUsername()}
                                                     {this.getInputPassword()}
-                                                    {this.getInputMasterpassword()}
                                                     <Row>
                                                         <Col sm={12}>
                                                             <Form.Label>
@@ -561,9 +463,6 @@ class Login extends React.Component {
                                                             </Form.Label>
                                                         </Col>
                                                     </Row>
-                                                    {this.getRadioButtons()}
-
-                                                    {this.getInputAuthn()}
                                                     {this.getInputFile()}
                                                     <hr/>
                                                     <Form.Group>
@@ -572,7 +471,9 @@ class Login extends React.Component {
                                                             :
                                                             <Form.Check type="checkbox" id="inpKeepLoggedIn" checked={false} onChange={() => this.setSaveUser(true)} label={StringSelector.getString(this.state.language).rememberUsername} />
                                                         }
-                                                        <Nav.Link onClick={() => { this.switchToRegister(true, false, true)} }>{StringSelector.getString(this.state.language).registrationButton}</Nav.Link>
+                                                        { this.state.networkState &&
+                                                            <Nav.Link onClick={() => { this.switchToRegister(true, false, true)} }>{StringSelector.getString(this.state.language).registrationButton}</Nav.Link>
+                                                        }
                                                     </Form.Group>
                                                     <Button variant="danger" className={"float-right"} onClick={this.handleSubmit}>
                                                         {StringSelector.getString(this.state.language).loginButton}
@@ -604,9 +505,9 @@ const mapDispatchToProps = (dispatch) => {
     return {
         login: (creds) => dispatch(login(creds)),
         logout: () => dispatch(logout()),
-        save2FA: (option) => dispatch(save2FA(option)),
         saveUserState: (to) => dispatch(saveUserState(to)),
         saveUser: (username) => dispatch(saveUser(username)),
+        setSessionUser: (username) => dispatch(setSessionUser(username)),
     }
 };
 

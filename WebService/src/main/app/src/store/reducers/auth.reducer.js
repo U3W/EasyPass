@@ -14,14 +14,13 @@ const authReducer = ( state = initState, action) => {
                 loggedIn: true
             };
         case "LOGIN_ERROR":
-            sessionStorage.setItem(authConstants.loggedIn, "false");
+            sessionStorage.setItem(authConstants.loggedIn, null);
             return {
             };
 
         case "LOGOUT_SUCCESS":
             //console.log("LastPart: Logout success");
-            sessionStorage.setItem(authConstants.loggedIn, "false");
-            sessionStorage.setItem(authConstants.verified, "false");
+            sessionStorage.setItem(authConstants.loggedIn, null);
             return {
             };
         default:

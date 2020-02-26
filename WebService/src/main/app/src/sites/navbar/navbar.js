@@ -28,19 +28,19 @@ class NavbarEP extends React.Component {
         super(props);
 
         this.state = {
-            expanded: false,
-            popUpShow: false,
+            settingsPopUpShow: false,
             changePassPopUpShow: false,
             popUpCatShow: false,
+            userKeyPopUp: false,
         };
 
 
         this.logoutFunc = this.logoutFunc.bind(this);
-        this.getPopUp = this.getPopUp.bind(this);
-        this.setPopUp = this.setPopUp.bind(this);
-        this.setPopUpDisabled = this.setPopUpDisabled.bind(this);
-        this.setPopupSave = this.setPopupSave.bind(this);
-        this.getPopUp = this.getPopUp.bind(this);
+        this.getSettingsPopUp = this.getSettingsPopUp.bind(this);
+        this.setSettingsPopUp = this.setSettingsPopUp.bind(this);
+        this.setSettingsPopUpDisabled = this.setSettingsPopUpDisabled.bind(this);
+        this.setSettingsPopupSave = this.setSettingsPopupSave.bind(this);
+        this.getSettingsPopUp = this.getSettingsPopUp.bind(this);
         this.setSettingExpanded = this.setSettingExpanded.bind(this);
 
         this.setPopUpCatDisabled = this.setPopUpCatDisabled.bind(this);
@@ -50,6 +50,10 @@ class NavbarEP extends React.Component {
         this.setChangePopUp = this.setChangePopUp.bind(this);
 
         this.generateKeyFile = this.generateKeyFile.bind(this);
+
+        this.setUserKeyPopUpDisabled = this.setUserKeyPopUpDisabled.bind(this);
+        this.setUserKeyPopUpEnabled = this.setUserKeyPopUpEnabled.bind(this);
+
     }
 
 
@@ -60,28 +64,22 @@ class NavbarEP extends React.Component {
         this.props.callback.logoutDash();
     }
 
-    setExpanded() {
-        this.setState({
-            expanded: !this.state.expanded
-        })
-    }
 
-
-    setPopUpDisabled() {
+    setSettingsPopUpDisabled() {
         this.props.callback.cancelSettings();
         this.setState({
-            popUpShow: false
+            settingsPopUpShow: false
         });
     }
-    setPopupSave() {
+    setSettingsPopupSave() {
         this.setState({
-            popUpShow: false
+            settingsPopUpShow: false
         });
         this.props.callback.saveSettings();
     }
-    setPopUp() {
+    setSettingsPopUp() {
         this.setState({
-            popUpShow: true,
+            settingsPopUpShow: true,
         });
         this.props.callback.setSettingExpandedFalse();
     }
@@ -182,10 +180,10 @@ class NavbarEP extends React.Component {
         this.props.callback.generateKeyfile();
     }
 
-    getPopUp() {
+    getSettingsPopUp() {
         return (
             <>
-                <Modal show={this.state.popUpShow} onHide={this.setPopUpDisabled} className="ep-modal-dialog">
+                <Modal show={this.state.settingsPopUpShow} onHide={this.setSettingsPopUpDisabled} className="ep-modal-dialog popUpBehind">
                     <Modal.Header closeButton>
                         <Modal.Title>{StringSelector.getString(this.props.callback.state.language).settings}</Modal.Title>
                     </Modal.Header>
@@ -223,27 +221,82 @@ class NavbarEP extends React.Component {
                                 </Col>
                                 <div className="noPadding">
                                     <div className="float-right">
-                                        <Button variant="danger" className="noLeftBorderRadius" onClick={this.setChangePopUp}>Change</Button>
+                                        <Button variant="danger" className="noLeftBorderRadius" onClick={this.setChangePopUp}>{StringSelector.getString(this.props.callback.state.language).changePassBut}</Button>
                                     </div>
                                 </div>
                             </Row>
                             <Row className="rowMargin">
                                 <Col className="noPadding">
                                     <InputGroup.Prepend>
-                                        <InputGroup.Text className="fitHoleParent">Generate Keyfile</InputGroup.Text>
+                                        <InputGroup.Text className="fitHoleParent">{StringSelector.getString(this.props.callback.state.language).genKeyfile}</InputGroup.Text>
                                     </InputGroup.Prepend>
                                 </Col>
                                 <div className="noPadding">
                                     <div className="float-right">
-                                        <Button variant="danger" className="noLeftBorderRadius" onClick={this.generateKeyFile}>Generate</Button>
+                                        <Button variant="danger" className="noLeftBorderRadius" onClick={this.generateKeyFile}>{StringSelector.getString(this.props.callback.state.language).genButton}</Button>
+                                    </div>
+                                </div>
+                            </Row>
+                            <Row className="rowMargin">
+                                <Col className="noPadding">
+                                    <InputGroup.Prepend>
+                                        <InputGroup.Text className="fitHoleParent">Userkey (uniq identifier)</InputGroup.Text>
+                                    </InputGroup.Prepend>
+                                </Col>
+                                <div className="noPadding">
+                                    <div className="float-right">
+                                        <Button variant="danger" className="noLeftBorderRadius" onClick={this.setUserKeyPopUpEnabled}>Show</Button>
                                     </div>
                                 </div>
                             </Row>
                         </Card.Body>
                     </Modal.Body>
                     <Modal.Footer>
-                        <Button variant="danger" onClick={this.setPopupSave}>
+                        <Button variant="danger" onClick={this.setSettingsPopupSave}>
                             {StringSelector.getString(this.props.callback.state.language).saveSetting}
+                        </Button>
+                    </Modal.Footer>
+                </Modal>
+            </>
+        );
+    }
+
+    setUserKeyPopUpDisabled() {
+        this.setState({
+            userKeyPopUp: false,
+        });
+    }
+
+    setUserKeyPopUpEnabled() {
+        this.setState({
+            userKeyPopUp: true,
+        })
+    }
+
+    getUserKeyPopUp() {
+        return (
+            <>
+                <Modal show={this.state.userKeyPopUp} onHide={this.setUserKeyPopUpDisabled} className="ep-modal-dialog">
+                    <Modal.Header closeButton>
+                        <Modal.Title>{StringSelector.getString(this.props.callback.state.language).userKeyHead}</Modal.Title>
+                    </Modal.Header>
+                    <Modal.Body>
+                        <Card.Body>
+                            <Row>
+                                <Col className="noPadding">
+                                    <InputGroup>
+                                        <InputGroup.Prepend>
+                                            <InputGroup.Text>{StringSelector.getString(this.props.callback.state.language).userKey}</InputGroup.Text>
+                                        </InputGroup.Prepend>
+                                        <FormControl disabled={true} className="noResize" as="textarea" aria-label="With textarea" value={"asdjhskjfhfhs97vz987398vw9847vw8vw88787hv8hw8wc8ch7w4fhetzurhjdjhsjhvr9es897r4786ge975809437896e9874fzbdhogivnfhejisuihfkbjtrh5u90ezrsvuofpeiheifu89rsu7fgozhuf"}/>
+                                    </InputGroup>
+                                </Col>
+                            </Row>
+                        </Card.Body>
+                    </Modal.Body>
+                    <Modal.Footer>
+                        <Button variant="danger" onClick={this.setUserKeyPopUpDisabled}>
+                            {StringSelector.getString(this.props.callback.state.language).userKeyClose}
                         </Button>
                     </Modal.Footer>
                 </Modal>
@@ -287,7 +340,7 @@ class NavbarEP extends React.Component {
                                 </div>
                                 <Nav className="mr-auto">
                                     <NavDropdown title={this.props.callback.state.username} onClick={this.setSettingExpanded} className="settingsPopUp dropDown" id="basic-nav-dropdown">
-                                        <NavDropdown.Item onClick={this.setPopUp} >{StringSelector.getString(this.props.callback.state.language).settings}</NavDropdown.Item>
+                                        <NavDropdown.Item onClick={this.setSettingsPopUp} >{StringSelector.getString(this.props.callback.state.language).settings}</NavDropdown.Item>
                                     </NavDropdown>
                                 </Nav>
                             </Navbar.Collapse>
@@ -330,7 +383,8 @@ class NavbarEP extends React.Component {
                         }
                     </div>
                 </div>
-                {this.getPopUp()}
+                {this.getSettingsPopUp()}
+                {this.getUserKeyPopUp()}
                 <ResetPass callback={this} show={this.state.changePassPopUpShow}/>
             </>
         );

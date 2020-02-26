@@ -14,6 +14,13 @@ class LoginAuth {
     clear() {
         sessionStorage.setItem(authConstants.loggedIn, null);
     }
+
+    getUsername() {
+        if ( sessionStorage.getItem(authConstants.username) === null ) {
+            return undefined;
+        }
+        return sessionStorage.getItem(authConstants.username);
+    }
 }
 
 

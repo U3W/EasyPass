@@ -54,3 +54,12 @@
     margin-top: auto;
     margin-bottom: auto;
 }
+
+.hiddenFileInput {
+    display: none;
+}
+
+.fileButton {
+    border-top-left-radius: 0 !important;
+    border-bottom-left-radius: 0 !important;
+}

@@ -83,6 +83,9 @@ export function workerCall( e ) {
             this.showDeletePopUp(dashboardAlerts.showDeleteCatAlert, success);
             this.dismissDeleteCat();
             break;
+        case 'wrongCreds':
+            this.setWrongCreds();
+            break;
     }
 
 }
