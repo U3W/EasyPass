@@ -1,11 +1,24 @@
-FROM ubuntu:18.04
+FROM rust as builder
+
+# wasm-pack
+RUN curl https://rustwasm.github.io/wasm-pack/installer/init.sh -sSf | sh
+
+# cargo-generate
+RUN apt-get -yqq install pkg-config libssl-dev git;	\
+	cargo install cargo-generate; \
+rustup toolchain install nightly && \
+rustup default nightly
+ENV USER root
+COPY . /easylist/
+WORKDIR /easylist/WebService/src/main/rust/
+RUN wasm-pack build --release --no-typescript
 
 FROM openjdk:8-jdk
 
 ARG IPADDRESS
 
-COPY . /easylist/
 WORKDIR /easylist/
+COPY --from=builder /easylist/ .
 
 RUN apt update && \
 apt-get install authbind && \
