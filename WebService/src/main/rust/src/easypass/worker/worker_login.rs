@@ -56,7 +56,7 @@ impl Worker {
             self.user.replace(Some(user_hash));
             self.mkey.replace(Some(mkey));
             // Init databases in worker
-            self.clone().init().await;
+            self.clone().set_database_url().await;
             true
         } else {
             // Unsuccessful check
@@ -81,7 +81,7 @@ impl Worker {
             self.user.replace(Some(user_hash));
             self.mkey.replace(Some(mkey));
             // Init databases in worker
-            self.clone().init().await;
+            self.clone().set_database_url().await;
         }
         check
     }

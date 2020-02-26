@@ -26,8 +26,9 @@ use serde_json::value::Value::Bool;
 // Add other modules that define Worker functionality
 // Allows to split Worker logic
 mod worker_login;
+mod worker_registration;
+mod worker_network;
 mod worker_private_entries;
-mod worker_events;
 
 
 /// Manages databases and performs CRUD-operations.
@@ -40,6 +41,7 @@ pub struct Worker {
     service_status: RefCell<String>,
     service_closure: RefCell<Option<Closure<dyn FnMut()>>>,
     database_url: RefCell<Option<String>>,
+    database_url_is_set: RefCell<bool>,
     category_cache: RefCell<HashMap<String, RecoverCategory>>,
     category_clear: RefCell<HashMap<u16, Timeout>>,
     password_cache: RefCell<HashMap<String, RecoverPassword>>,
@@ -70,8 +72,7 @@ struct ClosureStorage {
 impl Worker {
     /// Creates a new Worker that manages databases.
     /// This includes live syncing and methods for CRUD-operations.
-    pub fn new(url: String) -> Rc<Worker> {
-        // TODO is url needed? Init is done later...
+    pub fn new() -> Rc<Worker> {
         // User hash and masterkey are not known at initialization
         let user = RefCell::new(None);
         let mkey = RefCell::new(None);
@@ -89,6 +90,7 @@ impl Worker {
             service_status: RefCell::new(String::from("offline")),
             service_closure: RefCell::new(None),
             database_url: RefCell::new(None),
+            database_url_is_set: RefCell::new(false),
             category_cache: RefCell::new(HashMap::new()),
             category_clear: RefCell::new(HashMap::new()),
             password_cache: RefCell::new(HashMap::new()),
@@ -98,29 +100,23 @@ impl Worker {
         worker
     }
 
-    pub async fn init(self: Rc<Worker>) {
-        log("init");
-        log(&get_node_mode());
+    pub async fn set_database_url(self: Rc<Worker>) {
 
         if is_online() {
-            let worker = self.clone();
             let result = JsFuture::from(get_database_url()).await;
             match result {
                 Ok(url_raw) => {
                     let url = url_raw.as_string().unwrap();
                     log(&format!("My URL!! {}", &url));
-                    worker.database_url.replace(Some(url));
-                    worker.service_status.replace(String::from("online"));
+                    self.database_url.replace(Some(url));
+                    self.database_url_is_set.replace(true);
                 }
                 Err(_) => {
                     // TODO interval that checks if service is available again
                     log("down");
-                    worker.service_status.replace(String::from("down"));
+                    self.service_status.replace(String::from("down"));
                 }
             }
-        } else {
-            log("offline");
-            self.service_status.replace(String::from("offline"));
         }
     }
 
@@ -256,7 +252,7 @@ impl Worker {
         let mut remote_db = None;
         // When online, setup remote database and sync handler
         // TODO use navigator.online?
-        let sync_handler = if self.service_status.borrow().as_str() == "online" {
+        let sync_handler = if is_online() {
             // Init remote databases
             let remote_db_name = format!("DB-URL: {}{}-{}",
                 &self.database_url.borrow().as_ref().unwrap(),

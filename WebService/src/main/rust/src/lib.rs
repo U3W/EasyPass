@@ -95,7 +95,7 @@ impl Backend {
         utils::set_panic_hook();
         // Build and setup internal state
         let state = State::new(
-            None, Worker::new(String::from("")), None, None
+            None, Worker::new(), None, None
         );
         // Rc is needed to use state in different parts of the application
         let state = Rc::new(state);
@@ -241,6 +241,7 @@ impl Backend {
             },
             "network" => {
                 console_log!("NETWORK: {:?}", &data);
+                worker.handle_network_change().await;
             }
             "unregister" => {
                 worker.reset().await;
