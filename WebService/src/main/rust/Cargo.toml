@@ -27,6 +27,7 @@ x25519-dalek = "0.6.0"
 sha3 = "0.8.2"
 c2-chacha = "0.2.2"
 poly1305 = "0.5.2"
+jni = "0.14.0"
 # The `console_error_panic_hook` crate provides better debugging of panics by
 # logging them with `console.error`. This is great for development, but requires
 # all the `std::fmt` and `std::panicking` infrastructure, so isn't great for

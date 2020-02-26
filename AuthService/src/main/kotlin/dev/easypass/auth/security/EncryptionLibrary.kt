@@ -2,8 +2,10 @@ package dev.easypass.auth.security
 
 import dev.easypass.auth.datstore.document.*
 import dev.easypass.auth.security.challenge.*
+import dev.easypass.auth.security.RustCall
 import org.springframework.stereotype.*
 import java.util.*
+
 
 /**
  * Provides a variety of different security methods
@@ -38,10 +40,7 @@ class EncryptionLibrary(private val properties: Properties) {
      * @param key: to encrypt the [text]
      */
     fun encrypt(text: String, key: String): String {
-        //TODO Gescheite Encryption machen
-        var encrypted = "${text}_ENC_${key}"
-
-        return encrypted
+        return RustCall.encrypt(text, key)
     }
 
     fun randomString(len: Int): String {
