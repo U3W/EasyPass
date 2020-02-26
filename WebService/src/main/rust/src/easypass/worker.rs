@@ -254,6 +254,7 @@ impl Worker {
         let mut remote_db = None;
         // When online, setup remote database and sync handler
         // TODO use navigator.online?
+        // TODO change is_online to check if database_url is some and not none
         let sync_handler = if is_online() {
             // Init remote databases
             let remote_db_name = format!("DB-URL: {}{}-{}",
@@ -438,7 +439,7 @@ impl Worker {
     }
 }
 
-trait ConnectionPlus<'a> {
+trait ConnectionPlus {
     /// Sets the remote database and sync handler for the connection
     fn set_remote_db(
         &mut self, database_url: String, user: String,
@@ -446,9 +447,9 @@ trait ConnectionPlus<'a> {
     );
 }
 
-impl ConnectionPlus<'_> for Connection {
+impl ConnectionPlus for Connection {
     fn set_remote_db(
-        &mut self, database_url: String, user: String,
+        & mut self, database_url: String, user: String,
         sync: &Closure<dyn FnMut(JsValue)>, sync_error: &Closure<dyn FnMut(JsValue)>
     ) {
         // Init remote databases
