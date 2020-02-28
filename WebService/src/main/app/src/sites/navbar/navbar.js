@@ -268,9 +268,10 @@ class NavbarEP extends React.Component {
     }
 
     setUserKeyPopUpEnabled() {
+        //this.props.callback.reqUserkey();
         this.setState({
             userKeyPopUp: true,
-        })
+        });
     }
 
     getUserKeyPopUp() {
@@ -288,7 +289,7 @@ class NavbarEP extends React.Component {
                                         <InputGroup.Prepend>
                                             <InputGroup.Text>{StringSelector.getString(this.props.callback.state.language).userKey}</InputGroup.Text>
                                         </InputGroup.Prepend>
-                                        <FormControl disabled={true} className="noResize" as="textarea" aria-label="With textarea" value={"asdjhskjfhfhs97vz987398vw9847vw8vw88787hv8hw8wc8ch7w4fhetzurhjdjhsjhvr9es897r4786ge975809437896e9874fzbdhogivnfhejisuihfkbjtrh5u90ezrsvuofpeiheifu89rsu7fgozhuf"}/>
+                                        <FormControl disabled={true} className="noResize" as="textarea" aria-label="With textarea" value={this.props.userKey}/>
                                     </InputGroup>
                                 </Col>
                             </Row>

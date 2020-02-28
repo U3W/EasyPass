@@ -91,6 +91,8 @@ class Dashboard extends React.Component {
             catselected: cat, //JSON.parse(localStorage.getItem(dashboardConst.catselectedPriv)),
             groupselected: dashboardState.getSelectedGroup(),
 
+            // ToDo @Kacper neeeds to be set after login
+            userKey: "Testtsofhsdjvlkdfhsflbsdufnkjfoeklfvbnvjxidajvxnkjdiajvbfdsjaiosxvbxkdfjskcnvxv",
             expanded: false,
             settingsExpanded: false,
             // alerts
@@ -218,8 +220,6 @@ class Dashboard extends React.Component {
         window.addEventListener('resize', this.updateWindowDimensions);
         this.props.worker.addEventListener("message", this.workerCall);
         this.props.worker.postMessage(['dashboard', undefined]);
-
-        this.setWrongCreds();
     }
 
     componentWillUnmount() {
@@ -1260,6 +1260,12 @@ class Dashboard extends React.Component {
 
     }
 
+    setUserKey( userKey ) {
+        this.setState({
+            userKey: userKey,
+        });
+    }
+
     /**
      * @returns [] a list with all the categories created by the user
      */
@@ -1454,7 +1460,7 @@ class Dashboard extends React.Component {
 
         return (
             <div className="size-hole-window-hidden-scroll" onClick={this.resetSettingsExpanded}>
-                <NavbarEP callback={this} width={this.state.width} language={this.state.language}/>
+                <NavbarEP callback={this} width={this.state.width} language={this.state.language} userKey={this.state.userKey}/>
                 <div className="container-fluid fixScroll">
                     <Row>
                         <NavbarVerticalEP2 callback={this} className={sidebarClass} />
