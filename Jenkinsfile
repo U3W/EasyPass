@@ -1,3 +1,4 @@
+pipeline{
 node {
     checkout scm
     docker.withRegistry('https://registry.nonamehd.win') {
@@ -7,4 +8,5 @@ node {
 
     	customImage.push('latest')
     }
+}
 }
