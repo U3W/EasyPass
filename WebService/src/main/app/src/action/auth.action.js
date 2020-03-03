@@ -1,6 +1,6 @@
-export const SAVE_MAUTH_STATE = "SAVE_MAUTH_STATE";
 export const SAVE_USER = "SAVE_USER";
 export const SAVE_USERNAME = "SAVE_USERNAME";
+export const SAVE_SESSIONUSER = "SAVE_SESSIONUSER";
 
 export const login = (status) => {
     return (dispatch, getState) => {
@@ -32,11 +32,6 @@ export const logout = () => {
     }
 };
 
-export const save2FA = (twoFactorOpt) => ({
-    type: SAVE_MAUTH_STATE,
-    twoFactorOpt,
-});
-
 export const saveUserState = ( user ) => ({
     type: SAVE_USER,
     user,
@@ -46,4 +41,9 @@ export const saveUser = ( username ) => ({
     type: SAVE_USERNAME,
     username,
 });
+
+export const setSessionUser = ( username ) => ({
+    type: SAVE_SESSIONUSER,
+    username
+})
 

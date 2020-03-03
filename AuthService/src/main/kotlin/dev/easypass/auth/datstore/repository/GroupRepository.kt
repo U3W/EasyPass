@@ -1,22 +1,13 @@
 package dev.easypass.auth.datstore.repository
 
-import dev.easypass.auth.datstore.document.Group
-import dev.easypass.auth.datstore.exception.EntityAlreadyinDatabaseException
+import dev.easypass.auth.datstore.document.*
 import org.ektorp.*
-import org.ektorp.support.CouchDbRepositorySupport
-import org.ektorp.support.GenerateView
-import org.springframework.stereotype.Component
+import org.ektorp.support.*
+import org.springframework.stereotype.*
 
-/**
- * Provides Ektorp Repository Support for the class [Group]
- * @param db: is initialized by the Bean [CouchDbConnector], the connection to the Database
- */
 @Component
 class GroupRepository(db: CouchDbConnector) : CouchDbRepositorySupport<Group>(Group::class.java, db) {
 
-    /**
-     * Generates the views required by the repository
-     */
     init {
         //The initStandardDesignDocument-method throws a NullPointerException when a view already exists in the database
         for (doc in db.allDocIds) {
@@ -26,27 +17,31 @@ class GroupRepository(db: CouchDbConnector) : CouchDbRepositorySupport<Group>(Gr
         initStandardDesignDocument()
     }
 
-    /**
-     * returns a [List] of all the entries with the passed [gname] that are stored in the database
-     * @param gname: the name of the group
-     */
     @GenerateView
-    fun findByGname(gname: String?): List<Group> {
-        return queryView("by_gname", gname)
+    private fun findByGid(gid: String?): List<Group> {
+        return queryView("by_gid", gid)
     }
 
-    /**
-     * This methods overrides the add-method of [CouchDbRepositorySupport], throws an [EntityAlreadyinDatabaseException], when an entity with the same gname as [entity] is already saved in the database
-     * @param entity: a group object to save in the database
-     */
-    override fun add(entity: Group) = try {
-        if (findByGname(entity.gname).isNotEmpty()) {
-            throw EntityAlreadyinDatabaseException()
-        } else {
-            throw DocumentNotFoundException("Exception is caught later! ")
-        }
-    } catch (e: DocumentNotFoundException) {
+    @Throws(DocumentNotFoundException::class, UpdateConflictException::class)
+    fun findOneByGid(gid: String): Group {
+        val list = findByGid(gid)
+        if (list.isEmpty())
+            throw DocumentNotFoundException("The Group [$gid] is NOT FOUND in the database")
+        if (list.size > 1)
+            throw UpdateConflictException()
+        return list[0]
+    }
+
+    @Throws(UpdateConflictException::class)
+    override fun add(entity: Group) = if (findByGid(entity.gid).isEmpty()) {
         super.add(entity)
+    } else {
+        throw UpdateConflictException()
+    }
+
+    fun removeAllByGid(gid: String) {
+        for (group in findByGid(gid))
+            remove(group)
     }
 
 }

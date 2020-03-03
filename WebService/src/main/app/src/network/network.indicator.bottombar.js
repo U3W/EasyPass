@@ -17,16 +17,21 @@ class IndicatorBot extends React.Component {
     }
 
     setOnline( state ) {
-        this.setState({
-            online: state,
-            show: true,
-        }, () => {
-            setTimeout(() => this.setState({show: false}), 2000);
-        });
+        if ( !this.state.show ) {
+            this.setState({
+                online: state,
+                show: true,
+            }, () => {
+                setTimeout(() => this.setState({show: false}), 2000);
+            });
+        }
+        else {
+            setTimeout(() => this.setOnline(state), 1000);
+        }
     }
 
     render() {
-        if ( this.props.width <= 425 && !this.state.first) {
+        if ( this.props.width > 0 && this.props.width <= 425 && !this.state.first) {
             this.setState({first: true});
             setTimeout(() => this.setState({show: true}), 500);
             setTimeout(() => this.setState({show: false}), 2500);

@@ -1,0 +1,20 @@
+version: '3'
+services:
+        couchdb:
+                image: "couchdb"
+                environment:
+                   - COUCHDB_USER=admin
+                   - COUCHDB_PASSWORD=Password1234
+                network_mode: host
+  
+        easylist:
+                build: 
+                        context: .
+                environment:
+                   - HOST=127.0.0.1
+                   - HTTPS_PORT=8433
+                   - HTTP_PORT=80
+                   - REDIRECT_TO_HTTPS=false
+                network_mode: host
+                depends_on:
+                   - couchdb

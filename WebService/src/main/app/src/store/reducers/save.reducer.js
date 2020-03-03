@@ -4,9 +4,10 @@ import {
 } from "../../action/dashboard.action";
 import {dashboardConst} from "../../sites/dashboard/const/dashboard.enum";
 import tabs from "../../sites/dashboard/tabs/tab.enum";
-import {SAVE_MAUTH_STATE} from "../../action/auth.action";
+import {SAVE_MAUTH_STATE, SAVE_SESSIONUSER} from "../../action/auth.action";
 import {SAVE_USER, SAVE_USERNAME} from "../../action/auth.action";
 import {loginConst} from "../../sites/login/login.enum";
+import {authConstants} from "../../authentification/auth.const.sessionstorage";
 
 
 const saveReducer = ( state, action) => {
@@ -39,6 +40,9 @@ const saveReducer = ( state, action) => {
             return {};
         case SAVE_USERNAME:
             localStorage.setItem(loginConst.saveUsername, action.username);
+            return {};
+        case SAVE_SESSIONUSER:
+            sessionStorage.setItem(authConstants.username, action.username);
             return {};
         case SAVE_GROUP:
             localStorage.setItem(dashboardConst.groupSelected, JSON.stringify(action.groupselected));

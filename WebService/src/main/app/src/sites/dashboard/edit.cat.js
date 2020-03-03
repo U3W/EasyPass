@@ -15,7 +15,7 @@ export default class EditCategory extends React.Component {
         this.state = {
             id: undefined,
             rev: undefined,
-            catName: StringSelector.getString(this.props.callback.state.language).editCatSelCat,
+            catName: "",
 
             nameNew: "",
             descriptionNew: "",
@@ -85,9 +85,21 @@ export default class EditCategory extends React.Component {
     getPopUpCat()  {
         let cats = this.props.callback.getCats();
 
-        let finalCats = cats.map((item) =>
-            this.returnCatBase(item._id, item._rev, item.name, item.desc)
-        );
+        let finalCats;
+        if ( cats.length === 0 ) {
+            finalCats = (
+                <tr>
+                    <td>
+                        {StringSelector.getString(this.props.callback.state.language).editCatNoCat}
+                    </td>
+                </tr>
+            );
+        }
+        else {
+            finalCats = cats.map((item) =>
+                this.returnCatBase(item._id, item._rev, item.name, item.desc)
+            );
+        }
 
         return (
             <>
@@ -110,8 +122,9 @@ export default class EditCategory extends React.Component {
 
     resetState() {
         this.setState({
-            id: 0,
-            catName: StringSelector.getString(this.props.callback.state.language).editCatSelCat,
+            id: undefined,
+            rev: undefined,
+            catName: "",
 
             nameNew: "",
             descriptionNew: "",
@@ -123,15 +136,20 @@ export default class EditCategory extends React.Component {
     }
 
     editCat() {
-        if ( this.state.nameNew.length !== 0 ) {
-            this.props.callback.updateCat(this.state.id, this.state.rev, this.state.nameNew, this.state.descriptionNew);
-            this.resetState();
+        if ( this.state.id === undefined ) {
+            this.dismissPopUp();
         }
         else {
-            // error
-            this.setState({
-                missingName: true,
-            })
+            if ( this.state.nameNew.length !== 0 ) {
+                this.props.callback.updateCat(this.state.id, this.state.rev, this.state.nameNew, this.state.descriptionNew);
+                this.resetState();
+            }
+            else {
+                // error
+                this.setState({
+                    missingName: true,
+                })
+            }
         }
     }
 
@@ -203,14 +221,18 @@ export default class EditCategory extends React.Component {
                     <Modal.Body className="ep-modal-body">
                         <Card.Body>
                             <InputGroup size="sm" className="mb-3 editCat" onClick={this.setPopUpCatEnabled}>
-                                <FormControl autoComplete="off" aria-label="Small" className="round-cat dropdown-toggle nav-link" role="button" value={this.state.catName} aria-describedby="inputGroup-sizing-sm" disabled={true}/>
+                                { this.state.catName === "" ?
+                                    <FormControl autoComplete="off" aria-label="Small" className="round-cat dropdown-toggle nav-link" role="button" value={StringSelector.getString(this.props.callback.state.language).editCatSelCat} aria-describedby="inputGroup-sizing-sm" disabled={true}/>
+                                    :
+                                    <FormControl autoComplete="off" aria-label="Small" className="round-cat dropdown-toggle nav-link" role="button" value={this.state.catName} aria-describedby="inputGroup-sizing-sm" disabled={true}/>
+                                }
                                 <InputGroup.Append>
                                     <Button variant="dark" className="dropdown-toggle dropdown-toggle-split" onClick={this.setPopUpCatEnabled}>
                                         <span className="sr-only">Toggle Dropdown</span>
                                     </Button>
                                 </InputGroup.Append>
                             </InputGroup>
-                            { this.state.id === 0 ?
+                            { this.state.id === undefined ?
                                 hidden
                                 :
                                 edit
@@ -218,7 +240,7 @@ export default class EditCategory extends React.Component {
                         </Card.Body>
                     </Modal.Body>
                     <Modal.Footer>
-                        <Button variant={"danger"} onClick={this.editCat}>Speichern</Button>
+                        <Button variant={"danger"} onClick={this.editCat}>{StringSelector.getString(this.props.callback.state.language).editCatSave}</Button>
                     </Modal.Footer>
                 </Modal>
                 {this.getPopUpCat()}

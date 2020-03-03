@@ -1,28 +1,19 @@
 package dev.easypass.auth.security
 
-import dev.easypass.auth.datstore.CouchDBConnectionProvider
-import dev.easypass.auth.datstore.document.User
-import dev.easypass.auth.datstore.exception.EntityAlreadyinDatabaseException
-import dev.easypass.auth.datstore.repository.UserRepository
-import dev.easypass.auth.security.exception.NoActiveChallengeException
-import dev.easypass.auth.security.exception.UserIsBlockedException
-import dev.easypass.auth.security.challenge.InternalAuthenticationChallenge
-import dev.easypass.auth.security.challenge.UserAuthenticationChallenge
-import org.ektorp.DocumentNotFoundException
-import org.springframework.security.authentication.AuthenticationProvider
-import org.springframework.security.authentication.BadCredentialsException
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
-import org.springframework.security.core.Authentication
-import org.springframework.security.core.AuthenticationException
-import org.springframework.security.core.GrantedAuthority
-import org.springframework.security.core.authority.SimpleGrantedAuthority
-import org.springframework.security.web.authentication.WebAuthenticationDetails
-import org.springframework.stereotype.Component
-import java.time.Duration
-import java.time.LocalDateTime
+import dev.easypass.auth.datstore.repository.*
+import dev.easypass.auth.security.challenge.*
+import dev.easypass.auth.security.exception.*
+import org.ektorp.*
+import org.springframework.security.authentication.*
+import org.springframework.security.core.*
+import org.springframework.security.core.authority.*
+import org.springframework.security.core.context.*
+import org.springframework.security.web.authentication.*
+import org.springframework.stereotype.*
+import java.time.*
 import java.util.*
+import kotlin.collections.ArrayList
 import kotlin.collections.HashMap
-
 
 /**
  * Enables the authentication with challenges
@@ -30,8 +21,11 @@ import kotlin.collections.HashMap
  * @param encryptionLibrary: this class provides the required encryption methods
  */
 @Component
-class ChallengeAuthenticationProvider(private val userRepository: UserRepository, private val connector: CouchDBConnectionProvider, private val encryptionLibrary: EncryptionLibrary, private val properties: Properties) : AuthenticationProvider {
-    private val currentChallenges = HashMap<Pair<String, String>, InternalAuthenticationChallenge>()
+class ChallengeAuthenticationProvider(private val userRepository: UserRepository,
+                                      private val groupRepository: GroupRepository,
+                                      private val encryptionLibrary: EncryptionLibrary,
+                                      private val properties: Properties) : AuthenticationProvider {
+    private val currentChallenges = HashMap<Pair<String, String>, Pair<InternalChallenge, String>>()
     private var attemptCounter = HashMap<Pair<String, String>, Pair<Int, LocalDateTime>>()
 
     /**
@@ -40,32 +34,15 @@ class ChallengeAuthenticationProvider(private val userRepository: UserRepository
      */
     @Throws(AuthenticationException::class)
     override fun authenticate(authentication: Authentication): Authentication? {
-        val ip = (authentication.details as WebAuthenticationDetails).remoteAddress
-        val uname = authentication.name
-        val challenge = authentication.credentials.toString()
-        val authorities = ArrayList<GrantedAuthority>()
-        authorities.add(SimpleGrantedAuthority(uname))
-
-        val key = Pair(ip, uname)
-
-        if (currentChallenges[key] == null) {
-            loginFailed(key)
-            throw NoActiveChallengeException()
-        }
-        else if (!currentChallenges[key]!!.isActive()) {
-            loginFailed(key)
-            currentChallenges.remove(key)
-            throw NoActiveChallengeException()
-        }
-        else if (isBlocked(key)) {
-            throw UserIsBlockedException()
-        }
-        else if (!currentChallenges[key]!!.checkChallenge(challenge)){
-            loginFailed(key)
-            throw BadCredentialsException("Wrong credentials provided")
-        } else {
+        val key = Pair((authentication.details as WebAuthenticationDetails).remoteAddress, authentication.name)
+        val pwd = authentication.credentials.toString()
+        if (isAuthenticated(key, pwd)) {
+            val authorities = ArrayList<GrantedAuthority>()
+            authorities.add(SimpleGrantedAuthority("${currentChallenges[key]?.second}_${key.second}"))
             loginSucceeded(key)
-            return UsernamePasswordAuthenticationToken(uname, challenge, authorities)
+            return UsernamePasswordAuthenticationToken(key.second, pwd, authorities)
+        } else {
+            return null
         }
     }
 
@@ -77,51 +54,100 @@ class ChallengeAuthenticationProvider(private val userRepository: UserRepository
         return authentication == UsernamePasswordAuthenticationToken::class.java
     }
 
+    @Throws(AuthenticationException::class)
+    fun addAuthorities(username: String, password: String, remoteAddress: String, authentication: Authentication) {
+        val key = Pair(remoteAddress, username)
+        println("key: $key $password ${currentChallenges[key]}")
+        if (isAuthenticated(key, password)) {
+            val authorities = ArrayList<GrantedAuthority>(authentication.authorities)
+            authorities.add(SimpleGrantedAuthority("${currentChallenges[key]?.second}_${key.second}"))
+
+            loginSucceeded(key)
+            SecurityContextHolder.getContext().authentication = UsernamePasswordAuthenticationToken(authentication.principal, authentication.credentials, authorities)
+        }
+    }
+
+    @Throws(AuthenticationException::class)
+    fun isAuthenticated(key: Pair<String, String>, pwd: String): Boolean =
+            if (currentChallenges[key] == null || !currentChallenges[key]!!.first.isActive()) {
+                loginFailed(key)
+                throw NoActiveChallengeException()
+            } else if (isBlocked(key)) {
+                loginFailed(key)
+                throw UserIsBlockedException()
+            } else if (!currentChallenges[key]!!.first.checkChallenge(pwd)) {
+                loginFailed(key)
+                throw BadCredentialsException("Wrong credentials provided")
+            } else {
+                true
+            }
+
+
     fun loginSucceeded(key: Pair<String, String>) {
         currentChallenges.remove(key)
         attemptCounter.remove(key)
     }
 
     fun loginFailed(key: Pair<String, String>) {
-        if(attemptCounter[key] == null)
+        currentChallenges.remove(key)
+        if (attemptCounter[key] == null)
             attemptCounter[key] = Pair(1, LocalDateTime.now())
         else
-            attemptCounter[key] = Pair(attemptCounter[key]!!.first+1, LocalDateTime.now())
+            attemptCounter[key] = Pair(attemptCounter[key]!!.first + 1, LocalDateTime.now())
     }
 
     fun isBlocked(key: Pair<String, String>): Boolean {
         if (attemptCounter[key] != null) {
-            if (Duration.between(attemptCounter[key]!!.second, LocalDateTime.now()).toMillis()/1000 >= properties.getProperty("auth.secondsAfterAttemptsAreReset").toInt())
+            if (Duration.between(attemptCounter[key]!!.second, LocalDateTime.now()).toMillis() / 1000 >= properties.getProperty("auth.secondsAfterAttemptsAreReset").toInt())
                 attemptCounter.remove(key)
-            else if (attemptCounter[key]!!.first > properties.getProperty("auth.allowedWrongAttemptsUntilBlock").toInt())
+            else if (attemptCounter[key]!!.first > properties.getProperty("auth.allowedWrongAttempts").toInt())
                 return true
         }
         return false
     }
 
     /**
-     * Adds a new [InternalAuthenticationChallenge] to the [currentChallenges]
-     * @param uname: the name of the user
+     * Adds a new [InternalChallenge] to the [currentChallenges]
+     * @param uid: the name of the user
      */
-    fun addUserChallenge(ip: String, uname: String): UserAuthenticationChallenge {
-        val key = Pair(ip, uname)
-        return try {
-            currentChallenges[key] = encryptionLibrary.generateInternalAdministrationChallenge()
-            val user = userRepository.findOneByUname(uname)
-            UserAuthenticationChallenge(currentChallenges[key]!!.getChallengeEncryptedByPublicKey(user.publicKey), user.privateKey)
-        } catch (ex: DocumentNotFoundException) {
-            val user = encryptionLibrary.generateDummyUser(uname)
-            UserAuthenticationChallenge(encryptionLibrary.generateInternalAdministrationChallenge().getChallengeEncryptedByPublicKey(user.publicKey), user.privateKey)
-        }
-    }
-
-    fun registerUser(user: User): String {
+    fun addChallenge(key: Pair<String, String>, role: String): Map<String, Any> {
+        val challenge = HashMap<String, Any>()
         try {
-            userRepository.add(user)
-            connector.createCouchDbConnector(user.uname)
-        } catch (ex: EntityAlreadyinDatabaseException) {
-            return ex.message.toString()
+            if (currentChallenges.keys.contains(key)) {
+                if (currentChallenges[key]!!.second == role && currentChallenges[key]!!.first.isActive())
+                    throw DocumentNotFoundException("A Dummy User will be created in the Catch-Block!")
+                else
+                    currentChallenges.remove(key)
+            }
+            when (role) {
+                "USER"  -> {
+                    val user = userRepository.findOneByUid(key.second)
+                    currentChallenges[key] = Pair(encryptionLibrary.generateInternalAdministrationChallenge(), role)
+                    challenge["challenge"] = currentChallenges[key]!!.first.getChallengeEncryptedByPubK(user.pubK)
+                    challenge["privK"] = user.privK
+                }
+                "GROUP" -> {
+                    val group = groupRepository.findOneByGid(key.second)
+                    currentChallenges[key] = Pair(encryptionLibrary.generateInternalAdministrationChallenge(), role)
+                    challenge["challenge"] = currentChallenges[key]!!.first.getChallengeEncryptedByPubK(group.gpubK)
+                    challenge["privK"] = group.gprivK
+                }
+                "ADMIN" -> {
+                    val group = groupRepository.findOneByGid(key.second)
+                    currentChallenges[key] = Pair(encryptionLibrary.generateInternalAdministrationChallenge(), role)
+                    challenge["challenge"] = currentChallenges[key]!!.first.getChallengeEncryptedByPubK(group.apubK)
+                    challenge["privK"] = group.aprivK
+                }
+                else    -> {
+                    throw DocumentNotFoundException("")
+                }
+            }
+        } catch (ex: DbAccessException) {
+            val user = encryptionLibrary.generateDummyUser(key.second)
+            challenge["challenge"] = encryptionLibrary.encrypt(encryptionLibrary.generateAuthenticationChallenge(), user.pubK)
+            challenge["privK"] = user.privK
         }
-        return "UserAddedSuccessfully"
+        return challenge
     }
 }
+

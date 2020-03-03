@@ -1,7 +1,7 @@
 #![feature(in_band_lifetimes)]
 #![feature(async_closure)]
-
 // Import wasm_bindgen, js_sys, web_sys dependencies and more
+mod crypto;
 mod utils;
 use wasm_bindgen::prelude::*;
 use wasm_bindgen_futures::{spawn_local, future_to_promise};
@@ -343,12 +343,3 @@ impl Utils for JsValue {
         (cmd, data)
     }
 }
-
-
-
-
-
-
-
-
-

@@ -194,7 +194,7 @@ export default class EditGroup extends React.Component {
                         </Card.Body>
                     </Modal.Body>
                     <Modal.Footer>
-                        <Button variant={"danger"} onClick={this.saveEdit}>{StringSelector.getString(this.props.callback.state.language).addGroupBut}</Button>
+                        <Button variant={"danger"} onClick={this.saveEdit}>{StringSelector.getString(this.props.callback.state.language).editGroupButton}</Button>
                     </Modal.Footer>
                 </Modal>
             </>

@@ -1,12 +1,11 @@
 package dev.easypass.auth.datstore.document
 
-import org.ektorp.support.CouchDbDocument
+import org.ektorp.support.*
 
 /**
- * A [CouchDbDocument] subclass which allows to persist users in the database.
- * @uname: the username of the user.
- * @publicKey: the registered public key to create challenges for the user.
- * @privateKey: a private key encrypted with the masterpaassword of the user.
+ * A [CouchDbDocument] subclass which allows the persistence of users in the database.
+ * @param gid: the name of the user.
+ * @param pubK: the registered public key to create challenges used for the authentication of the user.
+ * @param privK: a private key encrypted with the masterpassword used for the authentication of the user.
  */
-class User(var uname: String = "DefaultUname", var publicKey: String = "DefaultPublicKey", var privateKey: String = "DefaultPrivateKey") : CouchDbDocument() {
-}
+class User(val uid: String = "Default", val pubK: String = "Default", val privK: String = "Default") : CouchDbDocument()

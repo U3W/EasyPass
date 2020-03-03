@@ -196,35 +196,9 @@ class App extends React.Component {
 
     handleConnectionChange = () => {
         const network = navigator.onLine;
-        // ToDO @Kacper worker call with this.state.isDisconnected
         if (this.state.workerInitialized) {
             this.state.worker.postMessage(['network', network]);
         }
-
-        /**console.log("baumi");
-        const condition = !navigator.onLine ? 'online' : 'offline';
-        let isConn = false;
-        if (condition === 'online') {
-            console.log("Online");
-            isConn = true;
-            const webPing = setInterval(
-                () => {
-                    console.log("here");
-                    fetch('//google.com', {
-                        mode: 'no-cors',
-                    })
-                        .then(() => {
-                            isConn = true;
-                            this.setState({ isDisconnected: false }, () => {
-                                return clearInterval(webPing)
-                            });
-                        }).catch(() => {this.setState({ isDisconnected: true }); isConn = false; console.log("Offline")})
-                }, 500);
-            return;
-        }
-       this.ref.current.setOnline(this.state.isDisconnected);*/
-
-        // TODO @Seb Online/Offline UI Change
         this.ref.current.setOnline(network);
     };
 

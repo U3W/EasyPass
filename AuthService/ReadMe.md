@@ -1,69 +1,204 @@
 # Auth-Service
 
-Fill with test users:
+## Rest-Calls AuthRestController /auth
+
+### /register
 
 ```
-curl -i -X POST -H "Content-Type: application/json" -d "{\"uname\": \"mwustinger\", \"publicKey\": \"M_A_R_T_I_N___P_U_B_L_I_C___K_E_Y\", \"privateKey\": \"M_A_R_T_I_N___P_R_I_V_A_T_E___K_E_Y\"}" http://localhost:7000/register
+curl -i ^
+-X POST ^
+-H "Content-Type: application/json" ^
+-d "{\"uid\": \"mwustinger\", \"pubK\": \"PUBK\", \"privK\": \"PRIVK_ENC_MK\"}" ^
+http://localhost:7000/auth/register
 
-curl -i -X POST -H "Content-Type: application/json" -d "{\"uname\": \"kurbaniec\", \"publicKey\": \"K_A_C_P_E_R___P_U_B_L_I_C___K_E_Y\", \"privateKey\": \"K_A_C_P_E_R___P_R_I_V_A_T_E___K_E_Y\"}" http://localhost:7000/register
-    
-    curl -i -X POST -H "Content-Type: application/json" -d "{\"uname\": \"mwelsch\", \"publicKey\": \"M_O_R_I_T_Z___P_U_B_L_I_C___K_E_Y\", \"privateKey\": \"M_O_R_I_T_Z___P_R_I_V_A_T_E___K_E_Y\"}" http://localhost:7000/register
-    
-    curl -i -X POST -H "Content-Type: application/json" -d "{\"uname\": \"swahl\", \"publicKey\": \"S_E_B___P_U_B_L_I_C___K_E_Y\", \"privateKey\": \"S_E_B___P_R_I_V_A_T_E___K_E_Y\"}" http://localhost:7000/register
-    
-curl -i -X POST -H "Content-Type: application/json" -d "{\"uname\": \"croschger\", \"publicKey\": \"R_O_S_C_H_G_E_R___P_U_B_L_I_C___K_E_Y\", \"privateKey\": \"R_O_S_C_H_G_E_R___P_R_I_V_A_T_E___K_E_Y\"}" http://localhost:7000/auth/register
-
+curl -i ^
+-X POST ^
+-H "Content-Type: application/json" ^
+-d "{\"uid\": \"mwelsch\", \"pubK\": \"PUBK\", \"privK\": \"PRIVK_ENC_MK\"}" ^
+http://localhost:7000/auth/register
 ```
 
-Authentication Test:
+### /challenge
 
 ```
-curl -i --header "Accept:application/json" -X GET -b cookieMwustinger.txt http://localhost:7000/store/mwustinger
-
-curl -X POST http://localhost:7000/auth/challenge?uname=mwustinger
-
-curl -X POST -d username=mwustinger -d password=D_A_S___I_S_T___E_I_N_E___C_H_A_L_L_E_N_G_E -c cookieMwustinger.txt http://localhost:7000/auth/login
-
-curl --header "Accept:application/json" -X GET -b cookieMwustinger.txt http://localhost:7000/store/mwustinger
-
-curl -X POST -c cookieMwustinger.txt http://localhost:7000/auth/logout
-
-curl -i --header "Accept:application/json" -X GET -b cookieMwustinger.txt http://localhost:7000/store/mwustinger
-
+curl -i ^
+-X POST ^
+-H "Content-Type: application/json" ^
+-d "{\"uid\": \"mwustinger\", \"role\": \"USER\"}" ^
+http://localhost:7000/auth/challenge
 ```
 
-Wrong Authentication:
+### /login
+
+Fill in the right challenge obtained by the call above
 
 ```
-curl -i -X POST http://localhost:7000/auth/challenge?uname=mwustinger
-
-curl -i -X POST -d username=mwustinger -d password=D_A_S___I_S_T___K_E_I_N_E___C_H_A_L_L_E_N_G_E -c cookieMwustinger.txt http://localhost:7000/login
-
-curl -i -X POST -d username=mwustinger -d password=D_A_S___I_S_T___K_E_I_N_E___C_H_A_L_L_E_N_G_E -c cookieMwustinger.txt http://localhost:7000/login
-
-curl -i -X POST -d username=mwustinger -d password=D_A_S___I_S_T___E_I_N_E___C_H_A_L_L_E_N_G_E -c cookieMwustinger.txt http://localhost:7000/login
-
-
-
-
-curl -i -X POST http://localhost:7000/auth/challenge?uname=mwustinger
-
-curl -i -X POST -d username=mwustinger -d password=D_A_S___I_S_T___K_E_I_N_E___C_H_A_L_L_E_N_G_E -c cookieMwustinger.txt http://localhost:7000/login
-
-curl -i -X POST -d username=mwustinger -d password=D_A_S___I_S_T___E_I_N_E___C_H_A_L_L_E_N_G_E -c cookieMwustinger.txt http://localhost:7000/login
-
-curl -i --header "Accept:application/json" -X GET -b cookieMwustinger.txt http://localhost:7000/couchdb/mwustinger
-
-curl -i --header "Accept:application/json" -X GET -b cookieMwustinger.txt http://localhost:7000/couchdb/mwelsch
-
-curl -i --header "Accept:application/json" -X GET -b cookieMwustinger.txt http://localhost:7000/couchdb/sbreit
-
-
-
-curl -i -X POST http://localhost:7000/auth/challenge?uname=mwustinger
-
-curl -i -X POST -d username=mwustinger -d password=D_A_S___I_S_T___E_I_N_E___C_H_A_L_L_E_N_G_E -c cookieMwustinger.txt http://localhost:7000/auth/login
-
-curl -i --header "Accept:application/json" -X GET -b cookieMwustinger.txt http://localhost:7000/couchdb/mwustinger
+curl -i ^
+-X POST ^
+-d username=mwustinger ^
+-d password=Qe3JwM54dN ^
+-c cookie.txt ^
+http://localhost:7000/auth/login
 ```
 
+### /logout
+
+```
+curl -i ^
+-X POST ^
+-b cookie.txt ^
+http://localhost:7000/auth/logout
+```
+
+## Rest-Calls CouchDB-Store /store
+
+### /{dbname}
+
+```
+curl -i ^
+-X GET ^
+-H "Accept:application/json" ^
+-b cookie.txt ^
+http://localhost:7000/store/mwustinger
+
+curl -i ^
+-X GET ^
+-H "Accept:application/json" ^
+-b cookie.txt ^
+http://localhost:7000/store/mwustinger-meta
+```
+
+## Rest-Calls UserRestController /user
+
+### /remove
+
+```
+curl -i ^
+-X POST ^
+-b cookie.txt ^
+http://localhost:7000/user/remove
+```
+
+### /create_group
+
+```
+curl -i ^
+-X POST ^
+-H "Content-Type: application/json" ^
+-d "{\"gpubK\": \"GPUBK\", \"gprivK\": \"GPRIVK_ENC_GMK\", \"apubK\": \"APUBK\", \"aprivK\": \"APRIVK_ENC_AMK\", \"gmk\": \"GMK_ENC_PUBK\", \"amk\": \"AMK_ENC_PUBK\", \"title\": \"TITLE_ENC_PUBK\"}" ^
+-b cookie.txt ^
+http://localhost:7000/user/create_group
+```
+
+### /auth_group
+
+#### as regular user
+
+Fill in the right gid saved in the meta-database
+
+```
+curl -i ^
+-X POST ^
+-H "Content-Type: application/json" ^
+-d "{\"uid\": \"g2e6153824c9642a09150f2f8d06a33a8\", \"role\": \"GROUP\"}" ^
+http://localhost:7000/auth/challenge
+```
+
+Fill in the right challenge obtained by the call above
+
+```
+curl -i ^
+-X POST ^
+-H "Content-Type: application/json" ^
+-d "{\"gid\": \"g2e6153824c9642a09150f2f8d06a33a8\", \"pwd\": \"Tsn4tHv8eP\"}" ^
+-b cookie.txt ^
+http://localhost:7000/user/auth_group
+```
+
+#### as admin user
+
+Fill in the right gid saved in the meta-database
+
+```
+curl -i ^
+-X POST ^
+-H "Content-Type: application/json" ^
+-d "{\"uid\": \"g2e6153824c9642a09150f2f8d06a33a8\", \"role\": \"ADMIN\"}" ^
+http://localhost:7000/auth/challenge
+```
+
+Fill in the right challenge obtained by the call above
+
+```
+curl -i ^
+-X POST ^
+-H "Content-Type: application/json" ^
+-d "{\"gid\": \"g2e6153824c9642a09150f2f8d06a33a8\", \"pwd\": \"NzZCh4QCn3\"}" ^
+-b cookie.txt ^
+http://localhost:7000/user/auth_group
+```
+
+### /my_keys
+
+```
+curl -i ^
+-X POST ^
+-b cookie.txt ^
+http://localhost:7000/user/my_keys
+```
+
+### /pubkey
+
+```
+curl -i ^
+-X POST ^
+-H "Content-Type: application/json" ^
+-d "{\"uid\": \"mwelsch\"}" ^
+-b cookie.txt ^
+http://localhost:7000/user/pubkey
+```
+
+## Rest-Calls GroupRestController /group
+
+### /members
+
+```
+curl -i ^
+-X POST ^
+-H "Accept:application/json" ^
+-b cookie.txt ^
+http://localhost:7000/group/g2e6153824c9642a09150f2f8d06a33a8/members
+```
+
+## Rest-Calls AdminRestController /admin
+
+### /{gid}/remove
+
+```
+curl -i ^
+-X POST ^
+-b cookie.txt ^
+http://localhost:7000/admin/g2e6153824c9642a09150f2f8d06a33a8/remove
+```
+
+### /{gid}/add_user
+
+```
+curl -i ^
+-X POST ^
+-H "Content-Type: application/json" ^
+-d "{\"uid\": \"mwelsch\", \"euid\": \"mwelsch_ENC_GPUBK\", \"gmk\": \"GMK_ENC_PUBK\", \"amk\": \"AMK_ENC_PUBK\"}" ^
+-b cookie.txt ^
+http://localhost:7000/admin/g2e6153824c9642a09150f2f8d06a33a8/add_user
+```
+
+### /{gid}/change_cred
+
+```
+curl -i ^
+-X POST ^
+-H "Content-Type: application/json" ^
+-d "{\"gpubK\": \"GPUBK2\", \"gprivK\": \"GPRIVK2_ENC_GMK\", \"apubK\": \"APUBK2\", \"aprivK\": \"APRIVK2_ENC_AMK\", \"gmk\": \"GMK_ENC_PUBK\", \"amk\": \"AMK_ENC_PUBK\"}" ^
+-b cookie.txt ^
+http://localhost:7000/admin/g2e6153824c9642a09150f2f8d06a33a8/change_cred
+```
