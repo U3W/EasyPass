@@ -346,7 +346,7 @@ class Dashboard extends React.Component {
             {name: "Test4", userGroupList:["Aha", "huhu", "asdsada"], id:"4", ref:"4"},
             {name: "Test5", userGroupList:["Aha", "huhu"], id:"5", ref:"5"},
             {name: "Test6", userGroupList:["Aha", "huhu"], id:"6", ref:"6"},
-            {name: "Test7", userGroupList:["Aha", "huhu"], id:"7", ref:"7"},
+            {name: "Test7", userGroupList:[], id:"7", ref:"7"},
         ];
         if ( this.state.groupselected === "0") {
             // Group menu

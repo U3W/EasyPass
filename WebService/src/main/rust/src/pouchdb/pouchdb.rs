@@ -212,7 +212,8 @@ impl PouchDB {
         self.changes_with_options(
             JsValue::from_serde(&json!({
              "live": true,
-             "since": "now"
+             "since": "now",
+             "include_docs": true
             })).unwrap()
         )
     }

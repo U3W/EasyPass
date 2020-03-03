@@ -31,6 +31,7 @@ mod worker_login;
 mod worker_registration;
 mod worker_network;
 mod worker_private_entries;
+mod worker_changes;
 
 
 /// Manages databases and performs CRUD-operations.
@@ -134,8 +135,11 @@ impl Worker {
             let worker = worker_moved_change.clone();
             spawn_local(async move {
                 //let worker = &worker_moved_change;
-                log("We have a change!");
+                console_log!("We have a change!");
+                console_log!("This is the change: {:?}", &val);
                 // Send all documents to ui on change
+                // TODO send only changes
+                worker.clone().changes(val).await;
                 worker.clone().all_docs_without_passwords();
             });
         });
