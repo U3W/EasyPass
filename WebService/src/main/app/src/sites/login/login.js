@@ -449,7 +449,7 @@ class Login extends React.Component {
                                                         className="loginLogo"
                                                     />
                                                     <Col>
-                                                        <h2>Login</h2>
+                                                        <h2>{StringSelector.getString(this.state.language).login}</h2>
                                                     </Col>
                                                 </Row>
                                                 <hr/>

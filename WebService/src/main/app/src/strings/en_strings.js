@@ -3,6 +3,7 @@ import React from "react";
 
 export const strings = {
     // Login
+    login: "Login",
     username: "Username",
     usernamePlaceholder: "Please enter username",
     password: "Password",
@@ -20,6 +21,7 @@ export const strings = {
     registrationAlertError: "An error occurred while creating the account. Please try again!",
 
     // Registration
+    regist: "Registration",
     registUser: "Username",
     registUserInfo: "With this username you can login later",
     registUserPlaceholder: "Please enter a username",

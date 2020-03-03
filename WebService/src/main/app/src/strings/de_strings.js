@@ -14,6 +14,7 @@
 
 export const strings = {
     // Login
+    login: "Login",
     username: "Username",
     usernamePlaceholder: "Bitte Ihren Benutzernamen eingeben",
     password: "Passwort",
@@ -33,6 +34,7 @@ export const strings = {
 
 
     // Registration
+    regist: "Registrierung",
     registUser: "Username",
     registUserInfo: "Mit diesem Benutzernamen können Sie sich später anmelden",
     registUserPlaceholder: "Bitte einen Nutzernamen eingeben",
