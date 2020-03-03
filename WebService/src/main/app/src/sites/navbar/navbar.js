@@ -32,6 +32,8 @@ class NavbarEP extends React.Component {
             changePassPopUpShow: false,
             popUpCatShow: false,
             userKeyPopUp: false,
+
+            show2FAOpt: false,
         };
 
 
@@ -54,6 +56,8 @@ class NavbarEP extends React.Component {
         this.setUserKeyPopUpDisabled = this.setUserKeyPopUpDisabled.bind(this);
         this.setUserKeyPopUpEnabled = this.setUserKeyPopUpEnabled.bind(this);
 
+        this.show2FAOption = this.show2FAOption.bind(this);
+        this.setShow2FAOptDisabled = this.setShow2FAOptDisabled.bind(this);
     }
 
 
@@ -213,16 +217,16 @@ class NavbarEP extends React.Component {
                                     </div>
                                 </div>
                             </Row>
-                            <hr/>
+                            <hr className="hrSettings"/>
                             <Row className="rowMargin">
                                 <Col className="noPadding">
                                     <InputGroup.Prepend>
-                                        <InputGroup.Text className="fitHoleParent">Userkey (uniq identifier)</InputGroup.Text>
+                                        <InputGroup.Text className="fitHoleParent">{StringSelector.getString(this.props.callback.state.language).userKeySettings}</InputGroup.Text>
                                     </InputGroup.Prepend>
                                 </Col>
                                 <div className="noPadding">
                                     <div className="float-right">
-                                        <Button variant="danger" className="noLeftBorderRadius" onClick={this.setUserKeyPopUpEnabled}>Show</Button>
+                                        <Button variant="danger" className="noLeftBorderRadius" onClick={this.setUserKeyPopUpEnabled}>{StringSelector.getString(this.props.callback.state.language).userKeyShow}</Button>
                                     </div>
                                 </div>
                             </Row>
@@ -238,8 +242,19 @@ class NavbarEP extends React.Component {
                                     </div>
                                 </div>
                             </Row>
-                            <hr/>
-
+                            <hr className="hrSettings"/>
+                            <Row className="rowMargin">
+                                <Col className="noPadding">
+                                    <InputGroup.Prepend>
+                                        <InputGroup.Text className="fitHoleParent">{StringSelector.getString(this.props.callback.state.language).settings2FA}</InputGroup.Text>
+                                    </InputGroup.Prepend>
+                                </Col>
+                                <div className="noPadding">
+                                    <div className="float-right">
+                                        <Button variant="danger" className="noLeftBorderRadius" onClick={this.show2FAOption}>{StringSelector.getString(this.props.callback.state.language).settings2FAOpen}</Button>
+                                    </div>
+                                </div>
+                            </Row>
                             <Row className="rowMargin">
                                 <Col className="noPadding">
                                     <InputGroup.Prepend>
@@ -265,6 +280,18 @@ class NavbarEP extends React.Component {
         );
     }
 
+    show2FAOption() {
+        this.setState({
+            show2FAOpt: true,
+        });
+    }
+
+    setShow2FAOptDisabled() {
+        this.setState({
+            show2FAOpt: false,
+        })
+    }
+
     setUserKeyPopUpDisabled() {
         this.setState({
             userKeyPopUp: false,
@@ -277,6 +304,38 @@ class NavbarEP extends React.Component {
             userKeyPopUp: true,
         });
     }
+
+    get2FAPopUp() {
+        return (
+            <>
+                <Modal show={this.state.show2FAOpt} onHide={this.setShow2FAOptDisabled} className="ep-modal-dialog">
+                    <Modal.Header closeButton>
+                        <Modal.Title>{StringSelector.getString(this.props.callback.state.language).userKeyHead}</Modal.Title>
+                    </Modal.Header>
+                    <Modal.Body>
+                        <Card.Body>
+                            <Row>
+                                <Col className="noPadding">
+                                    <InputGroup>
+                                        <InputGroup.Prepend>
+                                            <InputGroup.Text>{StringSelector.getString(this.props.callback.state.language).userKey}</InputGroup.Text>
+                                        </InputGroup.Prepend>
+                                        <FormControl disabled={true} className="noResize" as="textarea" aria-label="With textarea" value={this.props.userKey}/>
+                                    </InputGroup>
+                                </Col>
+                            </Row>
+                        </Card.Body>
+                    </Modal.Body>
+                    <Modal.Footer>
+                        <Button variant="danger" onClick={this.setUserKeyPopUpDisabled}>
+                            {StringSelector.getString(this.props.callback.state.language).userKeyClose}
+                        </Button>
+                    </Modal.Footer>
+                </Modal>
+            </>
+        );
+    }
+
 
     getUserKeyPopUp() {
         return (
@@ -390,6 +449,7 @@ class NavbarEP extends React.Component {
                 </div>
                 {this.getSettingsPopUp()}
                 {this.getUserKeyPopUp()}
+                {this.get2FAPopUp()}
                 <ResetPass callback={this} show={this.state.changePassPopUpShow}/>
             </>
         );

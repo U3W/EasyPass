@@ -500,7 +500,7 @@ class Registration extends React.Component {
     }
 
 
-    getInputMasterpass() {
+    /*getInputMasterpass() {
         if ( this.state.missingMasterpassword || this.state.masterpassMatchPass || this.state.masterpassNoMatch)
         {
             return (
@@ -619,10 +619,10 @@ class Registration extends React.Component {
                 </Form.Group>
             );
         }
-    }
+    }*/
 
 
-    getInputMasterpassSec() {
+    /*getInputMasterpassSec() {
         if ( this.state.missingSecMasterpassword || this.state.masterpassMatchPass || this.state.masterpassNoMatch)
         {
             let toAdd;
@@ -714,7 +714,7 @@ class Registration extends React.Component {
                 </Form.Group>
             );
         }
-    }
+    }*/
 
     exit() {
         this.props.callback.switchToRegister(false,false,true);

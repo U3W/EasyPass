@@ -90,6 +90,7 @@ class Dashboard extends React.Component {
             tabselected: tab, // tabs.PRIVPASS
             catselected: cat, //JSON.parse(localStorage.getItem(dashboardConst.catselectedPriv)),
             groupselected: dashboardState.getSelectedGroup(),
+            groupRevSelected: dashboardState.getSelectedGroupRev(),
 
             // ToDo @Kacper neeeds to be set after login
             userKey: "Testtsofhsdjvlkdfhsflbsdufnkjfoeklfvbnvjxidajvxnkjdiajvbfdsjaiosxvbxkdfjskcnvxv",
@@ -184,20 +185,32 @@ class Dashboard extends React.Component {
         this.getCats = this.getCats.bind(this);
         this.renderLinesSonstige = this.renderLinesSonstige.bind(this);
         this.renderLines = this.renderLines.bind(this);
+
         this.addGroup = that.addGroup.bind(this);
         this.editGroup = that.editGroup.bind(this);
-        this.addPass = that.addPass.bind(this);
-        this.deletePass = that.deletePass.bind(this);
-        this.getPass = that.getPass.bind(this);
-        this.getPassForUpdate = that.getPassForUpdate.bind(this);
-        this.copyPass = that.copyPass.bind(this);
-        this.goToPage = that.goToPage.bind(this);
+        this.addPass = this.addPass.bind(this);
+        this.deletePass = this.deletePass.bind(this);
+        this.getPass = this.getPass.bind(this);
+        this.getPassForUpdate = this.getPassForUpdate.bind(this);
+        this.copyPass = this.copyPass.bind(this);
+        this.goToPage = this.goToPage.bind(this);
         this.resetPass = that.resetPass.bind(this);
         this.undoDelete = that.undoDelete.bind(this);
 
-        this.addCat = that.addCat.bind(this);
-        this.updateCat = that.updateCat.bind(this);
-        this.deleteCats = that.deleteCats.bind(this);
+        this.addCat = this.addCat.bind(this);
+        this.updateCat = this.updateCat.bind(this);
+        this.deleteCats = this.deleteCats.bind(this);
+
+        this.addPassEx = that.addPass.bind(this);
+        this.deletePassEx = that.deletePass.bind(this);
+        this.getPassEx = that.getPass.bind(this);
+        this.getPassForUpdateEx = that.getPassForUpdate.bind(this);
+        this.copyPassEx = that.copyPass.bind(this);
+        this.goToPageEx = that.goToPage.bind(this);
+
+        this.addCatEx = that.addCat.bind(this);
+        this.updateCatEx = that.updateCat.bind(this);
+        this.deleteCatsEx = that.deleteCats.bind(this);
 
 
         this.triggerEditGroup = this.triggerEditGroup.bind(this);
@@ -210,8 +223,8 @@ class Dashboard extends React.Component {
         // Entry functions
         this.loadEntries = dashboardEntries.loadEntries.bind(this);
         this.getCatsFromTab = dashboardEntries.getCatsFromTab.bind(this);
-        this.getCatsFromGroup = dashboardEntries.getCatsFromGroup.bind(this);
         this.getCatData = dashboardEntries.getCatData.bind(this);
+        this.getCatDataGroup = dashboardEntries.getCatDataGroup.bind(this);
 
     }
 
@@ -232,6 +245,91 @@ class Dashboard extends React.Component {
         this.setState({ width: window.innerWidth, height: window.innerHeight });
     }
 
+    /* Start "Middleware"
+    * Purpose: Add GroupId and GroupRev if needed
+    */
+    addPass(user, passwd, url, title, tags, catID ) {
+        if ( this.state.tabselected === tabs.GROUPPASS ) {
+            this.addPassEx(user, passwd, url, title, tags, catID, this.state.groupselected, this.state.groupRevSelected);
+        }
+        else {
+            this.addPassEx(user, passwd, url, title, tags, catID, undefined, undefined);
+        }
+    }
+
+    deletePass( id, rev) {
+        if ( this.state.tabselected === tabs.GROUPPASS ) {
+            this.deletePassEx(id, rev, this.state.groupselected, this.state.groupRevSelected);
+        }
+        else {
+            this.deletePassEx(id, rev, undefined, undefined);
+        }
+    }
+
+    getPass( id, rev ) {
+        if ( this.state.tabselected === tabs.GROUPPASS ) {
+            this.getPassEx(id, rev, this.state.groupselected, this.state.groupRevSelected);
+        }
+        else {
+            this.getPassEx(id, rev, undefined, undefined);
+        }
+    }
+
+    getPassForUpdate( id, rev) {
+        if ( this.state.tabselected === tabs.GROUPPASS ) {
+            this.getPassForUpdateEx(id, rev, this.state.groupselected, this.state.groupRevSelected);
+        }
+        else {
+            this.getPassForUpdateEx(id, rev, undefined, undefined);
+        }
+    }
+
+    copyPass( id, rev) {
+        if ( this.state.tabselected === tabs.GROUPPASS ) {
+            this.copyPassEx(id, rev, this.state.groupselected, this.state.groupRevSelected);
+        }
+        else {
+            this.copyPassEx(id, rev, undefined, undefined);
+        }
+    }
+
+    goToPage( url, id, rev ) {
+        if ( this.state.tabselected === tabs.GROUPPASS ) {
+            this.goToPageEx(url, id, rev, this.state.groupselected, this.state.groupRevSelected);
+        }
+        else {
+            this.goToPageEx(url, id, rev, undefined, undefined);
+        }
+    }
+
+    addCat( name, description ) {
+        if ( this.state.tabselected === tabs.GROUPPASS ) {
+            this.addCatEx(name, description, this.state.groupselected, this.state.groupRevSelected);
+        }
+        else {
+            this.addCatEx(name, description, undefined, undefined);
+        }
+    }
+
+    updateCat(id, rev, nameNew, descriptionNew) {
+        if ( this.state.tabselected === tabs.GROUPPASS ) {
+            this.updateCatEx(id, rev, nameNew, descriptionNew, this.state.groupselected, this.state.groupRevSelected);
+        }
+        else {
+            this.updateCatEx(id, rev, nameNew, descriptionNew, undefined, undefined);
+        }
+    }
+
+    deleteCats( entries ) {
+        if ( this.state.tabselected === tabs.GROUPPASS ) {
+            this.deleteCatsEx(entries, this.state.groupselected, this.state.groupRevSelected);
+        }
+        else {
+            this.deleteCatsEx(entries, undefined, undefined);
+        }
+    }
+    /* End "Middleware"*/
+
     changeLanguageTo( to ) {
         this.setState({
             language: to
@@ -244,7 +342,7 @@ class Dashboard extends React.Component {
         if (cats[0] !== undefined) {
             for (let i = 0; i < cats.length; i++) {
                 let catId = cats[i]._id;
-                let catData = this.getCatData(catId, this.state.tabselected, this.state.groupselected);
+                let catData = this.getCatData(catId, this.state.tabselected);
                 // add callback to array
                 if (catData !== undefined) {
                     catData = this.addCallback(catData);
@@ -269,7 +367,7 @@ class Dashboard extends React.Component {
     renderLinesSonstige() {
         let passwords = {};
         let selectedTab = this.state.tabselected;
-        let catData = this.getCatData("0", this.state.tabselected, this.state.groupselected);
+        let catData = this.getCatData("0", this.state.tabselected);
 
         // add callback to array
         if (catData !== undefined && catData.length > 0) {
@@ -293,7 +391,7 @@ class Dashboard extends React.Component {
     }
 
 
-    deleteGroup( id, ref) {
+    deleteGroup( id, rev) {
         // change to group menu
         this.changeGroup("0");
         // ToDo call Kacpers method
@@ -341,13 +439,13 @@ class Dashboard extends React.Component {
         let rend;
         // ToDo kacpers method
         const groups = [
-            {name: "Test1", userGroupList:["Aha", "huhu", "haha", "hihi", "huuuuuh", "haskdad"], id:"1", ref:"1"},
-            {name: "Test2", userGroupList:["Aha", "huhu", "lasdald", "akhakjsd"], id:"2", ref:"2"},
-            {name: "Test3", userGroupList:["Aha", "huhu", "asdads"], id:"3", ref:"3"},
-            {name: "Test4", userGroupList:["Aha", "huhu", "asdsada"], id:"4", ref:"4"},
-            {name: "Test5", userGroupList:["Aha", "huhu"], id:"5", ref:"5"},
-            {name: "Test6", userGroupList:["Aha", "huhu"], id:"6", ref:"6"},
-            {name: "Test7", userGroupList:["Aha", "huhu"], id:"7", ref:"7"},
+            {name: "Test1", userGroupList:["Aha", "huhu", "haha", "hihi", "huuuuuh", "haskdad"], id:"1", rev:"1"},
+            {name: "Test2", userGroupList:["Aha", "huhu", "lasdald", "akhakjsd"], id:"2", rev:"2"},
+            {name: "Test3", userGroupList:["Aha", "huhu", "asdads"], id:"3", rev:"3"},
+            {name: "Test4", userGroupList:["Aha", "huhu", "asdsada"], id:"4", rev:"4"},
+            {name: "Test5", userGroupList:["Aha", "huhu"], id:"5", rev:"5"},
+            {name: "Test6", userGroupList:["Aha", "huhu"], id:"6", rev:"6"},
+            {name: "Test7", userGroupList:["Aha", "huhu"], id:"7", rev:"7"},
         ];
         if ( this.state.groupselected === "0") {
             // Group menu
@@ -363,7 +461,7 @@ class Dashboard extends React.Component {
                     i++;
                     return (
                         <Col key={i} xs={12} sm={6} md={4}>
-                            <GroupCard callback={this} name={singleGroup.name} userGroupList={singleGroup.userGroupList} _id={singleGroup.id} _ref={singleGroup.ref}/>
+                            <GroupCard callback={this} name={singleGroup.name} userGroupList={singleGroup.userGroupList} _id={singleGroup.id} _rev={singleGroup.rev}/>
                         </Col>
                     );
                 });
@@ -390,7 +488,7 @@ class Dashboard extends React.Component {
             }
             rend = (
                 <>
-                    <SingleGroup callback={this} name={groups[singleInd].name} userGroupList={groups[singleInd].userGroupList} id={groups[singleInd]._id} ref={groups[singleInd]._ref}/>
+                    <SingleGroup callback={this} name={groups[singleInd].name} userGroupList={groups[singleInd].userGroupList} id={groups[singleInd]._id} rev={groups[singleInd]._rev}/>
                 </>
             );
         }
@@ -474,7 +572,7 @@ class Dashboard extends React.Component {
     }
 
     getCatsForGroup() {
-        return this.sortCatsAlph(this.getCatsFromGroup(this.state.groupselected));
+        return this.sortCatsAlph(this.getCatDataGroup(this.state.groupselected, this.state.groupRevSelected));
     }
 
     renderGroupCat() {
@@ -1220,10 +1318,11 @@ class Dashboard extends React.Component {
         }
     }
 
-    changeGroup( changeTo ) {
-        this.props.saveGroup(changeTo);
+    changeGroup( changeTo, changeToRev ) {
+        this.props.saveGroup(changeTo, changeToRev);
         this.setState({
             groupselected: changeTo,
+            groupRevSelected: changeToRev
         });
     }
 
@@ -1567,7 +1666,7 @@ const mapDispatchToProps3 = (dispatch) => {
         saveCat: (tabselected, catselected) => dispatch(saveCat(tabselected, catselected)),
         saveSidebarClosed: (sidebarClosed) => dispatch(saveSidebarClosed(sidebarClosed)),
         changeLanguage: (language) => dispatch(changeLanguage(language)),
-        saveGroup: (groupselected) => dispatch(saveGroup(groupselected)),
+        saveGroup: (groupselected, groupRevSelected) => dispatch(saveGroup(groupselected, groupRevSelected)),
     };
 };
 

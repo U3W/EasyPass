@@ -101,7 +101,12 @@ export const strings = {
 
     saveSetting: "Änderungen speichern",
 
+    settings2FA: "2FA Optionen",
+    settings2FAOpen: "Öffnen",
+
     userKeyHead: "Öffentlicher userkey",
+    userKeySettings: "Userkey (einzigartige Nutzeridentifizierung)",
+    userKeyShow: "Anzeigen",
     userKey: "Userkey",
     userKeyClose: "Schließen",
 

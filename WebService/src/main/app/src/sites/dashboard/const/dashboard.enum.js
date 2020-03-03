@@ -5,6 +5,7 @@ export const dashboardConst = {
     sidebarClosed: "3",
     languageSelected: "4",
     groupSelected: "5",
+    groupRevSelected: "6",
 };
 
 export const dashboardLanguage  = {

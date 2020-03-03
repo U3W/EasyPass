@@ -29,7 +29,7 @@ export default class SingleGroup extends React.Component {
             name: this.props.name,
             userGroupList: this.deepCopy(this.props.userGroupList),
             id: this.props._id,
-            ref: this.props._ref,
+            rev: this.props._rev,
         };
 
 
@@ -121,7 +121,7 @@ export default class SingleGroup extends React.Component {
                                         </Tooltip>
                                     }
                                 >
-                                    <Button variant="dark" className="groupReturnButton buttonSpace " onClick={() => this.props.callback.deleteGroup(this.state.id, this.state.ref, false)}>
+                                    <Button variant="dark" className="groupReturnButton buttonSpace " onClick={() => this.props.callback.deleteGroup(this.state.id, this.state.rev, false)}>
                                         <img
                                             src={DeleteIcon}
                                             alt=""
@@ -140,7 +140,7 @@ export default class SingleGroup extends React.Component {
                                         </Tooltip>
                                     }
                                 >
-                                    <Button variant="dark" className="groupReturnButton buttonSpace " onClick={() => this.props.callback.triggerEditGroup( this.state.id, this.state.ref, this.state.name, this.state.userGroupList)}>
+                                    <Button variant="dark" className="groupReturnButton buttonSpace " onClick={() => this.props.callback.triggerEditGroup( this.state.id, this.state.rev, this.state.name, this.state.userGroupList)}>
                                         <img
                                             src={EditIcon}
                                             alt=""
@@ -159,7 +159,7 @@ export default class SingleGroup extends React.Component {
                                         </Tooltip>
                                     }
                                 >
-                                    <Button variant="dark" className="groupReturnButton buttonSpace " onClick={() => this.props.callback.changeGroup("0")}>
+                                    <Button variant="dark" className="groupReturnButton buttonSpace " onClick={() => this.props.callback.changeGroup("0", "0")}>
                                         <img
                                             src={GroupReturn}
                                             alt=""

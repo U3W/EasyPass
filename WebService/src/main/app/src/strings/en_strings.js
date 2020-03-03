@@ -28,7 +28,7 @@ export const strings = {
     registUserAlreadyExist: "This username already exists!",
 
     registPass: "Password",
-    registPassInfo: "With this username you can login later",
+    registPassInfo: "With this password you can login later",
     registPassPlaceholder: "Please enter a password",
 
     registPassSec: "Repeat password",
@@ -88,7 +88,12 @@ export const strings = {
 
     saveSetting: "Save settings",
 
+    settings2FA: "2FA Options",
+    settings2FAOpen: "Open",
+
     userKeyHead: "Public userkey",
+    userKeySettings: "Userkey (unique user-identifier)",
+    userKeyShow: "Show",
     userKey: "Userkey",
     userKeyClose: "Close",
 

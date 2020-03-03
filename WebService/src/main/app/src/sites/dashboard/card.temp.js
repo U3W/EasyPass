@@ -27,7 +27,7 @@ export default class GroupCard extends React.Component {
             name: this.props.name,
             userGroupList: this.props.userGroupList,
             id: this.props._id,
-            ref: this.props._ref,
+            rev: this.props._rev,
         };
 
     }
@@ -98,7 +98,7 @@ export default class GroupCard extends React.Component {
                                             </Tooltip>
                                         }
                                     >
-                                        <Button variant="dark" className="groupButton" onClick={() => this.props.callback.changeGroup(this.state.id)}>
+                                        <Button variant="dark" className="groupButton" onClick={() => this.props.callback.changeGroup(this.state.id, this.state.rev)}>
                                             <img
                                                 src={OpenGroup}
                                                 alt=""
