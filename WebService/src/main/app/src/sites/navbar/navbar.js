@@ -213,30 +213,7 @@ class NavbarEP extends React.Component {
                                     </div>
                                 </div>
                             </Row>
-                            <Row className="rowMargin">
-                                <Col className="noPadding">
-                                    <InputGroup.Prepend>
-                                        <InputGroup.Text className="fitHoleParent">{StringSelector.getString(this.props.callback.state.language).changePass}</InputGroup.Text>
-                                    </InputGroup.Prepend>
-                                </Col>
-                                <div className="noPadding">
-                                    <div className="float-right">
-                                        <Button variant="danger" className="noLeftBorderRadius" onClick={this.setChangePopUp}>{StringSelector.getString(this.props.callback.state.language).changePassBut}</Button>
-                                    </div>
-                                </div>
-                            </Row>
-                            <Row className="rowMargin">
-                                <Col className="noPadding">
-                                    <InputGroup.Prepend>
-                                        <InputGroup.Text className="fitHoleParent">{StringSelector.getString(this.props.callback.state.language).genKeyfile}</InputGroup.Text>
-                                    </InputGroup.Prepend>
-                                </Col>
-                                <div className="noPadding">
-                                    <div className="float-right">
-                                        <Button variant="danger" className="noLeftBorderRadius" onClick={this.generateKeyFile}>{StringSelector.getString(this.props.callback.state.language).genButton}</Button>
-                                    </div>
-                                </div>
-                            </Row>
+                            <hr/>
                             <Row className="rowMargin">
                                 <Col className="noPadding">
                                     <InputGroup.Prepend>
@@ -249,6 +226,33 @@ class NavbarEP extends React.Component {
                                     </div>
                                 </div>
                             </Row>
+                            <Row className="rowMargin">
+                                <Col className="noPadding">
+                                    <InputGroup.Prepend>
+                                        <InputGroup.Text className="fitHoleParent">{StringSelector.getString(this.props.callback.state.language).changePass}</InputGroup.Text>
+                                    </InputGroup.Prepend>
+                                </Col>
+                                <div className="noPadding">
+                                    <div className="float-right">
+                                        <Button variant="danger" className="noLeftBorderRadius" onClick={this.setChangePopUp}>{StringSelector.getString(this.props.callback.state.language).changePassBut}</Button>
+                                    </div>
+                                </div>
+                            </Row>
+                            <hr/>
+
+                            <Row className="rowMargin">
+                                <Col className="noPadding">
+                                    <InputGroup.Prepend>
+                                        <InputGroup.Text className="fitHoleParent">{StringSelector.getString(this.props.callback.state.language).genKeyfile}</InputGroup.Text>
+                                    </InputGroup.Prepend>
+                                </Col>
+                                <div className="noPadding">
+                                    <div className="float-right">
+                                        <Button variant="danger" className="noLeftBorderRadius" onClick={this.generateKeyFile}>{StringSelector.getString(this.props.callback.state.language).genButton}</Button>
+                                    </div>
+                                </div>
+                            </Row>
+
                         </Card.Body>
                     </Modal.Body>
                     <Modal.Footer>

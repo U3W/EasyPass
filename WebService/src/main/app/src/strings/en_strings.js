@@ -52,18 +52,12 @@ export const strings = {
     registNextButton: "Next step",
     registButton: "Register",
 
-    // verify - masterpassword
-    masterpassword: "Masterpassword",
-    masterpasswordPlace: "Please enter masterpassword",
-    masterpass2FA: "2-factor-option",
-    masterpass2FAWebauthn: "Webauthn",
-    masterpass2FAFile: "Key-File",
+    // 2FA
+    masterpass2FA: "2-factor-key (optional)",
+    masterpass2FAFileDel: "Clear",
     masterpass2FAFileSelect: "Select file",
     masterpass2FAFileNoFile: "No file selected",
     masterpass2FAFileNotSup: "Not supported",
-
-    masterpassWrongLoginHeader: "Verification not possible!",
-    masterpassWrongLogin: "Masterpassword or 2-factor-option are wrong!",
 
     /** Dashboard **/
 

@@ -65,18 +65,13 @@ export const strings = {
     registNextButton: "Nächster Schritt",
     registButton: "Registrieren",
 
-    // verify - Masterpassword
-    masterpassword: "Masterpasswort",
-    masterpasswordPlace: "Bitte Ihr Masterpasswort eingeben",
-    masterpass2FA: "2-Faktor-Option",
-    masterpass2FAWebauthn: "Webauthn",
-    masterpass2FAFile: "Key-File",
+    // 2FA
+    masterpass2FA: "2-Faktor-Schlüssel (Optional)",
+    masterpass2FAFileDel: "Löschen",
     masterpass2FAFileSelect: "Datei auswählen",
     masterpass2FAFileNoFile: "Keine Datei ausgewählt",
     masterpass2FAFileNotSup: "Nicht unterstützt",
 
-    masterpassWrongLoginHeader: "Verifizierung nicht möglich!",
-    masterpassWrongLogin: "Masterpasswort oder 2-Faktor-Option sind falsch!",
 
     /** Dashboard **/
 
