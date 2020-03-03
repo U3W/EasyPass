@@ -31,7 +31,7 @@ class AdminRestController(private val couchDBConnectionProvider: CouchDBConnecti
         group.members.add(euid)
         couchDBConnectionProvider.UserDatabaseConnector().update(group)
         userRepository.findOneByUid(uid)
-        couchDBConnectionProvider.createCouchDbConnector("${uid}-meta").create(GroupAccessCredentials("GROUP", gid, gmk, amk))
+        couchDBConnectionProvider.createCouchDbConnector("${uid}-meta").create(GroupAccessCredentials("group", gid, gmk, amk))
         response.status = HttpServletResponse.SC_OK
     } catch (ex: NullPointerException) {
         response.sendError(HttpServletResponse.SC_CONFLICT, "Insufficient parameters provided!")
@@ -50,7 +50,7 @@ class AdminRestController(private val couchDBConnectionProvider: CouchDBConnecti
         val amk = data["amk"]!!
         userRepository.findOneByUid(uid)
         groupRepository.findOneByGid(gid)
-        couchDBConnectionProvider.createCouchDbConnector("${uid}-meta").create(GroupAccessCredentials("GROUP", gid, gmk, amk))
+        couchDBConnectionProvider.createCouchDbConnector("${uid}-meta").create(GroupAccessCredentials("group", gid, gmk, amk))
         groupRepository.removeAllByGid(gid)
         val members = ArrayList<String>()
         members.add(encryptionLibrary.encrypt(uid, gpubK))

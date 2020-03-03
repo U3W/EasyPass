@@ -45,7 +45,7 @@ class UserRestController(private val couchDBConnectionProvider: CouchDBConnectio
         val title = data["title"]!!
         val gid = "g" + UUID.randomUUID().toString().replace("-", "")
         userRepository.findOneByUid(uid)
-        couchDBConnectionProvider.createCouchDbConnector("${uid}-meta").create(GroupAccessCredentials("GROUP", gid, gmk, amk))
+        couchDBConnectionProvider.createCouchDbConnector("${uid}-meta").create(GroupAccessCredentials("group", gid, gmk, amk))
         val members = ArrayList<String>()
         members.add(encryptionLibrary.encrypt(uid, gpubK))
         groupRepository.add(Group(gid, gpubK, gprivK, apubK, aprivK, members))
