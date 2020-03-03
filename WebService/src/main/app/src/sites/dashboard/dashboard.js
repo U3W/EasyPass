@@ -219,7 +219,6 @@ class Dashboard extends React.Component {
         this.props.worker.addEventListener("message", this.workerCall);
         this.props.worker.postMessage(['dashboard', undefined]);
 
-        this.setWrongCreds();
     }
 
     componentWillUnmount() {

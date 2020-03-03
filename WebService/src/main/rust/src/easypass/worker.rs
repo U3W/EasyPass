@@ -22,6 +22,7 @@ use serde_json::json;
 use serde_json::{Value};
 use serde_json::value::Value::Bool;
 use wasm_bindgen::__rt::RefMut;
+use sha3::Digest;
 
 
 // Add other modules that define Worker functionality

@@ -194,6 +194,9 @@ impl Backend {
             "login" => {
                 worker.login(data).await;
             },
+            "registration" => {
+                worker.registration(data).await;
+            }
             "network" => {
                 console_log!("NETWORK: {:?}", &data);
             },
