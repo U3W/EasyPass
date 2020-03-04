@@ -36,7 +36,7 @@ Fill in the right challenge obtained by the call above
 curl -i ^
 -X POST ^
 -d username=mwustinger ^
--d password=Qe3JwM54dN ^
+-d password=fMEmjJhCxD ^
 -c cookie.txt ^
 http://localhost:7000/auth/login
 ```

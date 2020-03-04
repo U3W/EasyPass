@@ -33,15 +33,12 @@ class EncryptionLibrary(private val properties: Properties) {
     }
 
     /**
-     * Encrypts the [text] with the passed [key]
-     * @param text: that should be encrypted
-     * @param key: to encrypt the [text]
+     * Encrypts the [msg] with the passed [key]
+     * @param msg: that should be encrypted
+     * @param key: to encrypt the [msg]
      */
-    fun encrypt(text: String, key: String): String {
-        //TODO Gescheite Encryption machen
-        var encrypted = "${text}_ENC_${key}"
-
-        return encrypted
+    fun encrypt(msg: String, key: String): String {
+        return RustCall.encrypt(msg, key)
     }
 
     fun randomString(len: Int): String {
