@@ -429,6 +429,12 @@ userRemove {
         right: 0;
         left: 0;
     }
+    .fixed-bottom-easypass {
+        position: fixed;
+        bottom: 15px;
+        right: 0;
+        left: 0;
+    }
 }
 
 @media (min-width: 425px) {
@@ -436,6 +442,12 @@ userRemove {
         position: fixed;
         /* 86 + 5 */
         top: 91px;
+        right: 0;
+        left: 0;
+    }
+    .fixed-bottom-easypass {
+        position: fixed;
+        bottom: 15px;
         right: 0;
         left: 0;
     }
@@ -511,4 +523,25 @@ userRemove {
 
 .doubleHrBottom {
     margin-top: 0.1rem !important
+}
+
+/* Disabled Buttons */
+.disButton {
+    background-color: #343a40;
+    border-color: #343a40;
+    opacity: .65;
+}
+
+.tab-content :hover > *{
+    color: black !important;
+}
+.nav-tabs > a:hover {
+    color: black;
+}
+.nav-tabs .nav-link {
+    color: #707070;
+}
+
+.nav-tabs .nav-link.active {
+    color: black;
 }

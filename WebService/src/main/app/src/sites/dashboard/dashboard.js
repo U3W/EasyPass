@@ -94,6 +94,9 @@ class Dashboard extends React.Component {
 
             // ToDo @Kacper neeeds to be set after login
             userKey: "Testtsofhsdjvlkdfhsflbsdufnkjfoeklfvbnvjxidajvxnkjdiajvbfdsjaiosxvbxkdfjskcnvxv",
+            // ToDo @Kacper needs to be set before component is rendered
+            is2FASet: false,
+
             expanded: false,
             settingsExpanded: false,
             // alerts
@@ -336,6 +339,12 @@ class Dashboard extends React.Component {
         });
     }
 
+    change2FA( to ) {
+        this.setState({
+            is2FASet: to,
+        });
+    }
+
     renderLines(cats) {
         let passwords = {};
 
@@ -435,6 +444,11 @@ class Dashboard extends React.Component {
         return "Temp Name";
     }
 
+    isGroupAdmin( id, rev ) {
+        // ToDo Kacpers method, to check if user is admin of this group
+        return false;
+    }
+
     renderGroup() {
         let rend;
         // ToDo kacpers method
@@ -461,7 +475,7 @@ class Dashboard extends React.Component {
                     i++;
                     return (
                         <Col key={i} xs={12} sm={6} md={4}>
-                            <GroupCard callback={this} name={singleGroup.name} userGroupList={singleGroup.userGroupList} _id={singleGroup.id} _rev={singleGroup.rev}/>
+                            <GroupCard callback={this} isAdmin={this.isGroupAdmin(singleGroup.id, singleGroup.rev)} name={singleGroup.name} userGroupList={singleGroup.userGroupList} _id={singleGroup.id} _rev={singleGroup.rev}/>
                         </Col>
                     );
                 });
@@ -488,7 +502,7 @@ class Dashboard extends React.Component {
             }
             rend = (
                 <>
-                    <SingleGroup callback={this} name={groups[singleInd].name} userGroupList={groups[singleInd].userGroupList} id={groups[singleInd]._id} rev={groups[singleInd]._rev}/>
+                    <SingleGroup callback={this} isAdmin={this.isGroupAdmin(groups[singleInd].id, groups[singleInd].rev)} name={groups[singleInd].name} userGroupList={groups[singleInd].userGroupList} id={groups[singleInd]._id} rev={groups[singleInd]._rev}/>
                 </>
             );
         }

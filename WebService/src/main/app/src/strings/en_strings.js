@@ -83,13 +83,18 @@ export const strings = {
     changePassAlertErr: "Password does not match the original one!",
     changePassAlertSucc: "Password changed!",
 
-    genKeyfile: "Generate keyfile",
+    genKeyfile: "Generate new keyfile",
     genButton: "Generate",
 
     saveSetting: "Save settings",
 
-    settings2FA: "2FA Options",
+    settings2FA: "2FA-options",
     settings2FAOpen: "Open",
+
+    settings2FACurrA: "2FA-Key (currently: activated)",
+    settings2FACurrD: "2FA-Key (currently: deactivated)",
+    settings2FAActivate: "Activate",
+    settings2FADeactivate: "Deactivate",
 
     userKeyHead: "Public userkey",
     userKeySettings: "Userkey (unique user-identifier)",
@@ -195,9 +200,14 @@ export const strings = {
     cardGroupMembers: "Group members:",
 
     cardEdit: "Edit this group",
+    cardDis: "You do not have the required rights for this action!",
     cardDel: "Delete this group",
     cardOpen: "Open this group",
     cardReturn: "Return to the group menu",
+
+    // Group Card Single
+    cardGroupMembersTab: "Group members",
+    cardGroupPassTab: "Passwords",
 
     // Delete Alert
     cardDelSuc: "Group deleted!",

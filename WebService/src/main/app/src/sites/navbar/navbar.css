@@ -33,6 +33,19 @@
     margin-right: 50%;
 }
 
+.settingsFitSize {
+    white-space:normal;
+    word-break: break-all;
+}
+
+.settingsButtonCol {
+    position: relative;
+}
+
+.settingsButtonFixHeight {
+    height: 100%;
+}
+
 .stickRightText {
     background-color: rgba(0,0,0,0.0) !important;
     border: 0;
@@ -479,6 +492,7 @@
 .del-modal-dialog .modal-content {
     max-height: calc(100vh - 86px);
     border-radius: .3rem;
+    overflow: auto;
 }
 
 .del-modal-dialog  .float-center {
@@ -529,6 +543,7 @@
 .ep-modal-dialog .modal-content {
     max-height: calc(100vh - 86px);
     border-radius: .3rem;
+    overflow: auto;
 }
 
 .ep-modal-body {
@@ -618,6 +633,10 @@
     height: 100%;
     width: 1px;
     position: absolute;
+}
+
+.inpDisabled {
+    opacity: .65;
 }
 
 /*
