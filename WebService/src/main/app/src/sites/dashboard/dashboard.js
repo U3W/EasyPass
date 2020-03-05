@@ -141,6 +141,12 @@ class Dashboard extends React.Component {
             currGroupEditName: "",
             currGroupEditUserGroupList: [],
 
+            // change password alert
+            alertChangePassShow: false,
+
+            // for activate/deactivate 2fa
+            alert2FAShow: false,
+
             // with, height
             width: 0,
             height: 0,
@@ -169,11 +175,12 @@ class Dashboard extends React.Component {
         this.changeCat = this.changeCat.bind(this);
         this.changeTab = this.changeTab.bind(this);
         this.dismissCopy = this.dismissCopy.bind(this);
-        this.saveEdit = that.saveEdit.bind(this);
         this.renderCat = this.renderCat.bind(this);
         this.renderGroup = this.renderGroup.bind(this);
         this.deleteGroup = this.deleteGroup.bind(this);
         this.resetSettingsExpanded = this.resetSettingsExpanded.bind(this);
+        this.show2FASetAlert = this.show2FASetAlert.bind(this);
+        this.setShowResetPassError = this.setShowResetPassError.bind(this);
         // Popups
         this.dismissAddCat = this.dismissAddCat.bind(this);
         this.showAddCat = this.showAddCat.bind(this);
@@ -184,6 +191,10 @@ class Dashboard extends React.Component {
         this.showAddGroup = this.showAddGroup.bind(this);
         this.dismissAddGroup = this.dismissAddGroup.bind(this);
         this.getGroupAddShow = this.getGroupAddShow.bind(this);
+        // set 2FA
+        this.change2FA = that.change2FA.bind(this);
+        this.generateKeyfile = that.generateKeyfile.bind(this);
+
         // update, delete and so on
         this.getCats = this.getCats.bind(this);
         this.renderLinesSonstige = this.renderLinesSonstige.bind(this);
@@ -192,12 +203,14 @@ class Dashboard extends React.Component {
         this.addGroup = that.addGroup.bind(this);
         this.editGroup = that.editGroup.bind(this);
         this.addPass = this.addPass.bind(this);
+        this.saveEdit = this.saveEdit.bind(this);
         this.deletePass = this.deletePass.bind(this);
         this.getPass = this.getPass.bind(this);
         this.getPassForUpdate = this.getPassForUpdate.bind(this);
         this.copyPass = this.copyPass.bind(this);
         this.goToPage = this.goToPage.bind(this);
         this.resetPass = that.resetPass.bind(this);
+        this.resetUserPass = that.resetUserPass.bind(this);
         this.undoDelete = that.undoDelete.bind(this);
 
         this.addCat = this.addCat.bind(this);
@@ -205,6 +218,7 @@ class Dashboard extends React.Component {
         this.deleteCats = this.deleteCats.bind(this);
 
         this.addPassEx = that.addPass.bind(this);
+        this.saveEditEx = that.saveEdit.bind(this);
         this.deletePassEx = that.deletePass.bind(this);
         this.getPassEx = that.getPass.bind(this);
         this.getPassForUpdateEx = that.getPassForUpdate.bind(this);
@@ -257,6 +271,15 @@ class Dashboard extends React.Component {
         }
         else {
             this.addPassEx(user, passwd, url, title, tags, catID, undefined, undefined);
+        }
+    }
+
+    saveEdit(id, rev, userNew, passwordNew, urlNew, titleNew, tagNew, catIdNew) {
+        if ( this.state.tabselected === tabs.GROUPPASS ) {
+            this.saveEditEx(id, rev, userNew, passwordNew, urlNew, titleNew, tagNew, catIdNew, this.state.groupselected, this.state.groupRevSelected);
+        }
+        else {
+            this.saveEditEx(id, rev, userNew, passwordNew, urlNew, titleNew, tagNew, catIdNew, undefined, undefined);
         }
     }
 
@@ -339,11 +362,7 @@ class Dashboard extends React.Component {
         });
     }
 
-    change2FA( to ) {
-        this.setState({
-            is2FASet: to,
-        });
-    }
+
 
     renderLines(cats) {
         let passwords = {};
@@ -1129,9 +1148,11 @@ class Dashboard extends React.Component {
                     showDeletePassAlert: true,
                 });
                 sleep(4000).then(() => {
-                        this.setState({
-                            showDeletePassAlert: false,
-                        })
+                        if ( this.state.showDeletePassAlert ) {
+                            this.setState({
+                                showDeletePassAlert: false,
+                            })
+                        }
                     }
                 );
                 break;
@@ -1140,9 +1161,24 @@ class Dashboard extends React.Component {
                     showDeleteCatAlert: true,
                 });
                 sleep(4000).then(() => {
-                        this.setState({
-                            showDeleteCatAlert: false,
-                        })
+                        if ( this.state.showDeleteCatAlert ) {
+                            this.setState({
+                                showDeleteCatAlert: false,
+                            })
+                        }
+                    }
+                );
+                break;
+            case dashboardAlerts.showDeleteGroupAlert:
+                this.setState({
+                    showDeleteGroup: true,
+                });
+                sleep(4000).then(() => {
+                        if ( this.state.showDeleteGroup ) {
+                            this.setState({
+                                showDeleteGroup: false,
+                            })
+                        }
                     }
                 );
                 break;
@@ -1307,6 +1343,58 @@ class Dashboard extends React.Component {
         });
     }
 
+    show2FASetAlert( succ ) {
+        if ( !this.state.alert2FAShow ) {
+            if ( succ ) {
+                this.setState({
+                    alertState: "success",
+                });
+            }
+            else {
+                this.setState({
+                    alertState: "danger",
+                })
+            }
+            this.setState({
+                alert2FAShow: true,
+            });
+            setTimeout(() => {
+                this.setState({
+                    alert2FAShow: false,
+                });
+            }, 2125)
+        }
+        else {
+            setTimeout(() => this.show2FASetAlert(), 500);
+        }
+    }
+
+    setShowResetPassError( succ ) {
+        if ( !this.state.alertChangePassShow ) {
+            if ( succ ) {
+                this.setState({
+                    alertState: "success",
+                });
+            }
+            else {
+                this.setState({
+                    alertState: "danger",
+                });
+            }
+            this.setState({
+                alertChangePassShow: true,
+            });
+            setTimeout(() => {
+                this.setState({
+                    alertChangePassShow: false,
+                });
+            }, 2125)
+        }
+        else {
+            setTimeout(() => this.setShowResetPassError(), 500);
+        }
+    }
+
     setExpanded() {
         this.setState({
             expanded: !this.state.expanded
@@ -1414,10 +1502,7 @@ class Dashboard extends React.Component {
 
     }
 
-    generateKeyfile() {
-        // ToDO call Kacpers Method
-        console.log("Hier keyfile")
-    }
+
 
     setSidebarState( to ) {
         this.setState({
@@ -1694,5 +1779,20 @@ const mapStateToProps3 = (state) => {
 function sleep (time) {
     return new Promise((resolve) => setTimeout(resolve, time));
 }
+
+export function download(filename, text) {
+    let element = document.createElement('a');
+    element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(text));
+    element.setAttribute('download', filename);
+
+    element.style.display = 'none';
+    document.body.appendChild(element);
+
+    element.click();
+
+    document.body.removeChild(element);
+}
+
+
 
 export default connect(mapStateToProps3, mapDispatchToProps3, null, { pure: false})(Dashboard)

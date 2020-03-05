@@ -23,6 +23,7 @@ import CopyIcon from "../../img/icons/password_copy_white.svg";
 import ResetPass from "./resetPass";
 import tabs from "../dashboard/tabs/tab.enum";
 import Alert from "react-bootstrap/Alert";
+import dashboard, {download} from "../dashboard/dashboard";
 
 class NavbarEP extends React.Component {
     constructor(props) {
@@ -35,6 +36,7 @@ class NavbarEP extends React.Component {
             userKeyPopUp: false,
 
             show2FAOpt: false,
+            show2FAFromDeToAct: false,
             alert2FAShow: false,
         };
 
@@ -62,11 +64,23 @@ class NavbarEP extends React.Component {
         this.setShow2FAOptDisabled = this.setShow2FAOptDisabled.bind(this);
     }
 
-
+    componentDidUpdate(prevProps, prevState, snapshot) {
+        console.log("Aha", this.props.callback.state.is2FASet, this.props.callback.state.alert2FAShow);
+        if ( (this.props.callback.state.is2FASet && this.props.callback.state.alert2FAShow) && !this.state.show2FAFromDeToAct ) {
+            this.setState({
+                show2FAFromDeToAct: true,
+            });
+            this.props.callback.generateKeyfile();
+        }
+        else if ( !this.props.callback.state.is2FASet && this.state.show2FAFromDeToAct ){
+            this.setState({
+                show2FAFromDeToAct: false,
+            });
+        }
+    }
 
 
     logoutFunc() {
-        //console.log(this.props);
         this.props.callback.logoutDash();
     }
 
@@ -91,13 +105,8 @@ class NavbarEP extends React.Component {
     }
 
     resetPass(pass, newPass) {
-        if ( this.props.callback.resetPass(pass, newPass) ) {
-            this.setChangePopUpDisabled();
-            return true;
-        }
-        else {
-            return false;
-        }
+        this.props.callback.resetUserPass(pass, newPass);
+        this.setChangePopUpDisabled();
     }
 
     setChangePopUpDisabled() {
@@ -286,28 +295,31 @@ class NavbarEP extends React.Component {
         });
     }
 
-    show2FASetAlert() {
-        if ( !this.state.alert2FAShow ) {
-            this.setState({
-                alert2FAShow: true,
-            });
-            setTimeout(() => {
-                this.setState({
-                    alert2FAShow: false,
-                });
-            }, 2125)
+    print2FAAlert() {
+        const show = this.props.callback.state.alert2FAShow;
+        let text = StringSelector.getString(this.props.callback.state.language).settings2FAChangedSucc;
+        if ( this.props.callback.state.alertState === "danger" ) {
+            text = StringSelector.getString(this.props.callback.state.language).settings2FAChangedErr;
         }
-        else {
-            setTimeout(() => this.show2FASetAlert(), 500);
-        }
+        return (
+            <Alert show={show} variant={this.props.callback.state.alertState} className="center-horz center-vert error fixed-bottom-easypass in-front">
+                <p className="center-horz center-vert center-text">
+                    {text}
+                </p>
+            </Alert>
+        );
     }
 
-    print2FAAlert() {
-        const show = this.state.alert2FAShow;
+    printChangePassAlert() {
+        const show = this.props.callback.state.alertChangePassShow;
+        let text = StringSelector.getString(this.props.callback.state.language).settingsChangePassSucc;
+        if ( this.props.callback.state.alertState === "danger" ) {
+            text = StringSelector.getString(this.props.callback.state.language).settingsChangePassErr;
+        }
         return (
-            <Alert show={show} variant={"success"} className="center-horz center-vert error fixed-bottom-easypass in-front">
+            <Alert show={show} variant={this.props.callback.state.alertState} className="center-horz center-vert error fixed-bottom-easypass in-front">
                 <p className="center-horz center-vert center-text">
-                    Test
+                    {text}
                 </p>
             </Alert>
         );
@@ -339,15 +351,24 @@ class NavbarEP extends React.Component {
                                 <div className="noPadding settingsButtonCol">
                                     { this.props.callback.state.is2FASet ?
                                         <>
-                                            <Button variant="danger" className="noLeftBorderRadius settingsButtonFixHeight" onClick={() => {this.props.callback.change2FA(false); this.show2FASetAlert();}}>{StringSelector.getString(this.props.callback.state.language).settings2FADeactivate}</Button>
+                                            <Button variant="danger" className="noLeftBorderRadius settingsButtonFixHeight" onClick={() => {this.props.callback.change2FA(false);}}>{StringSelector.getString(this.props.callback.state.language).settings2FADeactivate}</Button>
                                         </>
                                         :
                                         <>
-                                            <Button variant="danger" className="noLeftBorderRadius settingsButtonFixHeight" onClick={() => {this.props.callback.change2FA(true); this.show2FASetAlert();}}>{StringSelector.getString(this.props.callback.state.language).settings2FAActivate}</Button>
+                                            <Button variant="danger" className="noLeftBorderRadius settingsButtonFixHeight" onClick={() => {this.props.callback.change2FA(true);}}>{StringSelector.getString(this.props.callback.state.language).settings2FAActivate}</Button>
                                         </>
                                     }
                                 </div>
                             </Row>
+                            { this.state.show2FAFromDeToAct  &&
+                                <>
+                                    <div className="settingsFitSize text-danger infoText">
+                                        {StringSelector.getString(this.props.callback.state.language).settings2FAInfo1}<br/>
+                                        {StringSelector.getString(this.props.callback.state.language).settings2FAInfo2}<br/>
+                                        {StringSelector.getString(this.props.callback.state.language).settings2FAInfo3}
+                                    </div>
+                                </>
+                            }
                             <hr className="hrSettings"/>
                             { this.props.callback.state.is2FASet ?
                                 <Row className="rowMargin">
@@ -499,6 +520,7 @@ class NavbarEP extends React.Component {
                 {this.getUserKeyPopUp()}
                 {this.get2FAPopUp()}
                 {this.print2FAAlert()}
+                {this.printChangePassAlert()}
                 <ResetPass callback={this} show={this.state.changePassPopUpShow}/>
             </>
         );

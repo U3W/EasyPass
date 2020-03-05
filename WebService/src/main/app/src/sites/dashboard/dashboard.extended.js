@@ -1,4 +1,5 @@
 import {dashboardAlerts} from "./const/dashboard.enum";
+import {download} from "./dashboard";
 
 /**
  * Extends functionality of the `Dashboard` component.
@@ -137,7 +138,7 @@ export function addPass(user, passwd, url, title, tags, catID, groupID, groupRev
 /**
  * Updates a password entry.
  */
-export function saveEdit(id, rev, groupId, groupRev, userNew, passwdNew, urlNew, titleNew, tagsNew, catNew) {
+export function saveEdit(id, rev, userNew, passwdNew, urlNew, titleNew, tagsNew, catNew, groupId, groupRev) {
     // if groupId === undifined => priv pass
     const tabID = this.state.tabselected;
     console.log("saveEdit " + id + ":" + rev);
@@ -199,6 +200,35 @@ export function resetPass() {
         passwordCacheID: undefined,
         show: false
     });
+}
+
+/**
+ * Resets the users password
+ */
+export function resetUserPass() {
+    // ToDo @Kacper
+    // true if succ
+    this.setShowResetPassError(false);
+}
+
+/**
+ * Changes 2FA (true|false)
+ */
+export function change2FA( to ) {
+    // ToDo @Kacper call worker to set 2fa state
+    this.setState({
+        is2FASet: to,
+    });
+    // true if succ --> call as callback
+    this.show2FASetAlert(false);
+}
+
+/**
+ * Generates Keyfile
+ */
+export function generateKeyfile() {
+    // ToDO call Kacpers Method
+    download( this.state.username + "_keyfile.easykey", "Das ist ein gutes Keyfile");
 }
 
 /**

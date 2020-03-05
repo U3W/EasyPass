@@ -43,6 +43,10 @@ export default class ResetPass extends React.Component{
             [e.target.id]: e.target.value,
         });
         if ( e.target.value.length > 0 ) {
+            this.setState({
+                newPassMatchPass: false,
+                newPassNotSec: false,
+            });
             switch (e.target.id) {
                 case "pass":
                     this.setState({
@@ -115,17 +119,8 @@ export default class ResetPass extends React.Component{
         }
 
         if ( !error ) {
-            let succ = this.props.callback.resetPass(this.state.pass, this.state.newPass);
-            if ( !succ ) {
-                this.props.callback.props.callback.setErrorShow(true);
-                this.props.callback.props.callback.setErrorState("danger");
-                this.props.callback.props.callback.setErrorText("Passwort stimmt nicht mit dem ursprünglichen überein!");
-            }
-            else {
-                this.props.callback.props.callback.setErrorShow(true);
-                this.props.callback.props.callback.setErrorState("success");
-                this.props.callback.props.callback.setErrorText("Passwort geändert!");
-            }
+            this.props.callback.resetPass(this.state.pass, this.state.newPass);
+
             this.setState({
                 pass: "",
                 passShow: false,

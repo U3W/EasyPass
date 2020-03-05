@@ -88,13 +88,22 @@ export const strings = {
 
     saveSetting: "Save settings",
 
+    settingsChangePassSucc: "Password changed",
+    settingsChangePassErr: "An error occurred when changing the password. Please try again!",
+
     settings2FA: "2FA-options",
     settings2FAOpen: "Open",
+
+    settings2FAInfo1: "With the activation a keyfile is downloaded which you need to log in.",
+    settings2FAInfo2: "Please note that you cannot log in without this file!",
+    settings2FAInfo3: "For security reasons, the possibility to log in without a keyfile remains for about 30 minutes.",
 
     settings2FACurrA: "2FA-Key (currently: activated)",
     settings2FACurrD: "2FA-Key (currently: deactivated)",
     settings2FAActivate: "Activate",
     settings2FADeactivate: "Deactivate",
+    settings2FAChangedSucc: "Changes successfully saved.",
+    settings2FAChangedErr: "An error occurred while saving the changes. Please try again!",
 
     userKeyHead: "Public userkey",
     userKeySettings: "Userkey (unique user-identifier)",

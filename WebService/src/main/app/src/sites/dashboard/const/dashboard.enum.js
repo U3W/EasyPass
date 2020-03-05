@@ -24,6 +24,7 @@ export const dashboardAlerts = {
     showEditedCat: "showEditedCat",
     showDeletePassAlert: "showDeletePassAlert",
     showDeleteCatAlert: "showDeleteCatAlert",
+    showDeleteGroupAlert: "showDeleteGroupAlert",
 
     showAddedGroup: "showAddedGroup",
     showEditedGroup: "showEditedGroup",
