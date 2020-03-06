@@ -12,6 +12,7 @@ use jni::objects::{JClass, JString};
 // can't return one of the objects with lifetime information because the
 // lifetime checker won't let us.
 use jni::sys::jstring;
+use crate::crypto::asymmetric;
 
 // This keeps Rust from "mangling" the name and making it unique for this
 // crate.
@@ -23,8 +24,18 @@ pub extern "system" fn Java_RustCall_encryptWithPubKey(env: JNIEnv, class: JClas
     let pubKey: String =
         env.get_string(pubKey).expect("Couldn't get java string!").into();
 
-    //let output = env.new_string(asymmetric::encryptChallenge(input.as_str(), pubKey)).expect("Couldn't create java string!");
-    let output = env.new_string("test").expect("Creating java strings");
+    let output = env.new_string(asymmetric::encrypt_challenge(input.as_str(), pubKey)).expect("Couldn't create java string!");
+
+    output.into_inner()
+}
+#[no_mangle]
+pub extern "system" fn Java_RustCall_generateRandomChallenge(env: JNIEnv, class: JClass, input: JString)
+                                                       -> jstring {
+    let input: String =
+        env.get_string(input).expect("Couldn't get java string!").into();
+
+
+    let output = env.new_string(asymmetric::fake_challenge(input.as_str())).expect("Couldn't create java string!");
 
     output.into_inner()
 }

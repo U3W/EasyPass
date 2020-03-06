@@ -68,6 +68,8 @@ pub fn new_user(key: &[u8]) -> (String, String){ // Returns  (encryptedPrivateKe
     return (secret, public);
 }
 pub fn authenticate_user(secret: &str, challenge: &str, key: &[u8]) -> Result<String, i32>{
+    let challenge = decode_config(challenge, base64::URL_SAFE).unwrap();
+    let challenge = String::from_utf8(challenge).unwrap();
     let vec: Vec<&str> = challenge.split("§").collect();
     let server_pub = vec[0];
     let challenge = vec[1];
@@ -92,5 +94,16 @@ pub fn encrypt_challenge(challenge: &str, pub_key: String) -> String{ //encrypte
     let mut public = encode_config(public, base64::URL_SAFE);
     public.push_str("§");
     public.push_str(encrypted.as_str());
-    return public;
+    return encode_config(&public, base64::URL_SAFE);
+}
+pub fn fake_challenge(challenge: &str) -> String{
+    let (_secret, pub_key) = Statisch::create_keypair();
+    let (secret, public) = Empheral::create_keypair();
+    let key = Empheral::get_key(secret, pub_key);
+    let encrypted = encrypt(challenge, key.as_slice());
+    let public = public.as_bytes();
+    let mut public = encode_config(public, base64::URL_SAFE);
+    public.push_str("§");
+    public.push_str(encrypted.as_str());
+    return encode_config(&public, base64::URL_SAFE);
 }
