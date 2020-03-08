@@ -38,7 +38,8 @@ class EncryptionLibrary(private val properties: Properties) {
      * @param key: to encrypt the [msg]
      */
     fun encrypt(msg: String, key: String): String {
-        return RustCall.encrypt(msg, key)
+        return msg+"_ENC_"+key
+        //return RustCall.encrypt(msg, key)
     }
 
     fun randomString(len: Int): String {

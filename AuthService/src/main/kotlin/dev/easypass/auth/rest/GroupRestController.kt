@@ -10,10 +10,12 @@ import javax.servlet.http.*
 @RequestMapping("/group")
 class GroupRestController(private val groupRepository: GroupRepository) {
     @PostMapping("/{gid}/members")
-    fun getMembers(@PathVariable gid: String, response: HttpServletResponse, authentication: Authentication): List<String> = try {
-        groupRepository.findOneByGid(gid).members
+    fun getMembers(@PathVariable gid: String, response: HttpServletResponse, authentication: Authentication): Map<String, Any> = try {
+        val members = HashMap<String, Any>()
+        members["members"] = groupRepository.findOneByGid(gid).members
+        members
     } catch (ex: DbAccessException) {
-        response.sendError(HttpServletResponse.SC_CONFLICT, "Requested group not found!")
-        ArrayList()
+        response.sendError(HttpServletResponse.SC_FORBIDDEN, "Wrong id provided!")
+        HashMap()
     }
 }

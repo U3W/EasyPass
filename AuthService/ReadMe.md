@@ -14,7 +14,7 @@ http://localhost:7000/auth/register
 curl -i ^
 -X POST ^
 -H "Content-Type: application/json" ^
--d "{\"uid\": \"mwelsch\", \"pubK\": \"PUBK\", \"privK\": \"PRIVK_ENC_MK\"}" ^
+-d "{\"uid\": \"swahl\", \"pubK\": \"PUBK\"}" ^
 http://localhost:7000/auth/register
 ```
 
@@ -36,7 +36,7 @@ Fill in the right challenge obtained by the call above
 curl -i ^
 -X POST ^
 -d username=mwustinger ^
--d password=fMEmjJhCxD ^
+-d password=fKCaub4oQD ^
 -c cookie.txt ^
 http://localhost:7000/auth/login
 ```
@@ -100,7 +100,7 @@ Fill in the right gid saved in the meta-database
 curl -i ^
 -X POST ^
 -H "Content-Type: application/json" ^
--d "{\"uid\": \"g2e6153824c9642a09150f2f8d06a33a8\", \"role\": \"GROUP\"}" ^
+-d "{\"uid\": \"gba7d96de85e64a129c503474567bd37e\", \"role\": \"GROUP\"}" ^
 http://localhost:7000/auth/challenge
 ```
 
@@ -110,7 +110,7 @@ Fill in the right challenge obtained by the call above
 curl -i ^
 -X POST ^
 -H "Content-Type: application/json" ^
--d "{\"gid\": \"g2e6153824c9642a09150f2f8d06a33a8\", \"pwd\": \"Tsn4tHv8eP\"}" ^
+-d "{\"gid\": \"gba7d96de85e64a129c503474567bd37e\", \"pwd\": \"Tsn4tHv8eP\"}" ^
 -b cookie.txt ^
 http://localhost:7000/user/auth_group
 ```
@@ -123,7 +123,7 @@ Fill in the right gid saved in the meta-database
 curl -i ^
 -X POST ^
 -H "Content-Type: application/json" ^
--d "{\"uid\": \"g2e6153824c9642a09150f2f8d06a33a8\", \"role\": \"ADMIN\"}" ^
+-d "{\"uid\": \"gba7d96de85e64a129c503474567bd37e\", \"role\": \"ADMIN\"}" ^
 http://localhost:7000/auth/challenge
 ```
 
@@ -133,7 +133,7 @@ Fill in the right challenge obtained by the call above
 curl -i ^
 -X POST ^
 -H "Content-Type: application/json" ^
--d "{\"gid\": \"g2e6153824c9642a09150f2f8d06a33a8\", \"pwd\": \"NzZCh4QCn3\"}" ^
+-d "{\"gid\": \"gba7d96de85e64a129c503474567bd37e\", \"pwd\": \"lCcuT39EHw\"}" ^
 -b cookie.txt ^
 http://localhost:7000/user/auth_group
 ```
@@ -167,7 +167,7 @@ curl -i ^
 -X POST ^
 -H "Accept:application/json" ^
 -b cookie.txt ^
-http://localhost:7000/group/g2e6153824c9642a09150f2f8d06a33a8/members
+http://localhost:7000/group/gba7d96de85e64a129c503474567bd37e/members
 ```
 
 ## Rest-Calls AdminRestController /admin
@@ -178,7 +178,7 @@ http://localhost:7000/group/g2e6153824c9642a09150f2f8d06a33a8/members
 curl -i ^
 -X POST ^
 -b cookie.txt ^
-http://localhost:7000/admin/g2e6153824c9642a09150f2f8d06a33a8/remove
+http://localhost:7000/admin/gba7d96de85e64a129c503474567bd37e/remove
 ```
 
 ### /{gid}/add_user
@@ -189,7 +189,7 @@ curl -i ^
 -H "Content-Type: application/json" ^
 -d "{\"uid\": \"mwelsch\", \"euid\": \"mwelsch_ENC_GPUBK\", \"gmk\": \"GMK_ENC_PUBK\", \"amk\": \"AMK_ENC_PUBK\"}" ^
 -b cookie.txt ^
-http://localhost:7000/admin/g2e6153824c9642a09150f2f8d06a33a8/add_user
+http://localhost:7000/admin/gba7d96de85e64a129c503474567bd37e/add_user
 ```
 
 ### /{gid}/change_cred
@@ -200,5 +200,5 @@ curl -i ^
 -H "Content-Type: application/json" ^
 -d "{\"gpubK\": \"GPUBK2\", \"gprivK\": \"GPRIVK2_ENC_GMK\", \"apubK\": \"APUBK2\", \"aprivK\": \"APRIVK2_ENC_AMK\", \"gmk\": \"GMK_ENC_PUBK\", \"amk\": \"AMK_ENC_PUBK\"}" ^
 -b cookie.txt ^
-http://localhost:7000/admin/g2e6153824c9642a09150f2f8d06a33a8/change_cred
+http://localhost:7000/admin/gba7d96de85e64a129c503474567bd37e/change_cred
 ```

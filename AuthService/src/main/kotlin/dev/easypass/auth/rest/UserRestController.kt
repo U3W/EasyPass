@@ -55,8 +55,6 @@ class UserRestController(private val couchDBConnectionProvider: CouchDBConnectio
         response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Required authorities not available!")
     } catch (ex: NullPointerException) {
         response.sendError(HttpServletResponse.SC_CONFLICT, "Insufficient parameters provided!")
-    } catch (ex: DbAccessException) {
-        response.sendError(HttpServletResponse.SC_FORBIDDEN, "Wrong id provided!")
     }
 
     @PostMapping("/auth_group")
@@ -79,7 +77,7 @@ class UserRestController(private val couchDBConnectionProvider: CouchDBConnectio
         keypair["privK"] = userRepository.findOneByUid(uid).privK
         keypair
     } catch (ex: AuthenticationException) {
-        response.sendError(HttpServletResponse.SC_CONFLICT, "Insufficient parameters provided!")
+        response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Required authorities not available!")
         HashMap()
     } catch (ex: DbAccessException) {
         response.sendError(HttpServletResponse.SC_CONFLICT, "Corrupted Database!")
