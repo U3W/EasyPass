@@ -654,7 +654,7 @@
 
 #logoutBut #logoutButIcon {
     position: absolute;
-    background-image: url("../../img/icons/logout.svg");
+    background-image: url("navbar_icons/logout.svg"); /*url("././src/img/icons/logout.svg");*/
     top: 7px;
     left: 24px;
     height: 30px;
@@ -663,7 +663,7 @@
 
 #logoutBut #logoutButIconHover {
     position: absolute;
-    background-image: url("../../img/icons/logout_hover.svg");
+    background-image: url("navbar_icons/logout_hover.svg");
     top: 7px;
     left: 24px;
     height: 30px;
@@ -671,7 +671,7 @@
 }
 
 #logoutBut :hover #logoutButIcon {
-    background-image: url("../../img/icons/logout_hover.svg");
+    background-image: url("navbar_icons/logout_hover.svg");
     -webkit-transition: opacity .15s ease-in-out;
     -moz-transition: opacity .15s ease-in-out;
     -o-transition: opacity .15s ease-in-out;
@@ -684,23 +684,23 @@
  */
 
 #groupPassword #groupPasswordIcon{
-    background-image: url("../../img/icons/tab_group_password.svg");
+    background-image: url("navbar_icons/tab_group_password.svg");
     height: 16px;
     width: 16px;
 }
 
 #groupPassword :hover #groupPasswordIcon {
-    background-image: url("../../img/icons/tab_group_password_hover.svg");
+    background-image: url("navbar_icons/tab_group_password_hover.svg");
 }
 
 #privPassword #privPasswordIcon{
-    background-image: url("../../img/icons/tab_password.svg");
+    background-image: url("navbar_icons/tab_password.svg");
     height: 16px;
     width: 16px;
 }
 
 #privPassword :hover #privPasswordIcon {
-    background-image: url("../../img/icons/tab_password_hover.svg");
+    background-image: url("navbar_icons/tab_password_hover.svg");
 }
 
 /*
@@ -708,37 +708,37 @@
  */
 
 #navbar-bot #groupPassword #groupPasswordIcon {
-    background-image: url("../../img/icons/tab_group_password.svg");
+    background-image: url("navbar_icons/tab_group_password.svg");
     height: 32px;
     width: 32px;
 }
 
 #navbar-bot #groupPassword :hover #groupPasswordIcon {
-    background-image: url("../../img/icons/tab_group_password_bot_hover.svg");
+    background-image: url("navbar_icons/tab_group_password_bot_hover.svg");
 }
 
 #navbar-bot #privPassword #privPasswordIcon {
-    background-image: url("../../img/icons/tab_password.svg");
+    background-image: url("navbar_icons/tab_password.svg");
     height: 32px;
     width: 32px;
 }
 
 #navbar-bot #privPassword :hover #privPasswordIcon {
-    background-image: url("../../img/icons/tab_password_bot_hover.svg");
+    background-image: url("navbar_icons/tab_password_bot_hover.svg");
 }
 
 /*
  * Active Bottom Icons + Hover
  */
 #privPassword.active #privPasswordIcon {
-    background-image: url("../../img/icons/tab_password_bot_hover.svg") !important;
+    background-image: url("navbar_icons/tab_password_bot_hover.svg") !important;
 }
 #groupPassword.active #groupPasswordIcon {
-    background-image: url("../../img/icons/tab_group_password_bot_hover.svg") !important;
+    background-image: url("navbar_icons/tab_group_password_bot_hover.svg") !important;
 }
 #privPassword.active :hover #privPasswordIcon {
-    background-image: url("../../img/icons/tab_password_bot_active_hover.svg") !important;
+    background-image: url("navbar_icons/tab_password_bot_active_hover.svg") !important;
 }
 #groupPassword.active :hover #groupPasswordIcon {
-    background-image: url("../../img/icons/tab_group_password_bot_active_hover.svg") !important;
+    background-image: url("navbar_icons/tab_group_password_bot_active_hover.svg") !important;
 }

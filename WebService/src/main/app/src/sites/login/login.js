@@ -18,8 +18,8 @@ import * as animation from "../../animation/fadeOutGradient"
 
 // Rest
 import {Card, Nav} from "react-bootstrap";
-import LogoSchlüssel from "../../img/logo/LogoSchnlüsselV2.svg"
-import Logo from "../../img/logo/LogoV2.svg"
+import LogoSchlüssel from "../../img/logos/LogoSchnlüsselV2.svg"
+import Logo from "../../img/logos/LogoV2.svg"
 import LoginAuth from "../../authentification/auth.login"
 import Alert from "react-bootstrap/Alert";
 import { connect } from 'react-redux';

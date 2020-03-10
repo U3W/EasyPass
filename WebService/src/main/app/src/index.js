@@ -23,11 +23,11 @@ import Dashboard from "./sites/dashboard/dashboard";
 import * as serviceWorker from "./service-worker/sw-handler";
 
 
-import Logo from './img/logo/Logo_Single_Big.svg'
-import Cloud1 from './img/logo/Cloud1.svg'
-import Cloud2 from './img/logo/Cloud2.svg'
-import Cloud3 from './img/logo/Cloud3.svg'
-import Cloud4 from './img/logo/Cloud4.svg'
+import Logo from './img/logos/Logo_Single_Big.svg'
+import Cloud1 from './img/logos/Cloud1.svg'
+import Cloud2 from './img/logos/Cloud2.svg'
+import Cloud3 from './img/logos/Cloud3.svg'
+import Cloud4 from './img/logos/Cloud4.svg'
 import {
     bounceInDown,
     bounceOutDown,

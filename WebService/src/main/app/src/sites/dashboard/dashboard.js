@@ -1,11 +1,11 @@
 import React from "react";
 import {Button, Col, Row} from "react-bootstrap";
-import NavbarEP from "../navbar/navbar";
-import "../navbar/navbar.css";
+import NavbarEP from "./navbar/navbar";
+import "./navbar/navbar.css";
 import "./dashboard.css";
 import {connect} from "react-redux";
 import {login, logout} from "../../action/auth.action";
-import NavbarVerticalEP2 from "../navbar/navbar.vertical.v2";
+import NavbarVerticalEP2 from "./navbar/navbar.vertical.v2";
 import LoginAuth from "../../authentification/auth.login"
 import IndicatorSide from "../../network/network.indicator.sidebar";
 import tabs from "./tabs/tab.enum";
@@ -47,8 +47,9 @@ import Table from "react-bootstrap/Table";
 import EditGroup from "./edit.group";
 import SingleGroup from "./single.group";
 
-class Dashboard extends React.Component {
 
+
+class Dashboard extends React.Component {
     constructor(props){
         super(props);
 

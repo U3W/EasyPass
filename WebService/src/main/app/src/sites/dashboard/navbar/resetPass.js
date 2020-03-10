@@ -5,10 +5,10 @@ import Row from "react-bootstrap/Row";
 import InputGroup from "react-bootstrap/InputGroup";
 import FormControl from "react-bootstrap/FormControl";
 import Button from "react-bootstrap/Button";
-import CopyIcon from "../../img/icons/password_copy_white.svg";
-import StringSelector from "../../strings/stings";
-import HideIcon from "../../img/icons/password_hide_white.svg";
-import ShowIcon from "../../img/icons/password_show_white.svg"
+import CopyIcon from "../../../img/icons/password_copy_white.svg";
+import StringSelector from "../../../strings/stings";
+import HideIcon from "../../../img/icons/password_hide_white.svg";
+import ShowIcon from "../../../img/icons/password_show_white.svg"
 import Alert from "react-bootstrap/Alert";
 
 

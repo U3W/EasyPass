@@ -2,7 +2,7 @@ import React from "react"
 import GroupCard from "../card.temp";
 import {ProtectedRoute} from "../../../routing/ProtectedRoute";
 import Dashboard from "../dashboard";
-import Logo from "../../../img/logo/LogoV2.svg"
+import Logo from "../../../img/logos/LogoV2.svg"
 import Row from "react-bootstrap/Row";
 import Col from "react-bootstrap/Col";
 import {Container} from "react-bootstrap";

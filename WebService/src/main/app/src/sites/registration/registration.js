@@ -13,7 +13,7 @@ import StringSelector from "../../strings/stings";
 
 // Rest
 import {Card} from "react-bootstrap";
-import Logo from "../../img/logo/LogoV2.svg"
+import Logo from "../../img/logos/LogoV2.svg"
 import LoginAuth from "../../authentification/auth.login"
 import Alert from "react-bootstrap/Alert";
 import { connect } from 'react-redux';

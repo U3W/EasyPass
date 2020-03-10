@@ -6,24 +6,24 @@ import Button from "react-bootstrap/Button";
 import FormControl from "react-bootstrap/FormControl";
 import Row from "react-bootstrap/Row";
 
-import Logo from "../../img/logo/LogoSchnlüsselV2.svg"
+import Logo from "../../../img/logos/LogoSchnlüsselV2.svg"
 import Modal from "react-bootstrap/Modal";
 import Table from "react-bootstrap/Table";
 
 // Icons
-import AddCat from "../../img/icons/password_add_tag_black.svg";
-import EditCat from "../../img/icons/password_edit.svg";
-import DeleteCat from "../../img/icons/dashboard_deleteCat.svg";
+import AddCat from "../../../img/icons/password_add_tag_black.svg";
+import EditCat from "../../../img/icons/password_edit.svg";
+import DeleteCat from "../../../img/icons/dashboard_deleteCat.svg";
 import ButtonGroup from "react-bootstrap/ButtonGroup";
 import InputGroup from "react-bootstrap/InputGroup";
-import {dashboardAlerts, dashboardLanguage} from "../dashboard/const/dashboard.enum";
-import StringSelector from "../../strings/stings";
-import dashboardState from "../dashboard/dashboard.saved.state";
-import CopyIcon from "../../img/icons/password_copy_white.svg";
+import {dashboardAlerts, dashboardLanguage} from "../const/dashboard.enum";
+import StringSelector from "../../../strings/stings";
+import dashboardState from "../dashboard.saved.state";
+import CopyIcon from "../../../img/icons/password_copy_white.svg";
 import ResetPass from "./resetPass";
-import tabs from "../dashboard/tabs/tab.enum";
+import tabs from "../tabs/tab.enum";
 import Alert from "react-bootstrap/Alert";
-import dashboard, {download} from "../dashboard/dashboard";
+import dashboard, {download} from "../dashboard";
 
 class NavbarEP extends React.Component {
     constructor(props) {
@@ -39,7 +39,6 @@ class NavbarEP extends React.Component {
             show2FAFromDeToAct: false,
             alert2FAShow: false,
         };
-
 
         this.logoutFunc = this.logoutFunc.bind(this);
         this.getSettingsPopUp = this.getSettingsPopUp.bind(this);
@@ -65,7 +64,6 @@ class NavbarEP extends React.Component {
     }
 
     componentDidUpdate(prevProps, prevState, snapshot) {
-        console.log("Aha", this.props.callback.state.is2FASet, this.props.callback.state.alert2FAShow);
         if ( (this.props.callback.state.is2FASet && this.props.callback.state.alert2FAShow) && !this.state.show2FAFromDeToAct ) {
             this.setState({
                 show2FAFromDeToAct: true,

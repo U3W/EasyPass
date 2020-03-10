@@ -1,16 +1,16 @@
 import React from "react"
 import {Button, Col} from "react-bootstrap";
 import Row from "react-bootstrap/Row";
-import tabs from "../dashboard/tabs/tab.enum";
-import IndicatorBot from "../../network/network.indicator.bottombar";
-import dashboardState from "../dashboard/dashboard.saved.state";
+import tabs from "../tabs/tab.enum";
+import IndicatorBot from "../../../network/network.indicator.bottombar";
+import dashboardState from "../dashboard.saved.state";
 // Icons
-import AddCat from "../../img/icons/password_add_tag.svg";
-import EditCat from "../../img/icons/password_edit_white.svg";
-import DeleteCat from "../../img/icons/dashboard_deleteCat_white.svg";
-import OpenSidebar from "../../img/icons/sidebar_open.svg";
-import CloseSidebar from "../../img/icons/sidebar_close.svg";
-import StringSelector from "../../strings/stings";
+import AddCat from "../../../img/icons/password_add_tag.svg";
+import EditCat from "../../../img/icons/password_edit_white.svg";
+import DeleteCat from "../../../img/icons/dashboard_deleteCat_white.svg";
+import OpenSidebar from "../../../img/icons/sidebar_open.svg";
+import CloseSidebar from "../../../img/icons/sidebar_close.svg";
+import StringSelector from "../../../strings/stings";
 
 class NavbarVerticalEP2 extends React.Component {
     constructor(props) {
