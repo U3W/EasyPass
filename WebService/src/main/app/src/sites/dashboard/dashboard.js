@@ -466,7 +466,7 @@ class Dashboard extends React.Component {
 
     isGroupAdmin( id, rev ) {
         // ToDo Kacpers method, to check if user is admin of this group
-        return false;
+        return true; //false;
     }
 
     renderGroup() {
@@ -1628,6 +1628,9 @@ class Dashboard extends React.Component {
 
 
         let mainClasses = "fixMain animateWidth";
+        if ( this.state.groupselected === "0" && this.state.tabselected === tabs.GROUPPASS ) {
+            mainClasses = "fixMainNoCats animateWidth";
+        }
         let sidebarClass = "";
         if ( this.state.expanded )
         {
