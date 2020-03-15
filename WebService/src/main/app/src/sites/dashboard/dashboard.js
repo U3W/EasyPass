@@ -205,6 +205,8 @@ class Dashboard extends React.Component {
         this.workerCall = that.workerCall.bind(this);
         // Entry functions
         this.loadEntries = dashboardEntries.loadEntries.bind(this);
+        this.setEntry = dashboardEntries.setEntry.bind(this);
+        this.removeEntry = dashboardEntries.removeEntry.bind(this);
         this.getCatsFromTab = dashboardEntries.getCatsFromTab.bind(this);
         this.getCatsFromGroup = dashboardEntries.getCatsFromGroup.bind(this);
         this.getCatData = dashboardEntries.getCatData.bind(this);

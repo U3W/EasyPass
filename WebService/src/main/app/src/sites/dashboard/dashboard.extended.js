@@ -19,6 +19,12 @@ export function workerCall( e ) {
         case 'allEntries':
             this.loadEntries(data);
             break;
+        case 'setEntry':
+            this.setEntry(data);
+            break;
+        case 'removeEntry':
+            this.removeEntry(data);
+            break;
         case 'savePassword':
             this.copy("", dashboardAlerts.showAddedPass, data.ok);
             this.dismissAddPass();

@@ -163,7 +163,7 @@ impl Worker {
         self.closures.replace(closures);*/
 
         // Send all password entries to UI
-        self.clone().private_entries_without_passwords();
+        self.clone().private_entries_without_passwords().await;
     }
 
     /// Reset Worker to initial state.
@@ -229,20 +229,28 @@ impl Worker {
         // Define functionality for local changes
         let worker_moved_change = self.clone();
         let dbtype_moved = dbtype.clone();
-        let change_closure = Closure::new(move |val: JsValue| {
-            let worker = worker_moved_change.clone();
-            let dbtype = dbtype.clone();
-            spawn_local(async move {
-                //let worker = &worker_moved_change;
-                console_log!("We have a change!");
-                console_log!("This is the change: {:?}", &val);
-                console_log!("What change? {}", &dbtype);
-                // Send all documents to ui on change
-                // TODO send only changes
-                worker.clone().changes(val).await;
-                worker.clone().private_entries_without_passwords();
-            });
-        });
+
+        let change_closure = if dbtype == "meta" {
+            Closure::new(move |val: JsValue| {
+                log("Meta Change!");
+            })
+        } else {
+            Closure::new(move |val: JsValue| {
+                let worker = worker_moved_change.clone();
+                let dbtype = dbtype.clone();
+                spawn_local(async move {
+                    //let worker = &worker_moved_change;
+                    console_log!("We have a change!");
+                    console_log!("This is the change: {:?}", &val);
+                    console_log!("What change? {}", &dbtype);
+                    // Send all documents to ui on change
+                    // TODO send only changes
+                    worker.clone().private_changes(val).await;
+                    //worker.clone().private_entries_without_passwords();
+                });
+            })
+        };
+
         // Define functionality for error cases on local changes
         let worker_moved_error = self.clone();
         let change_error_closure = Closure::new(move |val: JsValue| {

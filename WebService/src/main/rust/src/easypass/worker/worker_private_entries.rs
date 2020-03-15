@@ -17,30 +17,21 @@ use serde_json::value::Value::Bool;
 
 
 impl Worker {
-    pub fn private_entries_without_passwords(self: Rc<Worker>) {
-        let _ = future_to_promise(async move {
-            console_log!("all here1");
-            let action
-                = JsFuture::from(self.private.borrow().as_ref().unwrap().local_db.all_docs_without_passwords());
-            let result = action.await;
-            console_log!("all here2");
-            match result {
-                Ok(result) => {
-                    let msg = Array::new_with_length(2);
-                    let data = Array::new_with_length(2);
-                    data.set(0, JsValue::from_str("private"));
-                    data.set(1, result);
-                    msg.set(0, JsValue::from_str("allEntries"));
-                    // TODO error handling
-                    msg.set(1, JsValue::from(data));
-                    post_message(&msg);
-                },
-                Err(e) => {
-                    console_log!("SEND ERROR {:?}", e);
-                }
+    pub async fn private_entries_without_passwords(self: Rc<Worker>) {
+        let action
+            = JsFuture::from(self.private.borrow().as_ref().unwrap().local_db.all_docs_without_passwords());
+        let result = action.await;
+        match result {
+            Ok(result) => {
+                let data = Array::new_with_length(2);
+                data.set(0, JsValue::from_str("private"));
+                data.set(1, result);
+                Worker::build_and_post_message("allEntries", JsValue::from(data));
+            },
+            Err(e) => {
+                console_log!("SEND ERROR {:?}", e);
             }
-            Ok(JsValue::undefined())
-        });
+        }
     }
 
     pub async fn save_password(self: Rc<Worker>, data: JsValue) {

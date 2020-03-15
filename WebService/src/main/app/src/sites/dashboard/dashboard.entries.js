@@ -12,10 +12,6 @@ import React from "react";
  * Overrides existing entries with new data.
  */
 export function loadEntries(data) {
-
-    console.log("ENTRIES");
-    console.log(data);
-
     const type = data[0];
     const entries = data[1];
 
@@ -26,41 +22,53 @@ export function loadEntries(data) {
         let categories = new Map();
 
         entries.forEach(entry => {
-            if (entry.type==='passwd') {
+            if (entry.type === 'passwd') {
                 passwords.set(entry._id, entry);
             } else {
                 categories.set(entry._id, entry);
             }
         });
 
+        this.state.entries.set(type, {passwords: passwords, categories: categories});
+
         this.setState({
-            entries: this.state.entries.set(type, {passwords: passwords, categories: categories})
+            entries: this.state.entries
         });
     }
-
-
-
-    /**
-    let passwords = [];
-    let categories = [];
-    entries.forEach(entry => {
-        if (entry.type==='passwd') {
-            passwords.push(entry);
-        } else {
-            categories.push(entry);
-        }
-    });
-    if (!comparePasswords(this.state.entries.passwords, passwords) ||
-        !compareCategories(this.state.entries.categories, categories)) {
-        this.setState(prevState => ({
-            entries: {
-                ...prevState.entries,
-                passwords: passwords,
-                categories: categories
-            }
-        }));
-    }*/
 }
+
+export function setEntry(data) {
+    const type = data[0];
+    const entry = data[1];
+
+    if (entry.type === 'passwd') {
+       this.state.entries.get(type).passwords.set(entry._id, entry);
+    } else {
+       this.state.entries.get(type).categories.set(entry._id, entry);
+    }
+
+    this.setState({
+        entries: this.state.entries
+    });
+}
+
+export function removeEntry(data) {
+    const type = data[0];
+    const id = data[1];
+
+    const check = this.state.entries.get(type);
+
+    if (check.passwords.has(id)) {
+        this.state.entries.get(type).passwords.delete(id)
+    } else if (check.categories.has(id)) {
+        this.state.entries.get(type).categories.delete(id)
+    }
+
+    this.setState({
+        entries: this.state.entries
+    });
+}
+
 
 /**
  * Returns the categories from a selected tab in an array.
@@ -89,11 +97,6 @@ export function getCatsFromGroup(groupSelected) {
  * Returns the password entries from a category and selected tab in an array.
  */
 export function getCatData(catID, tabID, groupID) {
-    if (this.state.entries.has('private')) {
-        const el = this.state.entries.get('private');
-        console.log(el.passwords.size);
-    }
-
 
     if (this.state.entries.has('private') && this.state.entries.get('private').passwords.size > 0) {
         //return this.state.entries.passwords.filter(ent => ent.catID === catID && ent.tabID === tabID);
