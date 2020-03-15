@@ -163,7 +163,7 @@ impl Worker {
         self.closures.replace(closures);*/
 
         // Send all password entries to UI
-        self.clone().all_docs_without_passwords();
+        self.clone().private_entries_without_passwords();
     }
 
     /// Reset Worker to initial state.
@@ -205,11 +205,14 @@ impl Worker {
     /// Also, binds on change events of the database to the given closures.
     fn build_connection(self: Rc<Worker>, dbtype: String, id: Option<String>) -> Connection {
         // Set connection name
+        console_log!("A");
         let name = if dbtype == "private" || dbtype == "meta" {
             // private or meta database
+            console_log!("B");
             dbtype.clone()
         } else {
             // remote database
+            console_log!("C");
             id.unwrap().clone()
         };
 
@@ -217,6 +220,8 @@ impl Worker {
         let settings = Settings { adapter: "idb".to_string() };
         let local_db_name = &format!("{}-{}", self.user.borrow().as_ref().unwrap(), &name);
         let local_db = PouchDB::new(local_db_name, &JsValue::from_serde(&settings).unwrap());
+
+        console_log!("D");
 
         // With the reference to the Worker the functionality for
         // database events can be defined through closures
@@ -235,7 +240,7 @@ impl Worker {
                 // Send all documents to ui on change
                 // TODO send only changes
                 worker.clone().changes(val).await;
-                worker.clone().all_docs_without_passwords();
+                worker.clone().private_entries_without_passwords();
             });
         });
         // Define functionality for error cases on local changes
@@ -281,6 +286,8 @@ impl Worker {
         } else {
             None
         };
+
+        console_log!("F");
 
         // Create struct that holds connection information and return it
         Connection {

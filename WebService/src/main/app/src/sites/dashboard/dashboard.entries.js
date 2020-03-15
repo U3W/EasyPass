@@ -11,7 +11,36 @@ import React from "react";
 /**
  * Overrides existing entries with new data.
  */
-export function loadEntries(entries) {
+export function loadEntries(data) {
+
+    console.log("ENTRIES");
+    console.log(data);
+
+    const type = data[0];
+    const entries = data[1];
+
+    const check = this.state.entries[type];
+
+    if (!(type in this.state.entries) || entries !== check) {
+        let passwords = new Map();
+        let categories = new Map();
+
+        entries.forEach(entry => {
+            if (entry.type==='passwd') {
+                passwords.set(entry._id, entry);
+            } else {
+                categories.set(entry._id, entry);
+            }
+        });
+
+        this.setState({
+            entries: this.state.entries.set(type, {passwords: passwords, categories: categories})
+        });
+    }
+
+
+
+    /**
     let passwords = [];
     let categories = [];
     entries.forEach(entry => {
@@ -30,14 +59,19 @@ export function loadEntries(entries) {
                 categories: categories
             }
         }));
-    }
+    }*/
 }
 
 /**
  * Returns the categories from a selected tab in an array.
  */
 export function getCatsFromTab(tabSelected) {
-    return this.state.entries.categories.filter(cat => cat.tabID === tabSelected);
+    if (this.state.entries.has('private') && this.state.entries.get('private').categories.size > 0) {
+        //return this.state.entries.categories.filter(cat => cat.tabID === tabSelected);
+        return [...this.state.entries.get('private').categories.values()].filter(cat => cat.tabID === tabSelected);
+    } else return [];
+
+
 }
 
 export function getCatsFromGroup(groupSelected) {
@@ -55,7 +89,18 @@ export function getCatsFromGroup(groupSelected) {
  * Returns the password entries from a category and selected tab in an array.
  */
 export function getCatData(catID, tabID, groupID) {
-        return this.state.entries.passwords.filter(ent => ent.catID === catID && ent.tabID === tabID);
+    if (this.state.entries.has('private')) {
+        const el = this.state.entries.get('private');
+        console.log(el.passwords.size);
+    }
+
+
+    if (this.state.entries.has('private') && this.state.entries.get('private').passwords.size > 0) {
+        //return this.state.entries.passwords.filter(ent => ent.catID === catID && ent.tabID === tabID);
+        const array = [...this.state.entries.get('private').passwords.values()];
+        return array.filter(ent => ent.catID === catID && ent.tabID === tabID);
+    } else return [];
+
 }
 
 

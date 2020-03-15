@@ -74,10 +74,8 @@ class Dashboard extends React.Component {
             // password entries,
 
             //entries: new Entries(),
-            entries: {
-                passwords: [],
-                categories: []
-            },
+            entries: new Map(),
+
             passwordCache: undefined,
             passwordCacheID: undefined,
             show: false,

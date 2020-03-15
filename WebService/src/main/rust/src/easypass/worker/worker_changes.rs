@@ -22,6 +22,8 @@ impl Worker {
         console_log!("doc: {:?}", &doc);
         let doc: Value = doc.into_serde::<Value>().unwrap();
         console_log!("doc-parsed: {:?}", &doc);
+        let deleted = !doc["_deleted"].is_null();
+        console_log!("DELETD?: {}", &deleted);
 
         /**
         let typ = doc["type"].as_str().unwrap();
