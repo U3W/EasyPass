@@ -6,10 +6,6 @@ import("../../rust/pkg").then(wasm => {
 
     // Set node mode
     setNodeMode(process.env.NODE_ENV);
-    const kek = async () => {
-        console.log(await getDatabaseURL());
-    };
-    kek();
 
     // Create new backend and start it
     const app = new wasm.Backend();

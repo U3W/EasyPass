@@ -40,7 +40,7 @@ pub struct Worker {
     mkey: RefCell<Option<String>>,
     meta: RefCell<Option<Connection>>,
     private: RefCell<Option<Connection>>,
-    closures: RefCell<Option<ClosureStorage>>,
+    // closures: RefCell<Option<ClosureStorage>>,
     service_status: RefCell<String>,
     service_closure: RefCell<Option<Closure<dyn FnMut()>>>,
     database_url: RefCell<Option<String>>,
@@ -58,13 +58,18 @@ struct Connection {
     local_db: PouchDB,
     remote_db: Option<PouchDB>,
     changes_feed: ChangesFeed,
-    sync_handler: Option<SyncHandler>
+    sync_handler: Option<SyncHandler>,
+    change_closure: Closure<dyn FnMut(JsValue)>,
+    change_error_closure: Closure<dyn FnMut(JsValue)>,
+    sync_closure: Closure<dyn FnMut(JsValue)>,
+    sync_error_closure: Closure<dyn FnMut(JsValue)>,
 }
 
 /// Holds all database-relevant closures used by the Worker
 /// Change closures are called, when somethings changes in the local database.
 /// Sync closures are called, when synchronization happens between local and
 /// remote database.
+/// TODO remove
 struct ClosureStorage {
     change_closure: Closure<dyn FnMut(JsValue)>,
     change_error_closure: Closure<dyn FnMut(JsValue)>,
@@ -90,7 +95,6 @@ impl Worker {
             mkey,
             meta,
             private,
-            closures: RefCell::new(None),
             service_status: RefCell::new(String::from("offline")),
             service_closure: RefCell::new(None),
             database_url: RefCell::new(None),
@@ -126,49 +130,10 @@ impl Worker {
 
     /// Starts live replication for private password entries.
     pub async fn hearbeat(self: Rc<Worker>) {
-        // With the reference to the Worker the functionality for
-        // database events can be defined through closures
-        //
-        // Define functionality for local changes
-        let worker_moved_change = self.clone();
-        let change_closure = Closure::new(move |val: JsValue| {
-            let worker = worker_moved_change.clone();
-            spawn_local(async move {
-                //let worker = &worker_moved_change;
-                console_log!("We have a change!");
-                console_log!("This is the change: {:?}", &val);
-                // Send all documents to ui on change
-                // TODO send only changes
-                worker.clone().changes(val).await;
-                worker.clone().all_docs_without_passwords();
-            });
-        });
-        // Define functionality for error cases on local changes
-        let worker_moved_error = self.clone();
-        let change_error_closure = Closure::new(move |val: JsValue| {
-            let worker = &worker_moved_error;
-            log("EEEEEEEEEEEERRRRRRRRROOOOOOOOOOORRRRRRRRR!");
-        });
-        // Define functionality for remote-sync changes
-        let sync_closure = Closure::new(move |val: JsValue| {
-            log("Sync Change!");
-        });
-        // Define functionality for error cases on remote changes
-        let sync_error_closure = Closure::new(move |val: JsValue| {
-            log(&format!("Error {:?}", &val));
-        });
-        // Define functionality for on change on meta database
-        let meta_closure = Closure::new(move |val: JsValue| {
-            log("META CHANGE!");
-        });
-
         // Define databases
         //
         // Setup meta database
-        let meta
-            = self.build_connection(String::from("meta"),
-        &meta_closure, &change_error_closure,
-        &sync_closure, &sync_error_closure);
+        let meta = self.clone().build_connection(String::from("meta"), None);
 
         // Check/Write meta-data
         let user = String::from(self.user.borrow().as_ref().unwrap().as_str());
@@ -181,14 +146,12 @@ impl Worker {
         self.meta.replace(meta);
 
         // Setup database for private password entries
-        let private
-            = self.build_connection(String::from("private"),
-        &change_closure, &change_error_closure,
-        &sync_closure, &sync_error_closure);
+        let private = self.clone().build_connection(String::from("private"), None);
         // Add it to the worker
         let private = Some(private);
         self.private.replace(private);
 
+        /**
         // Create struct that holds all database relevant closures
         let closures = Some(ClosureStorage {
             change_closure,
@@ -197,7 +160,7 @@ impl Worker {
             sync_error_closure,
             meta_closure
         });
-        self.closures.replace(closures);
+        self.closures.replace(closures);*/
 
         // Send all password entries to UI
         self.clone().all_docs_without_passwords();
@@ -228,7 +191,6 @@ impl Worker {
         self.user.replace(None);
         self.mkey.replace(None);
         self.private.replace(None);
-        self.closures.replace(None);
     }
 
     fn build_and_post_message(cmd: &str, data: JsValue) {
@@ -241,20 +203,61 @@ impl Worker {
 
     /// Setups local and remote database and returns them as one Connection struct.
     /// Also, binds on change events of the database to the given closures.
-    fn build_connection(
-        &self, name: String,
-        change: &Closure<dyn FnMut(JsValue)>, change_error: &Closure<dyn FnMut(JsValue)>,
-        sync: &Closure<dyn FnMut(JsValue)>, sync_error: &Closure<dyn FnMut(JsValue)>
-    ) -> Connection {
+    fn build_connection(self: Rc<Worker>, dbtype: String, id: Option<String>) -> Connection {
+        // Set connection name
+        let name = if dbtype == "private" || dbtype == "meta" {
+            // private or meta database
+            dbtype.clone()
+        } else {
+            // remote database
+            id.unwrap().clone()
+        };
+
         // Setup local database
         let settings = Settings { adapter: "idb".to_string() };
         let local_db_name = &format!("{}-{}", self.user.borrow().as_ref().unwrap(), &name);
         let local_db = PouchDB::new(local_db_name, &JsValue::from_serde(&settings).unwrap());
+
+        // With the reference to the Worker the functionality for
+        // database events can be defined through closures
+        //
+        // Define functionality for local changes
+        let worker_moved_change = self.clone();
+        let dbtype_moved = dbtype.clone();
+        let change_closure = Closure::new(move |val: JsValue| {
+            let worker = worker_moved_change.clone();
+            let dbtype = dbtype.clone();
+            spawn_local(async move {
+                //let worker = &worker_moved_change;
+                console_log!("We have a change!");
+                console_log!("This is the change: {:?}", &val);
+                console_log!("What change? {}", &dbtype);
+                // Send all documents to ui on change
+                // TODO send only changes
+                worker.clone().changes(val).await;
+                worker.clone().all_docs_without_passwords();
+            });
+        });
+        // Define functionality for error cases on local changes
+        let worker_moved_error = self.clone();
+        let change_error_closure = Closure::new(move |val: JsValue| {
+            let worker = &worker_moved_error;
+            log("EEEEEEEEEEEERRRRRRRRROOOOOOOOOOORRRRRRRRR!");
+        });
+        // Define functionality for remote-sync changes
+        let sync_closure = Closure::new(move |val: JsValue| {
+            log("Sync Change!");
+        });
+        // Define functionality for error cases on remote changes
+        let sync_error_closure = Closure::new(move |val: JsValue| {
+            log(&format!("Error {:?}", &val));
+        });
         // Setup changes feed for database
         let changes_feed = local_db.changes();
         // On change functions need to be bound to the changes feed
-        changes_feed.on_change(change);
-        changes_feed.on_error(change_error);
+        changes_feed.on_change(&change_closure);
+        changes_feed.on_error(&change_error_closure);
+
         // Create variable that contains the remote database or none
         let mut remote_db = None;
         // When online, setup remote database and sync handler
@@ -269,8 +272,8 @@ impl Worker {
             // Get Sync Handler
             let sync_handler: SyncHandler = local_db.sync(&remote_db_here);
             // Bind on change functions
-            sync_handler.on_change(sync);
-            sync_handler.on_error(sync_error);
+            sync_handler.on_change(&sync_closure);
+            sync_handler.on_error(&sync_error_closure);
             // Save new remote database
             remote_db = Some(remote_db_here);
             // Return sync handler
@@ -278,13 +281,18 @@ impl Worker {
         } else {
             None
         };
+
         // Create struct that holds connection information and return it
         Connection {
             name,
             local_db,
             remote_db,
             changes_feed,
-            sync_handler
+            sync_handler,
+            change_closure,
+            change_error_closure,
+            sync_closure,
+            sync_error_closure
         }
     }
 
@@ -447,15 +455,13 @@ impl Worker {
 trait ConnectionPlus {
     /// Sets the remote database and sync handler for the connection
     fn set_remote_db(
-        &mut self, database_url: String, user: String,
-        sync: &Closure<dyn FnMut(JsValue)>, sync_error: &Closure<dyn FnMut(JsValue)>
+        &mut self, database_url: String, user: String
     );
 }
 
 impl ConnectionPlus for Connection {
     fn set_remote_db(
-        & mut self, database_url: String, user: String,
-        sync: &Closure<dyn FnMut(JsValue)>, sync_error: &Closure<dyn FnMut(JsValue)>
+        & mut self, database_url: String, user: String
     ) {
         // Init remote databases
         let remote_db_name
@@ -464,8 +470,8 @@ impl ConnectionPlus for Connection {
         // Get Sync Handler
         let sync_handler: SyncHandler = self.local_db.sync(&remote_db);
         // Bind on change functions
-        sync_handler.on_change(sync);
-        sync_handler.on_error(sync_error);
+        sync_handler.on_change(&self.sync_closure);
+        sync_handler.on_error(&self.sync_error_closure);
         // Set remote database
         self.remote_db = Some(remote_db);
         // Set sync handler
