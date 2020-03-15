@@ -42,6 +42,7 @@ pub struct Worker {
     mkey: RefCell<Option<String>>,
     meta: RefCell<Option<Connection>>,
     private: RefCell<Option<Connection>>,
+    group: RefCell<HashMap<String, Connection>>,
     // closures: RefCell<Option<ClosureStorage>>,
     service_status: RefCell<String>,
     service_closure: RefCell<Option<Closure<dyn FnMut()>>>,
@@ -82,6 +83,7 @@ impl Worker {
         // Databases will be setup later on
         let meta = RefCell::new(None);
         let private = RefCell::new(None);
+        let group = RefCell::new(HashMap::new());
         // Create worker with reference counting to enable its usage
         // in multiple parts in the application
         let worker = Rc::new(Worker {
@@ -89,6 +91,7 @@ impl Worker {
             mkey,
             meta,
             private,
+            group,
             service_status: RefCell::new(String::from("offline")),
             service_closure: RefCell::new(None),
             database_url: RefCell::new(None),
@@ -144,17 +147,6 @@ impl Worker {
         // Add it to the worker
         let private = Some(private);
         self.private.replace(private);
-
-        /**
-        // Create struct that holds all database relevant closures
-        let closures = Some(ClosureStorage {
-            change_closure,
-            change_error_closure,
-            sync_closure,
-            sync_error_closure,
-            meta_closure
-        });
-        self.closures.replace(closures);*/
 
         // Send all password entries to UI
         self.clone().private_entries_without_passwords().await;
@@ -447,6 +439,14 @@ impl Worker {
         let conn = self.private.borrow();
         Ref::map(conn, |t| {
           &t.as_ref().unwrap().local_db
+        })
+    }
+
+    /// Return a reference to the local database for a groups password entries
+    pub fn get_group_local_db(&self, gid: String) -> Ref<PouchDB> {
+        let map = self.group.borrow();
+        Ref::map(map, |t| {
+            &t.get(&gid).as_ref().unwrap().local_db
         })
     }
 

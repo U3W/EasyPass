@@ -1,4 +1,5 @@
 use crate::easypass::worker::Worker;
+use crate::easypass::worker::worker_crud::*;
 use crate::{post_message, log};
 use crate::easypass::timeout::Timeout;
 use crate::easypass::recovery::{RecoverPassword, Category, RecoverCategory};
@@ -34,20 +35,17 @@ impl Worker {
         }
     }
 
-    pub async fn save_password(self: Rc<Worker>, data: JsValue) {
-        // TODO Worker Decrypt Password
-        let result
-            = JsFuture::from(self.private.borrow().as_ref().unwrap().local_db.post(&data)).await;
-        Worker::build_and_post_message("savePassword", result.unwrap());
+    pub async fn save_private_password(self: Rc<Worker>, data: JsValue) {
+        self.save_password(CRUDType::Private, None, data).await;
     }
 
-    pub async fn update_password(self: Rc<Worker>, data: JsValue) {
+    pub async fn update_private_password(self: Rc<Worker>, data: JsValue) {
         let result
             = JsFuture::from(self.private.borrow().as_ref().unwrap().local_db.put(&data)).await;
         Worker::build_and_post_message("updatePassword", result.unwrap());
     }
 
-    pub async fn delete_password(self: Rc<Worker>, data: JsValue) {
+    pub async fn delete_private_password(self: Rc<Worker>, data: JsValue) {
         // Bind private database and cache for deleted password entries
         let private_db = self.get_private_local_db();
         let cache = &self.password_cache;
@@ -110,7 +108,7 @@ impl Worker {
             }, 7500));
     }
 
-    pub async fn undo_delete_password(self: Rc<Worker>, data: JsValue) {
+    pub async fn undo_delete_private_password(self: Rc<Worker>, data: JsValue) {
         // Bind private database
         let private_db = self.get_private_local_db();
         // Get full backup data
@@ -144,20 +142,20 @@ impl Worker {
         }
     }
 
-    pub async fn save_category(self: Rc<Worker>, data: JsValue) {
+    pub async fn save_private_category(self: Rc<Worker>, data: JsValue) {
         // TODO Worker Decrypt Password
         let result
             = JsFuture::from(self.private.borrow().as_ref().unwrap().local_db.post(&data)).await;
         Worker::build_and_post_message("saveCategory", result.unwrap());
     }
 
-    pub async fn update_category(self: Rc<Worker>, data: JsValue) {
+    pub async fn update_private_category(self: Rc<Worker>, data: JsValue) {
         let result
             = JsFuture::from(self.private.borrow().as_ref().unwrap().local_db.put(&data)).await;
         Worker::build_and_post_message("updateCategory", result.unwrap());
     }
 
-    pub async fn delete_categories(self: Rc<Worker>, categories: JsValue) {
+    pub async fn delete_private_categories(self: Rc<Worker>, categories: JsValue) {
         // Convert JsValue to Array, that its truly is
         let categories = Array::from(&categories);
         // Bind private database and cache for deleted password entries
@@ -250,7 +248,7 @@ impl Worker {
             }, 7500));
     }
 
-    pub async fn undo_delete_categories(self: Rc<Worker>, categories: JsValue) {
+    pub async fn undo_delete_private_categories(self: Rc<Worker>, categories: JsValue) {
         // Convert JsValue to Array, that its truly is
         let categories = Array::from(&categories);
         // Bind private database and cache for deleted password entries
@@ -291,7 +289,7 @@ impl Worker {
         }
     }
 
-    pub async fn get_password(self: Rc<Worker>, cmd: String, data: JsValue) {
+    pub async fn get_private_password(self: Rc<Worker>, cmd: String, data: JsValue) {
         // Bind private database
         let private_db = self.get_private_local_db();
         // Parse data to make it readable from Rust
@@ -324,11 +322,5 @@ impl Worker {
         post_message(&JsValue::from_serde(
             &json!([cmd, back.into_serde::<Value>().unwrap()])
         ).unwrap());
-    }
-
-    pub fn find(self: Rc<Worker>, data: JsValue) -> Promise {
-        future_to_promise(async move {
-            JsFuture::from(self.private.borrow().as_ref().unwrap().local_db.find(&data)).await
-        })
     }
 }

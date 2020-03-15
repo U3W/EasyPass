@@ -215,32 +215,32 @@ impl Backend {
         // Perform operation
         match cmd.as_ref() {
             "savePassword" => {
-                worker.save_password(data).await;
+                worker.save_private_password(data).await;
             }
             "updatePassword" => {
-                worker.update_password(data).await;
+                worker.update_private_password(data).await;
             }
             "deletePassword" => {
-                worker.delete_password(data).await;
+                worker.delete_private_password(data).await;
             }
             "undoDeletePassword" => {
-                worker.undo_delete_password(data).await;
+                worker.undo_delete_private_password(data).await;
             }
             "getPassword" | "getPasswordForUpdate" |
             "getPasswordToClipboard" | "getPasswordAndRedirect" => {
-                worker.get_password(cmd, data).await;
+                worker.get_private_password(cmd, data).await;
             }
             "saveCategory" => {
-                worker.save_category(data).await;
+                worker.save_private_category(data).await;
             }
             "updateCategory" => {
-                worker.update_category(data).await;
+                worker.update_private_category(data).await;
             }
             "deleteCategories" => {
-                worker.delete_categories(data).await;
+                worker.delete_private_categories(data).await;
             }
             "undoDeleteCategories" => {
-                worker.undo_delete_categories(data).await;
+                worker.undo_delete_private_categories(data).await;
             },
             "network" => {
                 worker.handle_network_change(data).await;
