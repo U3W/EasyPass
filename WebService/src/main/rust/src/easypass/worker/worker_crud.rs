@@ -1,4 +1,5 @@
 use crate::easypass::worker::Worker;
+use crate::pouchdb::pouchdb::PouchDB;
 use crate::{post_message, log};
 use crate::easypass::timeout::Timeout;
 use crate::easypass::recovery::{RecoverPassword, Category, RecoverCategory};
@@ -14,31 +15,39 @@ use js_sys::{Promise, Array, ArrayBuffer};
 use serde_json::json;
 use serde_json::Value;
 use serde_json::value::Value::Bool;
+use wasm_bindgen::__rt::core::cell::Ref;
 
 #[derive(PartialEq)]
+#[derive(Copy, Clone)]
 pub enum CRUDType {
     Private,
     Group
 }
 
 impl Worker {
-    pub async fn save_password(
-        self: Rc<Worker>, crudtype: CRUDType, gid: Option<String>, data: JsValue
-    ) {
+
+    fn get_local_db_and_mkey(
+        &self, crudtype: CRUDType, gid: Option<String>
+    ) -> (Ref<PouchDB>, String) {
         let (local_db, mkey) = if crudtype == CRUDType::Private {
             let local_db = self.get_private_local_db();
             let mkey = self.mkey.borrow().as_ref().unwrap().clone();
             (local_db, mkey)
         } else {
-            let local_db = self.get_group_local_db(gid.unwrap());
-            let mkey = String::from("Baum");
+            let gid = gid.unwrap();
+            let local_db = self.get_group_local_db(&gid);
+            let mkey = self.get_group_key(&gid);
             (local_db, mkey)
         };
+        (local_db, mkey)
+    }
 
+    pub async fn save_password(
+        self: Rc<Worker>, crudtype: CRUDType, gid: Option<String>, data: JsValue
+    ) {
+        let (local_db, mkey) = self.get_local_db_and_mkey(crudtype, gid);
         let result = JsFuture::from(local_db.post(&data)).await;
-
         // TODO @Moritz decrypt result
-
         if crudtype == CRUDType::Private {
             Worker::build_and_post_message("savePassword", result.unwrap());
         } else {
@@ -46,15 +55,25 @@ impl Worker {
         }
     }
 
-    pub async fn update_password(self: Rc<Worker>, data: JsValue) {
+    pub async fn update_password(
+        self: Rc<Worker>, crudtype: CRUDType, gid: Option<String>, data: JsValue
+    ) {
+        let (local_db, mkey) = self.get_local_db_and_mkey(crudtype, gid);
+        // TODO @Mortitz encrypt data
         let result
-            = JsFuture::from(self.private.borrow().as_ref().unwrap().local_db.put(&data)).await;
-        Worker::build_and_post_message("updatePassword", result.unwrap());
+            = JsFuture::from(local_db.put(&data)).await;
+        if crudtype == CRUDType::Private {
+            Worker::build_and_post_message("updatePassword", result.unwrap());
+        } else {
+            // TODO @Kacper save
+        }
     }
 
-    pub async fn delete_password(self: Rc<Worker>, data: JsValue) {
-        // Bind private database and cache for deleted password entries
-        let private_db = self.get_private_local_db();
+    pub async fn delete_password(
+        self: Rc<Worker>, crudtype: CRUDType, gid: Option<String>, data: JsValue
+    ) {
+        // Bind database and cache for deleted password entries
+        let (local_db, _) = self.get_local_db_and_mkey(crudtype, gid);
         let cache = &self.password_cache;
         // Clear is a hashmap which stores deletion routines (closures)
         let mut clear = self.password_clear.borrow_mut();
@@ -68,7 +87,7 @@ impl Worker {
         {
             // Get full entry for backup
             let backup_raw
-                = JsFuture::from(private_db.get(&id)).await.unwrap();
+                = JsFuture::from(local_db.get(&id)).await.unwrap();
             let recovery = RecoverPassword::new(&backup_raw);
             log(&format!("RECOVERY: {:?}", &recovery));
             // Add full password entry to password cache
@@ -79,9 +98,13 @@ impl Worker {
         }
         // Delete password entry and post result
         let action
-            = JsFuture::from(private_db.remove(&JsValue::from(&id), &rev));
+            = JsFuture::from(local_db.remove(&JsValue::from(&id), &rev));
         let result = action.await;
-        Worker::build_and_post_message("deletePassword", result.unwrap());
+        if crudtype == CRUDType::Private {
+            Worker::build_and_post_message("deletePassword", result.unwrap());
+        } else {
+            // TODO @Kacper save
+        }
         // Delete password entry after a timeout
         // Generate id for new routine
         let mut rng = rand::thread_rng();

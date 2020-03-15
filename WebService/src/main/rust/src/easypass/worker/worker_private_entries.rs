@@ -40,9 +40,7 @@ impl Worker {
     }
 
     pub async fn update_private_password(self: Rc<Worker>, data: JsValue) {
-        let result
-            = JsFuture::from(self.private.borrow().as_ref().unwrap().local_db.put(&data)).await;
-        Worker::build_and_post_message("updatePassword", result.unwrap());
+        self.update_password(CRUDType::Private, None, data).await;
     }
 
     pub async fn delete_private_password(self: Rc<Worker>, data: JsValue) {

@@ -249,6 +249,9 @@ impl Backend {
                 worker.reset().await;
                 state.set_mode(None);
             }
+            "addGroup" => {
+                worker.add_group(data).await;
+            }
             _ => {}
         }
     }

@@ -14,3 +14,12 @@ use js_sys::{Promise, Array, ArrayBuffer};
 use serde_json::json;
 use serde_json::Value;
 use serde_json::value::Value::Bool;
+
+
+impl Worker {
+    pub async fn add_group(self: Rc<Worker>, data: JsValue) {
+        // TODO build connection
+
+        // TODO add key to group_keys
+    }
+}

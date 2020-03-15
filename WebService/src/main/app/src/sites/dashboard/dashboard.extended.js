@@ -93,6 +93,14 @@ export function workerCall( e ) {
         case 'wrongCreds':
             this.setWrongCreds();
             break;
+        case 'addGroup':
+            this.setState({
+                showAddedGroup: true,
+                alertState: "success",
+            },() => {
+                this.dismissCopy(dashboardAlerts.showAddedGroup);
+            });
+            break;
     }
 
 }
@@ -115,14 +123,12 @@ export function editGroup( id, ref, name, userGroupList) {
  * Adds a group
  */
 export function addGroup(name, userGroupList) {
-    // ToDO @Kacper
-    // needs to be put in workerCall
-    this.setState({
-        showAddedGroup: true,
-        alertState: "success",
-    },() => {
-        this.dismissCopy(dashboardAlerts.showAddedGroup);
-    });
+    this.props.worker.postMessage(['addGroup',
+        {
+            name: name,
+            users: userGroupList
+        }
+    ]);
 }
 /**
  * Adds a new password entry.

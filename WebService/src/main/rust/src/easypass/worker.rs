@@ -40,10 +40,10 @@ mod worker_changes;
 pub struct Worker {
     user: RefCell<Option<String>>,
     mkey: RefCell<Option<String>>,
+    group_keys: RefCell<HashMap<String, String>>,
     meta: RefCell<Option<Connection>>,
     private: RefCell<Option<Connection>>,
-    group: RefCell<HashMap<String, Connection>>,
-    // closures: RefCell<Option<ClosureStorage>>,
+    groups: RefCell<HashMap<String, Connection>>,
     service_status: RefCell<String>,
     service_closure: RefCell<Option<Closure<dyn FnMut()>>>,
     database_url: RefCell<Option<String>>,
@@ -80,18 +80,20 @@ impl Worker {
         // User hash and masterkey are not known at initialization
         let user = RefCell::new(None);
         let mkey = RefCell::new(None);
+        let group_keys = RefCell::new(HashMap::new());
         // Databases will be setup later on
         let meta = RefCell::new(None);
         let private = RefCell::new(None);
-        let group = RefCell::new(HashMap::new());
+        let groups = RefCell::new(HashMap::new());
         // Create worker with reference counting to enable its usage
         // in multiple parts in the application
         let worker = Rc::new(Worker {
             user,
             mkey,
+            group_keys,
             meta,
             private,
-            group,
+            groups,
             service_status: RefCell::new(String::from("offline")),
             service_closure: RefCell::new(None),
             database_url: RefCell::new(None),
@@ -189,14 +191,14 @@ impl Worker {
 
     /// Setups local and remote database and returns them as one Connection struct.
     /// Also, binds on change events of the database to the given closures.
-    fn build_connection(self: Rc<Worker>, dbtype: String, id: Option<String>) -> Connection {
+    fn build_connection(self: Rc<Worker>, dbtype: String, gid: Option<String>) -> Connection {
         // Set connection name
         let name = if dbtype == "private" || dbtype == "meta" {
             // private or meta database
             dbtype.clone()
         } else {
             // remote database
-            id.unwrap().clone()
+            gid.unwrap().clone()
         };
 
         // Setup local database
@@ -443,11 +445,16 @@ impl Worker {
     }
 
     /// Return a reference to the local database for a groups password entries
-    pub fn get_group_local_db(&self, gid: String) -> Ref<PouchDB> {
-        let map = self.group.borrow();
+    pub fn get_group_local_db(&self, gid: &str) -> Ref<PouchDB> {
+        let map = self.groups.borrow();
         Ref::map(map, |t| {
-            &t.get(&gid).as_ref().unwrap().local_db
+            &t.get(gid).as_ref().unwrap().local_db
         })
+    }
+
+    pub fn get_group_key(&self, gid: &str) -> String {
+        let keys = self.group_keys.borrow();
+        String::from(keys.get(gid).unwrap())
     }
 
     /// Returns service/network status of the app
