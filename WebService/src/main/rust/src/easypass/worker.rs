@@ -30,7 +30,9 @@ use sha3::Digest;
 mod worker_login;
 mod worker_registration;
 mod worker_network;
+mod worker_crud;
 mod worker_private_entries;
+mod worker_group_entries;
 mod worker_changes;
 
 
@@ -53,6 +55,10 @@ pub struct Worker {
 
 /// Holds one logical databases with references to the local and remote one.
 /// Also, contains the changes-feed and sync-handler.
+/// Holds also all database-relevant closures used by the Worker
+/// Change closures are called, when somethings changes in the local database.
+/// Sync closures are called, when synchronization happens between local and
+/// remote database.
 struct Connection {
     name: String,
     local_db: PouchDB,
@@ -65,18 +71,6 @@ struct Connection {
     sync_error_closure: Closure<dyn FnMut(JsValue)>,
 }
 
-/// Holds all database-relevant closures used by the Worker
-/// Change closures are called, when somethings changes in the local database.
-/// Sync closures are called, when synchronization happens between local and
-/// remote database.
-/// TODO remove
-struct ClosureStorage {
-    change_closure: Closure<dyn FnMut(JsValue)>,
-    change_error_closure: Closure<dyn FnMut(JsValue)>,
-    sync_closure: Closure<dyn FnMut(JsValue)>,
-    sync_error_closure: Closure<dyn FnMut(JsValue)>,
-    meta_closure: Closure<dyn FnMut(JsValue)>
-}
 
 impl Worker {
     /// Creates a new Worker that manages databases.
@@ -205,14 +199,11 @@ impl Worker {
     /// Also, binds on change events of the database to the given closures.
     fn build_connection(self: Rc<Worker>, dbtype: String, id: Option<String>) -> Connection {
         // Set connection name
-        console_log!("A");
         let name = if dbtype == "private" || dbtype == "meta" {
             // private or meta database
-            console_log!("B");
             dbtype.clone()
         } else {
             // remote database
-            console_log!("C");
             id.unwrap().clone()
         };
 
@@ -220,8 +211,6 @@ impl Worker {
         let settings = Settings { adapter: "idb".to_string() };
         let local_db_name = &format!("{}-{}", self.user.borrow().as_ref().unwrap(), &name);
         let local_db = PouchDB::new(local_db_name, &JsValue::from_serde(&settings).unwrap());
-
-        console_log!("D");
 
         // With the reference to the Worker the functionality for
         // database events can be defined through closures

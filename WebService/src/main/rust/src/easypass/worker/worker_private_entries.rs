@@ -331,22 +331,4 @@ impl Worker {
             JsFuture::from(self.private.borrow().as_ref().unwrap().local_db.find(&data)).await
         })
     }
-
-    pub fn all_docs(self: Rc<Worker>) -> Promise {
-        future_to_promise(async move {
-            JsFuture::from(self.private.borrow().as_ref().unwrap().local_db.all_docs_included()).await
-        })
-    }
-
-    pub fn remove_with_element(self: Rc<Worker>, data: JsValue) -> Promise {
-        future_to_promise(async move {
-            JsFuture::from(self.private.borrow().as_ref().unwrap().local_db.remove_with_element(&data)).await
-        })
-    }
-
-    pub fn remove(self: Rc<Worker>, doc_id: JsValue, doc_rev: JsValue) -> Promise {
-        future_to_promise(async move {
-            JsFuture::from(self.private.borrow().as_ref().unwrap().local_db.remove(&doc_id, &doc_rev)).await
-        })
-    }
 }
