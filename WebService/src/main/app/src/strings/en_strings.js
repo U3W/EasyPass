@@ -3,6 +3,7 @@ import React from "react";
 
 export const strings = {
     // Login
+    login: "Login",
     username: "Username",
     usernamePlaceholder: "Please enter username",
     password: "Password",
@@ -20,13 +21,14 @@ export const strings = {
     registrationAlertError: "An error occurred while creating the account. Please try again!",
 
     // Registration
+    regist: "Registration",
     registUser: "Username",
     registUserInfo: "With this username you can login later",
     registUserPlaceholder: "Please enter a username",
     registUserAlreadyExist: "This username already exists!",
 
     registPass: "Password",
-    registPassInfo: "With this username you can login later",
+    registPassInfo: "With this password you can login later",
     registPassPlaceholder: "Please enter a password",
 
     registPassSec: "Repeat password",
@@ -50,18 +52,12 @@ export const strings = {
     registNextButton: "Next step",
     registButton: "Register",
 
-    // verify - masterpassword
-    masterpassword: "Masterpassword",
-    masterpasswordPlace: "Please enter masterpassword",
-    masterpass2FA: "2-factor-option",
-    masterpass2FAWebauthn: "Webauthn",
-    masterpass2FAFile: "Key-File",
+    // 2FA
+    masterpass2FA: "2-factor-key (optional)",
+    masterpass2FAFileDel: "Clear",
     masterpass2FAFileSelect: "Select file",
     masterpass2FAFileNoFile: "No file selected",
     masterpass2FAFileNotSup: "Not supported",
-
-    masterpassWrongLoginHeader: "Verification not possible!",
-    masterpassWrongLogin: "Masterpassword or 2-factor-option are wrong!",
 
     /** Dashboard **/
 
@@ -87,12 +83,31 @@ export const strings = {
     changePassAlertErr: "Password does not match the original one!",
     changePassAlertSucc: "Password changed!",
 
-    genKeyfile: "Generate keyfile",
+    genKeyfile: "Generate new keyfile",
     genButton: "Generate",
 
     saveSetting: "Save settings",
 
+    settingsChangePassSucc: "Password changed",
+    settingsChangePassErr: "An error occurred when changing the password. Please try again!",
+
+    settings2FA: "2FA-options",
+    settings2FAOpen: "Open",
+
+    settings2FAInfo1: "With the activation a keyfile is downloaded which you need to log in.",
+    settings2FAInfo2: "Please note that you cannot log in without this file!",
+    settings2FAInfo3: "For security reasons, the possibility to log in without a keyfile remains for about 30 minutes.",
+
+    settings2FACurrA: "2FA-Key (currently: activated)",
+    settings2FACurrD: "2FA-Key (currently: deactivated)",
+    settings2FAActivate: "Activate",
+    settings2FADeactivate: "Deactivate",
+    settings2FAChangedSucc: "Changes successfully saved.",
+    settings2FAChangedErr: "An error occurred while saving the changes. Please try again!",
+
     userKeyHead: "Public userkey",
+    userKeySettings: "Userkey (unique user-identifier)",
+    userKeyShow: "Show",
     userKey: "Userkey",
     userKeyClose: "Close",
 
@@ -194,9 +209,14 @@ export const strings = {
     cardGroupMembers: "Group members:",
 
     cardEdit: "Edit this group",
+    cardDis: "You do not have the required rights for this action!",
     cardDel: "Delete this group",
     cardOpen: "Open this group",
     cardReturn: "Return to the group menu",
+
+    // Group Card Single
+    cardGroupMembersTab: "Group members",
+    cardGroupPassTab: "Passwords",
 
     // Delete Alert
     cardDelSuc: "Group deleted!",

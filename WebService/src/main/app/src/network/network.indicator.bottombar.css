@@ -86,3 +86,12 @@
 .offline-ui-bot.offline-ui-bot-down .offline-ui-bot-content:after {
     background: #ec8787;
 }
+
+.indicatorBot {
+    display: none;
+}
+@media (max-width: 425px) {
+    .indicatorBot {
+        display: block;
+    }
+}

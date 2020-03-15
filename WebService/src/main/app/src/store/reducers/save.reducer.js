@@ -46,6 +46,7 @@ const saveReducer = ( state, action) => {
             return {};
         case SAVE_GROUP:
             localStorage.setItem(dashboardConst.groupSelected, JSON.stringify(action.groupselected));
+            localStorage.setItem(dashboardConst.groupRevSelected, JSON.stringify(action.groupRevSelected));
             return {};
         default:
             return {};

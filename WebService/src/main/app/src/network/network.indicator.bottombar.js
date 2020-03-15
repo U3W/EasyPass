@@ -60,7 +60,7 @@ class IndicatorBot extends React.Component {
             );
         }
         return (
-            <div>
+            <div className="indicatorBot">
                 {render}
             </div>
         );

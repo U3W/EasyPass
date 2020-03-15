@@ -14,6 +14,9 @@ import ButtonToolbar from "react-bootstrap/ButtonToolbar";
 import EditIcon from "../../img/icons/password_edit_white.svg";
 import GroupReturn from "../../img/icons/group_return.svg";
 import PassLine from "./line.temp";
+import Tabs from "react-bootstrap/Tabs";
+import Tab from "react-bootstrap/Tab";
+import Accordion from "react-bootstrap/Accordion";
 
 // Nach dem machen --> https://www.youtube.com/watch?v=rH9jM-8hAD8
 /**
@@ -29,7 +32,7 @@ export default class SingleGroup extends React.Component {
             name: this.props.name,
             userGroupList: this.deepCopy(this.props.userGroupList),
             id: this.props._id,
-            ref: this.props._ref,
+            rev: this.props._rev,
         };
 
 
@@ -73,7 +76,7 @@ export default class SingleGroup extends React.Component {
             out1 = arr1.map((item) => {
                 i++;
                 return (
-                    <li key={i}>{item}</li>
+                    <li key={i}><b>{item}</b></li>
                 );
             });
         }
@@ -81,7 +84,7 @@ export default class SingleGroup extends React.Component {
             out2 = arr2.map((item) => {
                 i++;
                 return (
-                    <li key={i}>{item}</li>
+                    <li key={i}><b>{item}</b></li>
                 );
             });
         }
@@ -103,6 +106,103 @@ export default class SingleGroup extends React.Component {
     }
 
     render() {
+        let editBut = (
+            <>
+                {['bottom'].map(placement => (
+                    <OverlayTrigger
+                        key={placement}
+                        placement={placement}
+                        overlay={
+                            <Tooltip id={`tooltip-${placement}`}>
+                                {StringSelector.getString(this.props.callback.state.language).cardEdit}
+                            </Tooltip>
+                        }
+                    >
+                        <Button variant="dark" className="groupReturnButton buttonSpace " onClick={() => this.props.callback.triggerEditGroup( this.state.id, this.state.rev, this.state.name, this.state.userGroupList)}>
+                            <img
+                                src={EditIcon}
+                                alt=""
+                                className="groupReturnIcon"
+                            />
+                        </Button>
+                    </OverlayTrigger>
+                ))}
+            </>
+        );
+
+        let delBut = (
+            <>
+                {['bottom'].map(placement => (
+                    <OverlayTrigger
+                        key={placement}
+                        placement={placement}
+                        overlay={
+                            <Tooltip id={`tooltip-${placement}`}>
+                                {StringSelector.getString(this.props.callback.state.language).cardDel}
+                            </Tooltip>
+                        }
+                    >
+                        <Button variant="dark" className="groupReturnButton buttonSpace " onClick={() => this.props.callback.deleteGroup(this.state.id, this.state.rev, false)}>
+                            <img
+                                src={DeleteIcon}
+                                alt=""
+                                className="groupReturnIcon"
+                            />
+                        </Button>
+                    </OverlayTrigger>
+                ))}
+            </>
+        );
+
+        if ( !this.props.isAdmin ) {
+            editBut = (
+                <>
+                    {['bottom'].map(placement => (
+                        <OverlayTrigger
+                            key={placement}
+                            placement={placement}
+                            overlay={
+                                <Tooltip id={`tooltip-${placement}`}>
+                                    {StringSelector.getString(this.props.callback.state.language).cardDis}
+                                </Tooltip>
+                            }
+                        >
+                            <Button variant="dark" className="groupReturnButton buttonSpace disButton">
+                                <img
+                                    src={EditIcon}
+                                    alt=""
+                                    className="groupReturnIcon"
+                                />
+                            </Button>
+                        </OverlayTrigger>
+                    ))}
+                </>
+            );
+
+            delBut = (
+                <>
+                    {['bottom'].map(placement => (
+                        <OverlayTrigger
+                            key={placement}
+                            placement={placement}
+                            overlay={
+                                <Tooltip id={`tooltip-${placement}`}>
+                                    {StringSelector.getString(this.props.callback.state.language).cardDis}
+                                </Tooltip>
+                            }
+                        >
+                            <Button variant="dark" className="groupReturnButton buttonSpace disButton" >
+                                <img
+                                    src={DeleteIcon}
+                                    alt=""
+                                    className="groupReturnIcon"
+                                />
+                            </Button>
+                        </OverlayTrigger>
+                    ))}
+                </>
+            );
+        }
         return (
             <>
                 <Row>
@@ -111,44 +211,8 @@ export default class SingleGroup extends React.Component {
                     </Col>
                     <Col className="center-vert">
                         <div className="float-right">
-                            {['bottom'].map(placement => (
-                                <OverlayTrigger
-                                    key={placement}
-                                    placement={placement}
-                                    overlay={
-                                        <Tooltip id={`tooltip-${placement}`}>
-                                            {StringSelector.getString(this.props.callback.state.language).cardDel}
-                                        </Tooltip>
-                                    }
-                                >
-                                    <Button variant="dark" className="groupReturnButton buttonSpace " onClick={() => this.props.callback.deleteGroup(this.state.id, this.state.ref, false)}>
-                                        <img
-                                            src={DeleteIcon}
-                                            alt=""
-                                            className="groupReturnIcon"
-                                        />
-                                    </Button>
-                                </OverlayTrigger>
-                            ))}
-                            {['bottom'].map(placement => (
-                                <OverlayTrigger
-                                    key={placement}
-                                    placement={placement}
-                                    overlay={
-                                        <Tooltip id={`tooltip-${placement}`}>
-                                            {StringSelector.getString(this.props.callback.state.language).cardEdit}
-                                        </Tooltip>
-                                    }
-                                >
-                                    <Button variant="dark" className="groupReturnButton buttonSpace " onClick={() => this.props.callback.triggerEditGroup( this.state.id, this.state.ref, this.state.name, this.state.userGroupList)}>
-                                        <img
-                                            src={EditIcon}
-                                            alt=""
-                                            className="groupReturnIcon"
-                                        />
-                                    </Button>
-                                </OverlayTrigger>
-                            ))}
+                            {delBut}
+                            {editBut}
                             {['bottom'].map(placement => (
                                 <OverlayTrigger
                                     key={placement}
@@ -159,7 +223,7 @@ export default class SingleGroup extends React.Component {
                                         </Tooltip>
                                     }
                                 >
-                                    <Button variant="dark" className="groupReturnButton buttonSpace " onClick={() => this.props.callback.changeGroup("0")}>
+                                    <Button variant="dark" className="groupReturnButton buttonSpace " onClick={() => this.props.callback.changeGroup("0", "0")}>
                                         <img
                                             src={GroupReturn}
                                             alt=""
@@ -172,15 +236,25 @@ export default class SingleGroup extends React.Component {
                         </div>
                     </Col>
                 </Row>
-                <Row className="groupPadding">
-                    <Col>
-                        <b>{StringSelector.getString(this.props.callback.state.language).cardGroupMembers}</b>
-                    </Col>
-                </Row>
-                {this.renderGroups()}
-                <hr className="doubleHrTop"/>
-                <hr className="doubleHrBottom"/>
-                {this.props.callback.renderGroupCat()}
+                <br/>
+                <Tabs defaultActiveKey="pass" id="uncontrolled-tab-example">
+                    <Tab eventKey="pass" title={StringSelector.getString(this.props.callback.state.language).cardGroupPassTab}>
+                        <br/>
+                        <Col>
+                            {this.props.callback.renderGroupCat()}
+                        </Col>
+                    </Tab>
+                    <Tab eventKey="group" title={StringSelector.getString(this.props.callback.state.language).cardGroupMembersTab}>
+                        <Col>
+                            <Row className="groupPadding">
+                                <Col>
+                                    <b>{StringSelector.getString(this.props.callback.state.language).cardGroupMembers}</b>
+                                </Col>
+                            </Row>
+                            {this.renderGroups()}
+                        </Col>
+                    </Tab>
+                </Tabs>
             </>
         )
     }

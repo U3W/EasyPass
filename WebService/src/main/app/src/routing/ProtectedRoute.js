@@ -25,6 +25,16 @@ export const ProtectedRoute = ({component: Component, type: type, ...rest}) => {
                                }/>
                            }
                        }
+                       else {
+                           return <Redirect to={
+                               {
+                                   pathname: "/",
+                                   state: {
+                                       from: props.location
+                                   }
+                               }
+                           }/>
+                       }
                     }
             }
         />

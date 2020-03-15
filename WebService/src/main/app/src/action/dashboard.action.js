@@ -28,8 +28,9 @@ export const changeLanguage = (language) => ({
     language,
 });
 
-export const saveGroup = (groupselected) => ({
+export const saveGroup = (groupselected, groupRevSelected) => ({
     type: SAVE_GROUP,
     groupselected,
+    groupRevSelected,
 });
 

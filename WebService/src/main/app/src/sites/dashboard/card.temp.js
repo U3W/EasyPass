@@ -27,13 +27,110 @@ export default class GroupCard extends React.Component {
             name: this.props.name,
             userGroupList: this.props.userGroupList,
             id: this.props._id,
-            ref: this.props._ref,
+            rev: this.props._rev,
         };
 
     }
 
     /* <input id="..." type="hidden" value="..."/>: Must be at the first position, otherwise the search function wont find it -> exception */
     render() {
+        let editBut = (
+            <>
+                {['bottom'].map(placement => (
+                    <OverlayTrigger
+                        key={placement}
+                        placement={placement}
+                        overlay={
+                            <Tooltip id={`tooltip-${placement}`}>
+                                {StringSelector.getString(this.props.callback.state.language).cardEdit}
+                            </Tooltip>
+                        }
+                    >
+                        <Button variant="dark" className="groupButton" onClick={() => this.props.callback.triggerEditGroup( this.state.id, this.state.rev, this.state.name, this.state.userGroupList)}>
+                            <img
+                                src={EditIcon}
+                                alt=""
+                                className="groupIcons"
+                            />
+                        </Button>
+                    </OverlayTrigger>
+                ))}
+            </>
+        );
+
+        let delBut = (
+            <>
+                {['bottom'].map(placement => (
+                    <OverlayTrigger
+                        key={placement}
+                        placement={placement}
+                        overlay={
+                            <Tooltip id={`tooltip-${placement}`}>
+                                {StringSelector.getString(this.props.callback.state.language).cardDel}
+                            </Tooltip>
+                        }
+                    >
+                        <Button variant="dark" className="groupButton" onClick={() => this.props.callback.deleteGroup(this.state.id, this.state.rev, false)}>
+                            <img
+                                src={DeleteIcon}
+                                alt=""
+                                className="groupIcons"
+                            />
+                        </Button>
+                    </OverlayTrigger>
+                ))}
+            </>
+        );
+
+        if ( !this.props.isAdmin ) {
+            editBut = (
+                <>
+                    {['bottom'].map(placement => (
+                        <OverlayTrigger
+                            key={placement}
+                            placement={placement}
+                            overlay={
+                                <Tooltip id={`tooltip-${placement}`}>
+                                    {StringSelector.getString(this.props.callback.state.language).cardDis}
+                                </Tooltip>
+                            }
+                        >
+                            <Button variant="dark" className="groupButton disButton">
+                                <img
+                                    src={EditIcon}
+                                    alt=""
+                                    className="groupIcons"
+                                />
+                            </Button>
+                        </OverlayTrigger>
+                    ))}
+                </>
+            );
+
+            delBut = (
+                <>
+                    {['bottom'].map(placement => (
+                        <OverlayTrigger
+                            key={placement}
+                            placement={placement}
+                            overlay={
+                                <Tooltip id={`tooltip-${placement}`}>
+                                    {StringSelector.getString(this.props.callback.state.language).cardDis}
+                                </Tooltip>
+                            }
+                        >
+                            <Button variant="dark" className="groupButton disButton">
+                                <img
+                                    src={DeleteIcon}
+                                    alt=""
+                                    className="groupIcons"
+                                />
+                            </Button>
+                        </OverlayTrigger>
+                    ))}
+                </>
+            );
+        }
         return (
             <Card className="pass-card groupCard">
                 <input id="searchInput" type="hidden" value={this.props.name}/>
@@ -46,46 +143,10 @@ export default class GroupCard extends React.Component {
                     <Card.Footer className="spezFooter">
                         <Row>
                             <Col xs={4}>
-                                {['bottom'].map(placement => (
-                                    <OverlayTrigger
-                                        key={placement}
-                                        placement={placement}
-                                        overlay={
-                                            <Tooltip id={`tooltip-${placement}`}>
-                                                {StringSelector.getString(this.props.callback.state.language).cardDel}
-                                            </Tooltip>
-                                        }
-                                    >
-                                        <Button variant="dark" className="groupButton" onClick={() => this.props.callback.deleteGroup(this.state.id, this.state.ref, false)}>
-                                            <img
-                                                src={DeleteIcon}
-                                                alt=""
-                                                className="groupIcons"
-                                            />
-                                        </Button>
-                                    </OverlayTrigger>
-                                ))}
+                                {delBut}
                             </Col>
                             <Col xs={4}>
-                                {['bottom'].map(placement => (
-                                    <OverlayTrigger
-                                        key={placement}
-                                        placement={placement}
-                                        overlay={
-                                            <Tooltip id={`tooltip-${placement}`}>
-                                                {StringSelector.getString(this.props.callback.state.language).cardEdit}
-                                            </Tooltip>
-                                        }
-                                    >
-                                        <Button variant="dark" className="groupButton" onClick={() => this.props.callback.triggerEditGroup( this.state.id, this.state.ref, this.state.name, this.state.userGroupList)}>
-                                            <img
-                                                src={EditIcon}
-                                                alt=""
-                                                className="groupIcons"
-                                            />
-                                        </Button>
-                                    </OverlayTrigger>
-                                ))}
+                                {editBut}
                             </Col>
                             <Col xs={4}>
                                 {['bottom'].map(placement => (
@@ -98,7 +159,7 @@ export default class GroupCard extends React.Component {
                                             </Tooltip>
                                         }
                                     >
-                                        <Button variant="dark" className="groupButton" onClick={() => this.props.callback.changeGroup(this.state.id)}>
+                                        <Button variant="dark" className="groupButton" onClick={() => this.props.callback.changeGroup(this.state.id, this.state.rev)}>
                                             <img
                                                 src={OpenGroup}
                                                 alt=""

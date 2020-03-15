@@ -1,4 +1,5 @@
 import {dashboardAlerts} from "./const/dashboard.enum";
+import {download} from "./dashboard";
 
 /**
  * Extends functionality of the `Dashboard` component.
@@ -126,7 +127,7 @@ export function addGroup(name, userGroupList) {
 /**
  * Adds a new password entry.
  */
-export function addPass(user, passwd, url, title, tags, catID, groupID) {
+export function addPass(user, passwd, url, title, tags, catID, groupID, groupRev) {
     if ( groupID !== undefined ) {
         // add password to group
         // ToDO @Kacper
@@ -143,8 +144,8 @@ export function addPass(user, passwd, url, title, tags, catID, groupID) {
 /**
  * Updates a password entry.
  */
-export function saveEdit(id, rev, groupId, userNew, passwdNew, urlNew, titleNew, tagsNew, catNew) {
-    // if groupId === null => priv pass
+export function saveEdit(id, rev, userNew, passwdNew, urlNew, titleNew, tagsNew, catNew, groupId, groupRev) {
+    // if groupId === undifined => priv pass
     const tabID = this.state.tabselected;
     console.log("saveEdit " + id + ":" + rev);
     console.log("saveEdit " + catNew);
@@ -156,7 +157,8 @@ export function saveEdit(id, rev, groupId, userNew, passwdNew, urlNew, titleNew,
 /**
  * Removes a password entry by id and revision.
  */
-export function deletePass(id, rev) {
+export function deletePass(id, rev, groupId, groupRev) {
+    // if groupId === undifined => priv pass
     this.setState({
         currentPassDelete: id,
     });
@@ -167,7 +169,8 @@ export function deletePass(id, rev) {
  * Returns a password that matches the id.
  * When no entry is found, undefined will be returned.
  */
-export function getPass(id, rev) {
+export function getPass(id, rev, groupId, groupRev) {
+    // if groupId === undifined => priv pass
     this.props.worker.postMessage(['getPassword', {_id: id, _rev: rev}])
 }
 
@@ -176,18 +179,21 @@ export function getPass(id, rev) {
  * When no entry is found, undefined will be returned.
  * Difference to `getPass`: show will no be set to true.
  */
-export function getPassForUpdate(id, rev) {
+export function getPassForUpdate(id, rev, groupId, groupRev) {
+    // if groupId === undifined => priv pass
     this.props.worker.postMessage(['getPasswordForUpdate', {_id: id, _rev: rev}])
 }
 
 /**
  * Copies the latest cached password of a password entry to the users clipboard.
  */
-export function copyPass(id, rev) {
+export function copyPass(id, rev, groupId, groupRev) {
+    // if groupId === undifined => priv pass
     this.props.worker.postMessage(['getPasswordToClipboard', {_id: id, _rev: rev}]);
 }
 
-export function goToPage(url, id, rev) {
+export function goToPage(url, id, rev, groupId, groupRev) {
+    // if groupId === undifined => priv pass
     this.props.worker.postMessage(['getPasswordAndRedirect', {_id: id, _rev: rev, url: url}]);
 }
 
@@ -200,6 +206,35 @@ export function resetPass() {
         passwordCacheID: undefined,
         show: false
     });
+}
+
+/**
+ * Resets the users password
+ */
+export function resetUserPass() {
+    // ToDo @Kacper
+    // true if succ
+    this.setShowResetPassError(false);
+}
+
+/**
+ * Changes 2FA (true|false)
+ */
+export function change2FA( to ) {
+    // ToDo @Kacper call worker to set 2fa state
+    this.setState({
+        is2FASet: to,
+    });
+    // true if succ --> call as callback
+    this.show2FASetAlert(false);
+}
+
+/**
+ * Generates Keyfile
+ */
+export function generateKeyfile() {
+    // ToDO call Kacpers Method
+    download( this.state.username + "_keyfile.easykey", "Das ist ein gutes Keyfile");
 }
 
 /**
@@ -232,7 +267,8 @@ export function undoDelete(which, id) {
 /**
  * Adds a new category entry.
  */
-export function addCat(name, description) {
+export function addCat(name, description, groupId, groupRev) {
+    // if groupId === undifined => priv pass
     const tabID = this.state.tabselected;
     this.props.worker.postMessage(['saveCategory',
         {type: 'cat', name: name, desc: description, tabID: tabID }]);
@@ -241,7 +277,8 @@ export function addCat(name, description) {
 /**
  * Updates a category entry.
  */
-export function updateCat(id, rev, nameNew, descriptionNew) {
+export function updateCat(id, rev, nameNew, descriptionNew, groupId, groupRev) {
+    // if groupId === undifined => priv pass
     const tabID = this.state.tabselected;
     this.props.worker.postMessage(['updateCategory',
         {_id: id, _rev: rev, type: 'cat', name: nameNew, desc: descriptionNew, tabID: tabID}]);
@@ -251,7 +288,8 @@ export function updateCat(id, rev, nameNew, descriptionNew) {
 /**
  * Removes multiple categories that are passed as an array of ids and revisions.
  */
-export function deleteCats(entries) {
+export function deleteCats(entries, groupId, groupRev) {
+    // if groupId === undifined => priv pass
     this.setState({
         currentCatDelete: entries,
     });

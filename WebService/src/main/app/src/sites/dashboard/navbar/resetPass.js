@@ -5,10 +5,10 @@ import Row from "react-bootstrap/Row";
 import InputGroup from "react-bootstrap/InputGroup";
 import FormControl from "react-bootstrap/FormControl";
 import Button from "react-bootstrap/Button";
-import CopyIcon from "../../img/icons/password_copy_white.svg";
-import StringSelector from "../../strings/stings";
-import HideIcon from "../../img/icons/password_hide_white.svg";
-import ShowIcon from "../../img/icons/password_show_white.svg"
+import CopyIcon from "../../../img/icons/password_copy_white.svg";
+import StringSelector from "../../../strings/stings";
+import HideIcon from "../../../img/icons/password_hide_white.svg";
+import ShowIcon from "../../../img/icons/password_show_white.svg"
 import Alert from "react-bootstrap/Alert";
 
 
@@ -43,6 +43,10 @@ export default class ResetPass extends React.Component{
             [e.target.id]: e.target.value,
         });
         if ( e.target.value.length > 0 ) {
+            this.setState({
+                newPassMatchPass: false,
+                newPassNotSec: false,
+            });
             switch (e.target.id) {
                 case "pass":
                     this.setState({
@@ -115,17 +119,8 @@ export default class ResetPass extends React.Component{
         }
 
         if ( !error ) {
-            let succ = this.props.callback.resetPass(this.state.pass, this.state.newPass);
-            if ( !succ ) {
-                this.props.callback.props.callback.setErrorShow(true);
-                this.props.callback.props.callback.setErrorState("danger");
-                this.props.callback.props.callback.setErrorText("Passwort stimmt nicht mit dem ursprünglichen überein!");
-            }
-            else {
-                this.props.callback.props.callback.setErrorShow(true);
-                this.props.callback.props.callback.setErrorState("success");
-                this.props.callback.props.callback.setErrorText("Passwort geändert!");
-            }
+            this.props.callback.resetPass(this.state.pass, this.state.newPass);
+
             this.setState({
                 pass: "",
                 passShow: false,

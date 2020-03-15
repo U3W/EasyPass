@@ -31,6 +31,13 @@ class dashboardState {
         return JSON.parse(localStorage.getItem(dashboardConst.groupSelected));
     }
 
+    static getSelectedGroupRev() {
+        if ( JSON.parse(localStorage.getItem(dashboardConst.groupRevSelected)) === null ) {
+            return "0";
+        }
+        return JSON.parse(localStorage.getItem(dashboardConst.groupRevSelected));
+    }
+
     static getSidebarClosed() {
         if ( JSON.parse(localStorage.getItem(dashboardConst.sidebarClosed)) === null )
         {
