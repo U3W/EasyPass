@@ -29,7 +29,7 @@ class EncryptionLibrary(private val properties: Properties) {
      * Generates a random [String] challenge
      */
     fun generateAuthenticationChallenge(): String {
-        return randomString(properties.getProperty("auth.challengeLength").toInt())
+        return "challenge"//return randomString(properties.getProperty("auth.challengeLength").toInt())
     }
 
     /**
