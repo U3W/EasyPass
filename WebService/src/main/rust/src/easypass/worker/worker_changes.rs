@@ -11,6 +11,7 @@ use js_sys::{Promise, Object, Array, ArrayBuffer};
 use serde_json::json;
 use serde_json::Value;
 use serde_json::value::Value::Bool;
+use crate::easypass::worker::worker_crud::CRUDType;
 
 impl Worker {
 
@@ -57,7 +58,17 @@ impl Worker {
         if doc["_deleted"].is_null() {
             // Check if group was added
             if doc["type"].as_str().unwrap() == "group" {
-               // Worker::build_connection()
+                // Build new group connection
+                let connection
+                    = self.clone().build_connection(CRUDType::Private, Some(id.clone()));
+                // Add it to hashmap
+                self.groups.borrow_mut().insert(id, connection);
+                // TODO @Kacper add keys to storage
+
+                console_log!("mygroups: {:?}", &self.groups.borrow().len());
+
+                // TODO @Kacper send result to UI
+
             }
         } else {
             // Check if a group was deleted

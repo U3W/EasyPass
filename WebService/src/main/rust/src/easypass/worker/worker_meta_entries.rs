@@ -35,6 +35,34 @@ impl Worker {
         let _ = JsFuture::from(meta_db.post(&group_data)).await;
     }
 
+
+    pub async fn get_groups(self: Rc<Worker>) -> Vec<Value> {
+        let meta_db = &self.get_meta_local_db();
+        let data = JsFuture::from(meta_db.find(
+            &JsValue::from_serde(&json!({
+                "selector": {
+                    "type": {"$eq": "group"}
+                },
+                "fields": [
+                    "_id", "_rev", "type", "user", "url", "title", "tags", "tabID", "catID",
+                    "name", "desc", "amk", "gmk", "gid"
+                ],
+        })).unwrap())).await.unwrap();
+
+        let data = data.into_serde::<Value>().unwrap();
+
+        let result = if !data["docs"].is_null() {
+            let groups = data["docs"].as_array().unwrap();
+            groups.to_vec()
+        } else {
+            vec![]
+        };
+
+        result
+    }
+
+
+
     /// Writes and updates metadata.
     /// Meta-data consist of the hash of the username and the encrypted masterkey.
     pub async fn write_meta_data(meta_db: &PouchDB, user: String, mkey: String) {

@@ -152,6 +152,25 @@ impl Worker {
         let private = Some(private);
         self.private.replace(private);
 
+        // Setup known group databases
+        // Get group meta-data from meta-database
+        let saved_groups = self.clone().get_groups().await;
+        let mut groups = self.groups.borrow_mut();
+        console_log!("SAVED GROUPS: ");
+        // Setup database for every group
+        for group in saved_groups {
+            console_log!("GROUP: {}", &group);
+            let gid = String::from(group["gid"].as_str().unwrap());
+            let id = String::from(group["_id"].as_str().unwrap());
+            let connection
+                = self.clone().build_connection(CRUDType::Group, Some(gid));
+            groups.insert(id, connection);
+            // TODO @Kacper setup keys for group-databases!
+
+            // TODO @Kacper send entries to ui
+        }
+        console_log!("SAVED GROUPS length: {}", &groups.len());
+
         // Send all password entries to UI
         self.clone().private_entries_without_passwords().await;
     }
@@ -220,7 +239,10 @@ impl Worker {
 
         let change_closure = if crudtype == CRUDType::Meta {
             Closure::new(move |val: JsValue| {
-                log("Meta Change!");
+                let worker = worker_moved_change.clone();
+                spawn_local(async move {
+                    worker.clone().meta_changes(val).await;
+                });
             })
         } else if crudtype == CRUDType::Private {
             Closure::new(move |val: JsValue| {
@@ -285,17 +307,16 @@ impl Worker {
             //  /store/uid
             //  /store/gid
 
-            let remote_db_name = if crudtype == CRUDType::Meta {
-
-            } else if crudtype == CRUDType::Private {
-
-            } else {
-
-            };
-
+            /**
             let remote_db_name = format!("DB-URL: {}{}-{}",
                 &self.database_url.borrow().as_ref().unwrap(),
-                &self.user.borrow().as_ref().unwrap(), &name);
+                &self.user.borrow().as_ref().unwrap(), &name);*/
+
+            let remote_db_name = Worker::build_remote_name(
+                crudtype, &self.database_url.borrow().as_ref().unwrap(), &name,
+                &self.user.borrow().as_ref().unwrap()
+            );
+
             let remote_db_here = PouchDB::new_with_name(&remote_db_name);
             // Get Sync Handler
             let sync_handler: SyncHandler = local_db.sync(&remote_db_here);
@@ -310,8 +331,6 @@ impl Worker {
             None
         };
 
-        console_log!("F");
-
         // Create struct that holds connection information and return it
         Connection {
             name,
@@ -324,6 +343,18 @@ impl Worker {
             sync_closure,
             sync_error_closure
         }
+    }
+
+    /// [name] - "private", "meta" or group-id
+    fn build_remote_name(
+        crudtype: CRUDType, database_url: &str, name: &str, uname: &str
+    ) -> String {
+        let remote_db_name = if crudtype == CRUDType::Meta || crudtype == CRUDType::Private {
+            format!("{}{}-{}", database_url, uname, name)
+        } else {
+            format!("{}{}", database_url, name)
+        };
+        remote_db_name
     }
 }
 
