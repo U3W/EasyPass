@@ -36,7 +36,7 @@ Fill in the right challenge obtained by the call above
 curl -i ^
 -X POST ^
 -d username=mwustinger ^
--d password=fKCaub4oQD ^
+-d password=yFhHbzXlYC ^
 -c cookie.txt ^
 http://localhost:7000/auth/login
 ```
@@ -133,7 +133,7 @@ Fill in the right challenge obtained by the call above
 curl -i ^
 -X POST ^
 -H "Content-Type: application/json" ^
--d "{\"gid\": \"gba7d96de85e64a129c503474567bd37e\", \"pwd\": \"lCcuT39EHw\"}" ^
+-d "{\"gid\": \"gba7d96de85e64a129c503474567bd37e\", \"pwd\": \"VwWbFsfPFM\"}" ^
 -b cookie.txt ^
 http://localhost:7000/user/auth_group
 ```
@@ -187,7 +187,7 @@ http://localhost:7000/admin/gba7d96de85e64a129c503474567bd37e/remove
 curl -i ^
 -X POST ^
 -H "Content-Type: application/json" ^
--d "{\"uid\": \"mwelsch\", \"euid\": \"mwelsch_ENC_GPUBK\", \"gmk\": \"GMK_ENC_PUBK\", \"amk\": \"AMK_ENC_PUBK\"}" ^
+-d "{\"uid\": \"mwelsch\", \"euid\": \"mwelsch_ENC_GPUBK\", \"gmk\": \"GMK_ENC_PUBK\"}" ^
 -b cookie.txt ^
 http://localhost:7000/admin/gba7d96de85e64a129c503474567bd37e/add_user
 ```

@@ -9,4 +9,4 @@ import org.ektorp.support.*
  * @param gmk: the masterkey to authenticate a regular user.
  * @param amk: the masterkey to authenticate a admin user.
  */
-class GroupAccessCredentials(val type: String, val gid: String, val gmk: String, val amk: String) : CouchDbDocument()
+class GroupAccessCredentials(val type: String, val gid: String, val gmk: String, val amk: String?) : CouchDbDocument()

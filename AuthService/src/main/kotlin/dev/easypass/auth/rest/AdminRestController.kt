@@ -26,7 +26,7 @@ class AdminRestController(private val couchDBConnectionProvider: CouchDBConnecti
         val uid = data["uid"]!!
         val euid = data["euid"]!!
         val gmk = data["gmk"]!!
-        val amk = data["amk"]!!
+        var amk = data["amk"]
         val group = groupRepository.findOneByGid(gid)
         group.members.add(euid)
         couchDBConnectionProvider.UserDatabaseConnector().update(group)
