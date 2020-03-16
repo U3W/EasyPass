@@ -19,9 +19,11 @@ use wasm_bindgen::__rt::core::cell::Ref;
 
 #[derive(PartialEq)]
 #[derive(Copy, Clone)]
+#[derive(Debug)]
 pub enum CRUDType {
     Private,
-    Group
+    Group,
+    Meta
 }
 
 impl Worker {
