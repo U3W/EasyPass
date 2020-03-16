@@ -44,19 +44,27 @@ class UserRestController(private val couchDBConnectionProvider: CouchDBConnectio
         val amk = data["amk"]!!
         val title = data["title"]!!
         val gid = "g" + UUID.randomUUID().toString().replace("-", "")
+
         userRepository.findOneByUid(uid)
-        couchDBConnectionProvider.createCouchDbConnector("${uid}-meta").create(GroupAccessCredentials("GROUP", gid, gmk, amk))
+        couchDBConnectionProvider.createCouchDbConnector("${uid}-meta").create(GroupAccessCredentials(gid = gid, gmk = gmk, amk = amk))
+
         val members = ArrayList<String>()
         members.add(encryptionLibrary.encrypt(uid, gpubK))
         groupRepository.add(Group(gid, gpubK, gprivK, apubK, aprivK, members))
-        couchDBConnectionProvider.createCouchDbConnector(gid).create(GroupSettings(title, encryptionLibrary.encrypt(LocalDateTime.now().toString(), gpubK)))
+
+        val db = couchDBConnectionProvider.createCouchDbConnector(gid)
+        val titleObj = Title(title = title)
+        val lastModifiedObj = LastModified(lastModified = encryptionLibrary.encrypt(LocalDateTime.now().toString(), gpubK))
+        titleObj.id = "title_"
+        lastModifiedObj.id = "lastModified_"
+        db.create(titleObj)
+        db.create(lastModifiedObj)
+
         response.status = HttpServletResponse.SC_OK
     } catch (ex: AuthenticationException) {
         response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Required authorities not available!")
     } catch (ex: NullPointerException) {
         response.sendError(HttpServletResponse.SC_CONFLICT, "Insufficient parameters provided!")
-    } catch (ex: DbAccessException) {
-        response.sendError(HttpServletResponse.SC_FORBIDDEN, "Wrong id provided!")
     }
 
     @PostMapping("/auth_group")
@@ -79,7 +87,7 @@ class UserRestController(private val couchDBConnectionProvider: CouchDBConnectio
         keypair["privK"] = userRepository.findOneByUid(uid).privK
         keypair
     } catch (ex: AuthenticationException) {
-        response.sendError(HttpServletResponse.SC_CONFLICT, "Insufficient parameters provided!")
+        response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Required authorities not available!")
         HashMap()
     } catch (ex: DbAccessException) {
         response.sendError(HttpServletResponse.SC_CONFLICT, "Corrupted Database!")

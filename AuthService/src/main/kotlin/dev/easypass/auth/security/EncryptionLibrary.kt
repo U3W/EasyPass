@@ -29,19 +29,17 @@ class EncryptionLibrary(private val properties: Properties) {
      * Generates a random [String] challenge
      */
     fun generateAuthenticationChallenge(): String {
-        return randomString(properties.getProperty("auth.challengeLength").toInt())
+        return "challenge"//return randomString(properties.getProperty("auth.challengeLength").toInt())
     }
 
     /**
-     * Encrypts the [text] with the passed [key]
-     * @param text: that should be encrypted
-     * @param key: to encrypt the [text]
+     * Encrypts the [msg] with the passed [key]
+     * @param msg: that should be encrypted
+     * @param key: to encrypt the [msg]
      */
-    fun encrypt(text: String, key: String): String {
-        //TODO Gescheite Encryption machen
-        var encrypted = "${text}_ENC_${key}"
-
-        return encrypted
+    fun encrypt(msg: String, key: String): String {
+        return msg+"_ENC_"+key
+        //return RustCall.encrypt(msg, key)
     }
 
     fun randomString(len: Int): String {

@@ -7,7 +7,9 @@ import dev.easypass.auth.security.*
 import org.ektorp.*
 import org.springframework.security.core.*
 import org.springframework.web.bind.annotation.*
+import java.time.*
 import javax.servlet.http.*
+
 
 @RestController
 @RequestMapping("/admin")
@@ -26,16 +28,19 @@ class AdminRestController(private val couchDBConnectionProvider: CouchDBConnecti
         val uid = data["uid"]!!
         val euid = data["euid"]!!
         val gmk = data["gmk"]!!
-        val amk = data["amk"]!!
+        var amk = data["amk"]
         val group = groupRepository.findOneByGid(gid)
         group.members.add(euid)
         couchDBConnectionProvider.UserDatabaseConnector().update(group)
         userRepository.findOneByUid(uid)
-        couchDBConnectionProvider.createCouchDbConnector("${uid}-meta").create(GroupAccessCredentials("GROUP", gid, gmk, amk))
+        couchDBConnectionProvider.createCouchDbConnector("${uid}-meta").create(GroupAccessCredentials("group", gid, gmk, amk))
+
+        updateLastModified(gid)
         response.status = HttpServletResponse.SC_OK
     } catch (ex: NullPointerException) {
         response.sendError(HttpServletResponse.SC_CONFLICT, "Insufficient parameters provided!")
     } catch (ex: DbAccessException) {
+        println(ex.message)
         response.sendError(HttpServletResponse.SC_FORBIDDEN, "Wrong id provided!")
     }
 
@@ -50,15 +55,27 @@ class AdminRestController(private val couchDBConnectionProvider: CouchDBConnecti
         val amk = data["amk"]!!
         userRepository.findOneByUid(uid)
         groupRepository.findOneByGid(gid)
-        couchDBConnectionProvider.createCouchDbConnector("${uid}-meta").create(GroupAccessCredentials("GROUP", gid, gmk, amk))
+        couchDBConnectionProvider.createCouchDbConnector("${uid}-meta").create(GroupAccessCredentials("group", gid, gmk, amk))
         groupRepository.removeAllByGid(gid)
         val members = ArrayList<String>()
         members.add(encryptionLibrary.encrypt(uid, gpubK))
         groupRepository.add(Group(gid, gpubK, gprivK, apubK, aprivK, members))
+
+        updateLastModified(gid)
         response.status = HttpServletResponse.SC_OK
     } catch (ex: NullPointerException) {
         response.sendError(HttpServletResponse.SC_CONFLICT, "Insufficient parameters provided!")
     } catch (ex: DbAccessException) {
+        println(ex.message)
         response.sendError(HttpServletResponse.SC_FORBIDDEN, "Wrong id provided!")
+    }
+
+    //@Throws(DocumentNotFoundException::class, UpdateConflictException::class)
+    fun updateLastModified(gid: String) {
+        val group = groupRepository.findOneByGid(gid)
+        val db = couchDBConnectionProvider.createCouchDbConnector(gid)
+        val lastModified = db.get(LastModified::class.java, "lastModified_")
+        lastModified.lastModified = encryptionLibrary.encrypt(LocalDateTime.now().toString(), group.gpubK)
+        db.update(lastModified)
     }
 }
