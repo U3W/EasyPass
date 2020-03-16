@@ -277,10 +277,22 @@ impl Worker {
         // Create variable that contains the remote database or none
         let mut remote_db = None;
         // When online, setup remote database and sync handler
-        // TODO use navigator.online?
-        // TODO change is_online to check if database_url is some and not none
         let sync_handler = if is_online() {
             // Init remote databases
+
+            // TODO @Kacper refactor remote_db_name for server
+            //  /store/uid-meta
+            //  /store/uid
+            //  /store/gid
+
+            let remote_db_name = if crudtype == CRUDType::Meta {
+
+            } else if crudtype == CRUDType::Private {
+
+            } else {
+
+            };
+
             let remote_db_name = format!("DB-URL: {}{}-{}",
                 &self.database_url.borrow().as_ref().unwrap(),
                 &self.user.borrow().as_ref().unwrap(), &name);

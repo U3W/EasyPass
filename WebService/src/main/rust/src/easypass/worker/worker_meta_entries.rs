@@ -25,6 +25,7 @@ impl Worker {
     /// [gid] - Group ID
     /// [gmk] - General Master Key
     /// [amk] - Admin Master Key
+    // TODO @Kacper remove this when connected to server, server will do this
     pub async fn save_group(self: Rc<Worker>, gid: String, gmk: String, amk: String) {
         let group_data = JsValue::from_serde(&json!({
                 "type": "group", "gid": String::from(gid),

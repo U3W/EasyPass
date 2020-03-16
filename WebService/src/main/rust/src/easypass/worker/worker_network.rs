@@ -39,14 +39,6 @@ impl Worker {
                         let user = Ref::map(self.user.borrow(), |t| {
                             t.as_ref().unwrap()
                         });
-                        /**
-                        let sync_closure = Ref::map(self.closures.borrow(), |t| {
-                            &t.as_ref().unwrap().sync_closure
-                        });
-                        let sync_error_closure = Ref::map(self.closures.borrow(), |t| {
-                            &t.as_ref().unwrap().sync_error_closure
-                        });
-                        */
                         // Initialize remote database of private password entries
                         let mut private = RefMut::map(self.private.borrow_mut(), |t| {
                             t.as_mut().unwrap()

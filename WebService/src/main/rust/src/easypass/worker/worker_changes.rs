@@ -13,6 +13,8 @@ use serde_json::Value;
 use serde_json::value::Value::Bool;
 
 impl Worker {
+
+    /// Handles changes on private database
     pub async fn private_changes(self: Rc<Worker>, changes: JsValue) {
         // Get document
         let obj = Object::try_from(&changes).unwrap();
@@ -36,6 +38,38 @@ impl Worker {
             data.set(0, JsValue::from_str("private"));
             data.set(1, JsValue::from_str(doc["_id"].as_str().unwrap()));
             Worker::build_and_post_message("removeEntry", JsValue::from(data));
+        }
+    }
+
+    /// Handles changes on meta database
+    pub async fn meta_changes(self: Rc<Worker>, changes: JsValue) {
+        // Get document
+        let obj = Object::try_from(&changes).unwrap();
+        let values = Object::values(&obj);
+        console_log!("values: {:?}", &values);
+        let doc = values.get(2);
+        console_log!("doc: {:?}", &doc);
+        let doc: Value = doc.into_serde::<Value>().unwrap();
+        console_log!("doc-parsed: {:?}", &doc);
+
+        let id = String::from(doc["_id"].as_str().unwrap());
+
+        if doc["_deleted"].is_null() {
+            // Check if group was added
+            if doc["type"].as_str().unwrap() == "group" {
+               // Worker::build_connection()
+            }
+        } else {
+            // Check if a group was deleted
+            if self.groups.borrow().contains_key(&id) {
+                // If yes, stop sync and remove it
+                let mut groups = self.groups.borrow_mut();
+                let connection = groups.remove(&id).unwrap();
+                connection.changes_feed.cancel_changes();
+                if connection.sync_handler.is_some() {
+                    connection.sync_handler.as_ref().unwrap().cancel_sync();
+                }
+            }
         }
     }
 }
