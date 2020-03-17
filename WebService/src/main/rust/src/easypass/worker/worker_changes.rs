@@ -12,6 +12,7 @@ use serde_json::json;
 use serde_json::Value;
 use serde_json::value::Value::Bool;
 use crate::easypass::worker::worker_crud::CRUDType;
+use crate::easypass::connection::Connection;
 
 impl Worker {
 
@@ -59,8 +60,10 @@ impl Worker {
             // Check if group was added
             if doc["type"].as_str().unwrap() == "group" {
                 // Build new group connection
-                let connection
-                    = self.clone().build_connection(CRUDType::Private, Some(id.clone()));
+                let gid = String::from(doc["gid"].as_str().unwrap());
+                let connection = Connection::build_connection(
+                    self.clone(), CRUDType::Group, Some(gid),
+                    self.get_user(), self.get_database_url());
                 // Add it to hashmap
                 self.groups.borrow_mut().insert(id, connection);
                 // TODO @Kacper add keys to storage

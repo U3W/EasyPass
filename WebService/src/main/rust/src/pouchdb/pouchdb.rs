@@ -41,7 +41,7 @@ pub struct Auth {
 #[wasm_bindgen]
 extern "C" {
     #[wasm_bindgen(js_namespace = console)]
-    fn log(s: &str);
+    pub(crate) fn log(s: &str);
 
     #[derive(Clone)]
     #[wasm_bindgen(js_name = PouchDB)]

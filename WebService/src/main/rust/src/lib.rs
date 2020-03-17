@@ -265,7 +265,6 @@ mod state {
     use web_sys::{MessageEvent};
     use wasm_bindgen::__rt::core::cell::{RefCell, Ref};
     use crate::easypass::worker::Worker;
-    use wasm_bindgen::__rt::core::borrow::Borrow;
     use wasm_bindgen::__rt::std::rc::Rc;
 
     /// Stores the internal state of the Backend of the Web-App.

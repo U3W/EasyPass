@@ -15,7 +15,7 @@ use serde_json::json;
 use serde_json::value::Value::Bool;
 
 use crate::{log, get_database_url};
-use crate::easypass::worker::{Worker, ConnectionPlus};
+use crate::easypass::worker::{Worker};
 
 impl Worker {
     pub async fn handle_network_change(self: Rc<Worker>, online: JsValue) {
