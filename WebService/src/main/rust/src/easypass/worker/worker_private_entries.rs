@@ -3,6 +3,7 @@ use crate::easypass::worker::worker_crud::*;
 use crate::{post_message, log};
 use crate::easypass::timeout::Timeout;
 use crate::easypass::recovery::{RecoverPassword, Category, RecoverCategory};
+use crate::easypass::formats::CRUDType;
 
 extern crate rand;
 use rand::Rng;

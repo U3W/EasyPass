@@ -1,12 +1,12 @@
 use wasm_bindgen::prelude::*;
 use wasm_bindgen_futures::JsFuture;
 use wasm_bindgen::__rt::std::rc::Rc;
-use js_sys::{Array, Object};
-use web_sys::{FileReaderSync, Blob, File};
+use js_sys::{Object};
+use web_sys::{FileReaderSync, Blob};
 use serde_json::Value;
 use serde_json::json;
 use crate::easypass::worker::Worker;
-use crate::{post_message, log, is_online};
+use crate::{log, is_online};
 use crate::pouchdb::pouchdb::{PouchDB, Settings};
 
 

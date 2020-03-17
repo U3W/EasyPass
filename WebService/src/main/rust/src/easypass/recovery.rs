@@ -1,5 +1,5 @@
 use wasm_bindgen::JsValue;
-use serde_json::{Value, Map};
+use serde_json::{Value};
 use serde_json::json;
 
 #[derive(Debug)]

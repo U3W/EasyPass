@@ -3,28 +3,21 @@ use crate::pouchdb::pouchdb::PouchDB;
 use crate::{post_message, log};
 use crate::easypass::timeout::Timeout;
 use crate::easypass::recovery::{RecoverPassword, Category, RecoverCategory};
+use crate::easypass::formats::CRUDType;
 
 extern crate rand;
 use rand::Rng;
 
 use wasm_bindgen::__rt::std::rc::Rc;
 use wasm_bindgen_futures::JsFuture;
-use wasm_bindgen_futures::future_to_promise;
 use wasm_bindgen::JsValue;
-use js_sys::{Promise, Array, ArrayBuffer};
-use serde_json::json;
+use js_sys::{Array};
 use serde_json::Value;
-use serde_json::value::Value::Bool;
 use wasm_bindgen::__rt::core::cell::Ref;
+use serde_json::json;
+use serde_json::value;
+use serde_json::value::Value::Bool;
 
-#[derive(PartialEq)]
-#[derive(Copy, Clone)]
-#[derive(Debug)]
-pub enum CRUDType {
-    Private,
-    Group,
-    Meta
-}
 
 impl Worker {
 

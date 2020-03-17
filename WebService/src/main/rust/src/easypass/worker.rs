@@ -1,36 +1,25 @@
 
 use crate::easypass::timeout::*;
 use crate::pouchdb::pouchdb::*;
-use crate::easypass::worker::worker_crud::CRUDType;
 use crate::easypass::connection::Connection;
 use crate::{is_online, get_node_mode, get_database_url, post_message, log};
 use crate::easypass::recovery::{RecoverCategory, RecoverPassword};
-
-extern crate rand;
-use rand::Rng;
+use crate::easypass::formats::CRUDType;
 
 use wasm_bindgen::prelude::*;
-use wasm_bindgen_futures::{spawn_local, future_to_promise};
 use wasm_bindgen_futures::JsFuture;
-use wasm_bindgen::__rt::std::future::Future;
 use wasm_bindgen::__rt::std::rc::Rc;
 use wasm_bindgen::__rt::core::cell::{RefCell, Ref};
-use wasm_bindgen::__rt::std::sync::{Arc, Mutex, PoisonError};
 use wasm_bindgen::__rt::std::collections::HashMap;
-use js_sys::{Promise, Array, ArrayBuffer};
-use web_sys::{MessageEvent};
-use serde::{Deserialize, Serialize};
-use serde_json::json;
-use serde_json::{Value};
-use serde_json::value::Value::Bool;
-use wasm_bindgen::__rt::RefMut;
+use js_sys::{Array};
+use crate::easypass::group_keys::GroupKeys;
 
 // Add other modules that define Worker functionality
 // Allows to split Worker logic
 mod worker_login;
 mod worker_registration;
 mod worker_network;
-pub(crate) mod worker_crud;
+mod worker_crud;
 mod worker_meta_entries;
 mod worker_private_entries;
 mod worker_group_entries;
@@ -41,7 +30,7 @@ mod worker_changes;
 pub struct Worker {
     user: RefCell<Option<String>>,
     mkey: RefCell<Option<String>>,
-    group_keys: RefCell<HashMap<String, String>>,
+    group_keys: RefCell<HashMap<String, GroupKeys>>,
     meta: RefCell<Option<Connection>>,
     private: RefCell<Option<Connection>>,
     groups: RefCell<HashMap<String, Connection>>,
@@ -89,26 +78,6 @@ impl Worker {
         worker
     }
 
-    pub async fn set_database_url(self: Rc<Worker>) {
-
-        if is_online() {
-            let result = JsFuture::from(get_database_url()).await;
-            match result {
-                Ok(url_raw) => {
-                    let url = url_raw.as_string().unwrap();
-                    log(&format!("My URL!! {}", &url));
-                    self.database_url.replace(Some(url));
-                    self.database_url_is_set.replace(true);
-                }
-                Err(_) => {
-                    // TODO interval that checks if service is available again
-                    log("down");
-                    self.service_status.replace(String::from("down"));
-                }
-            }
-        }
-    }
-
     /// Starts live replication for private password entries.
     pub async fn hearbeat(self: Rc<Worker>) {
         // Define databases
@@ -135,29 +104,59 @@ impl Worker {
         // Add it to the worker
         let private = Some(private);
         self.private.replace(private);
+        // Send all password entries to UI
+        self.clone().private_entries_without_passwords().await;
 
         // Setup known group databases
         // Get group meta-data from meta-database
         let saved_groups = self.clone().get_groups().await;
-        let mut groups = self.groups.borrow_mut();
         console_log!("SAVED GROUPS: ");
         // Setup database for every group
         for group in saved_groups {
             console_log!("GROUP: {}", &group);
-            let gid = String::from(group["gid"].as_str().unwrap());
             let id = String::from(group["_id"].as_str().unwrap());
-            let connection = Connection::build_connection(
-                self.clone(), CRUDType::Group, Some(gid),
-                self.get_user(), self.get_database_url());
-            groups.insert(id, connection);
-            // TODO @Kacper setup keys for group-databases!
+            let gid = String::from(group["gid"].as_str().unwrap());
+            let gmk = String::from(group["gmk"].as_str().unwrap());
+            let amk = if !group["amk"].is_null() {
+                Some(String::from(group["amk"].as_str().unwrap()))
+            } else {
+                None
+            };
+            self.clone().setup_new_group(id, gid, gmk, amk);
 
             // TODO @Kacper send entries to ui
         }
-        console_log!("SAVED GROUPS length: {}", &groups.len());
 
-        // Send all password entries to UI
-        self.clone().private_entries_without_passwords().await;
+        console_log!("SAVED GROUPS length: {}", &self.groups.borrow().len());
+    }
+
+    /// Tries to fetch the URL to the EasyPass-Auth-Service.
+    pub async fn set_database_url(self: Rc<Worker>) {
+        if is_online() {
+            let result = JsFuture::from(get_database_url()).await;
+            match result {
+                Ok(url_raw) => {
+                    let url = url_raw.as_string().unwrap();
+                    log(&format!("My URL!! {}", &url));
+                    self.database_url.replace(Some(url));
+                    self.database_url_is_set.replace(true);
+                }
+                Err(_) => {
+                    // TODO interval that checks if service is available again
+                    log("down");
+                    self.service_status.replace(String::from("down"));
+                }
+            }
+        }
+    }
+
+    /// Sends a message and data in form of a Js-Array to the UI-thread.
+    fn build_and_post_message(cmd: &str, data: JsValue) {
+        let msg = Array::new_with_length(2);
+        msg.set(0, JsValue::from_str(cmd));
+        // TODO error handling
+        msg.set(1, data);
+        post_message(&msg);
     }
 
     /// Reset Worker to initial state.
@@ -184,15 +183,12 @@ impl Worker {
         // Reset state
         self.user.replace(None);
         self.mkey.replace(None);
+        self.group_keys.borrow_mut().clear();
+        self.group_keys.replace(HashMap::new());
         self.private.replace(None);
-    }
-
-    fn build_and_post_message(cmd: &str, data: JsValue) {
-        let msg = Array::new_with_length(2);
-        msg.set(0, JsValue::from_str(cmd));
-        // TODO error handling
-        msg.set(1, data);
-        post_message(&msg);
+        self.meta.replace(None);
+        self.groups.borrow_mut().clear();
+        self.groups.replace(HashMap::new());
     }
 }
 
@@ -225,7 +221,7 @@ impl Worker {
 
     pub fn get_group_key(&self, gid: &str) -> String {
         let keys = self.group_keys.borrow();
-        String::from(keys.get(gid).unwrap())
+        String::from(keys.get(gid).unwrap().gmk())
     }
 
     pub fn get_user(&self) -> String {

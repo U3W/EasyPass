@@ -1,18 +1,13 @@
 use crate::easypass::worker::Worker;
-use crate::{post_message, log};
-use crate::easypass::timeout::Timeout;
-use crate::easypass::recovery::{RecoverPassword, Category, RecoverCategory};
+use crate::{log};
+use crate::easypass::formats::CRUDType;
+use crate::easypass::connection::Connection;
 
 use wasm_bindgen::__rt::std::rc::Rc;
-use wasm_bindgen_futures::JsFuture;
-use wasm_bindgen_futures::future_to_promise;
 use wasm_bindgen::JsValue;
-use js_sys::{Promise, Object, Array, ArrayBuffer};
-use serde_json::json;
+use js_sys::{Object, Array};
 use serde_json::Value;
-use serde_json::value::Value::Bool;
-use crate::easypass::worker::worker_crud::CRUDType;
-use crate::easypass::connection::Connection;
+
 
 impl Worker {
 
@@ -60,17 +55,21 @@ impl Worker {
             // Check if group was added
             if doc["type"].as_str().unwrap() == "group" {
                 // Build new group connection
+                let id = String::from(doc["_id"].as_str().unwrap());
                 let gid = String::from(doc["gid"].as_str().unwrap());
-                let connection = Connection::build_connection(
-                    self.clone(), CRUDType::Group, Some(gid),
-                    self.get_user(), self.get_database_url());
-                // Add it to hashmap
-                self.groups.borrow_mut().insert(id, connection);
-                // TODO @Kacper add keys to storage
+                let gmk = String::from(doc["gmk"].as_str().unwrap());
+                let amk = if !doc["amk"].is_null() {
+                    Some(String::from(doc["amk"].as_str().unwrap()))
+                } else {
+                    None
+                };
+
+                self.clone().setup_new_group(id, gid, gmk, amk);
 
                 console_log!("mygroups: {:?}", &self.groups.borrow().len());
 
                 // TODO @Kacper send result to UI
+                console_log!("group keys: {:?}", &self.group_keys.borrow());
 
             }
         } else {

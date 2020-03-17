@@ -1,7 +1,7 @@
 use crate::easypass::worker::Worker;
 use crate::pouchdb::pouchdb::*;
-use crate::easypass::worker::worker_crud::CRUDType;
 use crate::is_online;
+use crate::easypass::formats::CRUDType;
 
 use wasm_bindgen::prelude::*;
 use wasm_bindgen_futures::{spawn_local};

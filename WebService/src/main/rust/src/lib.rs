@@ -5,26 +5,11 @@ mod crypto;
 mod utils;
 use wasm_bindgen::prelude::*;
 use wasm_bindgen_futures::{spawn_local, future_to_promise};
-use wasm_bindgen_futures::JsFuture;
 
-use serde_json::{Value};
-use js_sys::{Promise, Array, ArrayBuffer};
-use serde::{Deserialize, Serialize};
-use serde_json::json;
-use wasm_bindgen::__rt::std::future::Future;
+use js_sys::{Promise, Array};
 use wasm_bindgen::__rt::std::rc::Rc;
-use wasm_bindgen::__rt::core::cell::{RefCell, Cell};
-use wasm_bindgen::__rt::std::sync::{Arc, Mutex, PoisonError, MutexGuard};
-use wasm_bindgen::JsCast;
-use serde_json::value::Value::Bool;
-use wasm_bindgen::__rt::std::collections::HashMap;
-//use web_sys::{MessageEvent, FileReader};
-use web_sys::{MessageEvent, FileReaderSync};
+use web_sys::{MessageEvent};
 
-extern crate rand;
-use rand::Rng;
-use wasm_bindgen::__rt::Ref;
-use wasm_bindgen::__rt::std::net::Shutdown::Read;
 use crate::state::State;
 
 // Use wee_alloc as the memory allocator for the WebAssembly Module
@@ -167,10 +152,8 @@ impl Backend {
                 if state.mode_is_none() {
                     state.set_mode(Some(String::from(&cmd)));
                     // If the dashboard page is called
-                    log("dashboard init 1");
                     if state.mode_as_string() == "dashboard" {
                         // Start live replication and send all data to UI
-                        log("dashboard init 2");
                         state.worker().hearbeat().await;
                     }
                 } else {
