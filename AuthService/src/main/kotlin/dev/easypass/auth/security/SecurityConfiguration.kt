@@ -24,10 +24,10 @@ class SecurityConfiguration(private val authProvider: ChallengeAuthenticationPro
     @Throws(Exception::class)
     override fun configure(http: HttpSecurity) {
         http
-                .csrf().disable()
+                .csrf().disable() //.and().httpBasic()
                 .exceptionHandling()
                 .authenticationEntryPoint(RestAuthenticationEntryPoint())
-                .and()
+        http
                 .formLogin()
                 .loginPage("/auth/login")
                 .successHandler(RestAuthenticationSuccessHandler())

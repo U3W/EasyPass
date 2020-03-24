@@ -24,7 +24,7 @@ http://localhost:7000/auth/register
 curl -i ^
 -X POST ^
 -H "Content-Type: application/json" ^
--d "{\"uid\": \"mwustinger\", \"role\": \"USER\"}" ^
+-d "{\"uid\": \"mwustinger\" \"role\": \"USER\"}" ^
 http://localhost:7000/auth/challenge
 ```
 
