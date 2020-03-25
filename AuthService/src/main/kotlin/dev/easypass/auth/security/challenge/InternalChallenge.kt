@@ -23,5 +23,5 @@ class InternalChallenge(private val encryptionLibrary: EncryptionLibrary, privat
         return encryptionLibrary.encrypt(challenge, pubK)
     }
 
-    fun isActive(): Boolean = Duration.between(timeCreated, LocalDateTime.now()).toMillis() / 1000 < properties.getProperty("auth.challengeTimeOut").toInt()
+    fun isActive(): Boolean = Duration.between(timeCreated, LocalDateTime.now()).toMillis() / 1000 < properties.getProperty("auth.challengeTimeout").toInt()
 }

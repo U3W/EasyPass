@@ -29,7 +29,7 @@ class EncryptionLibrary(private val properties: Properties) {
      * Generates a random [String] challenge
      */
     fun generateAuthenticationChallenge(): String {
-        return "challenge"//return randomString(properties.getProperty("auth.challengeLength").toInt())
+        return randomString(properties.getProperty("auth.challengeLength").toInt())
     }
 
     /**
@@ -38,6 +38,7 @@ class EncryptionLibrary(private val properties: Properties) {
      * @param key: to encrypt the [msg]
      */
     fun encrypt(msg: String, key: String): String {
+        //TODO return real encryption
         return msg+"_ENC_"+key
         //return RustCall.encrypt(msg, key)
     }

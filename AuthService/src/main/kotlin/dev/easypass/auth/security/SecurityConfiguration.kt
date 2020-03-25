@@ -24,7 +24,7 @@ class SecurityConfiguration(private val authProvider: ChallengeAuthenticationPro
     @Throws(Exception::class)
     override fun configure(http: HttpSecurity) {
         http
-                .csrf().disable() //.and().httpBasic()
+                .csrf().disable()
                 .exceptionHandling()
                 .authenticationEntryPoint(RestAuthenticationEntryPoint())
         http
@@ -50,5 +50,9 @@ class SecurityConfiguration(private val authProvider: ChallengeAuthenticationPro
                 .addFilterBefore(groupFilter, AnonymousAuthenticationFilter::class.java)
                 .addFilterBefore(adminFilter, AnonymousAuthenticationFilter::class.java)
                 .addFilterBefore(storeFilter, AnonymousAuthenticationFilter::class.java)
+        http
+                .requiresChannel()
+                .anyRequest()
+                .requiresSecure()
     }
 }
