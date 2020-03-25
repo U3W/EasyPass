@@ -390,14 +390,8 @@ export default class AddPassword extends React.Component {
     addPass() {
         console.log("add.password.js: catID: " + this.state.catID);
         if ( this.state.user.length > 0 && this.state.title.length > 0 && this.state.pass.length > 0) {
-            if ( this.props.callback.state.tabselected === tabs.PRIVPASS ) {
-                this.props.callback.addPass(this.state.user, this.state.pass, this.state.url, this.state.title,
-                    this.state.tag, this.state.catID, undefined);
-            }
-            else {
-                this.props.callback.addPass(this.state.user, this.state.pass, this.state.url, this.state.title,
-                    this.state.tag, this.state.catID, this.props.callback.state.groupselected);
-            }
+            this.props.callback.addPass(this.state.user, this.state.pass, this.state.url, this.state.title,
+                this.state.tag, this.state.catID);
             this.resetState();
         }
         else {

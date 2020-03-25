@@ -13,7 +13,7 @@ import StringSelector from "../../strings/stings";
 
 // Rest
 import {Card} from "react-bootstrap";
-import Logo from "../../img/logo/LogoV2.svg"
+import Logo from "../../img/logos/LogoV2.svg"
 import LoginAuth from "../../authentification/auth.login"
 import Alert from "react-bootstrap/Alert";
 import { connect } from 'react-redux';
@@ -40,10 +40,6 @@ class Registration extends React.Component {
             newPassSec: "",
             newPassSecShow: false,
             newUser: "",
-            newMasterpass: "",
-            newMasterpassShow: false,
-            newMasterpassSec: "",
-            newMasterpassSecShow: false,
 
             step: 1,
 
@@ -51,12 +47,8 @@ class Registration extends React.Component {
             missingPassword: false,
             missingSecPassword: false,
             missingUsername: false,
-            missingMasterpassword: false,
-            missingMasterpasswordSec: false,
             userAlreadyTaken: false,
             passNoMatch: false,
-            masterpassMatchPass: false,
-            masterpassNoMatch: false,
         };
 
 
@@ -65,7 +57,6 @@ class Registration extends React.Component {
         this.handleKeyevent = this.handleKeyevent.bind(this);
         this.printError = this.printError.bind(this);
         this.resetError = this.resetError.bind(this);
-        this.resetToFirst = this.resetToFirst.bind(this);
         this.exit = this.exit.bind(this);
     }
 
@@ -94,16 +85,6 @@ class Registration extends React.Component {
                         missingUsername: false,
                     });
                     break;
-                case "newMasterpass":
-                    this.setState({
-                        missingMasterpassword: false,
-                    });
-                    break;
-                case "newMasterpassSec":
-                    this.setState({
-                        missingSecMasterpassword: false,
-                    });
-                    break;
             }
         }
     }
@@ -120,18 +101,6 @@ class Registration extends React.Component {
         event.preventDefault();
 
         this.submit();
-    }
-
-    resetToFirst() {
-        this.setState({
-            newMasterpass: "",
-            newMasterpassSec: "",
-            missingMasterpassword: false,
-            missingMasterpasswordSec: false,
-            masterpassMatchPass: false,
-            masterpassNoMatch: false,
-            step: 1,
-        })
     }
 
 
@@ -201,25 +170,13 @@ class Registration extends React.Component {
                 missingUsername: false,
                 passNoMatch: false,
                 userAlreadyTaken: true,
-            });
 
-
-            this.setState({
                 newPass: "",
                 newPassSec: "",
                 newUser: "",
             });
 
-
-            this.setState({
-                missingUsername: false,
-                missingPassword: false,
-                missingSecPassword: false,
-                passNoMatch: false,
-                userAlreadyTaken: false,
-            });
-
-            // ToDo Kall Kaspers method
+            // ToDo Kall Kaspers method to check if user regist was succ
             if (false) {
                 this.props.callback.switchToRegister(false, true, false);
             } else {
@@ -543,7 +500,7 @@ class Registration extends React.Component {
     }
 
 
-    getInputMasterpass() {
+    /*getInputMasterpass() {
         if ( this.state.missingMasterpassword || this.state.masterpassMatchPass || this.state.masterpassNoMatch)
         {
             return (
@@ -662,10 +619,10 @@ class Registration extends React.Component {
                 </Form.Group>
             );
         }
-    }
+    }*/
 
 
-    getInputMasterpassSec() {
+    /*getInputMasterpassSec() {
         if ( this.state.missingSecMasterpassword || this.state.masterpassMatchPass || this.state.masterpassNoMatch)
         {
             let toAdd;
@@ -757,7 +714,7 @@ class Registration extends React.Component {
                 </Form.Group>
             );
         }
-    }
+    }*/
 
     exit() {
         this.props.callback.switchToRegister(false,false,true);
@@ -786,10 +743,11 @@ class Registration extends React.Component {
                                             <span aria-hidden="true">×</span>
                                         </div>
                                         <Card.Img variant="top" src={Logo} className="centerImg"/>
-                                        <Card.Body>
+                                        <Card.Body className={"noPaddingTop"}>
+                                            <h4>{StringSelector.getString(this.props.callback.state.language).regist}</h4>
+                                            <hr/>
                                             <Form autoComplete="off">
                                                 {formOut}
-
                                                 <Button variant="danger" className={"float-right"} onClick={this.handleSubmit}>
                                                     {StringSelector.getString(this.props.callback.state.language).registButton}
                                                 </Button>

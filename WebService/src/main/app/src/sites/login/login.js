@@ -18,8 +18,8 @@ import * as animation from "../../animation/fadeOutGradient"
 
 // Rest
 import {Card, Nav} from "react-bootstrap";
-import LogoSchlüssel from "../../img/logo/LogoSchnlüsselV2.svg"
-import Logo from "../../img/logo/LogoV2.svg"
+import LogoSchlüssel from "../../img/logos/LogoSchnlüsselV2.svg"
+import Logo from "../../img/logos/LogoV2.svg"
 import LoginAuth from "../../authentification/auth.login"
 import Alert from "react-bootstrap/Alert";
 import { connect } from 'react-redux';
@@ -58,10 +58,9 @@ class Login extends React.Component {
 
             inpFile: null,
             fileName: "",
+            missingFile: false,
 
             saveUserState: "" + LoginState.getSaveUsernameState(),
-            missingMasterpassword: false,
-            missingFile: false,
         };
 
         this.fadeOutGradient = animation.fadeOutGradient.bind(this);
@@ -79,6 +78,7 @@ class Login extends React.Component {
         this.workerCall = this.workerCall.bind(this);
         this.loginProcess = this.loginProcess.bind(this);
         this.registrationProcess = this.registrationProcess.bind(this);
+        this.delFile = this.delFile.bind(this);
 
         // reset Dashboard username
         this.props.setSessionUser(null);
@@ -274,17 +274,14 @@ class Login extends React.Component {
             err = true;
             this.setState({missingUsername: true });
         }
-        if ( this.state.inpFile === null )
-        {
+        if ( this.state.missingFile ) {
             err = true;
-            this.setState({missingFile: true });
         }
         if ( !err )
         {
             this.setState({
                 missingUsername: false,
                 missingPassword: false,
-                missingMasterpassword: false,
                 missingFile: false
             });
 
@@ -398,6 +395,14 @@ class Login extends React.Component {
         document.getElementById("fakeFileInput").click();
     }
 
+    delFile() {
+        this.setState({
+            inpFile: null,
+            fileName: "",
+            missingFile: false,
+        })
+    }
+
     getInputFile() {
         let cssClass = "notDisabled";
         if ( this.state.missingFile ) {
@@ -408,6 +413,14 @@ class Login extends React.Component {
             <InputGroup className="mb-3">
                 <Form.Control disabled={true} className={cssClass} aria-describedby="inputGroup-sizing-default" placeholder={StringSelector.getString(this.state.language).masterpass2FAFileNoFile} value={this.state.fileName}/>
                 <input disabled={false} id="fakeFileInput" type="file" name="file" className="hiddenFileInput" accept=".easykey" onChange={this.handleFile}/>
+                { (this.state.missingFile || this.state.inpFile !== null) &&
+                    <>
+                        <Button variant={"dark"} className="fileButton notRound" onClick={this.delFile}>
+                            {StringSelector.getString(this.state.language).masterpass2FAFileDel}
+                        </Button>
+                        <hr className="vertical-button-sep"/>
+                    </>
+                }
                 <Button variant={"dark"} className="fileButton" onClick={this.rigInput}>
                     {StringSelector.getString(this.state.language).masterpass2FAFileSelect}
                 </Button>
@@ -449,7 +462,7 @@ class Login extends React.Component {
                                                         className="loginLogo"
                                                     />
                                                     <Col>
-                                                        <h2>Login</h2>
+                                                        <h2>{StringSelector.getString(this.state.language).login}</h2>
                                                     </Col>
                                                 </Row>
                                                 <hr/>

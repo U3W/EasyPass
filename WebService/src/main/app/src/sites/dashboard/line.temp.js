@@ -356,7 +356,7 @@ export default class PassLine extends React.Component {
     saveEdit() {
         this.setEdit(false, true);
         this.props.callback.saveEdit(
-            this.state.id, this.state.rev, this.state.groupId, this.state.userNew, this.state.passwordNew,
+            this.state.id, this.state.rev, this.state.userNew, this.state.passwordNew,
             this.state.urlNew, this.state.titleNew, this.state.tagNew, this.state.catIdNew);
     }
 

@@ -6,22 +6,24 @@ import Button from "react-bootstrap/Button";
 import FormControl from "react-bootstrap/FormControl";
 import Row from "react-bootstrap/Row";
 
-import Logo from "../../img/logo/LogoSchnlüsselV2.svg"
+import Logo from "../../../img/logos/LogoSchnlüsselV2.svg"
 import Modal from "react-bootstrap/Modal";
 import Table from "react-bootstrap/Table";
 
 // Icons
-import AddCat from "../../img/icons/password_add_tag_black.svg";
-import EditCat from "../../img/icons/password_edit.svg";
-import DeleteCat from "../../img/icons/dashboard_deleteCat.svg";
+import AddCat from "../../../img/icons/password_add_tag_black.svg";
+import EditCat from "../../../img/icons/password_edit.svg";
+import DeleteCat from "../../../img/icons/dashboard_deleteCat.svg";
 import ButtonGroup from "react-bootstrap/ButtonGroup";
 import InputGroup from "react-bootstrap/InputGroup";
-import {dashboardAlerts, dashboardLanguage} from "../dashboard/const/dashboard.enum";
-import StringSelector from "../../strings/stings";
-import dashboardState from "../dashboard/dashboard.saved.state";
-import CopyIcon from "../../img/icons/password_copy_white.svg";
+import {dashboardAlerts, dashboardLanguage} from "../const/dashboard.enum";
+import StringSelector from "../../../strings/stings";
+import dashboardState from "../dashboard.saved.state";
+import CopyIcon from "../../../img/icons/password_copy_white.svg";
 import ResetPass from "./resetPass";
-import tabs from "../dashboard/tabs/tab.enum";
+import tabs from "../tabs/tab.enum";
+import Alert from "react-bootstrap/Alert";
+import dashboard, {download} from "../dashboard";
 
 class NavbarEP extends React.Component {
     constructor(props) {
@@ -32,8 +34,11 @@ class NavbarEP extends React.Component {
             changePassPopUpShow: false,
             popUpCatShow: false,
             userKeyPopUp: false,
-        };
 
+            show2FAOpt: false,
+            show2FAFromDeToAct: false,
+            alert2FAShow: false,
+        };
 
         this.logoutFunc = this.logoutFunc.bind(this);
         this.getSettingsPopUp = this.getSettingsPopUp.bind(this);
@@ -54,13 +59,26 @@ class NavbarEP extends React.Component {
         this.setUserKeyPopUpDisabled = this.setUserKeyPopUpDisabled.bind(this);
         this.setUserKeyPopUpEnabled = this.setUserKeyPopUpEnabled.bind(this);
 
+        this.show2FAOption = this.show2FAOption.bind(this);
+        this.setShow2FAOptDisabled = this.setShow2FAOptDisabled.bind(this);
+    }
+
+    componentDidUpdate(prevProps, prevState, snapshot) {
+        if ( (this.props.callback.state.is2FASet && this.props.callback.state.alert2FAShow) && !this.state.show2FAFromDeToAct ) {
+            this.setState({
+                show2FAFromDeToAct: true,
+            });
+            this.props.callback.generateKeyfile();
+        }
+        else if ( !this.props.callback.state.is2FASet && this.state.show2FAFromDeToAct ){
+            this.setState({
+                show2FAFromDeToAct: false,
+            });
+        }
     }
 
 
-
-
     logoutFunc() {
-        //console.log(this.props);
         this.props.callback.logoutDash();
     }
 
@@ -85,13 +103,8 @@ class NavbarEP extends React.Component {
     }
 
     resetPass(pass, newPass) {
-        if ( this.props.callback.resetPass(pass, newPass) ) {
-            this.setChangePopUpDisabled();
-            return true;
-        }
-        else {
-            return false;
-        }
+        this.props.callback.resetUserPass(pass, newPass);
+        this.setChangePopUpDisabled();
     }
 
     setChangePopUpDisabled() {
@@ -192,61 +205,55 @@ class NavbarEP extends React.Component {
                             <Row>
                                 <Col className="noPadding">
                                     <InputGroup.Prepend>
-                                        <InputGroup.Text className="fitHoleParent">{StringSelector.getString(this.props.callback.state.language).language}</InputGroup.Text>
+                                        <InputGroup.Text className="fitHoleParent settingsFitSize">{StringSelector.getString(this.props.callback.state.language).language}</InputGroup.Text>
                                     </InputGroup.Prepend>
                                 </Col>
-                                <div className="noPadding">
-                                    <div className="float-right">
-                                        <ButtonGroup>
-                                            { this.props.language === dashboardLanguage.german ?
-                                                <>
-                                                    <Button className="noLeftBorderRadius" variant="danger" onClick={() => this.changeLanguageTo(dashboardLanguage.german)}>{StringSelector.getString(this.props.callback.state.language).german}</Button>
-                                                    <Button variant="secondary" onClick={() => this.changeLanguageTo(dashboardLanguage.english)}>{StringSelector.getString(this.props.callback.state.language).english}</Button>
-                                                </>
-                                                :
-                                                <>
-                                                    <Button className="noLeftBorderRadius" variant="secondary" onClick={() => this.changeLanguageTo(dashboardLanguage.german)}>{StringSelector.getString(this.props.callback.state.language).german}</Button>
-                                                    <Button variant="danger" onClick={() => this.changeLanguageTo(dashboardLanguage.english)}>{StringSelector.getString(this.props.callback.state.language).english}</Button>
-                                                </>
-                                            }
-                                        </ButtonGroup>
-                                    </div>
+                                <div className="noPadding settingsButtonCol">
+                                    <ButtonGroup>
+                                        { this.props.language === dashboardLanguage.german ?
+                                            <>
+                                                <Button className="noLeftBorderRadius settingsButtonFixHeight" variant="danger" onClick={() => this.changeLanguageTo(dashboardLanguage.german)}>{StringSelector.getString(this.props.callback.state.language).german}</Button>
+                                                <Button className="settingsButtonFixHeight" variant="secondary" onClick={() => this.changeLanguageTo(dashboardLanguage.english)}>{StringSelector.getString(this.props.callback.state.language).english}</Button>
+                                            </>
+                                            :
+                                            <>
+                                                <Button className="noLeftBorderRadius settingsButtonFixHeight" variant="secondary" onClick={() => this.changeLanguageTo(dashboardLanguage.german)}>{StringSelector.getString(this.props.callback.state.language).german}</Button>
+                                                <Button className="settingsButtonFixHeight" variant="danger" onClick={() => this.changeLanguageTo(dashboardLanguage.english)}>{StringSelector.getString(this.props.callback.state.language).english}</Button>
+                                            </>
+                                        }
+                                    </ButtonGroup>
+                                </div>
+                            </Row>
+                            <hr className="hrSettings"/>
+                            <Row className="rowMargin">
+                                <Col className="noPadding">
+                                    <InputGroup.Prepend>
+                                        <InputGroup.Text className="fitHoleParent settingsFitSize">{StringSelector.getString(this.props.callback.state.language).userKeySettings}</InputGroup.Text>
+                                    </InputGroup.Prepend>
+                                </Col>
+                                <div className="noPadding settingsButtonCol">
+                                    <Button variant="danger" className="noLeftBorderRadius settingsButtonFixHeight" onClick={this.setUserKeyPopUpEnabled}>{StringSelector.getString(this.props.callback.state.language).userKeyShow}</Button>
                                 </div>
                             </Row>
                             <Row className="rowMargin">
                                 <Col className="noPadding">
                                     <InputGroup.Prepend>
-                                        <InputGroup.Text className="fitHoleParent">{StringSelector.getString(this.props.callback.state.language).changePass}</InputGroup.Text>
+                                        <InputGroup.Text className="fitHoleParent settingsFitSize">{StringSelector.getString(this.props.callback.state.language).changePass}</InputGroup.Text>
                                     </InputGroup.Prepend>
                                 </Col>
-                                <div className="noPadding">
-                                    <div className="float-right">
-                                        <Button variant="danger" className="noLeftBorderRadius" onClick={this.setChangePopUp}>{StringSelector.getString(this.props.callback.state.language).changePassBut}</Button>
-                                    </div>
+                                <div className="noPadding settingsButtonCol">
+                                    <Button variant="danger" className="noLeftBorderRadius settingsButtonFixHeight" onClick={this.setChangePopUp}>{StringSelector.getString(this.props.callback.state.language).changePassBut}</Button>
                                 </div>
                             </Row>
+                            <hr className="hrSettings"/>
                             <Row className="rowMargin">
                                 <Col className="noPadding">
                                     <InputGroup.Prepend>
-                                        <InputGroup.Text className="fitHoleParent">{StringSelector.getString(this.props.callback.state.language).genKeyfile}</InputGroup.Text>
+                                        <InputGroup.Text className="fitHoleParent settingsFitSize">{StringSelector.getString(this.props.callback.state.language).settings2FA}</InputGroup.Text>
                                     </InputGroup.Prepend>
                                 </Col>
-                                <div className="noPadding">
-                                    <div className="float-right">
-                                        <Button variant="danger" className="noLeftBorderRadius" onClick={this.generateKeyFile}>{StringSelector.getString(this.props.callback.state.language).genButton}</Button>
-                                    </div>
-                                </div>
-                            </Row>
-                            <Row className="rowMargin">
-                                <Col className="noPadding">
-                                    <InputGroup.Prepend>
-                                        <InputGroup.Text className="fitHoleParent">Userkey (uniq identifier)</InputGroup.Text>
-                                    </InputGroup.Prepend>
-                                </Col>
-                                <div className="noPadding">
-                                    <div className="float-right">
-                                        <Button variant="danger" className="noLeftBorderRadius" onClick={this.setUserKeyPopUpEnabled}>Show</Button>
-                                    </div>
+                                <div className="noPadding settingsButtonCol">
+                                    <Button variant="danger" className="noLeftBorderRadius settingsButtonFixHeight" onClick={this.show2FAOption}>{StringSelector.getString(this.props.callback.state.language).settings2FAOpen}</Button>
                                 </div>
                             </Row>
                         </Card.Body>
@@ -261,6 +268,18 @@ class NavbarEP extends React.Component {
         );
     }
 
+    show2FAOption() {
+        this.setState({
+            show2FAOpt: true,
+        });
+    }
+
+    setShow2FAOptDisabled() {
+        this.setState({
+            show2FAOpt: false,
+        })
+    }
+
     setUserKeyPopUpDisabled() {
         this.setState({
             userKeyPopUp: false,
@@ -268,10 +287,122 @@ class NavbarEP extends React.Component {
     }
 
     setUserKeyPopUpEnabled() {
+        //this.props.callback.reqUserkey();
         this.setState({
             userKeyPopUp: true,
-        })
+        });
     }
+
+    print2FAAlert() {
+        const show = this.props.callback.state.alert2FAShow;
+        let text = StringSelector.getString(this.props.callback.state.language).settings2FAChangedSucc;
+        if ( this.props.callback.state.alertState === "danger" ) {
+            text = StringSelector.getString(this.props.callback.state.language).settings2FAChangedErr;
+        }
+        return (
+            <Alert show={show} variant={this.props.callback.state.alertState} className="center-horz center-vert error fixed-bottom-easypass in-front">
+                <p className="center-horz center-vert center-text">
+                    {text}
+                </p>
+            </Alert>
+        );
+    }
+
+    printChangePassAlert() {
+        const show = this.props.callback.state.alertChangePassShow;
+        let text = StringSelector.getString(this.props.callback.state.language).settingsChangePassSucc;
+        if ( this.props.callback.state.alertState === "danger" ) {
+            text = StringSelector.getString(this.props.callback.state.language).settingsChangePassErr;
+        }
+        return (
+            <Alert show={show} variant={this.props.callback.state.alertState} className="center-horz center-vert error fixed-bottom-easypass in-front">
+                <p className="center-horz center-vert center-text">
+                    {text}
+                </p>
+            </Alert>
+        );
+    }
+
+    get2FAPopUp() {
+        return (
+            <>
+                <Modal show={this.state.show2FAOpt} onHide={this.setShow2FAOptDisabled} className="ep-modal-dialog">
+                    <Modal.Header closeButton>
+                        <Modal.Title>{StringSelector.getString(this.props.callback.state.language).settings2FA}</Modal.Title>
+                    </Modal.Header>
+                    <Modal.Body>
+                        <Card.Body>
+                            <Row>
+                                <Col className="noPadding">
+                                    <InputGroup.Prepend>
+                                        { this.props.callback.state.is2FASet ?
+                                            <>
+                                                <InputGroup.Text className="fitHoleParent settingsFitSize">{StringSelector.getString(this.props.callback.state.language).settings2FACurrA}</InputGroup.Text>
+                                            </>
+                                            :
+                                            <>
+                                                <InputGroup.Text className="fitHoleParent settingsFitSize">{StringSelector.getString(this.props.callback.state.language).settings2FACurrD   }</InputGroup.Text>
+                                            </>
+                                        }
+                                    </InputGroup.Prepend>
+                                </Col>
+                                <div className="noPadding settingsButtonCol">
+                                    { this.props.callback.state.is2FASet ?
+                                        <>
+                                            <Button variant="danger" className="noLeftBorderRadius settingsButtonFixHeight" onClick={() => {this.props.callback.change2FA(false);}}>{StringSelector.getString(this.props.callback.state.language).settings2FADeactivate}</Button>
+                                        </>
+                                        :
+                                        <>
+                                            <Button variant="danger" className="noLeftBorderRadius settingsButtonFixHeight" onClick={() => {this.props.callback.change2FA(true);}}>{StringSelector.getString(this.props.callback.state.language).settings2FAActivate}</Button>
+                                        </>
+                                    }
+                                </div>
+                            </Row>
+                            { this.state.show2FAFromDeToAct  &&
+                                <>
+                                    <div className="settingsFitSize text-danger infoText">
+                                        {StringSelector.getString(this.props.callback.state.language).settings2FAInfo1}<br/>
+                                        {StringSelector.getString(this.props.callback.state.language).settings2FAInfo2}<br/>
+                                        {StringSelector.getString(this.props.callback.state.language).settings2FAInfo3}
+                                    </div>
+                                </>
+                            }
+                            <hr className="hrSettings"/>
+                            { this.props.callback.state.is2FASet ?
+                                <Row className="rowMargin">
+                                    <Col className="noPadding">
+                                        <InputGroup.Prepend>
+                                            <InputGroup.Text className="fitHoleParent settingsFitSize">{StringSelector.getString(this.props.callback.state.language).genKeyfile}</InputGroup.Text>
+                                        </InputGroup.Prepend>
+                                    </Col>
+                                    <div className="noPadding settingsButtonCol">
+                                        <Button variant="danger" disabled={false} className="noLeftBorderRadius settingsButtonFixHeight" onClick={this.generateKeyFile}>{StringSelector.getString(this.props.callback.state.language).genButton}</Button>
+                                    </div>
+                                </Row>
+                                :
+                                <Row className="rowMargin">
+                                    <Col className="noPadding">
+                                        <InputGroup.Prepend>
+                                            <InputGroup.Text className="fitHoleParent settingsFitSize">{StringSelector.getString(this.props.callback.state.language).genKeyfile}</InputGroup.Text>
+                                        </InputGroup.Prepend>
+                                    </Col>
+                                    <div className="noPadding settingsButtonCol">
+                                        <Button variant="danger" disabled={true} className="noLeftBorderRadius settingsButtonFixHeight">{StringSelector.getString(this.props.callback.state.language).genButton}</Button>
+                                    </div>
+                                </Row>
+                            }
+                        </Card.Body>
+                    </Modal.Body>
+                    <Modal.Footer>
+                        <Button variant="danger" onClick={this.setShow2FAOptDisabled}>
+                            {StringSelector.getString(this.props.callback.state.language).userKeyClose}
+                        </Button>
+                    </Modal.Footer>
+                </Modal>
+            </>
+        );
+    }
+
 
     getUserKeyPopUp() {
         return (
@@ -288,7 +419,7 @@ class NavbarEP extends React.Component {
                                         <InputGroup.Prepend>
                                             <InputGroup.Text>{StringSelector.getString(this.props.callback.state.language).userKey}</InputGroup.Text>
                                         </InputGroup.Prepend>
-                                        <FormControl disabled={true} className="noResize" as="textarea" aria-label="With textarea" value={"asdjhskjfhfhs97vz987398vw9847vw8vw88787hv8hw8wc8ch7w4fhetzurhjdjhsjhvr9es897r4786ge975809437896e9874fzbdhogivnfhejisuihfkbjtrh5u90ezrsvuofpeiheifu89rsu7fgozhuf"}/>
+                                        <FormControl disabled={true} className="noResize" as="textarea" aria-label="With textarea" value={this.props.userKey}/>
                                     </InputGroup>
                                 </Col>
                             </Row>
@@ -385,6 +516,9 @@ class NavbarEP extends React.Component {
                 </div>
                 {this.getSettingsPopUp()}
                 {this.getUserKeyPopUp()}
+                {this.get2FAPopUp()}
+                {this.print2FAAlert()}
+                {this.printChangePassAlert()}
                 <ResetPass callback={this} show={this.state.changePassPopUpShow}/>
             </>
         );

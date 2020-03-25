@@ -14,6 +14,7 @@
 
 export const strings = {
     // Login
+    login: "Login",
     username: "Username",
     usernamePlaceholder: "Bitte Ihren Benutzernamen eingeben",
     password: "Passwort",
@@ -33,6 +34,7 @@ export const strings = {
 
 
     // Registration
+    regist: "Registrierung",
     registUser: "Username",
     registUserInfo: "Mit diesem Benutzernamen können Sie sich später anmelden",
     registUserPlaceholder: "Bitte einen Nutzernamen eingeben",
@@ -63,18 +65,13 @@ export const strings = {
     registNextButton: "Nächster Schritt",
     registButton: "Registrieren",
 
-    // verify - Masterpassword
-    masterpassword: "Masterpasswort",
-    masterpasswordPlace: "Bitte Ihr Masterpasswort eingeben",
-    masterpass2FA: "2-Faktor-Option",
-    masterpass2FAWebauthn: "Webauthn",
-    masterpass2FAFile: "Key-File",
+    // 2FA
+    masterpass2FA: "2-Faktor-Schlüssel (Optional)",
+    masterpass2FAFileDel: "Löschen",
     masterpass2FAFileSelect: "Datei auswählen",
     masterpass2FAFileNoFile: "Keine Datei ausgewählt",
     masterpass2FAFileNotSup: "Nicht unterstützt",
 
-    masterpassWrongLoginHeader: "Verifizierung nicht möglich!",
-    masterpassWrongLogin: "Masterpasswort oder 2-Faktor-Option sind falsch!",
 
     /** Dashboard **/
 
@@ -99,12 +96,31 @@ export const strings = {
     changePassAlertErr: "Passwort stimmt nicht mit dem ursprünglichen überein!",
     changePassAlertSucc: "Passwort geändert!",
 
-    genKeyfile: "Keyfile generieren",
+    genKeyfile: "Neues Keyfile generieren",
     genButton: "Generieren",
 
     saveSetting: "Änderungen speichern",
 
+    settingsChangePassSucc: "Passwort geändert",
+    settingsChangePassErr: "Beim ändern des Passworts ist ein Fehler aufgetreten. Bitte versuchen Sie es erneut!",
+
+    settings2FA: "2FA-Optionen",
+    settings2FAOpen: "Öffnen",
+
+    settings2FAInfo1: "Mit der Aktivierung wird ein Keyfile heruntergeladen, dass Sie benötigen um sich einzuloggen.",
+    settings2FAInfo2: "Bitte beachten Sie, dass Sie Sich ohne diesem File nicht mehr einloggen können!",
+    settings2FAInfo3: "Aus Sicherheitsgründen bleibt die Möglichkeit sich, ohne Keyfile anzumelden für ca. 30 Minuten erhalten.",
+
+    settings2FACurrA: "2FA-Key (zurzeit: aktiviert)",
+    settings2FACurrD: "2FA-Key (zurzeit: deaktiviert)",
+    settings2FAActivate: "Aktivieren",
+    settings2FADeactivate: "Deaktivieren",
+    settings2FAChangedSucc: "Änderungen Erfolgreich gespeichert",
+    settings2FAChangedErr: "Beim speichern der Änderungen ist ein Fehler aufgetreten. Bitte versuchen Sie es erneut!",
+
     userKeyHead: "Öffentlicher userkey",
+    userKeySettings: "Userkey (einzigartige Nutzeridentifizierung)",
+    userKeyShow: "Anzeigen",
     userKey: "Userkey",
     userKeyClose: "Schließen",
 
@@ -205,9 +221,14 @@ export const strings = {
     cardGroupMembers: "Gruppenmitglieder:",
 
     cardEdit: "Diese Gruppe bearbeiten",
+    cardDis: "Sie haben nicht die benötigten Rechte für diese Aktion!",
     cardDel: "Diese Gruppe löschen",
     cardOpen: "Diese Gruppe öffnen",
     cardReturn: "Zum Gruppemenü zurückkehren",
+
+    // Group Card Single
+    cardGroupMembersTab: "Gruppenmitglieder",
+    cardGroupPassTab: "Passwörter",
 
     // Delete Alert
     cardDelSuc: "Gruppe wurde gelöscht!",
