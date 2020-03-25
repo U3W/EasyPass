@@ -109,7 +109,7 @@ export const strings = {
 
     settings2FAInfo1: "Mit der Aktivierung wird ein Keyfile heruntergeladen, dass Sie benötigen um sich einzuloggen.",
     settings2FAInfo2: "Bitte beachten Sie, dass Sie Sich ohne diesem File nicht mehr einloggen können!",
-    settings2FAInfo3: "Aus Sicherheitsgründen bleibt die Möglichkeit sich, ohne Keyfile anzumelden für ca. 30 Minuten erhalten.",
+    settings2FAInfo3: "Aus Sicherheitsgründen bleibt die Möglichkeit, sich ohne Keyfile anzumelden für ca. 30 Minuten erhalten.",
 
     settings2FACurrA: "2FA-Key (zurzeit: aktiviert)",
     settings2FACurrD: "2FA-Key (zurzeit: deaktiviert)",
