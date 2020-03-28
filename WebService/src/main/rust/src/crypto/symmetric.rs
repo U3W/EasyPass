@@ -34,6 +34,7 @@ pub fn encrypt_manual(msg: &str, key: &[u8], iv: &str) -> String {
     return out;
 }
 pub fn decrypt_manual(msg: &str, key: &[u8], iv: &str) -> Result<String, i32> {
+    //The MAC should be checked before trying to decrypt the text not afterwards!
     let mut c2 = ChaCha20Poly1305::new(key,iv);
     let v: Vec<&str> = msg.split("$").collect();
     let hash = v[0];
