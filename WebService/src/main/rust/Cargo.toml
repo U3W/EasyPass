@@ -48,6 +48,12 @@ features = [
   "FileReaderSync",
   "Blob",
   "File",
+  "WorkerGlobalScope",
+  "Headers",
+  "Request",
+  "RequestInit",
+  "RequestMode",
+  "Response",
 ]
 
 [dev-dependencies]

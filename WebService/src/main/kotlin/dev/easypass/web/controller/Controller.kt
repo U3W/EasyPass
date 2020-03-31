@@ -62,11 +62,15 @@ class Controller {
     @ResponseBody
     @CrossOrigin(origins = ["*"])
     fun getIPAddress(): Map<String, String> {
+        // TODO remove testing code
+        /**
         val serviceID = "auth-service"
         val application: Application = eurekaClient!!.getApplication(serviceID)
         val instanceInfo: InstanceInfo = application.instances[0]
         val url = instanceInfo.homePageUrl
         return mapOf("db" to "$url/auth/")
+        */
+        return mapOf("db" to "https://google.com")
     }
 
 }

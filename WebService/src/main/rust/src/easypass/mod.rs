@@ -4,3 +4,4 @@ pub mod worker;
 pub mod connection;
 pub mod formats;
 pub mod group_keys;
+pub mod service;

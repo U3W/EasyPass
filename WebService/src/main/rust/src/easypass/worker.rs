@@ -5,6 +5,8 @@ use crate::easypass::connection::Connection;
 use crate::{is_online, get_node_mode, get_database_url, post_message, log};
 use crate::easypass::recovery::{RecoverCategory, RecoverPassword};
 use crate::easypass::formats::CRUDType;
+use crate::easypass::group_keys::GroupKeys;
+use crate::easypass::service::*;
 
 use wasm_bindgen::prelude::*;
 use wasm_bindgen_futures::JsFuture;
@@ -12,7 +14,6 @@ use wasm_bindgen::__rt::std::rc::Rc;
 use wasm_bindgen::__rt::core::cell::{RefCell, Ref};
 use wasm_bindgen::__rt::std::collections::HashMap;
 use js_sys::{Array};
-use crate::easypass::group_keys::GroupKeys;
 
 // Add other modules that define Worker functionality
 // Allows to split Worker logic
@@ -80,6 +81,9 @@ impl Worker {
 
     /// Starts live replication for private password entries.
     pub async fn hearbeat(self: Rc<Worker>) {
+        //let kek = get_database().await;
+        //console_log!("KEK: {:?}", &kek);
+
         // Define databases
         //
         // Setup meta database
