@@ -9,7 +9,7 @@ pub async fn get_auth_service_url() -> Result<String, String> {
     let mut opts = RequestInit::new();
     opts.method("GET");
     opts.mode(RequestMode::Cors);
-    let url = "http://localhost:8090/database";
+    let url = "http://localhost:8090/service";
     let request = Request::new_with_str_and_init(&url, &opts).unwrap();
     request
         .headers()
@@ -23,7 +23,7 @@ pub async fn get_auth_service_url() -> Result<String, String> {
         let response: Response = Response::from(response.unwrap());
         let json = JsFuture::from(response.json().unwrap()).await.unwrap();
         let json = json.into_serde::<Value>().unwrap();
-        Ok(json["db"].as_str().unwrap().parse().unwrap())
+        Ok(json["url"].as_str().unwrap().parse().unwrap())
     } else {
         Err(response.unwrap().as_string().unwrap())
     }

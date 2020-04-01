@@ -58,7 +58,7 @@ class Controller {
         return mapOf("db" to "http://localhost:5984/testdb")
     }
 
-    @RequestMapping(value = ["/database"], method = [RequestMethod.GET], produces = ["application/json"])
+    @RequestMapping(value = ["/service"], method = [RequestMethod.GET], produces = ["application/json"])
     @ResponseBody
     @CrossOrigin(origins = ["*"])
     fun getIPAddress(): Map<String, String> {
@@ -70,7 +70,7 @@ class Controller {
         val url = instanceInfo.homePageUrl
         return mapOf("db" to "$url/auth/")
         */
-        return mapOf("db" to "https://google.com")
+        return mapOf("url" to "https://google.com")
     }
 
 }

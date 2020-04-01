@@ -22,7 +22,7 @@ workbox.routing.registerNavigationRoute(
     // Blacklist is needed for testing in development
     workbox.precaching.getCacheKeyForURL('/'), {
         blacklist: [
-            new RegExp('/database')
+            new RegExp('/service')
         ]
     }
 );
