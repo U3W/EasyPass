@@ -7,8 +7,9 @@ use x25519_dalek::{EphemeralSecret, StaticSecret};
 use x25519_dalek::PublicKey;
 use base64::{encode_config, decode_config};
 use sha3::{Digest, Sha3_256};
-use crate::crypto::symmetric::{encrypt, decrypt};
+use crate::crypto::symmetric::{encrypt, decrypt, get_random_iv};
 use crate::crypto::hashing::hash_sha3_256;
+use crate::crypto::passwords::password_to_key;
 
 pub struct Statisch{}
 impl Statisch{
@@ -26,7 +27,12 @@ impl Statisch{
         let key = key_hash.to_vec();
         return key;
     }
-    pub fn decrypt_secret(encrypted_secret: &str, key: &[u8]) -> StaticSecret {
+    pub fn decrypt_secret(encrypted_secret: &str, password: &str) -> StaticSecret {
+        let vec: Vec<&str> = encrypted_secret.split("§").collect();
+        let iv = vec[0];
+        let encrypted_secret = vec[1];
+        let key = password_to_key(password,String::from(iv));
+        let key = key.as_slice();
         let secret = decrypt(encrypted_secret, key).unwrap();
         let secret_vec = decode_config(&secret, base64::URL_SAFE).unwrap();
         let mut secret : [u8; 32] = [0u8;32];
@@ -34,12 +40,18 @@ impl Statisch{
         let secret = StaticSecret::from(secret);
         return secret;
     }
-    pub fn encrypt_secret(secret: StaticSecret, key: &[u8]) -> String {
+
+    pub fn encrypt_secret(secret: StaticSecret, password: &str) -> String {
         let secret = secret.to_bytes();
         let secret = encode_config(&secret, base64::URL_SAFE);
         let secret = secret.as_str();
+        let mut iv = get_random_iv(20).to_owned();
+        let key = password_to_key(password, iv.clone());
+        let key = key.as_slice();
         let secret = encrypt(secret, key);
-        return secret;
+        iv.push_str("§");
+        iv.push_str(&secret.as_str());
+        return iv;
     }
 }
 pub struct Empheral{}
@@ -60,14 +72,14 @@ impl Empheral{
     }
 }
 
-pub fn new_user(key: &[u8]) -> (String, String){ // Returns  (encryptedPrivateKey, PublicKey)
+pub fn new_user(password: &str) -> (String, String){ // Returns  (encryptedPrivateKey, PublicKey)
     let (secret, public) = Statisch::create_keypair();
     let public = public.as_bytes();
     let public = encode_config(public, base64::URL_SAFE);
-    let secret = Statisch::encrypt_secret(secret, key);
+    let secret = Statisch::encrypt_secret(secret, password);
     return (secret, public);
 }
-pub fn authenticate_user(secret: &str, challenge: &str, key: &[u8]) -> Result<String, i32>{
+pub fn authenticate_user(secret: &str, challenge: &str, password: &str) -> Result<String, i32>{
     let challenge = decode_config(challenge, base64::URL_SAFE).unwrap();
     let challenge = String::from_utf8(challenge).unwrap();
     let vec: Vec<&str> = challenge.split("§").collect();
@@ -77,7 +89,7 @@ pub fn authenticate_user(secret: &str, challenge: &str, key: &[u8]) -> Result<St
     let mut server_pub : [u8; 32] = [0u8;32];
     server_pub.copy_from_slice(&server_pub_vec);
     let server_pub = PublicKey::from(server_pub);
-    let secret = Statisch::decrypt_secret(secret,key);
+    let secret = Statisch::decrypt_secret(secret,password);
     let key = Statisch::get_key(secret, server_pub);
     let key = key.as_slice();
     return decrypt(challenge, key);

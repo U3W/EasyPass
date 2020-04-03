@@ -1,13 +1,21 @@
 use crate::crypto::{symmetric, passwords, second_fa, asymmetric};
+use base64::{encode_config, URL_SAFE};
 // Here I provice all functionts to Kacper Urbaniec. Those functions will not be called by the crypto library
-
-pub fn new_user(key: &[u8]) -> (String, String){
+/*
+chars used to concatenate strings:
+symmetric encrypt + hash: $
+^ + iv: %
+challenge + pubKeyServer: §
+master keys: §
+encryptedPrivateKey + iv: §
+*/
+pub fn new_user(password: &str) -> (String, String){
 	//TODO change parameter to string, since a password should be provided and not the master key!
-	return asymmetric::new_user(key);
+	return asymmetric::new_user(password);
 }
-pub fn decrypt_challenge(private_key: &str, challenge: &str, key: &[u8]) -> Result<String, i32>{
+pub fn decrypt_challenge(private_key: &str, challenge: &str, password: &str) -> Result<String, i32>{
 	//TODO change parameter to string, since a password should be provided and not the master key!
-	return asymmetric::authenticate_user(private_key, challenge, key);
+	return asymmetric::authenticate_user(private_key, challenge, password);
 }
 pub fn encrypt(msg: &str, key: &[u8]) -> String{
 	return symmetric::encrypt(msg, key);
@@ -32,6 +40,12 @@ pub fn generate_new_factor(password: &str, master_key: &[u8]) -> (String, String
 }
 
 pub fn hash_username(username: &str) -> String{
-	//TODO
-	return String::from("USerHash");
+	//TODO test
+	return encode_config(passwords::password_to_key(username, String::from("usernamesaltsstaythesame")).as_slice(), URL_SAFE);
+}
+pub fn asymmetric_encrypt(msg: &str, pub_key: &str) -> String{
+	return asymmetric::encrypt_challenge(msg, String::from(pub_key));
+}
+pub fn asymmetric_decrypt(msg: &str, priv_key: &str, password: &str) -> Result<String, i32>{
+	return asymmetric::authenticate_user(priv_key, msg, password);
 }

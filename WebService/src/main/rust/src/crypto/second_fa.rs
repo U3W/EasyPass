@@ -15,8 +15,8 @@ pub fn generate_new_factor(password: &str, master_key: &[u8]) -> (String, String
     let mut iv = get_random_iv(20).to_owned();
     let key = passwords::password_to_key(password, iv.clone());
     let key = key.as_slice();
-    let encrypted_secret_1 = Statisch::encrypt_secret(priv_key_1, key);
-    let encrypted_secret_2 = Statisch::encrypt_secret(priv_key_2, key);
+    let encrypted_secret_1 = Statisch::encrypt_secret(priv_key_1, password);
+    let encrypted_secret_2 = Statisch::encrypt_secret(priv_key_2, password);
     iv.push_str("§");
     iv.push_str(encrypted_secret_1.as_str());
     iv.push_str("§");
@@ -30,8 +30,8 @@ pub fn two_factors_to_key(password: &str, encrypted_master_key: &str, second_fac
     let encrypted_priv_2 = vec[2];
     let key = passwords::password_to_key(password, String::from(iv.clone()));
     let key = key.as_slice();
-    let priv_key_1 = Statisch::decrypt_secret(encrypted_priv_1, key);
-    let priv_key_2 = Statisch::decrypt_secret(encrypted_priv_2, key);
+    let priv_key_1 = Statisch::decrypt_secret(encrypted_priv_1, password);
+    let priv_key_2 = Statisch::decrypt_secret(encrypted_priv_2, password);
     let pub_key_1 = PublicKey::from(&priv_key_1);
     let pub_key_2 = PublicKey::from(&priv_key_2);
     let key_1 = Statisch::get_key(priv_key_1.clone(),pub_key_2);
